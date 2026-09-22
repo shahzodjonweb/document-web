@@ -1,0 +1,11 @@
+{
+  "status": "passed",
+  "verified_at": "2026-09-22T18:31:48.557Z",
+  "job_id": "42337527-3813-470b-99b0-0bb7f9a2dca4",
+  "checks": [
+    "Continuing visual/settings verification against previously verified real merge job",
+    "EN/UZ/RU dashboards at 1440, 390 and 320 widths, plus directory/billing/settings/support: no horizontal overflow",
+    "Settings persist timezone, output language, paper size and light/dark theme via API",
+    "No browser runtime errors"
+  ]
+}

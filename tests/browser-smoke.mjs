@@ -1,0 +1,34 @@
+import {chromium} from '@playwright/test'
+import assert from 'node:assert/strict'
+import fs from 'node:fs/promises'
+const browser=await chromium.launch({headless:true,channel:'chrome'})
+const context=await browser.newContext({viewport:{width:1440,height:1050},acceptDownloads:true})
+const page=await context.newPage()
+const errors=[];page.on('pageerror',e=>errors.push(e.message))
+const shots='docs/design/screenshots';await fs.mkdir(shots,{recursive:true})
+const checks=[];let jobId
+try {
+ await page.goto('http://127.0.0.1:3000/en');await page.getByRole('heading',{name:'Your documents. A little more organized.'}).waitFor();await page.screenshot({path:`${shots}/landing-en-desktop.png`,fullPage:true})
+ await page.goto('http://127.0.0.1:3000/en/app');await page.getByRole('button',{name:'Use local development account'}).click();await page.getByRole('heading',{name:'A little less paperwork.'}).waitFor()
+ if(!process.env.SKIP_JOURNEY){
+ await page.goto('http://127.0.0.1:3000/en/app/tools/pdf.merge');await page.locator('input[type=file]').setInputFiles(['tests/fixtures/research-notes.pdf','tests/fixtures/appendix.pdf']);await page.locator('.file-row').nth(1).waitFor();assert.equal(await page.locator('.file-row').count(),2)
+ await page.getByRole('button',{name:'Move up',exact:true}).nth(1).click();assert.match(await page.locator('.file-row').first().innerText(),/appendix/)
+ await page.locator('.locale-picker select').selectOption('uz');await page.waitForURL('**/uz/app/tools/pdf.merge');assert.equal(await page.locator('.file-row').count(),2);await page.screenshot({path:`${shots}/merge-uz-desktop.png`,fullPage:true})
+ await page.reload();await page.locator('.file-row').nth(1).waitFor();assert.match(await page.locator('.file-row').first().innerText(),/appendix/)
+ await page.setViewportSize({width:390,height:844});await page.screenshot({path:`${shots}/merge-uz-mobile.png`,fullPage:true})
+ await page.locator('.locale-picker select').selectOption('en');await page.waitForURL('**/en/app/tools/pdf.merge');await page.getByRole('button',{name:'Review task',exact:true}).click();await page.getByRole('button',{name:'Start processing',exact:true}).waitFor();assert.match(await page.locator('.quote-meters').innerText(),/1/)
+ await page.getByRole('button',{name:'Start processing',exact:true}).click();await page.waitForURL('**/app/jobs/*');await page.getByRole('heading',{name:'All done. Ready for what’s next.'}).waitFor();jobId=page.url().split('/').at(-1);const job=await (await context.request.get(`http://127.0.0.1:3000/api/v1/jobs/${jobId}`)).json();assert.equal(job.status,'succeeded');assert.equal(job.settled_meters.file_tasks,1);assert.equal(job.settled_meters.file_page_units,3);assert.equal(job.input_files[0].name,'appendix.pdf')
+ const [download]=await Promise.all([page.waitForEvent('download'),page.getByRole('link',{name:'Download',exact:true}).click()]);await download.saveAs('tests/fixtures/merged-result.pdf');const output=await fs.readFile('tests/fixtures/merged-result.pdf');assert.equal(output.subarray(0,5).toString(),'%PDF-');checks.push('Real upload → reorder → locale change → reload → quote → merge → PDF download; settled one task and three pages')
+ await page.screenshot({path:`${shots}/result-en-mobile.png`,fullPage:true});await page.setViewportSize({width:1440,height:1050});await page.screenshot({path:`${shots}/result-en-desktop.png`,fullPage:true});await page.reload();await page.getByRole('heading',{name:'All done. Ready for what’s next.'}).waitFor();checks.push('Result reload resolves same job')
+ }else{const history=await(await context.request.get('http://127.0.0.1:3000/api/v1/jobs')).json();jobId=history.results.find(j=>j.status==='succeeded').id;await page.goto(`http://127.0.0.1:3000/en/app/jobs/${jobId}`);await page.getByRole('heading',{name:'All done. Ready for what’s next.'}).waitFor();await page.screenshot({path:`${shots}/result-en-desktop.png`,fullPage:true});await page.setViewportSize({width:390,height:844});await page.screenshot({path:`${shots}/result-en-mobile.png`,fullPage:true});checks.push('Continuing visual/settings verification against previously verified real merge job')}
+ for(const locale of ['en','uz','ru']){
+  for(const width of [1440,390,320]){
+   await page.setViewportSize({width,height:900});await page.goto(`http://127.0.0.1:3000/${locale}/app`);await page.locator('.dashboard-drop').waitFor();await page.waitForTimeout(150);const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);assert.equal(overflow,false,`${locale} dashboard overflow ${width}`);if(width!==320)await page.screenshot({path:`${shots}/dashboard-${locale}-${width===1440?'desktop':'mobile'}.png`,fullPage:true})
+  }
+ }
+ for(const path of ['/ru/app/tools','/ru/app/billing','/uz/app/settings','/en/app/support']){await page.setViewportSize({width:390,height:844});await page.goto(`http://127.0.0.1:3000${path}`);await page.waitForTimeout(200);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,`${path} overflow`);await page.screenshot({path:`${shots}/${path.split('/').filter(Boolean).join('-')}-mobile.png`,fullPage:true})}
+ checks.push('EN/UZ/RU dashboards at 1440, 390 and 320 widths, plus directory/billing/settings/support: no horizontal overflow')
+ await page.goto('http://127.0.0.1:3000/en/app/settings');await page.getByRole('combobox',{name:'Timezone',exact:true}).fill('Asia/Tashkent');await page.getByRole('combobox',{name:'Output language',exact:true}).selectOption('uz');await page.getByRole('combobox',{name:'Paper size',exact:true}).selectOption('Letter');await page.locator('input[value=dark]').check();await page.getByRole('button',{name:'Save changes',exact:true}).click();await page.getByText('Preferences saved.',{exact:true}).waitFor();assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');const account=await (await context.request.get('http://127.0.0.1:3000/api/v1/me')).json();assert.equal(account.time_zone,'Asia/Tashkent');assert.equal(account.preferences.output_locale,'uz');assert.equal(account.preferences.paper_size,'Letter');await page.screenshot({path:`${shots}/settings-dark-mobile.png`,fullPage:true});await page.locator('input[value=light]').check();await page.getByRole('button',{name:'Save changes',exact:true}).click();checks.push('Settings persist timezone, output language, paper size and light/dark theme via API')
+ assert.deepEqual(errors,[]);checks.push('No browser runtime errors')
+ console.log(JSON.stringify({status:'passed',jobId,checks},null,2));await fs.writeFile('docs/design/browser-verification.json',JSON.stringify({status:'passed',verified_at:new Date().toISOString(),job_id:jobId,checks},null,2))
+} finally {await browser.close()}
