@@ -1,3 +1,4 @@
+import { extendedEntries, extendedToolNames } from './extended.ts'
 export type Locale = 'en' | 'uz' | 'ru'
 const entries: Record<string, [string, string, string]> = {
   preview: ['Preview', 'Ko‘rib chiqish', 'Предпросмотр'],
@@ -589,11 +590,17 @@ const toolEntries: Record<string, [string, string, string, string, string, strin
     'Снимите известный вам пароль.',
   ],
 }
+for (const [key, value] of Object.entries(extendedEntries)) {
+  if (!(key in entries)) entries[key] = value
+}
 const dictionaries = {} as Record<Locale, Record<string, string>>
 for (const [index, locale] of (['en', 'uz', 'ru'] as const).entries()) {
   dictionaries[locale] = Object.fromEntries(
     Object.entries(entries).map(([key, values]) => [key, values[index]!]),
   )
+  for (const [key, values] of Object.entries(extendedToolNames)) {
+    dictionaries[locale][`${key}.name`] = values[index]!
+  }
   for (const [key, values] of Object.entries(toolEntries)) {
     dictionaries[locale][`${key}.name`] = values[index]!
     dictionaries[locale][`${key}.description`] = values[index + 3]!

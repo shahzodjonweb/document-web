@@ -3,7 +3,24 @@ import type { Quote } from '../../generated/api/types'
 const props = defineProps<{ toolId: string }>()
 const { t, path, date } = useLocale()
 const ws = useWorkspace()
-const { icons, colors } = useTools()
+const { icons, colors, name, description } = useTools()
+const feature = computed(() => ws.features.value.find((f) => f.id === props.toolId))
+const schema = computed(() => (feature.value as any)?.parameters || {})
+const basic = [
+  'pdf.merge',
+  'pdf.compress',
+  'pdf.split',
+  'pdf.extract_pages',
+  'pdf.delete_pages',
+  'pdf.reorder',
+  'pdf.rotate',
+  'pdf.images_to_pdf',
+  'pdf.to_images',
+  'pdf.protect',
+  'pdf.unlock_known',
+  'convert.word_to_pdf',
+  'convert.pptx_to_pdf',
+]
 const fileInput = ref<HTMLInputElement>()
 const busy = ref('')
 const error = ref('')
@@ -25,8 +42,10 @@ watch(previewPage, () => {
 const idempotency = useState<Record<string, string>>('idempotency', () => ({}))
 const supported = computed(() => ws.features.value.some((f) => f.id === props.toolId))
 const isImages = computed(() => props.toolId === 'pdf.images_to_pdf')
-const isOffice = computed(() => props.toolId.startsWith('convert.'))
-const isMulti = computed(() => ['pdf.merge', 'pdf.images_to_pdf'].includes(props.toolId))
+const isOffice = computed(() => ['convert.word_to_pdf', 'convert.pptx_to_pdf'].includes(props.toolId))
+const isMulti = computed(
+  () => ['pdf.merge', 'pdf.images_to_pdf'].includes(props.toolId) || props.toolId.startsWith('batch.'),
+)
 const hasPages = computed(() =>
   ['pdf.extract_pages', 'pdf.delete_pages', 'pdf.rotate', 'pdf.to_images'].includes(props.toolId),
 )
@@ -38,7 +57,11 @@ const accept = computed(() =>
       ? props.toolId === 'convert.word_to_pdf'
         ? '.docx'
         : '.pptx'
-      : '.pdf',
+      : props.toolId.startsWith('ocr.')
+        ? '.pdf,.jpg,.jpeg,.png'
+        : props.toolId.startsWith('batch.')
+          ? '.pdf,.jpg,.jpeg,.png,.docx,.pptx'
+          : '.pdf',
 )
 const countPages = computed(() =>
   ws.activeUploads.value.reduce((n, f) => n + (f.page_count || f.pages || 1), 0),
@@ -221,8 +244,8 @@ function onDrop(event: DragEvent) {
         <AppIcon :name="icons[toolId] || 'file'" :size="28" />
       </div>
       <div>
-        <h1>{{ t(`${toolId}.name`) }}</h1>
-        <p>{{ t(`${toolId}.description`) }}</p>
+        <h1>{{ name(toolId, feature?.name) }}</h1>
+        <p>{{ description(toolId) }}</p>
       </div>
     </div>
     <div class="flow-steps">
@@ -444,6 +467,7 @@ function onDrop(event: DragEvent) {
               </select></label
             >
           </div>
+          <SchemaFields v-if="!basic.includes(toolId)" v-model="param" :schema="schema" />
           <p v-if="isOffice" class="muted">{{ t('simpleBody') }}</p>
         </section>
       </div>

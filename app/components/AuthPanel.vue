@@ -38,7 +38,7 @@ async function check() {
     if (c.status === 'approved') {
       await ws.api(`/auth/browser/challenges/${id}/exchange`, { method: 'POST', body: {} })
       await ws.init()
-      await ws.loadAccount()
+      await Promise.all([ws.loadAccount(), ws.loadCatalog(), ws.loadPlans()])
     } else error.value = t('awaitingTelegram')
   } catch {
     error.value = t('genericError')

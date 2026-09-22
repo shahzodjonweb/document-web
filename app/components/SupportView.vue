@@ -65,4 +65,5 @@ async function send() {
       /></NuxtLink>
     </aside>
   </div>
+  <SupportThreads :latest-id="ticket" />
 </template>

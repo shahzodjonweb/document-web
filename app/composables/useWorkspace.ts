@@ -50,6 +50,7 @@ export function useWorkspace() {
     }
   }
   async function loadCatalog() {
+    const accountId = user.value?.id
     let data
     try {
       data = await client.catalog()
@@ -57,17 +58,10 @@ export function useWorkspace() {
       apiError.value = true
       throw e
     }
+    if (user.value?.id !== accountId) return
     features.value = data.features
       .map((f) => ({ ...f, category: f.category || '' }))
-      .filter(
-        (f: Feature) =>
-          f.released !== false &&
-          f.enabled !== false &&
-          f.available !== false &&
-          /^(pdf\.(merge|compress|split|extract_pages|delete_pages|reorder|rotate|images_to_pdf|to_images|protect|unlock_known)|convert\.(word_to_pdf|pptx_to_pdf))$/.test(
-            f.id,
-          ),
-      )
+      .filter((f: Feature) => f.released !== false && f.enabled !== false && f.available !== false)
   }
   async function loadPlans() {
     let data
@@ -98,7 +92,7 @@ export function useWorkspace() {
   async function loginDev() {
     await api('/auth/dev-login', { method: 'POST', body: {} })
     await init()
-    await loadAccount()
+    await Promise.all([loadAccount(), loadCatalog(), loadPlans()])
   }
   async function logout() {
     await api('/auth/session', { method: 'DELETE' })

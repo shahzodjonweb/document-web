@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "at": "2026-09-22T19:53:38.515Z",
+  "checks": [
+    "Real Unicode form values saved as a versioned template; same immutable template fills two PDFs via independently quoted child jobs",
+    "Owned logo, chosen accent and brand name accepted into actual branded PDF rendering",
+    "Owned version-bound draft revision updates only selected section; unselected section objects unchanged"
+  ],
+  "formJob": "bbdc9610-8a94-4e0d-8b18-1709aa03f777",
+  "brandedJob": "17360b08-70a5-48a3-9399-8a4c13d93b9f",
+  "sourceId": "73c12b75-f00b-4ddb-b2cd-902467f90bfc"
+}

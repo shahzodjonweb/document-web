@@ -40,9 +40,28 @@ useHead(() => ({
   </div>
   <AuthPanel v-else-if="(isCustomer && !ws.user.value) || view === '/auth/telegram'" /><DashboardView
     v-else-if="view === '/app'"
+  /><BatchView
+    v-else-if="view.startsWith('/app/tools/batch.')"
+    :feature-id="view.slice('/app/tools/'.length)"
   /><ToolWorkspace
     v-else-if="view.startsWith('/app/tools/')"
     :tool-id="decodeURIComponent(view.slice('/app/tools/'.length))"
+  /><ImageStudio v-else-if="view === '/app/images'" /><StudioView
+    v-else-if="view === '/app/create' || view.startsWith('/app/create/')"
+    :draft-id="view.split('/')[3]"
+  /><EducationView
+    v-else-if="['/app/study', '/app/school', '/app/teach'].includes(view)"
+    :mode="view.split('/')[2]"
+  /><ProjectsView
+    v-else-if="view === '/app/projects' || view.startsWith('/app/projects/')"
+    :project-id="view.split('/')[3]"
+  /><TemplatesView v-else-if="view === '/app/templates'" /><WorkflowsView
+    v-else-if="view === '/app/workflows'"
+  /><EditorView
+    v-else-if="view === '/app/editor' || view.startsWith('/app/editor/')"
+    :document-id="view.split('/')[3]"
+  /><ReferralsView v-else-if="view === '/app/referrals'" /><BotView
+    v-else-if="view === '/app/bot'"
   /><ToolsView v-else-if="view === '/app/tools' || view === '/tools'" /><PublicToolView
     v-else-if="view.startsWith('/tools/')"
     :tool-id="decodeURIComponent(view.slice('/tools/'.length))"

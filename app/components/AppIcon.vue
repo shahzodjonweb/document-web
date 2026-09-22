@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import {
+  Pencil,
+  BookOpen,
   FileText,
   LayoutDashboard,
   Grid2X2,
@@ -51,6 +53,8 @@ import {
 } from 'lucide-vue-next'
 const props = withDefaults(defineProps<{ name: string; size?: number }>(), { size: 20 })
 const icons: Record<string, any> = {
+  edit: Pencil,
+  book: BookOpen,
   file: FileText,
   home: LayoutDashboard,
   tools: Grid2X2,

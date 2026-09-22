@@ -1,33 +1,39 @@
 # PDF Master · customer workspace
 
-A Nuxt 4 / Vue 3 / TypeScript application for PDF Master in English, Uzbek Latin and Russian. This repository owns only the public website, customer workspace and Telegram Mini App shell. The API, workers, Telegram bot, billing policy and all staff interfaces belong to the sibling `document-platform` repository.
+A Nuxt 4 / Vue 3 / TypeScript workspace in English, Uzbek Latin and Russian. This repository contains the public website, customer application and Telegram Mini App shell. The API, workers, actual aiogram bot, ledger and staff interface live in the sibling `document-platform` repository.
 
-This is a **local development beta**, not the complete 128-feature production roadmap. The browser displays only tools enabled by the platform catalog. AI creation, education, editable conversion and visual PDF editing remain gated; paid checkout is disabled while commercial prices are unset.
+Private GitHub repositories: [document-web](https://github.com/shahzodjonweb/document-web) and [document-platform](https://github.com/shahzodjonweb/document-platform).
 
-## Run locally
+The complete local workspace uses real server accounts, quotes, jobs, output files and transactions. The local authoring provider is explicitly labeled: it renders supplied and reviewed content deterministically and does not pretend to return live AI output. Live generation and Telegram transport depend on credentials configured through the staff interface. Local sandbox invoices do not charge real Telegram Stars.
 
-Use Node 22.19 or later in the Node 22 LTS line (`.nvmrc` pins 22.22.0), or supported Node 24 LTS. Start `document-platform` on `127.0.0.1:8000` first.
+## Run
+
+Use Node 22.19+ in the Node 22 LTS line (`.nvmrc` pins 22.22.0), or supported Node 24 LTS. Start `document-platform` on `127.0.0.1:8000` first.
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open `http://127.0.0.1:3000/en` for the public site or `/en/app` for the workspace. `/uz` and `/ru` select Uzbek and Russian. Use **Use local development account** in the authentication panel for local testing. This is an explicit real test account created by the API; no user or usage balance is fabricated by the frontend. Telegram login requires the backend bot configuration; Mini App launch data is exchanged server-side.
+Open `http://127.0.0.1:3000/en/app`. `/uz` and `/ru` select the other languages. **Use local development account** explicitly signs into the backend-owned test account. Telegram launch data is verified server-side; no account or balance is fabricated in the frontend.
 
-`API_ORIGIN` defaults to `http://127.0.0.1:8000`. Nuxt proxies `/api/**` to the platform so session cookies and CSRF protection stay same-origin. It is read at build time. Set it before building if the upstream differs.
+`API_ORIGIN` defaults to `http://127.0.0.1:8000`. Nuxt proxies `/api/**` to keep cookies and CSRF same-origin. This value is read when building; set it before a deployment build when the upstream differs.
 
-## Implemented customer journeys
+## Workspace
 
-- Public landing, tool directory/detail, plan comparison, help and clearly marked draft legal information.
-- Authentication via the server's Telegram challenge/Mini App exchange, plus explicitly gated local development login.
-- Upload, inspect metadata, reorder source PDFs/images with keyboard-accessible buttons, configure tool settings, review actual server meters/balances, confirm a quote, follow job state and download owner-authorized results.
-- Merge, split, extract/delete/reorder/rotate pages, lossless structural compression, image/PDF conversions, password protection/unlock, and qualified DOCX/PPTX conversion when the backend advertises them.
-- Passwords remain component memory only. Protection exchanges the password for an encrypted short-lived secret handle; unlock supplies it only in the private upload request. Neither sends a password in persisted job parameters.
-- Draft input IDs/order/settings survive same-browser reload and language navigation. Quotes invalidate when inputs/settings change. Pending submissions retain their original idempotency key so a reload can reconcile the same server job.
-- History/result refresh, included task/page balances, daily/reset information, API-backed locale/timezone/output-language/paper-size preferences, theme, support ticket form and logout.
+- `/app/tools`: server-enabled file tools, including PDF page operations, compression, images, password protection/unlock, Office/PDF conversion, OCR and batches. Upload → metadata/preview → settings → actual quote → idempotent job → private download.
+- `/app/create`: topic, supplied text or PDF sources → versioned draft → separately quoted outline → editable sections, questions and speaker notes → quote → PDF/PPTX. Existing drafts can be selected for rewriting or selected-slide revision. Branding accepts a name, accent color and owned logo. Unselected revision sections are preserved. Reviewed sections and questions can be saved as reusable private templates.
+- `/app/images`: provider-gated PNG generation with a real quote and confirmation. Handwriting accepts one image or one-page PDF, requires a qualified vision provider, and supports corrected transcription export without another provider charge.
+- `/app/study`, `/app/school`, `/app/teach`: education tools selected from the server configuration, with source/subject/level inputs, reviewed content, separate teacher and learner files, and adaptive follow-up based on an owned saved project.
+- `/app/projects`: explicit 90-day encrypted-content consent, private saved material, real exact-match practice results, weak topics and deletion. Practice feedback is not presented as a final academic grade.
+- `/app/editor`: authenticated page previews, point-based positioning, actual text/highlight/note/form/image/signature/replacement/redaction commands, saved form-value templates, batch form filling and quoted PDF export. The pending overlay is distinguished from the actual exported file. Redaction requires explicit rasterization consent.
+- `/app/workflows`, `/app/templates`: owner-scoped versioned definitions. Workflows submit the server's bound confirmation token and show real child results; failed steps stop subsequent work.
+- `/app/billing`, `/app/referrals`: server balances, invoices, explicit sandbox payment confirmation, subscription renewal controls, next-period plan scheduling, transaction/refund requests, invitation codes and actual reward counts.
+- `/app/bot`: the actual aiogram handlers through a clearly labeled local transport. Text, callback buttons, file uploads and artifact delivery are persisted by the platform; the local conversation does not send to external Telegram.
+- `/app/support`: tickets, owner-only conversation history and replies. Settings persist language, timezone, output preferences and light/dark theme.
+- `/app/jobs`: real job progress, positive settled usage, private downloads, idempotent bot delivery and expiring/revocable learner-only share links. Teacher answer keys have no public sharing control.
 
-No active tool, balance, task status, plan limit, price or customer statistic is invented by the client. Server policy remains authoritative. Shared links to protected artifacts are never treated as public authorization.
+The server remains authoritative for eligibility, limits, prices, ownership, retention and payment state. Raw PDF passwords stay out of persisted quote/job parameters; protection uses a short-lived secret handle. Original source files and edited output files remain separate. No staff assets or routes are bundled here.
 
 ## Verification
 
@@ -35,28 +41,28 @@ No active tool, balance, task status, plan limit, price or customer statistic is
 npm run typecheck
 npm run build
 npm run check:catalog
-npm run test:browser
+SKIP_JOURNEY=1 npm run test:browser
 npm run test:preview
+node tests/extended-smoke.mjs
+node tests/learning-smoke.mjs
+node tests/final-flows.mjs
+node tests/advanced-authoring.mjs
+node tests/final-provider-stages.mjs
+node tests/extended-accessibility.mjs
 ```
 
-The browser smoke test uses system Google Chrome via Playwright `channel: 'chrome'`. It performs a real merge and consumes one development-account task. Do not repeatedly run it against a quota-limited review account. `SKIP_JOURNEY=1 npm run test:browser` reruns locale, layout and settings checks without creating another job. The test data are local generated PDFs in `tests/fixtures/`; they contain no user documents.
+Browser scripts use system Google Chrome via Playwright `channel: 'chrome'`. The extended scripts create real local test records and perform explicit sandbox transactions or consume granted test allowances. They must run against the configured local test account. Fixture PDFs contain no user documents. `docs/design/QA.md` and JSON reports record the checks and their limits.
 
-See `docs/design/QA.md`, screenshots and the browser verification report. Real Telegram iOS/Android device testing, reviewed legal/commercial copy and production release gates remain outstanding. The local SPA serves public pages correctly but public SSR/SEO optimization is a later checkpoint.
+`tests/extended-accessibility.mjs` uses the pinned axe-core Playwright dependency. It scans representative extended routes in both themes at 390px.
 
-## API contract
+## API and deployment
 
-`generated/api/public.openapi.json` is the pinned public-only schema exported by `document-platform`. Its SHA-256 is checked by `npm run check:catalog`. `schema.d.ts` is generated by `openapi-typescript`; `client.ts` is a small typed transport wrapper over these generated response types. `types.ts` contains client view-model compatibility fields.
+`generated/api/public.openapi.json` is the pinned public schema exported by the platform. `npm run check:catalog` verifies its SHA-256 and excludes staff routes. Regenerate `schema.d.ts` with `npm run generate:api` after copying a new public schema and checksum. The shared CSRF-aware transport powers the base typed client and the extended domain screens.
 
-```sh
-npm run generate:api
-```
+The Dockerfile pins the Node image manifest and serves the production output as an unprivileged user on port 3000. Use `--build-arg API_ORIGIN=http://api:8000` with the sibling Compose setup. No remote deployment or production purchase has been performed.
 
-Copy a newly exported **public** schema and checksum from the platform before regeneration. Never copy staff contracts or clients into this repository.
+## Design and remaining external validation
 
-## Container
+`docs/design/FOUNDATION.md`, `EXTENDED_WORKSPACE.md` and `wireframes.html` describe the flows before implementation. The interface uses forest/sage/ivory tokens, locally hosted OFL DM Sans/Manrope fonts, Lucide icons, visible focus states, safe-area padding and responsive layouts. The complete workspace remains usable at 390px and 1440px in light and dark themes.
 
-The Dockerfile pins the Node base-image manifest, builds Nuxt, and runs the output as the unprivileged `node` user on port 3000. Build with `--build-arg API_ORIGIN=http://api:8000` for the sibling Compose deployment. Backend CSRF trusted origins and allowed hosts must match the customer origin. Production deployment, credentials and live checkout are not performed by this repository.
-
-## Design and assets
-
-`docs/design/FOUNDATION.md` and `wireframes.html` were written by the dedicated UI/UX implementation specialist before screens. The interface uses forest/sage/ivory tokens, a desktop sidebar, four-item mobile navigation, visible focus states and safe-area padding. DM Sans and Manrope are locally hosted variable fonts under their included SIL Open Font Licenses. Icons come from Lucide (ISC). No external image or stock-photo dependency is required.
+Real Telegram iOS/Android device validation, live credentials/providers, commercial and legal approval, production parser isolation/licensing and public SSR/SEO optimization remain external release work. Local legal pages identify their draft status. Actual processing has documented limitations: Office conversion can reflow layout, OCR needs review, exact text replacement supports qualified simple fonts, and redaction rasterizes all pages of the exported document.

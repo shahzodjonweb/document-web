@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "at": "2026-09-22T19:38:35.535Z",
+  "checks": [
+    "Teacher-authored question → explicit 90-day encrypted project save → real exact-match practice result 1/1",
+    "Teacher exports contain separate learner/key artifacts; learner link downloads and revokes; key has no share control",
+    "Reusable template saved through owner CRUD",
+    "Saved workflow → bound aggregate review → real child rotation task result",
+    "Batch compression quotes two children and returns real per-child outcomes"
+  ],
+  "draftId": "03db77d1-9e14-4760-bbdd-8318619dd87e",
+  "projectId": "c6f54887-a9d6-4cc5-b7ca-04e7d749c4dd",
+  "jobId": "3a58b321-0627-4e0b-aae9-e520d86b7feb"
+}

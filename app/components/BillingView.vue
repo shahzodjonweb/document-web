@@ -24,8 +24,10 @@ const limit = (plan: any, key: string) => plan.limits?.[key] ?? plan[key]
       >
     </div>
     <div class="allowance-grid">
-      <div v-for="key in ['file_tasks', 'file_page_units']" :key="key">
-        <span>{{ t(key === 'file_tasks' ? 'standardTasks' : 'pageUnits') }}</span>
+      <div v-for="key in ['file_tasks', 'file_page_units', 'ai_credits']" :key="key">
+        <span>{{
+          t(key === 'file_tasks' ? 'standardTasks' : key === 'file_page_units' ? 'pageUnits' : 'ai_credits')
+        }}</span>
         <p>
           <strong>{{ meters[key]?.remaining ?? '—' }}</strong> / {{ meters[key]?.limit ?? '—' }}
           <small>{{ t('remaining') }}</small>
@@ -43,14 +45,18 @@ const limit = (plan: any, key: string) => plan.limits?.[key] ?? plan[key]
       <div>
         <span>{{ t('dailyAllowance') }}</span>
         <p>
-          <strong>{{ usage.daily?.remaining ?? '—' }}</strong> / {{ usage.daily?.limit ?? '—' }}
+          <strong>{{
+            usage.daily?.limit === null ? t('unlimited') : (usage.daily?.remaining ?? '—')
+          }}</strong>
+          <template v-if="usage.daily?.limit !== null">/ {{ usage.daily?.limit ?? '—' }}</template>
           <small>{{ t('remaining') }}</small>
         </p>
         <small class="muted">UTC</small>
       </div>
     </div>
   </section>
-  <div class="info-banner"><AppIcon name="alert" :size="19" />{{ t('checkoutUnavailable') }}</div>
+  <CommercePanel v-if="ws.user.value" />
+  <div v-else class="info-banner"><AppIcon name="alert" :size="19" />{{ t('checkoutUnavailable') }}</div>
   <div class="plan-grid">
     <section
       v-for="plan in ws.plans.value"

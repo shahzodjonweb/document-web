@@ -1,5 +1,23 @@
 export function useTools() {
+  const { t } = useLocale()
+  const name = (id: string, fallback = '') =>
+    t(`${id}.name`) === `${id}.name` ? fallback || id : t(`${id}.name`)
+  const description = (id: string) =>
+    t(`${id}.description`) === `${id}.description` ? t('simpleBody') : t(`${id}.description`)
+  const destination = (id: string) =>
+    id === 'ai.images'
+      ? '/app/images'
+      : id.startsWith('editor.')
+        ? `/app/editor?feature=${encodeURIComponent(id)}`
+        : `/app/tools/${id}`
   const icons: Record<string, string> = {
+    'ocr.extract_text': 'word',
+    'ocr.searchable_pdf': 'search',
+    'convert.pdf_to_docx': 'word',
+    'convert.pdf_to_xlsx': 'tools',
+    'batch.convert': 'files',
+    'batch.compress': 'compress',
+    'batch.image_sets': 'image',
     'pdf.merge': 'merge',
     'pdf.compress': 'compress',
     'pdf.split': 'split',
@@ -35,12 +53,18 @@ export function useTools() {
     ),
   )
   const category = (id: string) =>
-    id === 'pdf.compress'
-      ? 'compressionCategory'
-      : id.includes('protect') || id.includes('unlock')
-        ? 'securityCategory'
-        : id.includes('images') || id.startsWith('convert.')
-          ? 'conversionCategory'
-          : 'pagesCategory'
-  return { icons, colors, sorted, category }
+    id.startsWith('ocr.')
+      ? 'ocrCategory'
+      : id.startsWith('editor.')
+        ? 'editor'
+        : id.startsWith('batch.')
+          ? 'automationCategory'
+          : id === 'pdf.compress'
+            ? 'compressionCategory'
+            : id.includes('protect') || id.includes('unlock')
+              ? 'securityCategory'
+              : id.includes('images') || id.startsWith('convert.')
+                ? 'conversionCategory'
+                : 'pagesCategory'
+  return { icons, colors, sorted, category, name, description, destination }
 }

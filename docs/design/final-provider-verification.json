@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "at": "2026-09-22T20:14:38.493Z",
+  "checks": [
+    "Image and handwriting tools accurately require a configured provider; handwriting accepts exactly one PNG/JPG/PDF source",
+    "Workspace mode changes persist to the server and open the matching workspace",
+    "All six published presets render in English, Uzbek and Russian with server eligibility",
+    "Separate outline stage is explicitly quoted at zero local credits, confirmed, then reloaded as a new editable draft version",
+    "Reviewed content saves as a reusable owner template and creates a new draft with its sections/questions intact"
+  ],
+  "errors": [],
+  "outlineDraft": "ffe2b33e-d4fe-4161-be9c-90dfa417a10d"
+}

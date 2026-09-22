@@ -3,6 +3,14 @@ import type { Job } from '../../generated/api/types'
 const props = defineProps<{ jobId: string }>()
 const { t, count, path, date } = useLocale()
 const ws = useWorkspace()
+const { name, destination } = useTools()
+const nextRoute = computed(() =>
+  job.value?.feature_id === 'ai.images'
+    ? '/app/images'
+    : /^(ai|study|school|teacher)\./.test(job.value?.feature_id || '')
+      ? `/app/create?feature=${job.value?.feature_id}`
+      : destination(job.value?.feature_id || ''),
+)
 const job = ref<Job | null>(null)
 const error = ref('')
 let timer: ReturnType<typeof setTimeout> | undefined
@@ -86,7 +94,7 @@ function downloadUrl(url: string | undefined, id: string) {
           )
         }}
       </h1>
-      <p>{{ t(`${job.feature_id}.name`) }} · {{ date(job.created_at, true) }}</p>
+      <p>{{ name(job.feature_id) }} · {{ date(job.created_at, true) }}</p>
     </section>
     <div v-if="active" class="panel processing-stages" role="status" aria-live="polite">
       <div
@@ -122,6 +130,7 @@ function downloadUrl(url: string | undefined, id: string) {
           ><AppIcon name="download" :size="17" />{{ t('download') }}</a
         >
       </div>
+      <ArtifactActions v-for="artifact in outputs" :key="`actions-${artifact.id}`" :artifact="artifact" />
       <p v-if="job.expires_at || outputs[0]?.expires_at" class="retention-note">
         <AppIcon name="clock" :size="15" />{{ t('expires') }}
         {{ date(job.expires_at || outputs[0]?.expires_at, true) }} · {{ ws.user.value?.time_zone || 'UTC' }}
@@ -136,10 +145,16 @@ function downloadUrl(url: string | undefined, id: string) {
         ><strong>{{ amount }}</strong>
       </div>
     </section>
-    <p v-for="warning in job.warnings" :key="warning" class="info-banner">{{ warning }}</p>
+    <p v-for="warning in job.warnings" :key="warning" class="info-banner">{{ t(warning) }}</p>
     <div class="result-actions">
+      <NuxtLink
+        v-if="job.parameters?.generation_draft_id && job.feature_id !== 'ai.images'"
+        :to="path(`/app/create/${job.parameters.generation_draft_id}`)"
+        class="button primary"
+        ><AppIcon name="edit" :size="17" />{{ t('reviewDraft') }}</NuxtLink
+      >
       <button v-if="active" class="button secondary" @click="cancel">{{ t('cancelTask') }}</button
-      ><NuxtLink :to="path(`/app/tools/${job.feature_id}`)" class="button secondary"
+      ><NuxtLink :to="path(nextRoute)" class="button secondary"
         ><AppIcon name="plus" :size="17" />{{ t('newOperation') }}</NuxtLink
       ><NuxtLink :to="path('/app/jobs')" class="text-link"
         >{{ t('viewHistory') }}<AppIcon name="right" :size="16"

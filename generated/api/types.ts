@@ -5,6 +5,7 @@ export interface User {
   first_name?: string
   telegram_id?: string | number
   locale: string
+  mode?: string
   timezone?: string
   time_zone?: string
   plan?: string

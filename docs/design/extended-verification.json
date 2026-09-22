@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "at": "2026-09-22T19:28:00.024Z",
+  "checks": [
+    "Local authoring: supplied content → editable outline → free quote → real downloadable PDF",
+    "Real PDF editor: input preview → positioned text → saved commands → quoted PDF export",
+    "Local Telegram page calls actual aiogram handlers and renders real bot messages/buttons",
+    "All eleven extended routes at 390px in English, Uzbek and Russian: no horizontal overflow"
+  ],
+  "jobId": "d51aee6b-f7d0-40b0-ae1c-16400b06b0d4",
+  "editorJob": "eff68c29-7380-4b2c-b53a-3a76166d86d0"
+}

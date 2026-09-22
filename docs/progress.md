@@ -1,17 +1,9 @@
-# Customer implementation checkpoint — 2026-09-22
+# Customer implementation progress
 
-The supplied handoff began with zero implemented application tickets. This checkpoint provides the local customer foundation and real P1 file-tool integration; it does not claim completion of the complete roadmap or a production release gate.
+Updated 2026-09-23. Existing repository extended for the user's full local demonstration request; no new commit or push was made during this extension.
 
-| Area | Evidence | Status |
-|---|---|---|
-| R0-01 customer scaffold | exact npm lock, Nuxt config, non-root Dockerfile, public contract snapshot | implemented locally |
-| R0-02 design/localization | dedicated UI/UX specialist, tokens, flows, wireframes, EN/UZ/RU catalog, responsive screenshots | implemented; human language review pending |
-| R0-04 customer shell | public/customer/Mini App, cookie/CSRF session, server feature catalog, typed generated schema | browser verified; actual Telegram devices pending |
-| R0-07 support | help/privacy guidance, API-backed categorized support form with subject/reference | implemented locally |
-| R1A-08 workspaces | thirteen processor tool mappings, ordered uploads, secret handles, quotes, jobs, downloads, history/preferences | actual merge browser journey verified; backend processor suite owns format qualification |
-| Billing display | server balances/limits, exact period/reset timestamps, null-price checkout disabled | implemented; no live payment integration claim |
-| Production release | operational security, real Telegram delivery/device behavior, published policies, release qualification | remains gated by platform |
+Customer routes cover the public site, authenticated tools, generation and education studio, saved projects/practice, editor, templates/workflows, billing/referrals, real local bot transport, job results/sharing/delivery and support conversations. Capabilities and entitlements come from the server. All UI text is maintained in the English/Uzbek/Russian catalog; exact final key count and contract checksum are emitted by `npm run check:catalog`.
 
-Choices: Nuxt4.5.2 after registry advisory review (initial older4.3.1 replaced); Vue3.5.43/router5.3.1; CSS variables instead of a CSS utility framework; local fonts; client-rendered customer/public views for the local checkpoint. No staff bundle or staff API client lives here. Source passwords are never placed in browser storage.
+Implementation evidence is in `docs/design/QA.md`, `extended-verification.json`, `learning-verification.json`, `final-flows-verification.json` and `extended-accessibility.json`. The later named reports supersede the initial checkpoint's13-tool scope. Actual provider credentials, commercial launch and external Telegram device validation are platform/release concerns and are not represented as completed external work.
 
-Next: complete deployed Telegram/browser parity, licensed production Office engine/container/font qualification, durable client server-draft lifecycle, approved legal/commercial copy and P1 release gate. P2/R1B future tools remain absent from active menus and paid benefit claims.
+The branded/revision/form-template/batch-form and separate outline paths pass against the live localhost API. The final public contract is pinned and generated, all 609 translation keys have three-locale parity, strict type checking and the supported Node 22 production build pass, and 22 mobile light/dark accessibility scans report no automated violations. Detailed final results and checksum are recorded in `docs/design/final-quality.json`. No remote push or deployment has been performed.

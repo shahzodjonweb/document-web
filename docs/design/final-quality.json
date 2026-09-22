@@ -1,0 +1,96 @@
+{
+  "status": "passed",
+  "verified_at": "2026-09-22T20:14:52.857Z",
+  "runtime": {
+    "web": "http://127.0.0.1:3000/en/app",
+    "api": "http://127.0.0.1:8000",
+    "browser": "Playwright 1.58.2 with system Google Chrome",
+    "build_node": "22.22.0"
+  },
+  "checks": {
+    "nuxt_typecheck": "passed",
+    "production_build": "passed",
+    "translation_keys": 609,
+    "complete_locales": [
+      "en",
+      "uz",
+      "ru"
+    ],
+    "public_contract_sha256": "dd8a3d767eb67621e43e11dbcc9a1105ab83958abef309d369f95eccce15a2ae",
+    "public_contract_staff_routes": 0,
+    "npm_audit_vulnerabilities": 0,
+    "git_diff_check": "passed",
+    "mobile_axe_scans": 22,
+    "mobile_axe_violations": 0,
+    "axe_page_errors": [],
+    "authenticated_catalog_visible": true,
+    "unconfigured_image_provider_flag": false,
+    "unconfigured_handwriting_provider_flag": false
+  },
+  "browser_evidence": [
+    {
+      "file": "extended-verification.json",
+      "status": "passed",
+      "at": "2026-09-22T19:28:00.024Z",
+      "checks": [
+        "Local authoring: supplied content → editable outline → free quote → real downloadable PDF",
+        "Real PDF editor: input preview → positioned text → saved commands → quoted PDF export",
+        "Local Telegram page calls actual aiogram handlers and renders real bot messages/buttons",
+        "All eleven extended routes at 390px in English, Uzbek and Russian: no horizontal overflow"
+      ]
+    },
+    {
+      "file": "learning-verification.json",
+      "status": "passed",
+      "at": "2026-09-22T19:38:35.535Z",
+      "checks": [
+        "Teacher-authored question → explicit 90-day encrypted project save → real exact-match practice result 1/1",
+        "Teacher exports contain separate learner/key artifacts; learner link downloads and revokes; key has no share control",
+        "Reusable template saved through owner CRUD",
+        "Saved workflow → bound aggregate review → real child rotation task result",
+        "Batch compression quotes two children and returns real per-child outcomes"
+      ]
+    },
+    {
+      "file": "final-flows-verification.json",
+      "status": "passed",
+      "at": "2026-09-22T19:36:18.551Z",
+      "checks": [
+        "Batch compression aggregate quote → independent child jobs → two real result receipts",
+        "Support ticket → owner conversation → persisted follow-up reply",
+        "Russian output setting → editable presentation generation → valid downloadable PPTX archive",
+        "Finished presentation delivered through idempotent artifact API to real local aiogram transcript",
+        "Actual sandbox subscription cancellation and resumption preserve current paid access"
+      ]
+    },
+    {
+      "file": "advanced-authoring-verification.json",
+      "status": "passed",
+      "at": "2026-09-22T19:53:38.515Z",
+      "checks": [
+        "Real Unicode form values saved as a versioned template; same immutable template fills two PDFs via independently quoted child jobs",
+        "Owned logo, chosen accent and brand name accepted into actual branded PDF rendering",
+        "Owned version-bound draft revision updates only selected section; unselected section objects unchanged"
+      ]
+    },
+    {
+      "file": "final-provider-verification.json",
+      "status": "passed",
+      "at": "2026-09-22T20:14:38.493Z",
+      "checks": [
+        "Image and handwriting tools accurately require a configured provider; handwriting accepts exactly one PNG/JPG/PDF source",
+        "Workspace mode changes persist to the server and open the matching workspace",
+        "All six published presets render in English, Uzbek and Russian with server eligibility",
+        "Separate outline stage is explicitly quoted at zero local credits, confirmed, then reloaded as a new editable draft version",
+        "Reviewed content saves as a reusable owner template and creates a new draft with its sections/questions intact"
+      ]
+    }
+  ],
+  "limitations": [
+    "No live image, handwriting or language-provider credential was used; provider gating was verified against local configuration.",
+    "Local Telegram runs real aiogram handlers in its simulator; external Telegram devices and delivery were not validated.",
+    "Sandbox invoices and transactions are local test records, not real Telegram Stars purchases.",
+    "Production isolation, licensing, commercial/legal approval and public SSR/SEO remain platform or release concerns."
+  ],
+  "repository_action": "No commit or push during this full-workspace extension"
+}

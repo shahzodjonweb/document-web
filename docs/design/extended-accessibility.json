@@ -1,0 +1,116 @@
+{
+  "at": "2026-09-22T20:08:50.422Z",
+  "reports": [
+    {
+      "theme": "light",
+      "route": "create",
+      "violations": []
+    },
+    {
+      "theme": "light",
+      "route": "images",
+      "violations": []
+    },
+    {
+      "theme": "light",
+      "route": "study",
+      "violations": []
+    },
+    {
+      "theme": "light",
+      "route": "editor",
+      "violations": []
+    },
+    {
+      "theme": "light",
+      "route": "billing",
+      "violations": []
+    },
+    {
+      "theme": "light",
+      "route": "bot",
+      "violations": []
+    },
+    {
+      "theme": "light",
+      "route": "support",
+      "violations": []
+    },
+    {
+      "theme": "light",
+      "route": "projects",
+      "violations": []
+    },
+    {
+      "theme": "light",
+      "route": "workflows",
+      "violations": []
+    },
+    {
+      "theme": "light",
+      "route": "templates",
+      "violations": []
+    },
+    {
+      "theme": "light",
+      "route": "referrals",
+      "violations": []
+    },
+    {
+      "theme": "dark",
+      "route": "create",
+      "violations": []
+    },
+    {
+      "theme": "dark",
+      "route": "images",
+      "violations": []
+    },
+    {
+      "theme": "dark",
+      "route": "study",
+      "violations": []
+    },
+    {
+      "theme": "dark",
+      "route": "editor",
+      "violations": []
+    },
+    {
+      "theme": "dark",
+      "route": "billing",
+      "violations": []
+    },
+    {
+      "theme": "dark",
+      "route": "bot",
+      "violations": []
+    },
+    {
+      "theme": "dark",
+      "route": "support",
+      "violations": []
+    },
+    {
+      "theme": "dark",
+      "route": "projects",
+      "violations": []
+    },
+    {
+      "theme": "dark",
+      "route": "workflows",
+      "violations": []
+    },
+    {
+      "theme": "dark",
+      "route": "templates",
+      "violations": []
+    },
+    {
+      "theme": "dark",
+      "route": "referrals",
+      "violations": []
+    }
+  ],
+  "errors": []
+}

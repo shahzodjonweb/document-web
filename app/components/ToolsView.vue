@@ -1,7 +1,8 @@
 <script setup lang="ts">
-const { t } = useLocale()
+const { t, path } = useLocale()
+const studio = useStudio()
 const route = useRoute()
-const { sorted, category } = useTools()
+const { sorted, category, name, description } = useTools()
 const search = ref('')
 const selected = ref('allCategories')
 const categories = [
@@ -10,12 +11,15 @@ const categories = [
   'compressionCategory',
   'conversionCategory',
   'securityCategory',
+  'ocrCategory',
+  'editor',
+  'automationCategory',
 ]
 const filtered = computed(() =>
   sorted.value.filter(
     (f) =>
       (selected.value === 'allCategories' || category(f.id) === selected.value) &&
-      `${t(`${f.id}.name`)} ${t(`${f.id}.description`)}`
+      `${name(f.id, f.name)} ${description(f.id)}`
         .toLocaleLowerCase()
         .includes(search.value.toLocaleLowerCase()),
   ),
@@ -33,6 +37,23 @@ function resetSearch() {
       <p>{{ t('toolsSub') }}</p>
     </div>
   </div>
+  <nav v-if="route.path.includes('/app') && studio.config.value" class="workspace-hubs">
+    <NuxtLink
+      v-for="item in [
+        { url: 'create', label: 'create', icon: 'sparkle' },
+        { url: 'study', label: 'education', icon: 'book' },
+        { url: 'workflows', label: 'workflows', icon: 'reorder' },
+        { url: 'bot', label: 'bot', icon: 'send' },
+        { url: 'templates', label: 'templates', icon: 'files' },
+        { url: 'projects', label: 'projects', icon: 'folder' },
+        { url: 'editor', label: 'editor', icon: 'edit' },
+        { url: 'referrals', label: 'referrals', icon: 'send' },
+      ]"
+      :key="item.url"
+      :to="path(`/app/${item.url}`)"
+      ><AppIcon :name="item.icon" :size="20" />{{ t(item.label) }}</NuxtLink
+    >
+  </nav>
   <div class="directory-toolbar">
     <div class="category-tabs">
       <button

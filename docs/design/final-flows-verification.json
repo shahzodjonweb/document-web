@@ -1,0 +1,12 @@
+{
+  "status": "passed",
+  "at": "2026-09-22T19:36:18.551Z",
+  "checks": [
+    "Batch compression aggregate quote → independent child jobs → two real result receipts",
+    "Support ticket → owner conversation → persisted follow-up reply",
+    "Russian output setting → editable presentation generation → valid downloadable PPTX archive",
+    "Finished presentation delivered through idempotent artifact API to real local aiogram transcript",
+    "Actual sandbox subscription cancellation and resumption preserve current paid access"
+  ],
+  "pptxJob": "55f4c708-4001-48bc-81a3-9a36559b47ac"
+}

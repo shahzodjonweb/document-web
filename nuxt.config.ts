@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2026-02-01',
   devtools: { enabled: false },
   ssr: false,
-  css: ['~/assets/css/fonts.css', '~/assets/css/main.css'],
+  css: ['~/assets/css/fonts.css', '~/assets/css/main.css', '~/assets/css/extended.css'],
   runtimeConfig: { public: { productName: 'PDF Master' } },
   nitro: {
     routeRules: { '/api/**': { proxy: `${process.env.API_ORIGIN || 'http://127.0.0.1:8000'}/api/**` } },

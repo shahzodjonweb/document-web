@@ -8,6 +8,8 @@ const form = reactive({
   output_locale: String(ws.user.value?.preferences?.output_locale || ws.user.value?.locale || 'en'),
   paper_size: String(ws.user.value?.preferences?.paper_size || 'A4'),
   locale: ws.user.value?.locale || 'en',
+  mode: ws.user.value?.mode || 'general',
+  adult_assistance: !!ws.user.value?.preferences?.adult_assistance,
   time_zone: ws.user.value?.time_zone || Intl.DateTimeFormat().resolvedOptions().timeZone,
   theme: import.meta.client ? localStorage.getItem('pdf-master-theme') || 'light' : 'light',
 })
@@ -20,12 +22,14 @@ async function save() {
       method: 'PATCH',
       body: {
         locale: form.locale,
+        mode: form.mode,
         time_zone: form.time_zone,
         preferences: {
           ...ws.user.value?.preferences,
           theme: form.theme,
           output_locale: form.output_locale,
           paper_size: form.paper_size,
+          adult_assistance: form.adult_assistance,
         },
       },
     })
@@ -72,6 +76,19 @@ async function save() {
       <div v-if="saved" class="success-banner" role="status">
         <AppIcon name="check" :size="17" />{{ t('saved') }}
       </div>
+      <label class="form-field"
+        ><span>{{ t('workspaceMode') }}</span
+        ><select v-model="form.mode">
+          <option v-for="mode in ['general', 'student', 'school', 'teacher']" :key="mode" :value="mode">
+            {{ t(mode) }}
+          </option>
+        </select></label
+      >
+      <label v-if="form.mode === 'school'" class="check-label adult-assistance"
+        ><input v-model="form.adult_assistance" type="checkbox" /><span>{{
+          t('adultAssistance')
+        }}</span></label
+      >
       <label class="form-field"
         ><span>{{ t('interfaceLanguage') }}</span
         ><select v-model="form.locale">

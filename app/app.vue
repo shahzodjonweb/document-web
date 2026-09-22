@@ -2,6 +2,7 @@
 const route = useRoute()
 const { t, path, locale, localePath } = useLocale()
 const ws = useWorkspace()
+const studio = useStudio()
 const { user, sessionReady, apiError } = ws
 const isApp = computed(() => route.path.includes('/app'))
 const theme = ref('light')
@@ -10,20 +11,38 @@ const nav = [
   { key: 'tools', url: '/app/tools', icon: 'tools' },
   { key: 'tasks', url: '/app/jobs', icon: 'tasks' },
 ]
+const extendedNav = computed(() =>
+  studio.config.value
+    ? [
+        { key: 'create', url: '/app/create', icon: 'sparkle' },
+        { key: 'education', url: '/app/study', icon: 'word' },
+        { key: 'projects', url: '/app/projects', icon: 'folder' },
+        { key: 'editor', url: '/app/editor', icon: 'edit' },
+        { key: 'workflows', url: '/app/workflows', icon: 'reorder' },
+        { key: 'bot', url: '/app/bot', icon: 'send' },
+      ]
+    : [],
+)
 const current = (url: string) =>
   url === '/app' ? route.path === path(url) : route.path.startsWith(path(url))
+watch(user, (value) => {
+  if (value) studio.load()
+  else studio.config.value = null
+})
 const crumb = computed(() =>
-  route.path.includes('/tools')
-    ? t('tools')
-    : route.path.includes('/jobs')
-      ? t('tasks')
-      : route.path.includes('/billing')
-        ? t('billing')
-        : route.path.includes('/settings')
-          ? t('settings')
-          : route.path.includes('/support')
-            ? t('support')
-            : t('home'),
+  extendedNav.value.find((item) => current(item.url))
+    ? t(extendedNav.value.find((item) => current(item.url))!.key)
+    : route.path.includes('/tools')
+      ? t('tools')
+      : route.path.includes('/jobs')
+        ? t('tasks')
+        : route.path.includes('/billing')
+          ? t('billing')
+          : route.path.includes('/settings')
+            ? t('settings')
+            : route.path.includes('/support')
+              ? t('support')
+              : t('home'),
 )
 async function changeLocale(event: Event) {
   const value = (event.target as HTMLSelectElement).value
@@ -33,6 +52,21 @@ async function changeLocale(event: Event) {
     } catch {}
   }
   await navigateTo(localePath(value))
+}
+async function changeMode(event: Event) {
+  try {
+    const mode = (event.target as HTMLSelectElement).value
+    user.value = await ws.api('/me', { method: 'PATCH', body: { mode } })
+    const destinations: Record<string, string> = {
+      general: '/app',
+      student: '/app/study',
+      school: '/app/school',
+      teacher: '/app/teach',
+    }
+    await navigateTo(path(destinations[mode] || '/app'))
+  } catch {
+    apiError.value = true
+  }
 }
 onMounted(async () => {
   const saved = localStorage.getItem('pdf-master-theme') || 'light'
@@ -61,7 +95,7 @@ onMounted(async () => {
       apiError.value = true
     }
   }
-  await Promise.allSettled([ws.loadCatalog(), ws.loadPlans(), ws.loadAccount()])
+  await Promise.allSettled([ws.loadCatalog(), ws.loadPlans(), ws.loadAccount(), studio.load()])
   if (user.value) {
     try {
       const pending = JSON.parse(sessionStorage.getItem('pdf-master-pending-job') || 'null')
@@ -99,11 +133,20 @@ watch(
       >
       <div class="workspace-picker">
         <span class="workspace-avatar"><AppIcon name="folder" :size="17" /></span
-        ><span>{{ t('general') }}</span>
+        ><select
+          v-if="user"
+          :value="user.mode || 'general'"
+          @change="changeMode"
+          :aria-label="t('workspaceMode')"
+        >
+          <option v-for="mode in ['general', 'student', 'school', 'teacher']" :key="mode" :value="mode">
+            {{ t(mode) }}
+          </option></select
+        ><span v-else>{{ t('general') }}</span>
       </div>
       <nav class="main-nav" aria-label="Workspace">
         <NuxtLink
-          v-for="item in nav"
+          v-for="item in [...nav.slice(0, 2), ...extendedNav, nav[2]!]"
           :key="item.key"
           :to="path(item.url)"
           :class="{ active: current(item.url) }"
