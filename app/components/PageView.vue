@@ -8,6 +8,17 @@ const filteredJobs = computed(() =>
   ws.jobs.value.filter((j) => selectedStatus.value === 'allStatuses' || j.status === selectedStatus.value),
 )
 const error = ref('')
+const authNotice = ref('')
+const callbackError = ref('')
+const authentication = useAuthentication()
+onMounted(async () => {
+  if (!route.query.auth_status && !route.query.auth_error) return
+  if (route.query.auth_error)
+    callbackError.value = authentication.errorMessage(String(route.query.auth_error))
+  else if (route.query.auth_status === 'success') authNotice.value = t('authGoogleComplete')
+  const { auth_status, auth_error, ...query } = route.query
+  await navigateTo({ path: route.path, query, hash: route.hash }, { replace: true })
+})
 const isCustomer = computed(() => view.value.startsWith('/app'))
 async function retry() {
   error.value = ''
@@ -32,6 +43,10 @@ useHead(() => ({
 }))
 </script>
 <template>
+  <ErrorBanner v-if="callbackError" :message="callbackError" />
+  <p v-if="authNotice" class="success-banner" role="status">
+    <AppIcon name="check" :size="17" />{{ authNotice }}
+  </p>
   <ErrorBanner v-if="ws.apiError.value || error" :message="error"
     ><button class="text-link" @click="retry">{{ t('retry') }}</button></ErrorBanner
   >

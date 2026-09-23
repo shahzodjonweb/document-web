@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "boundary": "Real Django API and browser cookies; email delivered only to isolated local file spool. No live Google or Telegram provider calls.",
+  "verified_at": "2026-09-23T21:00:13.765Z",
+  "account_id": "e70545d9-91b3-4b97-b0cc-abd561a2c07e",
+  "checks": [
+    "Real registration sends local email, requires correct verification code and creates a verified email-only account",
+    "Email/password login in a separate browser session resolves the original account",
+    "Password change preserves current account/session and invalidates the other browser session",
+    "Real reset email/code sets a new password; subsequent sign-in preserves the same account",
+    "Real account settings render EN/UZ/RU at mobile width without overflow"
+  ]
+}

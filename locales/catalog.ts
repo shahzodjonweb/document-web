@@ -1,3 +1,4 @@
+import { authenticationEntries } from './authentication.ts'
 import { extendedEntries, extendedToolNames } from './extended.ts'
 export type Locale = 'en' | 'uz' | 'ru'
 const entries: Record<string, [string, string, string]> = {
@@ -62,9 +63,9 @@ const entries: Record<string, [string, string, string]> = {
     'Все документы в одном месте.',
   ],
   signInBody: [
-    'Sign in with Telegram to keep your files, tasks and allowance together across devices.',
-    'Fayllar, vazifalar va limitingizdan barcha qurilmalarda foydalanish uchun Telegram orqali kiring.',
-    'Войдите через Telegram: файлы, задачи и лимиты будут доступны на всех устройствах.',
+    'Sign in with Google, email or Telegram. Connect them in Settings to keep one account across all your devices.',
+    'Google, email yoki Telegram orqali kiring. Barcha qurilmalarda bitta hisobdan foydalanish uchun ularni Sozlamalarda ulang.',
+    'Войдите через Google, почту или Telegram. Подключите их в настройках, чтобы использовать один аккаунт на всех устройствах.',
   ],
   loginTitle: ['Welcome to PDF Master', 'PDF Master’ga xush kelibsiz', 'Добро пожаловать в PDF Master'],
   logout: ['Sign out', 'Chiqish', 'Выйти'],
@@ -75,9 +76,9 @@ const entries: Record<string, [string, string, string]> = {
     'Подтвердите вход в Telegram и вернитесь сюда.',
   ],
   telegramNotConfigured: [
-    'Telegram sign-in is not configured in this local environment.',
-    'Bu mahalliy muhitda Telegram orqali kirish sozlanmagan.',
-    'Вход через Telegram не настроен в локальной среде.',
+    'Telegram sign-in is not available yet.',
+    'Telegram orqali kirish hali mavjud emas.',
+    'Вход через Telegram пока недоступен.',
   ],
   morning: ['Make room for better work.', 'Muhim ishlarga vaqt ajrating.', 'Больше времени для важного.'],
   greeting: ['A little less paperwork.', 'Qog‘ozbozlik biroz kamroq.', 'Меньше бумажной работы.'],
@@ -345,7 +346,7 @@ const entries: Record<string, [string, string, string]> = {
   system: ['System', 'Tizimga mos', 'Системная'],
   saveChanges: ['Save changes', 'Saqlash', 'Сохранить'],
   saved: ['Preferences saved.', 'Sozlamalar saqlandi.', 'Настройки сохранены.'],
-  linkedAccount: ['Linked Telegram account', 'Bog‘langan Telegram hisobi', 'Аккаунт Telegram'],
+  linkedAccount: ['Account identity', 'Hisob ma’lumotlari', 'Данные аккаунта'],
   testAccount: ['Local development account', 'Mahalliy test hisobi', 'Локальный тестовый аккаунт'],
   supportTitle: ['A little help, right here.', 'Yordam — shu yerda.', 'Помощь — рядом.'],
   supportSub: [
@@ -590,6 +591,7 @@ const toolEntries: Record<string, [string, string, string, string, string, strin
     'Снимите известный вам пароль.',
   ],
 }
+Object.assign(entries, authenticationEntries)
 for (const [key, value] of Object.entries(extendedEntries)) {
   if (!(key in entries)) entries[key] = value
 }

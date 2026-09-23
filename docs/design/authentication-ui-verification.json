@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "boundary": "Mocked external identity/API responses; browser behavior only. Real email lifecycle is tested separately.",
+  "verified_at": "2026-09-23T21:00:46.655Z",
+  "checks": [
+    "Registration and 8-digit verification; localized invalid-code error; successful session enters workspace",
+    "Telegram linking passes link intent, exchanges approval and refreshes linked state for the same account",
+    "Password change submits current/new credentials once and clears the form",
+    "Google connection uses authenticated link intent and redirects to Google authorization",
+    "Google identity conflict offers existing-account guidance and removes callback query",
+    "A Google account can add verified email/password while preserving its account and linked identities",
+    "Incorrect login clears password; reset returns to login without silently authenticating",
+    "No serious or critical automated accessibility findings in sign-in form",
+    "EN/UZ/RU mobile sign-in and settings have no horizontal overflow; 320px sign-in fits with no account navigation overlay",
+    "Unconfigured providers disable their actions with localized availability messages"
+  ]
+}

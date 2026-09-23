@@ -64,7 +64,17 @@ async function save() {
       <span class="status-badge succeeded">{{ t(ws.user.value?.plan || 'free') }}</span>
       <dl>
         <dt>{{ t('linkedAccount') }}</dt>
-        <dd>{{ ws.user.value?.is_test ? t('testAccount') : ws.user.value?.telegram_id || 'Telegram' }}</dd>
+        <dd>
+          {{
+            ws.user.value?.is_test
+              ? t('testAccount')
+              : ws.user.value?.email ||
+                ws.user.value?.google_email ||
+                ws.user.value?.telegram_user_id ||
+                ws.user.value?.telegram_id ||
+                '—'
+          }}
+        </dd>
       </dl>
       <button class="button secondary" @click="ws.logout">
         <AppIcon name="logout" :size="17" />{{ t('logout') }}
@@ -140,5 +150,6 @@ async function save() {
         {{ saving ? t('working') : t('saveChanges') }}<AppIcon name="check" :size="17" />
       </button>
     </form>
+    <AccountSignInSettings />
   </div>
 </template>

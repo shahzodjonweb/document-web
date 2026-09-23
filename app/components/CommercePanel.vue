@@ -9,6 +9,7 @@ const invoices = ref<any[]>([])
 const invoice = ref<any>(null)
 const busy = ref('')
 const error = ref('')
+const telegramRequired = ref(false)
 const success = ref('')
 const nextPlan = ref('plus')
 const refundReason = ref('')
@@ -16,11 +17,15 @@ const refundTarget = ref<any>(null)
 async function run(action: string, fn: () => Promise<void>) {
   busy.value = action
   error.value = ''
+  telegramRequired.value = false
   success.value = ''
   try {
     await fn()
   } catch (e: any) {
-    error.value = e.data?.error?.message || t('genericError')
+    telegramRequired.value = e.data?.error?.code === 'telegram_link_required'
+    error.value = telegramRequired.value
+      ? t('authTelegramRequired')
+      : e.data?.error?.message || t('genericError')
   } finally {
     busy.value = ''
   }
@@ -101,7 +106,11 @@ function selectedInvoice(value: any) {
 </script>
 <template>
   <section class="commerce-content">
-    <ErrorBanner v-if="error" :message="error" />
+    <ErrorBanner v-if="error" :message="error"
+      ><NuxtLink v-if="telegramRequired" :to="path('/app/settings')" class="text-link">{{
+        t('authSignInMethods')
+      }}</NuxtLink></ErrorBanner
+    >
     <div v-if="success" class="success-banner" role="status">
       <AppIcon name="check" :size="18" />{{ success }}
     </div>

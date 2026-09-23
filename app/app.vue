@@ -240,7 +240,7 @@ watch(
         </nav>
       </footer>
     </div>
-    <nav v-if="isApp" class="mobile-nav">
+    <nav v-if="isApp && user" class="mobile-nav">
       <NuxtLink
         v-for="item in [...nav, { key: 'account', url: '/app/settings', icon: 'settings' }]"
         :key="item.key"

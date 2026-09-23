@@ -1,48 +1,33 @@
 <script setup lang="ts">
 const { t, path } = useLocale()
+const route = useRoute()
 const ws = useWorkspace()
+const auth = useAuthentication()
 const busy = ref(false)
 const error = ref('')
-const challenge = ref<any>(null)
-async function login() {
+onMounted(auth.loadProviders)
+async function authenticated() {
+  if (route.path.includes('/auth/')) await navigateTo(path('/app'))
+}
+async function loginDev() {
   busy.value = true
   error.value = ''
   try {
     await ws.loginDev()
-  } catch (e: any) {
-    error.value = e.data?.error?.message || e.data?.message || t('genericError')
+    await authenticated()
+  } catch (e) {
+    error.value = auth.errorMessage(e)
   } finally {
     busy.value = false
   }
 }
-async function telegram() {
+async function google() {
   busy.value = true
   error.value = ''
   try {
-    challenge.value = await ws.api('/auth/browser/challenges', {
-      method: 'POST',
-      body: { device_description: navigator.userAgent.split(' ').slice(-2).join(' ') },
-    })
-    if (!challenge.value.telegram_url && !challenge.value.deep_link) error.value = t('telegramNotConfigured')
-  } catch (e: any) {
-    error.value = e.data?.error?.message || t('telegramNotConfigured')
-  } finally {
-    busy.value = false
-  }
-}
-async function check() {
-  busy.value = true
-  try {
-    const id = challenge.value.id
-    const c = await ws.api(`/auth/browser/challenges/${id}`)
-    if (c.status === 'approved') {
-      await ws.api(`/auth/browser/challenges/${id}/exchange`, { method: 'POST', body: {} })
-      await ws.init()
-      await Promise.all([ws.loadAccount(), ws.loadCatalog(), ws.loadPlans()])
-    } else error.value = t('awaitingTelegram')
-  } catch {
-    error.value = t('genericError')
-  } finally {
+    await auth.startGoogle('login')
+  } catch (e) {
+    error.value = auth.errorMessage(e)
     busy.value = false
   }
 }
@@ -56,27 +41,40 @@ async function check() {
     <span class="eyebrow">{{ t('loginTitle') }}</span>
     <h1>{{ t('signIn') }}</h1>
     <p>{{ t('signInBody') }}</p>
-    <ErrorBanner v-if="error" :message="error" /><button
-      class="button primary"
-      @click="telegram"
-      :disabled="busy"
-    >
-      <AppIcon name="send" :size="18" />{{ t('openTelegram') }}
-    </button>
-    <div v-if="challenge && (challenge.telegram_url || challenge.deep_link)" class="login-challenge">
-      <a
-        class="text-link"
-        :href="challenge.telegram_url || challenge.deep_link"
-        target="_blank"
-        rel="noopener"
-        >{{ t('openTelegram') }}<AppIcon name="external" :size="15"
-      /></a>
-      <p>{{ t('awaitingTelegram') }}</p>
-      <button class="button secondary" @click="check" :disabled="busy">{{ t('checkLogin') }}</button>
+    <div class="auth-methods">
+      <ErrorBanner v-if="error" :message="error" />
+      <ErrorBanner v-if="auth.providerError.value" :message="t('authProvidersFailed')"
+        ><button class="text-link" @click="auth.loadProviders">{{ t('retry') }}</button></ErrorBanner
+      >
+      <p v-if="auth.providerLoading.value" role="status" class="field-hint">{{ t('loading') }}</p>
+      <div class="auth-social-options">
+        <button
+          class="button secondary"
+          type="button"
+          @click="google"
+          :disabled="busy || !auth.ready('google')"
+        >
+          <span class="google-letter" aria-hidden="true">G</span>{{ t('authContinueGoogle') }}
+        </button>
+        <small v-if="auth.providers.value && !auth.ready('google')" class="field-hint">{{
+          t('authGoogleUnavailable')
+        }}</small>
+        <TelegramSignIn :disabled="busy || !auth.ready('telegram')" @authenticated="authenticated" />
+        <small v-if="auth.providers.value && !auth.ready('telegram')" class="field-hint">{{
+          t('telegramNotConfigured')
+        }}</small>
+      </div>
+      <div class="auth-divider">
+        <span>{{ t('authOrEmail') }}</span>
+      </div>
+      <EmailSignIn :disabled="busy || !auth.ready('email')" @authenticated="authenticated" />
+      <p v-if="auth.providers.value && !auth.ready('email')" class="field-hint auth-unavailable">
+        {{ t('authEmailUnavailable') }}
+      </p>
     </div>
     <div v-if="ws.devAvailable.value" class="dev-login">
       <span>{{ t('beta') }}</span
-      ><button class="button secondary" @click="login" :disabled="busy">
+      ><button class="button secondary" @click="loginDev" :disabled="busy">
         {{ busy ? t('working') : t('devLogin') }}<AppIcon name="right" :size="16" /></button
       ><small>{{ t('devNotice') }}</small>
     </div>

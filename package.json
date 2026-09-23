@@ -13,7 +13,9 @@
     "check:catalog": "node --experimental-strip-types tests/catalog-check.mjs",
     "generate:api": "openapi-typescript generated/api/public.openapi.json -o generated/api/schema.d.ts",
     "format": "prettier --write app locales generated/api/client.ts generated/api/types.ts nuxt.config.ts",
-    "test:preview": "node tests/preview-smoke.mjs"
+    "test:preview": "node tests/preview-smoke.mjs",
+    "test:auth:ui": "node tests/authentication-ui.mjs",
+    "test:auth:email": "node tests/authentication-email.mjs"
   },
   "dependencies": {
     "lucide-vue-next": "0.563.0",

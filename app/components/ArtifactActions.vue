@@ -1,12 +1,13 @@
 <script setup lang="ts">
 const props = defineProps<{ artifact: any }>()
-const { t, date } = useLocale()
+const { t, path, date } = useLocale()
 const ws = useWorkspace()
 const share = ref<any>(null)
 const copied = ref(false)
 const busy = ref(false)
 const error = ref('')
 const delivered = ref(false)
+const telegramRequired = ref(false)
 async function createShare() {
   busy.value = true
   error.value = ''
@@ -46,7 +47,10 @@ async function deliver() {
     })
     delivered.value = true
   } catch (e: any) {
-    error.value = e.data?.error?.message || t('genericError')
+    telegramRequired.value = e.data?.error?.code === 'telegram_link_required'
+    error.value = telegramRequired.value
+      ? t('authTelegramRequired')
+      : e.data?.error?.message || t('genericError')
   } finally {
     busy.value = false
   }
@@ -63,9 +67,18 @@ async function deliver() {
       :disabled="busy"
     >
       <AppIcon name="send" :size="15" />{{ t('shareMaterial') }}</button
-    ><button class="text-link" @click="deliver" :disabled="busy || delivered">
+    ><NuxtLink
+      v-if="ws.user.value?.login_methods?.telegram === false"
+      :to="path('/app/settings')"
+      class="text-link"
+      ><AppIcon name="send" :size="15" />{{ t('authLinkTelegram') }}</NuxtLink
+    ><button v-else class="text-link" @click="deliver" :disabled="busy || delivered">
       <AppIcon name="send" :size="15" />{{ t(delivered ? 'sentToBot' : 'sendToBot') }}</button
-    ><ErrorBanner v-if="error" :message="error" />
+    ><ErrorBanner v-if="error" :message="error"
+      ><NuxtLink v-if="telegramRequired" :to="path('/app/settings')" class="text-link">{{
+        t('authSignInMethods')
+      }}</NuxtLink></ErrorBanner
+    >
     <div v-if="share" class="share-panel">
       <p>{{ t('shareExpiry') }}</p>
       <div class="copy-field">

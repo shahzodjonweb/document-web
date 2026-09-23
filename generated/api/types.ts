@@ -4,6 +4,11 @@ export interface User {
   display_name: string
   first_name?: string
   telegram_id?: string | number
+  telegram_user_id?: string | null
+  email?: string | null
+  email_verified?: boolean
+  google_email?: string | null
+  login_methods?: { email: boolean; google: boolean; telegram: boolean }
   locale: string
   mode?: string
   timezone?: string
