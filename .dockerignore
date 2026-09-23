@@ -3,6 +3,15 @@ node_modules
 .output
 .git
 .env
+.env.*
+!.env.example
 test-results
 playwright-report
 docs/design/screenshots
+
+# Local deployment build artifacts and Python tooling.
+release.tar.gz
+image.tar.gz
+.deploy-output/
+__pycache__/
+*.py[cod]

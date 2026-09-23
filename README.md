@@ -61,6 +61,8 @@ Browser scripts use system Google Chrome via Playwright `channel: 'chrome'`. The
 
 The Dockerfile pins the Node image manifest and serves the production output as an unprivileged user on port 3000. Use `--build-arg API_ORIGIN=http://api:8000` with the sibling Compose setup. No remote deployment or production purchase has been performed.
 
+The [CI/CD guide](docs/cicd.md) documents automatic testing, production image smoke checks and SSH deployment from `main`. Set `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY` and `DEPLOY_KNOWN_HOSTS` as Actions secrets in both repositories. Missing credentials are reported as **Deployment not configured**; the workflow does not attempt a server connection until all four are supplied.
+
 ## Design and remaining external validation
 
 `docs/design/FOUNDATION.md`, `EXTENDED_WORKSPACE.md` and `wireframes.html` describe the flows before implementation. The interface uses forest/sage/ivory tokens, locally hosted OFL DM Sans/Manrope fonts, Lucide icons, visible focus states, safe-area padding and responsive layouts. The complete workspace remains usable at 390px and 1440px in light and dark themes.

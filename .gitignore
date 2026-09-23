@@ -7,3 +7,10 @@ node_modules
 .DS_Store
 test-results
 playwright-report
+
+# Local deployment build artifacts and Python tooling.
+release.tar.gz
+image.tar.gz
+.deploy-output/
+__pycache__/
+*.py[cod]
