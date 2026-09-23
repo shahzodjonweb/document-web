@@ -1,36 +1,23 @@
-# Web CI/CD
+# Independent web deployment
 
-This repository deploys the customer application into the same isolated `pdfmaster` Docker Compose project as the API, admin panel, workers and Telegram bot. The platform repository owns the stack configuration. Follow the complete [server setup and deployment runbook](https://github.com/shahzodjonweb/document-platform/blob/main/docs/cicd.md).
+Customer URL: **https://pdfmaster.orderdesk.live/en/app**.
 
-Add these repository Actions variables to **both** private repositories:
+This repository deploys only Docker project `pdfmaster-web`, rooted at `~/pdf-master/web`, with its own private Compose network and gateway at `127.0.0.1:8310`. It does not start, stop, migrate or roll back `pdfmaster-platform` or any other server project. The platform/admin runs independently at **https://pdfmaster-admin.orderdesk.live/ops/login**.
 
-- `DEPLOY_HOST`: server hostname or IP.
-- `DEPLOY_USER`: SSH deployment account with Docker access.
-- `DEPLOY_SSH_KEY`: complete private deployment key usable without an interactive passphrase.
-- `DEPLOY_KNOWN_HOSTS`: verified OpenSSH host-key entry for the target host and port.
+The Nuxt `/api` proxy targets the platform's public HTTPS origin. There is no shared application Docker network or database volume. Backend API availability remains a functional dependency; independent deployment requires backward-compatible API changes. Platform restarts do not restart the web containers.
 
-Use [web variables settings](https://github.com/shahzodjonweb/document-web/settings/variables/actions) and [platform variables settings](https://github.com/shahzodjonweb/document-platform/settings/variables/actions), or the helper from either repository:
+Read the [full operations runbook](https://github.com/shahzodjonweb/document-platform/blob/main/docs/cicd.md). Both repositories accept `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY` and `DEPLOY_KNOWN_HOSTS` from GitHub Actions Secrets or Variables. The SSH account is `root`; the target is `77.42.34.241`. Values are passed as masked inputs to the reusable deployment job. A key in Variables remains readable in variable settings. The server must authorize the matching public key for root.
 
-Choose **Settings → Secrets and variables → Actions → Variables → New repository variable**. `ci.yml` reads `vars.DEPLOY_*` and passes them into `deploy.yml` as masked reusable-workflow secret inputs; these names do not need repository Secrets entries. This protects deployment logs, while people with access to GitHub variable settings can still read the stored values, including the SSH key.
+CI checks the API/catalog contract, types and production build, tests release isolation, then starts the actual web Compose stack and gateway. Passing main releases are delivered over pinned SSH and deployed independently. No platform release or checksum match is needed. First delivery creates only the web environment. Failed activation restores only the previous web image. No database commands or global Docker cleanup are issued.
 
-```sh
-python3 scripts/deploy/configure_variables.py \
-  --host your-server.example --user deploy \
-  --key-file /absolute/path/deployment-key \
-  --known-hosts-file /absolute/path/verified-known-hosts
-```
+Optional Actions Variables: `DEPLOY_PORT` (default 22), `DEPLOY_PLATFORM` (default `linux/amd64`, also supports `linux/arm64`). Use `scripts/deploy/configure_variables.py --storage secrets` from either repository to configure both from verified local credential files, or omit `--storage secrets` to use Variables.
 
-The helper reads key files without printing their contents and verifies the four variable names in both private repositories. Confirm host fingerprints through a trusted server console or existing trusted record. Do not commit private keys. `--port` sets the optional `DEPLOY_PORT` variable for a nonstandard port. The optional `DEPLOY_PLATFORM` variable supports `linux/amd64` (default) or `linux/arm64`; set it consistently in both repositories.
+`infra/production/Caddyfile` contains this site's host-proxy route. For containerized ingress, the optional `proxy-network.example.yaml` attaches only this project's gateway with alias `pdfmaster-web-gateway`; it is stored as `~/pdf-master/web/compose.override.yaml` on the server. Existing projects and TLS routes must be preserved. Routine deployments do not reload or edit the shared TLS proxy.
 
-Pull requests check the catalog/API contract, TypeScript and production build, test release transactions, then build and smoke-test the Docker image. Successful `main` workflows package the tested image and send it over strict host-pinned SSH. No private registry token is needed. Missing variables produce an explicit **Deployment not configured** summary, with no server connection. A green build alone does not mean deployment succeeded.
-
-The first component waits for its partner. A public API checksum change waits for a matching platform/web pair; a server-side lock serializes both repositories. An older delayed workflow cannot replace a newer release. Deployment backs up the database, migrates, updates services and checks health. Failed activation restores previous images when available; database migrations are not reversed.
-
-Prepare the server environment, domain and TLS using the platform runbook before configuring deployment access. Trigger both workflows for the initial activation:
+Rollback only this project:
 
 ```sh
-gh workflow run ci.yml --repo shahzodjonweb/document-platform --ref main
-gh workflow run ci.yml --repo shahzodjonweb/document-web --ref main
+python3 ~/pdf-master/web/incoming/RELEASE_DIRECTORY/server.py rollback --component web
 ```
 
-Check the deployment job's final server result. A staged release is waiting and has not activated a new stack. The shared files in `scripts/deploy/` implement release protocol version 1; keep matching helpers and tests synchronized between repositories. The production stack uses its own volumes, network and loopback gateway port so another Docker application can remain on the server.
+The protocol-v2 helpers and tests are shared in source between repositories, but runtime state, deployment locks and Compose commands are completely separate. A successful CI run with a missing-configuration notice does not mean the website was deployed.

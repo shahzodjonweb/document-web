@@ -1,0 +1,12 @@
+# Optional server-owned ~/pdf-master/web/compose.override.yaml.
+# Only this project's gateway joins the existing TLS proxy network.
+services:
+  gateway:
+    networks:
+      default:
+      proxy:
+        aliases: [pdfmaster-web-gateway]
+networks:
+  proxy:
+    external: true
+    name: ${PDFMASTER_PROXY_NETWORK:?Set the existing proxy network}
