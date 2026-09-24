@@ -3,6 +3,9 @@ const route = useRoute()
 const { t, path, locale, localePath } = useLocale()
 const ws = useWorkspace()
 const studio = useStudio()
+const auth = useAuthentication()
+const miniAppError = ref('')
+const miniAppBusy = ref(false)
 const { user, sessionReady, apiError } = ws
 const isApp = computed(() => route.path.includes('/app'))
 const theme = ref('light')
@@ -68,6 +71,22 @@ async function changeMode(event: Event) {
     apiError.value = true
   }
 }
+async function signInMiniApp() {
+  const telegram = (window as any).Telegram?.WebApp
+  if (!telegram?.initData || user.value || miniAppBusy.value) return
+  miniAppError.value = ''
+  miniAppBusy.value = true
+  try {
+    await auth.startRequest('/auth/telegram/miniapp', { init_data: telegram.initData })
+    await auth.refreshAccount()
+    telegram.ready()
+    telegram.expand()
+  } catch (error) {
+    miniAppError.value = auth.errorMessage(error)
+  } finally {
+    miniAppBusy.value = false
+  }
+}
 onMounted(async () => {
   const saved = localStorage.getItem('pdf-master-theme') || 'light'
   theme.value = saved
@@ -85,16 +104,7 @@ onMounted(async () => {
     telegram.ready()
     telegram.expand()
   }
-  if (telegram?.initData && !user.value) {
-    try {
-      await ws.api('/auth/telegram/miniapp', { method: 'POST', body: { init_data: telegram.initData } })
-      await ws.init()
-      telegram.ready()
-      telegram.expand()
-    } catch {
-      apiError.value = true
-    }
-  }
+  if (telegram?.initData && !user.value) await signInMiniApp()
   await Promise.allSettled([ws.loadCatalog(), ws.loadPlans(), ws.loadAccount(), studio.load()])
   if (user.value) {
     try {
@@ -216,7 +226,14 @@ watch(
           /></NuxtLink>
         </div>
       </header>
-      <main id="main-content" :class="isApp ? 'main-content' : 'public-content'"><NuxtPage /></main>
+      <main id="main-content" :class="isApp ? 'main-content' : 'public-content'">
+        <ErrorBanner v-if="miniAppError && !user" :message="miniAppError"
+          ><button class="text-link" :disabled="miniAppBusy" @click="signInMiniApp">
+            {{ t('retry') }}
+          </button></ErrorBanner
+        >
+        <NuxtPage />
+      </main>
       <footer v-if="!isApp" class="public-footer">
         <div>
           <NuxtLink :to="path()" class="brand footer-brand"><BrandLogo /></NuxtLink>
@@ -239,4 +256,5 @@ watch(
       >
     </nav>
   </div>
+  <AntiBotDialog />
 </template>

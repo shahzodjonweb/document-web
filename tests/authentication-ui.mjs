@@ -28,6 +28,7 @@ const account = {
 }
 let signedIn = false
 let providers = {
+  antibot: { enabled: false, configured: false, site_key: '' },
   email: { enabled: true, configured: true },
   google: { enabled: true, configured: true },
   telegram: { enabled: true, configured: true },

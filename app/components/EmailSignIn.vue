@@ -50,10 +50,7 @@ async function submit() {
         emit('authenticated')
       }
     } else if (mode.value === 'login') {
-      await ws.api('/auth/email/login', {
-        method: 'POST',
-        body: { email: email.value.trim(), password: password.value },
-      })
+      await auth.startRequest('/auth/email/login', { email: email.value.trim(), password: password.value })
       await auth.refreshAccount()
       emit('authenticated')
     } else {
@@ -62,13 +59,10 @@ async function submit() {
         : mode.value === 'reset'
           ? '/auth/email/reset'
           : '/auth/email/register'
-      const result = await ws.api<{ challenge_id: string }>(endpoint, {
-        method: 'POST',
-        body: {
-          email: email.value.trim(),
-          ...(mode.value !== 'reset' ? { password: password.value, display_name: name.value.trim() } : {}),
-          locale: locale.value,
-        },
+      const result = await auth.startRequest<{ challenge_id: string }>(endpoint, {
+        email: email.value.trim(),
+        ...(mode.value !== 'reset' ? { password: password.value, display_name: name.value.trim() } : {}),
+        locale: locale.value,
       })
       challenge.value = result.challenge_id
       code.value = ''

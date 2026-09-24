@@ -1,4 +1,42 @@
 export const authenticationEntries: Record<string, [string, string, string]> = {
+  antibotTitle: ['A quick security check', 'Qisqa xavfsizlik tekshiruvi', 'Быстрая проверка безопасности'],
+  antibotDescription: [
+    'Please complete the check to continue.',
+    'Davom etish uchun tekshiruvdan o‘ting.',
+    'Пройдите проверку, чтобы продолжить.',
+  ],
+  antibotLoading: ['Loading the check…', 'Tekshiruv yuklanmoqda…', 'Загружаем проверку…'],
+  antibotChecking: ['Checking your browser…', 'Brauzeringiz tekshirilmoqda…', 'Проверяем ваш браузер…'],
+  antibotRequired: [
+    'Please try again to complete the security check.',
+    'Xavfsizlik tekshiruvidan o‘tish uchun qayta urinib ko‘ring.',
+    'Повторите попытку, чтобы пройти проверку.',
+  ],
+  antibotFailed: [
+    'The check did not pass. Please try again.',
+    'Tekshiruvdan o‘tib bo‘lmadi. Qayta urinib ko‘ring.',
+    'Проверка не пройдена. Попробуйте ещё раз.',
+  ],
+  antibotExpired: [
+    'The check timed out. Please try again.',
+    'Tekshiruv vaqti tugadi. Qayta urinib ko‘ring.',
+    'Время проверки истекло. Попробуйте ещё раз.',
+  ],
+  antibotUnavailable: [
+    'The security check is unavailable. Please try again shortly.',
+    'Xavfsizlik tekshiruvi hozir ishlamayapti. Birozdan keyin qayta urinib ko‘ring.',
+    'Проверка безопасности недоступна. Попробуйте чуть позже.',
+  ],
+  antibotCancelled: [
+    'Check cancelled. You can try again when ready.',
+    'Tekshiruv bekor qilindi. Tayyor bo‘lganda qayta urinib ko‘ring.',
+    'Проверка отменена. Когда будете готовы, попробуйте снова.',
+  ],
+  antibotBusy: [
+    'Please finish the open security check first.',
+    'Avval ochiq xavfsizlik tekshiruvini yakunlang.',
+    'Сначала завершите открытую проверку безопасности.',
+  ],
   authTelegramRequired: [
     'Connect Telegram in Settings to use Telegram delivery and Stars payments.',
     'Telegramga yuborish va Stars orqali to‘lovlar uchun Sozlamalarda Telegramni ulang.',

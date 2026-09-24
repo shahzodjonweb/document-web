@@ -24,9 +24,9 @@ async function start() {
   busy.value = true
   error.value = ''
   try {
-    challenge.value = await ws.api('/auth/browser/challenges', {
-      method: 'POST',
-      body: { intent: props.intent, device_description: navigator.userAgent.split(' ').slice(-2).join(' ') },
+    challenge.value = await auth.startRequest('/auth/browser/challenges', {
+      intent: props.intent,
+      device_description: navigator.userAgent.split(' ').slice(-2).join(' '),
     })
     if (!link.value) error.value = t('telegramNotConfigured')
   } catch (e) {

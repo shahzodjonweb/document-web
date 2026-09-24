@@ -1,3 +1,4 @@
+import type { AntiBotConfiguration } from './useAntiBot'
 export interface SignInProvider {
   enabled: boolean
   configured: boolean
@@ -6,14 +7,16 @@ export interface SignInProviders {
   email: SignInProvider
   google: SignInProvider
   telegram: SignInProvider
+  antibot: AntiBotConfiguration
 }
 export function useAuthentication() {
   const ws = useWorkspace()
+  const antiBot = useAntiBot()
   const { t, locale } = useLocale()
   const providers = useState<SignInProviders | null>('sign-in-providers', () => null)
   const providerError = useState('sign-in-providers-error', () => false)
   const providerLoading = useState('sign-in-providers-loading', () => false)
-  const ready = (provider: keyof SignInProviders) =>
+  const ready = (provider: 'email' | 'google' | 'telegram') =>
     !!providers.value?.[provider]?.enabled && !!providers.value?.[provider]?.configured
   async function loadProviders() {
     providerLoading.value = true
@@ -30,6 +33,11 @@ export function useAuthentication() {
   function errorMessage(error: any) {
     const code = typeof error === 'string' ? error : error?.data?.error?.code || ''
     const messages: Record<string, string> = {
+      antibot_required: 'antibotRequired',
+      antibot_failed: 'antibotFailed',
+      antibot_unavailable: 'antibotUnavailable',
+      antibot_cancelled: 'antibotCancelled',
+      antibot_busy: 'antibotBusy',
       invalid_credentials: 'authInvalidCredentials',
       invalid_login: 'authInvalidCredentials',
       invalid_code: 'authInvalidCode',
@@ -79,10 +87,14 @@ export function useAuthentication() {
     await ws.init()
     await Promise.allSettled([ws.loadAccount(), ws.loadCatalog(), ws.loadPlans()])
   }
+  async function startRequest<T = any>(endpoint: string, body: Record<string, unknown>) {
+    const token = await antiBot.verify()
+    return ws.api<T>(endpoint, { method: 'POST', body: { ...body, antibot_token: token } })
+  }
   async function startGoogle(intent: 'login' | 'link') {
-    const result = await ws.api<{ authorization_url: string }>('/auth/google/start', {
-      method: 'POST',
-      body: { intent, locale: locale.value },
+    const result = await startRequest<{ authorization_url: string }>('/auth/google/start', {
+      intent,
+      locale: locale.value,
     })
     // Only the Google authorization host can receive this browser navigation.
     const destination = new URL(result.authorization_url)
@@ -100,5 +112,6 @@ export function useAuthentication() {
     errorMessage,
     refreshAccount,
     startGoogle,
+    startRequest,
   }
 }

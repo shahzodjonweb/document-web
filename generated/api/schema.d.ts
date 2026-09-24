@@ -2017,6 +2017,8 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
+                    /** @description Fresh Turnstile proof with action customer_auth; required when web anti-bot verification is enabled. */
+                    antibot_token?: string;
                     /** @enum {unknown} */
                     intent?: "login" | "link";
                 };
@@ -2268,6 +2270,8 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
+                    /** @description Fresh Turnstile proof with action customer_auth; required when web anti-bot verification is enabled. */
+                    antibot_token?: string;
                     /** Format: email */
                     email: string;
                     password: string;
@@ -2335,6 +2339,8 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
+                    /** @description Fresh Turnstile proof with action customer_auth; required when web anti-bot verification is enabled. */
+                    antibot_token?: string;
                     /** Format: email */
                     email: string;
                     password: string;
@@ -2397,6 +2403,8 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
+                    /** @description Fresh Turnstile proof with action customer_auth; required when web anti-bot verification is enabled. */
+                    antibot_token?: string;
                     display_name?: string;
                     /** Format: email */
                     email: string;
@@ -2466,6 +2474,8 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
+                    /** @description Fresh Turnstile proof with action customer_auth; required when web anti-bot verification is enabled. */
+                    antibot_token?: string;
                     /** Format: email */
                     email: string;
                     locale?: string;
@@ -2713,6 +2723,8 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
+                    /** @description Fresh Turnstile proof with action customer_auth; required when web anti-bot verification is enabled. */
+                    antibot_token?: string;
                     /** @enum {unknown} */
                     intent?: "login" | "link";
                     locale?: string;
@@ -2842,6 +2854,12 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
+                        antibot: {
+                            binding: string;
+                            configured: boolean;
+                            enabled: boolean;
+                            site_key: string;
+                        };
                         email: {
                             configured: boolean;
                             enabled: boolean;
@@ -3009,6 +3027,8 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
+                    /** @description Fresh Turnstile proof with action customer_auth; required when web anti-bot verification is enabled. */
+                    antibot_token?: string;
                     init_data: string;
                 };
             };
