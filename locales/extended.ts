@@ -1,4 +1,159 @@
 export const extendedEntries: Record<string, [string, string, string]> = {
+  studioLocalContentNeeded: [
+    'This local mode uses your own content. Add the text or questions below before exporting.',
+    'Bu mahalliy rejim siz kiritgan matndan foydalanadi. Eksportdan oldin pastga matn yoki savollarni qo‘shing.',
+    'Локальный режим использует ваши материалы. Перед экспортом добавьте текст или вопросы ниже.',
+  ],
+  studioMoreOptions: ['More options', 'Qo‘shimcha sozlamalar', 'Дополнительные настройки'],
+  studioOptional: ['Optional', 'Ixtiyoriy', 'Необязательно'],
+  studioTitleOptional: ['Title (optional)', 'Sarlavha (ixtiyoriy)', 'Название (необязательно)'],
+  studioAutoTitle: [
+    'We’ll name it from your text. You can change it here.',
+    'Sarlavhani matningizdan olamiz. Uni shu yerda o‘zgartirishingiz mumkin.',
+    'Название возьмём из вашего текста. Здесь его можно изменить.',
+  ],
+  studioImagePromptPlaceholder: [
+    'A cosy library in watercolour, with warm sunlight.',
+    'Iliq quyosh nuri tushib turgan shinam kutubxona, akvarel uslubida.',
+    'Уютная библиотека в акварели, залитая тёплым солнечным светом.',
+  ],
+  studioImageQuickHint: [
+    'Just describe the image. We’ll handle the rest.',
+    'Kerakli rasmni ta’riflang. Qolganini biz tayyorlaymiz.',
+    'Просто опишите изображение. Остальное мы подготовим.',
+  ],
+  studioReviewCost: ['Review cost', 'Narxni ko‘rish', 'Посмотреть стоимость'],
+  studioYourIdea: ['Your idea', 'G‘oyangiz', 'Ваша идея'],
+  studioReviewCreate: ['Review & create', 'Tekshirish va yaratish', 'Проверка и создание'],
+  studioQuickHint: [
+    'Start with what you need. The extra settings are optional.',
+    'Nima kerakligini yozing. Qo‘shimcha sozlamalarni to‘ldirish shart emas.',
+    'Напишите, что вам нужно. Остальные настройки необязательны.',
+  ],
+  studioPrompt: ['What do you need?', 'Sizga nima kerak?', 'Что вам нужно?'],
+  studioSource: ['Add your content', 'Matningizni kiriting', 'Добавьте свой текст'],
+  studioQuestion: ['Your question', 'Savolingiz', 'Ваш вопрос'],
+  studioQuestionPlaceholder: [
+    'What are the main conclusions in this PDF?',
+    'Bu PDFdagi asosiy xulosalar qanday?',
+    'Каковы основные выводы этого PDF?',
+  ],
+  studioSourcePlaceholder: [
+    'Paste text, notes or questions here — or attach a PDF below.',
+    'Matn, qayd yoki savollarni shu yerga yozing yoki pastdan PDF biriktiring.',
+    'Вставьте текст, заметки или вопросы — либо прикрепите PDF ниже.',
+  ],
+  studioPromptPlaceholder: [
+    'Explain solar energy for beginners, with a few examples.',
+    'Quyosh energiyasini yangi o‘rganuvchilar uchun misollar bilan tushuntiring.',
+    'Объясните солнечную энергию простыми словами и приведите примеры.',
+  ],
+  studioEducationPlaceholder: [
+    'Tell us the topic and what you’d like to learn or teach.',
+    'Mavzuni va nimani o‘rganmoqchi yoki o‘rgatmoqchi ekaningizni yozing.',
+    'Укажите тему и что вы хотите изучить или объяснить.',
+  ],
+  studioSlidesPlaceholder: [
+    'A short presentation about renewable energy for students.',
+    'O‘quvchilar uchun qayta tiklanuvchi energiya haqida qisqa taqdimot.',
+    'Короткая презентация о возобновляемой энергии для школьников.',
+  ],
+  studioAttemptPlaceholder: [
+    'Problem: … My answer: … Help me understand any mistakes.',
+    'Masala: … Javobim: … Xatolarimni tushunishga yordam bering.',
+    'Задание: … Мой ответ: … Помогите разобраться в ошибках.',
+  ],
+  studioMarksPlaceholder: [
+    'Paste the learner’s work and the marking rubric or criteria.',
+    'O‘quvchining ishini va baholash mezonlarini kiriting.',
+    'Вставьте работу ученика и критерии оценивания.',
+  ],
+  studioReadingPlaceholder: [
+    'Adapt this for [age or level]: [paste your text].',
+    'Buni [yosh yoki daraja] uchun moslang: [matnni kiriting].',
+    'Адаптируйте для [возраст или уровень]: [ваш текст].',
+  ],
+  studioRevisionPrompt: ['What should change?', 'Nimani o‘zgartiramiz?', 'Что нужно изменить?'],
+  studioRevisionPlaceholder: [
+    'Make it clearer and more concise.',
+    'Aniqroq va qisqaroq qiling.',
+    'Сделайте текст понятнее и короче.',
+  ],
+  studioSourceHint: [
+    'Text or a PDF is enough. You don’t need to add both.',
+    'Matn yoki PDF yetarli. Ikkalasini ham kiritish shart emas.',
+    'Достаточно текста или PDF — добавлять оба не нужно.',
+  ],
+  studioPromptHint: [
+    'A sentence or two is enough to start.',
+    'Boshlash uchun bir-ikki jumla yetarli.',
+    'Для начала хватит одного-двух предложений.',
+  ],
+  studioRevisionHint: [
+    'We’ll improve the selected parts. Add instructions only if you want to.',
+    'Tanlangan qismlarni yaxshilaymiz. Xohlasangiz, qo‘shimcha ko‘rsatma yozing.',
+    'Улучшим выбранные части. Дополнительные пожелания — по желанию.',
+  ],
+  studioAttach: ['Add a PDF', 'PDF biriktirish', 'Добавить PDF'],
+  studioAttachHint: [
+    'Optional, if you have reference material.',
+    'Manba materialingiz bo‘lsa, biriktirishingiz mumkin.',
+    'Необязательно — если есть исходные материалы.',
+  ],
+  studioHandwritingFile: [
+    'Add your handwritten page',
+    'Qo‘lyozma sahifangizni yuklang',
+    'Добавьте страницу с рукописным текстом',
+  ],
+  studioQuestionFile: ['Add the PDF', 'PDFni yuklang', 'Добавьте PDF'],
+  studioQuestionFileHint: [
+    'We’ll use this PDF to answer your question.',
+    'Savolingizga shu PDF asosida javob beramiz.',
+    'Ответим на ваш вопрос по этому PDF.',
+  ],
+  studioPdfSourcesHint: [
+    'Add the PDFs you’d like us to use.',
+    'Foydalanishimiz kerak bo‘lgan PDFlarni yuklang.',
+    'Добавьте PDF, которые нужно использовать.',
+  ],
+  studioNoDrafts: [
+    'Create a document first, then come back to improve it.',
+    'Avval hujjat yarating, keyin uni yaxshilash uchun qayting.',
+    'Сначала создайте документ, затем вернитесь, чтобы его улучшить.',
+  ],
+  studioLengthSummary: ['{count} sections', '{count} bo‘lim', 'Разделов: {count}'],
+  studioSlidesSummary: ['{count} slides', '{count} slayd', 'Слайдов: {count}'],
+  studioEditOutline: [
+    'Edit outline (optional)',
+    'Rejani tahrirlash (ixtiyoriy)',
+    'Изменить план (необязательно)',
+  ],
+  studioDefaultsHint: [
+    'The defaults are ready. Change only what matters to you.',
+    'Asosiy sozlamalar tayyor. Faqat kerakli joyini o‘zgartiring.',
+    'Всё уже настроено. Измените только то, что вам нужно.',
+  ],
+  studioExtraInstructions: [
+    'Extra instructions (optional)',
+    'Qo‘shimcha ko‘rsatmalar (ixtiyoriy)',
+    'Дополнительные пожелания (необязательно)',
+  ],
+  studioReviewHint: [
+    'Ready to create. Review the cost, or adjust the outline if you want to.',
+    'Yaratishga tayyor. Narxni tekshiring yoki xohlasangiz rejani o‘zgartiring.',
+    'Всё готово. Проверьте стоимость или при желании измените план.',
+  ],
+  studioUnavailable: [
+    'AI tools are unavailable right now. Please try again later.',
+    'AI vositalari hozircha mavjud emas. Keyinroq qayta urinib ko‘ring.',
+    'ИИ-инструменты сейчас недоступны. Попробуйте позже.',
+  ],
+  studioPlanUnavailable: [
+    'This tool isn’t available on your current plan.',
+    'Bu vosita joriy tarifingizga kiritilmagan.',
+    'Этот инструмент недоступен на вашем тарифе.',
+  ],
+
   transcriptionReviewNote: [
     'Review and correct the recognized text, including every unclear marker. Exporting your reviewed transcription does not call the provider again.',
     'Aniqlangan matnni, shu jumladan noaniq belgilarni tekshiring va tuzating. Tekshirilgan matnni eksport qilish xizmatga qayta murojaat qilmaydi.',
@@ -32,9 +187,9 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Рукописный текст требует проверки',
   ],
   handwritingProviderRequired: [
-    'This tool requires a configured vision provider and an eligible plan. It does not run as local fixture OCR.',
-    'Ushbu vosita sozlangan ko‘rish xizmati va mos tarifni talab qiladi. U mahalliy sinov OCR sifatida ishlamaydi.',
-    'Нужны настроенный визуальный провайдер и подходящий тариф. Локальная имитация OCR не выполняется.',
+    'Handwriting recognition is unavailable right now.',
+    'Qo‘lyozmani tanish hozircha mavjud emas.',
+    'Распознавание рукописного текста сейчас недоступно.',
   ],
   handwritingInputHint: [
     'Upload one PNG/JPG or one-page PDF. Review all recognized text; unclear passages remain marked.',
@@ -67,14 +222,14 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Изображение для новой идеи.',
   ],
   imageStudioSub: [
-    'Describe one illustration and review the provider quote before generation.',
-    'Bitta tasvirni ta’riflang va yaratishdan oldin xizmat hisobini tekshiring.',
-    'Опишите одну иллюстрацию и проверьте стоимость перед созданием.',
+    'Describe your idea and review the cost before creating.',
+    'G‘oyangizni ta’riflang va yaratishdan oldin narxni ko‘ring.',
+    'Опишите идею и проверьте стоимость перед созданием.',
   ],
   imageProviderRequired: [
-    'Image provider is not configured',
-    'Rasm yaratish xizmati sozlanmagan',
-    'Генератор изображений не настроен',
+    'Image generation is unavailable right now.',
+    'Rasm yaratish hozircha mavjud emas.',
+    'Генерация изображений сейчас недоступна.',
   ],
   imageProviderNote: [
     'An administrator must connect a live image provider. Local authoring does not generate a substitute image.',
@@ -262,9 +417,9 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'От идеи к полезному документу.',
   ],
   studioSub: [
-    'Shape your content, review the outline, and export something worth keeping.',
-    'Matningizni tayyorlang, rejani tekshiring va natijani saqlang.',
-    'Подготовьте содержание, проверьте план и сохраните результат.',
+    'Describe it, review the cost, and create.',
+    'Ta’riflang, narxni ko‘ring va yarating.',
+    'Опишите задачу, проверьте стоимость и создайте.',
   ],
   localProvider: ['Local fixture provider', 'Mahalliy sinov generatori', 'Локальный тестовый генератор'],
   localProviderNote: [
@@ -314,9 +469,9 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   quotedCredits: ['Quoted credits', 'Hisoblangan kreditlar', 'Оценка в кредитах'],
   draftNotFound: ['This draft is unavailable.', 'Qoralama mavjud emas.', 'Черновик недоступен.'],
   contentRequired: [
-    'Add a title and topic or source text first.',
-    'Avval sarlavha va mavzu yoki manba matnini kiriting.',
-    'Сначала укажите название и тему или исходный текст.',
+    'Add a short description, text or a file to begin.',
+    'Boshlash uchun qisqa ta’rif, matn yoki fayl qo‘shing.',
+    'Для начала добавьте описание, текст или файл.',
   ],
   student: ['Student', 'Talaba', 'Студент'],
   school: ['School practice', 'Maktab mashqlari', 'Школьная практика'],

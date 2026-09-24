@@ -197,6 +197,9 @@
   font-size: 12px;
   margin: 15px 0;
 }
+.studio-quote > .button + .button {
+  margin-top: 10px;
+}
 .meter-row {
   display: flex;
   justify-content: space-between;
@@ -2326,4 +2329,63 @@
   .auth-illustration {
     margin-bottom: 15px;
   }
+}
+
+/* AI creation starts with one brief; customization stays within a native disclosure. */
+.studio-fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.studio-intro {
+  margin: 8px 0 24px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.studio-primary-field textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+.studio-defaults {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 22px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.studio-defaults svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.studio-charge-hint {
+  margin-top: 12px;
+  text-align: right;
+}
+.studio-more-options > summary {
+  cursor: pointer;
+  font-weight: 600;
+  line-height: 1.6;
+}
+.studio-more-options > summary > span {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+.studio-more-options[open] > summary {
+  margin-bottom: 20px;
+}
+.studio-more-options .field-hint {
+  margin-bottom: 18px;
+}
+.studio-more-options .education-fields {
+  grid-template-columns: minmax(0, 1fr);
+}
+.generation-summary h2,
+.generation-summary .outline-summary span {
+  overflow-wrap: anywhere;
 }
