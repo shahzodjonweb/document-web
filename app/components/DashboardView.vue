@@ -63,13 +63,7 @@ function onDrop(event: DragEvent) {
       @dragleave.prevent="dragging = false"
       @drop.prevent="onDrop"
     >
-      <div class="document-art" aria-hidden="true">
-        <div class="doc-back" />
-        <div class="doc-front">
-          <span class="doc-corner" /><span class="doc-label">PDF</span><i /><i /><i />
-        </div>
-        <span class="doc-plus"><AppIcon name="plus" :size="19" /></span>
-      </div>
+      <div class="document-art" aria-hidden="true"><BrandIcon /></div>
       <h2>{{ busy ? t('uploading') : t('uploadTitle') }}</h2>
       <p>{{ t('uploadSub') }}</p>
       <button class="button primary" @click="fileInput?.click()" :disabled="busy">

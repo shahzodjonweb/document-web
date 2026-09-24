@@ -1,0 +1,334 @@
+/* Supplied PDF Master artwork stays unchanged on every surface. */
+.brand-lockup {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  max-width: 100%;
+}
+.brand-logo-surface {
+  display: inline-flex;
+  width: 178px;
+  max-width: 100%;
+  align-items: center;
+  border-radius: 9px;
+}
+.brand-logo {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.brand .brand-subtitle {
+  margin: 0 0 0 5px;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+}
+.brand-symbol {
+  display: block;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+[data-theme='dark'] .brand-logo-surface {
+  background: #fff;
+  padding: 5px 8px;
+}
+.sidebar > .brand {
+  min-height: 57px;
+}
+.footer-brand .brand-logo-surface {
+  width: 145px;
+}
+.guest-avatar {
+  background: transparent;
+}
+.guest-avatar .brand-symbol,
+.bot-chat-heading .brand-symbol {
+  width: 32px;
+  height: 32px;
+}
+
+/* Quiet neutral surfaces keep the red and blue identity in focus. */
+body {
+  background-image: radial-gradient(ellipse at 90% 0%, #0275fc04, transparent 45%);
+}
+.sidebar {
+  border-top: 3px solid var(--brand-blue);
+}
+.app-topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.public-topbar {
+  border-bottom: 1px solid var(--border);
+}
+.main-nav > a.active,
+.secondary-nav > a.active {
+  box-shadow: inset 3px 0 0 var(--brand-blue);
+}
+.main-nav > a.active:hover,
+.secondary-nav > a.active:hover {
+  background: var(--sage);
+}
+.main-nav > a.active svg,
+.secondary-nav > a.active svg {
+  stroke-width: 2;
+}
+.button {
+  border-radius: 10px;
+}
+.button.primary {
+  background: var(--action);
+  color: #fff;
+  box-shadow: 0 3px 8px #005fcc20;
+}
+.button.primary:hover:not(:disabled) {
+  background: var(--action-hover);
+}
+.tool-icon {
+  border-radius: 12px;
+}
+.tool-card {
+  border-radius: 15px;
+}
+.tool-card:hover {
+  box-shadow: 0 9px 22px #0275fc0b;
+}
+.workspace-picker {
+  background: var(--soft);
+  border-radius: 10px;
+  margin-top: 25px;
+}
+.sidebar-note {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--canvas);
+}
+.usage-track > span {
+  background: linear-gradient(90deg, var(--brand-blue), #60a6ff);
+}
+.document-art {
+  width: 84px;
+  height: 84px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 3px;
+}
+.document-art .brand-symbol {
+  width: 80px;
+  height: 80px;
+}
+.dashboard-drop {
+  border-radius: 18px;
+  border-color: var(--brand-border);
+  background: linear-gradient(130deg, var(--sage), var(--surface) 74%);
+}
+.dashboard-drop:before {
+  opacity: 0.09;
+  background-size: 18px 18px;
+}
+.workspace-drop {
+  border-radius: 13px;
+}
+.quote-panel,
+.studio-quote {
+  border-top: 3px solid var(--brand-blue);
+}
+.landing-hero .eyebrow {
+  width: fit-content;
+  background: var(--sage);
+  padding: 8px 11px;
+  border-radius: 7px;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+.hero-art {
+  width: 100%;
+  max-width: 450px;
+  height: 415px;
+  transform: none;
+  left: auto;
+}
+.hero-art:before {
+  background:
+    radial-gradient(ellipse at 60% 45%, #0275fc12, transparent 62%),
+    radial-gradient(ellipse at 30% 65%, #fa33310b, transparent 50%);
+}
+.hero-brand-icon {
+  width: 250px;
+  height: 250px;
+  position: absolute;
+  left: 50%;
+  top: 47%;
+  transform: translate(-50%, -50%);
+}
+.hero-orbit,
+.orbit-two {
+  width: 360px;
+  height: 360px;
+  max-width: 95%;
+  left: 50%;
+  top: 47%;
+  transform: translate(-50%, -50%);
+}
+.orbit-two {
+  width: 290px;
+  height: 290px;
+}
+.hero-result {
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 16px);
+  background: var(--surface);
+}
+.hero-result small {
+  font-size: 10px;
+}
+.hero-file-chip {
+  top: 18px;
+  right: 8px;
+  border-color: var(--brand-border);
+}
+.hero-spark.s-one {
+  top: 34px;
+  left: 35px;
+}
+.hero-spark.s-two {
+  bottom: 100px;
+  right: 16px;
+}
+.landing-cta {
+  border-radius: 18px;
+  border-color: var(--brand-border);
+  background: linear-gradient(115deg, var(--sage), var(--surface));
+}
+.cta-brand-icon {
+  width: 57px;
+  height: 57px;
+}
+.auth-illustration {
+  display: grid;
+  place-items: center;
+  width: 134px;
+  height: 128px;
+  background: radial-gradient(ellipse, #0275fc10, transparent 72%);
+}
+.auth-illustration > .brand-symbol {
+  width: 109px;
+  height: 109px;
+}
+.auth-seal {
+  width: 37px;
+  height: 37px;
+  right: 1px;
+  bottom: 5px;
+  border: 3px solid var(--canvas);
+  background: var(--sage);
+  color: var(--primary);
+}
+.auth-tabs {
+  background: var(--soft);
+  border-radius: 10px;
+}
+.auth-tabs button.selected {
+  background: var(--surface);
+  box-shadow: 0 1px 5px #17212e0a;
+}
+:root[data-theme='dark'] .hero-result {
+  box-shadow: 0 8px 28px #0002;
+}
+@media (max-width: 1190px) {
+  .sidebar .brand-logo-surface {
+    width: 177px;
+  }
+  .hero-art {
+    transform: none;
+  }
+}
+@media (max-width: 760px) {
+  .brand-logo-surface {
+    width: 154px;
+  }
+  .mobile-brand .brand-logo-surface {
+    width: 150px;
+  }
+  .public-topbar {
+    gap: 12px;
+  }
+  .hero-art {
+    width: 100%;
+    height: 340px;
+    margin: 24px auto 0;
+    left: auto;
+    transform: none;
+  }
+  .hero-brand-icon {
+    width: 214px;
+    height: 214px;
+    top: 45%;
+  }
+  .hero-orbit,
+  .orbit-two {
+    width: 295px;
+    height: 295px;
+    top: 45%;
+  }
+  .orbit-two {
+    width: 240px;
+    height: 240px;
+  }
+  .hero-result {
+    bottom: 8px;
+  }
+  .hero-file-chip {
+    top: 1px;
+    right: 0;
+  }
+  .hero-spark.s-one {
+    top: 10px;
+    left: 6px;
+  }
+  .hero-spark.s-two {
+    bottom: 75px;
+    right: 0;
+  }
+  .landing-hero .eyebrow {
+    font-size: 9px;
+    letter-spacing: 0.6px;
+  }
+  .landing-cta {
+    gap: 15px;
+  }
+  .cta-brand-icon {
+    width: 45px;
+    height: 45px;
+  }
+}
+@media (max-width: 360px) {
+  .brand-logo-surface,
+  .mobile-brand .brand-logo-surface {
+    width: 132px;
+  }
+  .public-topbar {
+    gap: 8px;
+  }
+  .hero-brand-icon {
+    width: 190px;
+    height: 190px;
+  }
+  .hero-art {
+    height: 320px;
+  }
+  .hero-orbit {
+    width: 260px;
+    height: 260px;
+  }
+  .orbit-two {
+    width: 215px;
+    height: 215px;
+  }
+}

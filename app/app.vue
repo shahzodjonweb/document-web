@@ -125,12 +125,7 @@ watch(
   <a class="skip-link" href="#main-content">{{ t('start') }}</a>
   <div :class="isApp ? 'app-shell' : 'public-shell'">
     <aside v-if="isApp" class="sidebar">
-      <NuxtLink :to="path('/app')" class="brand"
-        ><span class="brand-icon"><AppIcon name="file" :size="23" /></span
-        ><span
-          >PDF <b>Master</b><small>{{ t('workspace') }}</small></span
-        ></NuxtLink
-      >
+      <NuxtLink :to="path('/app')" class="brand"><BrandLogo :subtitle="t('workspace')" /></NuxtLink>
       <div class="workspace-picker">
         <span class="workspace-avatar"><AppIcon name="folder" :size="17" /></span
         ><select
@@ -185,7 +180,7 @@ watch(
           /></NuxtLink>
         </div>
         <div v-else class="sidebar-profile">
-          <span class="avatar"><AppIcon name="file" :size="17" /></span
+          <span class="avatar guest-avatar"><BrandIcon /></span
           ><span
             ><strong>PDF Master</strong><small>{{ t('secureNote') }}</small></span
           >
@@ -197,14 +192,8 @@ watch(
         <div v-if="isApp" class="breadcrumb">
           <span>PDF Master</span><AppIcon name="chevron" :size="13" /><strong>{{ crumb }}</strong>
         </div>
-        <NuxtLink v-else :to="path()" class="brand"
-          ><span class="brand-icon"><AppIcon name="file" :size="22" /></span
-          ><span>PDF <b>Master</b></span></NuxtLink
-        >
-        <NuxtLink v-if="isApp" :to="path('/app')" class="mobile-brand brand"
-          ><span class="brand-icon"><AppIcon name="file" :size="21" /></span
-          ><span>PDF <b>Master</b></span></NuxtLink
-        >
+        <NuxtLink v-else :to="path()" class="brand"><BrandLogo /></NuxtLink>
+        <NuxtLink v-if="isApp" :to="path('/app')" class="mobile-brand brand"><BrandLogo /></NuxtLink>
         <nav v-if="!isApp" class="public-nav">
           <NuxtLink :to="path('/tools')">{{ t('tools') }}</NuxtLink
           ><NuxtLink :to="path('/pricing')">{{ t('pricing') }}</NuxtLink
@@ -230,7 +219,7 @@ watch(
       <main id="main-content" :class="isApp ? 'main-content' : 'public-content'"><NuxtPage /></main>
       <footer v-if="!isApp" class="public-footer">
         <div>
-          <strong>PDF Master</strong>
+          <NuxtLink :to="path()" class="brand footer-brand"><BrandLogo /></NuxtLink>
           <p>{{ t('footerNote') }}</p>
         </div>
         <nav>

@@ -109,7 +109,7 @@ async function clear() {
   <div class="bot-layout">
     <section class="panel bot-chat">
       <div class="bot-chat-heading">
-        <span class="avatar"><AppIcon name="file" :size="21" /></span>
+        <span class="avatar guest-avatar"><BrandIcon /></span>
         <div>
           <strong>PDF Master</strong><small>aiogram · {{ t('localBot') }}</small>
         </div>

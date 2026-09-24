@@ -34,9 +34,8 @@ async function google() {
 </script>
 <template>
   <section class="auth-panel">
-    <div class="auth-illustration">
-      <span class="floating-paper"><AppIcon name="file" :size="60" /><i /><i /><i /></span
-      ><span class="auth-seal"><AppIcon name="shield" :size="29" /></span>
+    <div class="auth-illustration" aria-hidden="true">
+      <BrandIcon /><span class="auth-seal"><AppIcon name="shield" :size="23" /></span>
     </div>
     <span class="eyebrow">{{ t('loginTitle') }}</span>
     <h1>{{ t('signIn') }}</h1>

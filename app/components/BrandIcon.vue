@@ -1,0 +1,10 @@
+<template>
+  <img
+    src="/brand/pdf-master-icon.svg"
+    alt=""
+    width="512"
+    height="512"
+    class="brand-symbol"
+    aria-hidden="true"
+  />
+</template>

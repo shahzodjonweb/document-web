@@ -47,7 +47,7 @@ async function chooseRevision() {
   })
 }
 function toggleBranding(event: Event) {
-  if ((event.target as HTMLInputElement).checked) form.options.branding = { name: '', accent: '#285f48' }
+  if ((event.target as HTMLInputElement).checked) form.options.branding = { name: '', accent: '#0275fc' }
   else delete form.options.branding
 }
 async function uploadLogo(file: File | undefined) {

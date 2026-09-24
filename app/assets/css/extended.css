@@ -1,4 +1,4 @@
-/* Extended workspace: the same quiet document language, with task-specific surfaces. */
+/* Task-specific surfaces share the PDF Master brand tokens. */
 .main-nav {
   overflow-y: auto;
   min-height: 0;
@@ -66,9 +66,9 @@
   align-items: center;
   gap: 10px;
   border-radius: 9px;
-  background: var(--sage);
-  border: 1px solid var(--border);
-  color: var(--primary);
+  background: var(--success-tint);
+  border: 1px solid var(--success-border);
+  color: var(--success-ink);
   padding: 14px 18px;
   margin-bottom: 20px;
   font-size: 13px;
@@ -106,7 +106,7 @@
 .studio-steps .active b,
 .studio-steps .complete b {
   background: var(--primary);
-  color: var(--surface);
+  color: var(--on-primary);
   border-color: var(--primary);
 }
 .studio-layout,
@@ -882,12 +882,12 @@
   text-align: left;
   white-space: pre-wrap;
   line-height: 1.2;
-  color: #263c30;
+  color: #17212e;
   min-width: 2px;
   min-height: 2px;
 }
 .editor-overlay.selected {
-  outline: 1px dashed #285f48;
+  outline: 1px dashed #0275fc;
   outline-offset: 3px;
 }
 .editor-overlay.highlight {
