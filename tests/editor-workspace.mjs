@@ -187,6 +187,17 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
     quotes.set(quote.id, quote)
     return json(quote, 201)
   }
+  if (endpoint === '/quotes' && method === 'POST') {
+    const quote = {
+      id: id(),
+      feature_id: body.feature_id,
+      meters: [{ meter: 'file_tasks', amount: 1 }],
+      affordable: true,
+      expires_at: new Date(Date.now() + 600000).toISOString(),
+    }
+    quotes.set(quote.id, quote)
+    return json(quote, 201)
+  }
   if (endpoint === '/jobs' && method === 'POST') {
     const key = request.headers()['idempotency-key']
     if (acceptedKeys.has(key)) return json(acceptedKeys.get(key))
@@ -316,29 +327,98 @@ try {
   await page.getByRole('button', { name: 'Use the other version', exact: true }).waitFor()
   checks.push('A version conflict stops autosave and asks which version to keep')
 
-  // 8. Plan gating renders locked tools without disabling them.
+  // 8. Plan gating renders locked controls without disabling them.
   plan = 'free'
   editor.commands = []
   await open()
-  const redact = page.getByTestId('editor-tool-redact')
-  assert.equal(await redact.getAttribute('data-locked'), 'true', 'redact is marked as outside the plan')
+  const redactMode = page.getByTestId('editor-mode-redact')
+  assert.equal(await redactMode.getAttribute('data-locked'), 'true', 'redaction is marked as outside the plan')
   assert.match(
-    (await redact.innerText()).replace(/\s+/g, ' '),
+    (await redactMode.innerText()).replace(/\s+/g, ' '),
     /Not in your plan/,
     'the lock is part of the accessible name, not a disabled state',
   )
-  await redact.click()
+  await redactMode.click()
+  await page.getByTestId('editor-mode-blocked').waitFor()
+  assert.equal(await page.getByTestId('editor-pages-board').count(), 0, 'a locked mode does not open')
+  const lockedTool = page.getByTestId('editor-tool-insert_image')
+  assert.equal(await lockedTool.getAttribute('data-locked'), 'true', 'paid tools are locked on the free plan')
+  await lockedTool.click()
   await page.locator('.editor-toolstrip .editor-lock').waitFor()
-  assert.equal(await page.getByTestId('editor-text-input').count(), 0, 'a locked tool cannot place anything')
   assert.equal(
     await page.locator('[data-testid="editor-command-list"] li').count(),
     0,
     'a locked tool adds no change',
   )
-  checks.push('Tools outside the plan stay visible and explain themselves instead of failing late')
+  checks.push('Controls outside the plan stay visible and explain themselves instead of failing late')
   plan = 'premium'
 
-  // 9. Accessibility and layout across locales, viewports and themes.
+  // 9. Redaction is a mode of its own: the server cannot even save a mixed draft.
+  editor.commands = []
+  await open()
+  await page.getByTestId('editor-tool-highlight').click()
+  await page.getByTestId('editor-page-1').click({ position: { x: 80, y: 80 } })
+  await page.waitForTimeout(1200)
+  await page.getByTestId('editor-mode-redact').click()
+  await page.getByTestId('editor-mode-blocked').waitFor()
+  assert.match(
+    await page.getByTestId('editor-mode-blocked').innerText(),
+    /Redaction exports on its own/,
+    'mixing redaction with other changes is refused up front',
+  )
+  checks.push('Redaction is refused alongside other changes before anything is saved')
+
+  // 10. Pages mode maps onto the right one-shot job.
+  editor.commands = []
+  await open()
+  await page.getByTestId('editor-mode-pages').click()
+  await page.getByTestId('editor-pages-board').waitFor()
+  const cards = page.locator('.editor-board-card')
+  await cards.nth(1).getByRole('button', { name: 'Remove page', exact: true }).click()
+  const quoteCalls = () => requests.filter((r) => r.path === '/quotes' && r.method === 'POST')
+  await page.getByTestId('editor-pages-apply').click()
+  await page.waitForURL('**/app/jobs/*')
+  let planned = quoteCalls().at(-1)
+  assert.equal(planned.body.feature_id, 'pdf.delete_pages', 'removing a page deletes it')
+  assert.equal(planned.body.parameters.pages, '2')
+
+  await open()
+  await page.getByTestId('editor-mode-pages').click()
+  await page.getByTestId('editor-pages-board').waitFor()
+  await cards.nth(0).getByRole('button', { name: 'Move page later', exact: true }).click()
+  await page.getByTestId('editor-pages-apply').click()
+  await page.waitForURL('**/app/jobs/*')
+  planned = quoteCalls().at(-1)
+  assert.equal(planned.body.feature_id, 'pdf.reorder', 'a pure swap reorders')
+  assert.deepEqual(planned.body.parameters.order, [2, 1])
+
+  await open()
+  await page.getByTestId('editor-mode-pages').click()
+  await page.getByTestId('editor-pages-board').waitFor()
+  await cards.nth(0).getByRole('button', { name: 'Rotate right', exact: true }).click()
+  assert.match(
+    await page.getByTestId('editor-pages-board').innerText(),
+    /Rotate pages/,
+    'rotation is planned as a rotate job',
+  )
+  await page.waitForFunction(
+    () => document.querySelectorAll('.editor-board-thumb > img').length > 0,
+    undefined,
+    { timeout: 10000 },
+  )
+  await page.screenshot({ path: path.join(output, 'pages-mode.png'), fullPage: true })
+  checks.push('Pages mode chooses delete, reorder or extract and never invents a server capability')
+
+  // Redaction mode on a clean draft, for the visual record.
+  editor.commands = []
+  await open()
+  await page.getByTestId('editor-mode-redact').click()
+  await page.getByTestId('editor-page-1').click({ position: { x: 150, y: 120 } })
+  await page.waitForTimeout(800)
+  await page.screenshot({ path: path.join(output, 'redact-mode.png'), fullPage: true })
+
+  // 11. Accessibility and layout across locales, viewports and themes.
+  editor.commands = []
   for (const locale of ['en', 'uz', 'ru']) {
     for (const width of [1440, 390]) {
       await page.setViewportSize({ width, height: 1000 })

@@ -255,7 +255,13 @@ export function useEditorSession() {
         // A payload the server will never accept must not be retried on a
         // timer; switch to manual saving and show exactly why.
         saveState.value = 'failed'
-        if (code === 'invalid_editor_command' || code === 'editor_out_of_bounds' || code === 'feature_not_in_plan')
+        if (
+          code === 'invalid_editor_command' ||
+          code === 'editor_out_of_bounds' ||
+          code === 'feature_not_in_plan' ||
+          code === 'redaction_requires_separate_export' ||
+          code === 'rasterization_consent_required'
+        )
           saveState.value = 'paused'
       }
       error.value = requestError(e)

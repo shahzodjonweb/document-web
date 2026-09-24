@@ -902,6 +902,59 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   editorDeleteDocument: ['Delete this editing session', 'Bu tahrir seansini o‘chirish', 'Удалить эту сессию редактирования'],
   editorExportSummary: ['Export summary', 'Eksport xulosasi', 'Сводка экспорта'],
   editorChangesOnPage: ['{count} on this page', 'Bu sahifada {count} ta', '{count} на этой странице'],
+
+  // Modes
+  editorModeEdit: ['Edit', 'Tahrirlash', 'Редактирование'],
+  editorModePages: ['Pages', 'Sahifalar', 'Страницы'],
+  editorModeRedact: ['Redact', 'Yashirish', 'Удаление'],
+
+  // Pages mode
+  editorPagesIntro: [
+    'Rotate, reorder, remove or pull out pages. This creates a new file and leaves this one untouched.',
+    'Sahifalarni burang, tartibini o‘zgartiring, o‘chiring yoki ajratib oling. Bu yangi fayl yaratadi, joriy fayl o‘zgarmaydi.',
+    'Поворачивайте, меняйте порядок, удаляйте или извлекайте страницы. Создаётся новый файл, текущий остаётся без изменений.',
+  ],
+  editorPagesSelectAll: ['Select all pages', 'Barcha sahifalarni tanlash', 'Выбрать все страницы'],
+  editorPagesClearSelection: ['Clear selection', 'Tanlovni bekor qilish', 'Снять выделение'],
+  editorPagesExtract: [
+    'Pull selected pages into a new file',
+    'Tanlangan sahifalarni yangi faylga ajratish',
+    'Извлечь выбранные страницы в новый файл',
+  ],
+  editorPagesReset: ['Undo all page changes', 'Sahifa o‘zgarishlarini bekor qilish', 'Отменить все изменения страниц'],
+  editorPagesApply: ['Apply page changes', 'Sahifa o‘zgarishlarini qo‘llash', 'Применить изменения страниц'],
+  editorPagesPlan: ['This runs as {feature}.', 'Bu {feature} sifatida bajariladi.', 'Выполняется как {feature}.'],
+  editorPagesMultiStep: [
+    'These changes need {count} separate exports, because each export runs one operation. Apply them one at a time, or simplify the changes.',
+    'Bu o‘zgarishlar uchun {count} ta alohida eksport kerak, chunki har bir eksport bitta amalni bajaradi. Ularni birma-bir qo‘llang yoki o‘zgarishlarni soddalashtiring.',
+    'Для этих изменений нужно {count} отдельных экспортов, так как каждый экспорт выполняет одну операцию. Применяйте их по очереди или упростите изменения.',
+  ],
+  editorPagesNoChange: ['No page changes yet.', 'Hozircha sahifa o‘zgarishlari yo‘q.', 'Изменений страниц пока нет.'],
+  editorPagesKeepOne: ['Keep at least one page.', 'Kamida bitta sahifa qoldiring.', 'Оставьте хотя бы одну страницу.'],
+  editorPagesBlockedByEdits: [
+    'You have content edits on this document. Page changes create a new file and would leave those edits behind.',
+    'Bu hujjatda mazmun o‘zgarishlari bor. Sahifa o‘zgarishlari yangi fayl yaratadi va bu tahrirlar unga o‘tmaydi.',
+    'В документе есть правки содержимого. Изменения страниц создают новый файл, и эти правки в него не попадут.',
+  ],
+  editorPagesResult: [
+    'The result is saved as a new file in your tasks.',
+    'Natija vazifalaringizda yangi fayl sifatida saqlanadi.',
+    'Результат сохраняется как новый файл в ваших задачах.',
+  ],
+  editorRotateLeft: ['Rotate left', 'Chapga burish', 'Повернуть влево'],
+  editorRotateRight: ['Rotate right', 'O‘ngga burish', 'Повернуть вправо'],
+  editorPageRemove: ['Remove page', 'Sahifani o‘chirish', 'Удалить страницу'],
+  editorPageRestore: ['Restore page', 'Sahifani tiklash', 'Восстановить страницу'],
+  editorPageMoveEarlier: ['Move page earlier', 'Sahifani oldinga surish', 'Переместить страницу выше'],
+  editorPageMoveLater: ['Move page later', 'Sahifani keyinga surish', 'Переместить страницу ниже'],
+
+  // Plan downgrades
+  editorLockedCommands: [
+    '{count} changes here need a different plan. Remove them or upgrade to keep saving.',
+    'Bu yerdagi {count} ta o‘zgarish uchun boshqa tarif kerak. Saqlashni davom ettirish uchun ularni olib tashlang yoki tarifni oshiring.',
+    'Для {count} изменений нужен другой тариф. Удалите их или смените тариф, чтобы продолжить сохранение.',
+  ],
+  editorRemoveLocked: ['Remove these changes', 'Bu o‘zgarishlarni olib tashlash', 'Удалить эти изменения'],
 }
 export const extendedToolNames: Record<string, [string, string, string]> = {
   'convert.pdf_to_docx': ['PDF to Word', 'PDF’dan Word', 'PDF в Word'],

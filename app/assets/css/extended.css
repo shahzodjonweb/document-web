@@ -2745,6 +2745,121 @@
   white-space: nowrap;
 }
 
+
+/* Mode switch ------------------------------------------------------ */
+.editor-modes {
+  display: inline-flex;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--soft);
+  /* Translated labels are long; let the switch scroll rather than the page. */
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.editor-modepill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.editor-modepill:hover {
+  color: var(--ink);
+}
+.editor-modepill.active {
+  background: var(--surface);
+  color: var(--primary);
+  box-shadow: var(--shadow);
+}
+
+/* Pages board ------------------------------------------------------ */
+.editor-board-panel {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 20px;
+}
+.editor-board-toolbar {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+  margin: 14px 0 18px;
+}
+.editor-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 14px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.editor-board-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface);
+}
+.editor-board-card.selected {
+  border-color: var(--primary);
+  background: var(--sage);
+}
+.editor-board-card.removed {
+  opacity: 0.42;
+}
+.editor-board-card.removed .editor-board-thumb {
+  outline: 2px solid var(--error);
+}
+.editor-board-thumb {
+  display: block;
+  width: 88px;
+  aspect-ratio: 1 / 1.414;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: #fff;
+  overflow: hidden;
+  transition: transform 0.15s ease;
+}
+.editor-board-thumb > img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.editor-board-card > strong {
+  font-size: 12px;
+  color: var(--muted);
+}
+.editor-board-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px;
+}
+.editor-board-apply {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+
 @media (max-width: 1190px) {
   .editor-body {
     grid-template-columns: 110px minmax(0, 1fr) 280px;
@@ -2783,6 +2898,14 @@
   }
   .editor-stage {
     padding: 12px 6px 18px;
+  }
+  .editor-modes {
+    width: 100%;
+  }
+  .editor-modepill {
+    flex: 1;
+    justify-content: center;
+    padding: 0 8px;
   }
   /* The tools need the whole width; the view controls drop to their own row. */
   .editor-toolstrip-scroll {

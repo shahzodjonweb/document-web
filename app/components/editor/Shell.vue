@@ -6,7 +6,7 @@
  * `useState`-backed and therefore survives navigation, so it is reset on mount
  * and whenever the document in the URL changes.
  */
-import { isCommandType, type CommandType } from '~/composables/useEditorCommands'
+import { COMMAND_FEATURE, isCommandType, type CommandType } from '~/composables/useEditorCommands'
 
 const props = defineProps<{ documentId?: string }>()
 
@@ -16,6 +16,7 @@ const ws = useWorkspace()
 const session = useEditorSession()
 const render = useEditorRender()
 const metrics = useEditorFontMetrics()
+const board = useEditorPages()
 
 const stage = ref<HTMLElement>()
 const railOpen = ref(true)
@@ -58,6 +59,38 @@ onMounted(() => {
 })
 
 watch(() => props.documentId, start)
+
+// Page organisation always starts from the document as it stands now.
+watch(
+  () => [session.mode.value, pageCount.value] as const,
+  ([mode, count]) => {
+    if (mode === 'pages' && count && board.order.value.length !== count) board.reset()
+  },
+)
+
+/**
+ * A draft made on a richer plan can be opened on a cheaper one. The server
+ * refuses the whole array, so say which changes are the problem instead of
+ * letting every autosave fail.
+ */
+const lockedCommands = computed(() => {
+  const features = ws.features.value
+  if (!features.length) return []
+  return session.commands.value.filter((command) => {
+    const match = features.find((item) => item.id === COMMAND_FEATURE[command.type])
+    return match ? match.eligible === false : false
+  })
+})
+
+watch(lockedCommands, (list) => {
+  if (list.length) session.saveState.value = 'paused'
+})
+
+function removeLocked() {
+  session.removeCommands(lockedCommands.value.map((command) => command._id))
+  session.saveState.value = 'dirty'
+  void session.save()
+}
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', applyFit)
@@ -143,9 +176,23 @@ onBeforeRouteLeave(async () => {
       </span>
     </section>
 
+    <section v-if="lockedCommands.length" class="info-banner editor-conflict" role="alert">
+      <div>
+        <strong>{{ t('editorLockedCommands', { count: lockedCommands.length }) }}</strong>
+      </div>
+      <span>
+        <NuxtLink :to="path('/app/billing')" class="button secondary small">{{ t('editorSeePlans') }}</NuxtLink>
+        <button type="button" class="button primary small" @click="removeLocked">
+          {{ t('editorRemoveLocked') }}
+        </button>
+      </span>
+    </section>
+
     <EditorToolStrip @toggle-pages="railOpen = !railOpen" />
 
-    <div class="editor-body">
+    <EditorPagesBoard v-if="session.mode.value === 'pages'" />
+
+    <div v-else class="editor-body">
       <EditorPageRail v-if="railOpen && pageCount" :page-count="pageCount" :current="currentPage" @go="goToPage" />
 
       <!-- Focusable so the pages can be scrolled from the keyboard alone. -->
@@ -181,11 +228,11 @@ onBeforeRouteLeave(async () => {
 
       <aside class="editor-side">
         <EditorFloatBar />
-        <EditorFieldPanel />
+        <EditorFieldPanel v-if="session.mode.value === 'edit'" />
         <EditorCommandList />
       </aside>
     </div>
 
-    <EditorActionBar />
+    <EditorActionBar v-if="session.mode.value !== 'pages'" />
   </div>
 </template>

@@ -133,6 +133,14 @@ async function remove(id: string) {
     <h2>{{ t('formTemplates') }}</h2>
     <p class="field-hint">{{ t('formTemplateHint') }}</p>
     <ErrorBanner v-if="error" :message="error" />
+    <!-- The server caps saved form templates at zero below premium, so saving
+         would always 403. Say so instead of offering a form that cannot work. -->
+    <p v-if="limit === 0" class="editor-lock" data-testid="form-templates-locked">
+      <AppIcon name="lock" :size="15" />
+      <span>{{ t('editorLockedTool', { tool: t('formTemplates') }) }}</span>
+      <NuxtLink :to="path('/app/billing')" class="text-link">{{ t('editorSeePlans') }}</NuxtLink>
+    </p>
+    <template v-else>
     <div v-for="item in items" :key="item.id" class="form-template-row">
       <button class="text-link" @click="use(item)"><AppIcon name="files" :size="15" />{{ item.name }}</button
       ><button class="icon-button" @click="remove(item.id)" :disabled="busy" :aria-label="t('delete')">
@@ -197,5 +205,6 @@ async function remove(id: string) {
         /></NuxtLink>
       </div>
     </details>
+    </template>
   </section>
 </template>
