@@ -18,7 +18,8 @@
     "test:auth:ui": "node tests/authentication-ui.mjs",
     "test:auth:email": "node tests/authentication-email.mjs",
     "test:auth:antibot": "node tests/antibot-ui.mjs",
-    "test:studio": "node tests/studio-simple-forms.mjs && node tests/image-simple-forms.mjs"
+    "test:studio": "node tests/studio-simple-forms.mjs && node tests/image-simple-forms.mjs",
+    "test:editor": "node tests/editor-workspace.mjs"
   },
   "dependencies": {
     "lucide-vue-next": "0.563.0",

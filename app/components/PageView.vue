@@ -72,7 +72,7 @@ useHead(() => ({
     :project-id="view.split('/')[3]"
   /><TemplatesView v-else-if="view === '/app/templates'" /><WorkflowsView
     v-else-if="view === '/app/workflows'"
-  /><EditorView
+  /><LazyEditorShell
     v-else-if="view === '/app/editor' || view.startsWith('/app/editor/')"
     :document-id="view.split('/')[3]"
   /><ReferralsView v-else-if="view === '/app/referrals'" /><BotView

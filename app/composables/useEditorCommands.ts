@@ -126,8 +126,22 @@ export const COMMAND_SHAPE: Record<CommandType, Shape> = {
   redact: { positional: true, box: true, image: false, icon: 'redact', labelKey: 'redact' },
 }
 
-/** Tools offered on the canvas, in tool-strip order. */
-export const CANVAS_TOOLS: CommandType[] = ['add_text', 'highlight', 'note', 'draw', 'signature', 'insert_image']
+/**
+ * Tools offered on the canvas, in tool-strip order.
+ *
+ * `redact` is here because it is placed exactly like a box, but the engine
+ * refuses to export it alongside anything else, so the action bar blocks a
+ * mixed draft rather than letting the save fail.
+ */
+export const CANVAS_TOOLS: CommandType[] = [
+  'add_text',
+  'highlight',
+  'note',
+  'draw',
+  'signature',
+  'insert_image',
+  'redact',
+]
 
 export function isCommandType(value: unknown): value is CommandType {
   return typeof value === 'string' && (COMMAND_TYPES as readonly string[]).includes(value)

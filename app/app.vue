@@ -8,6 +8,8 @@ const miniAppError = ref('')
 const miniAppBusy = ref(false)
 const { user, sessionReady, apiError } = ws
 const isApp = computed(() => route.path.includes('/app'))
+// The editor owns its own padding so the page canvas can use the full width.
+const isEditor = computed(() => /\/app\/editor(\/|$)/.test(route.path))
 const theme = ref('light')
 const nav = [
   { key: 'home', url: '/app', icon: 'home' },
@@ -226,7 +228,10 @@ watch(
           /></NuxtLink>
         </div>
       </header>
-      <main id="main-content" :class="isApp ? 'main-content' : 'public-content'">
+      <main
+        id="main-content"
+        :class="[isApp ? 'main-content' : 'public-content', { 'main-content-wide': isApp && isEditor }]"
+      >
         <ErrorBanner v-if="miniAppError && !user" :message="miniAppError"
           ><button class="text-link" :disabled="miniAppBusy" @click="signInMiniApp">
             {{ t('retry') }}
