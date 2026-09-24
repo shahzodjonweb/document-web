@@ -1,4 +1,18 @@
+import { existsSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
 import process from 'node:process'
+import { fileURLToPath } from 'node:url'
+
+// pdf.js fetches character maps, standard fonts and its wasm decoders at
+// runtime. They are served from our own origin so no document characteristic
+// ever reaches a CDN. The guard keeps a future pdfjs layout change from
+// failing `nuxt build`: the page still renders, non-embedded fonts substitute.
+const here = dirname(fileURLToPath(import.meta.url))
+const pdfjsAssets = (name: string) => {
+  const dir = resolve(here, 'node_modules/pdfjs-dist', name)
+  return existsSync(dir) ? [{ baseURL: `pdfjs/${name}`, dir, maxAge: 60 * 60 * 24 * 365 }] : []
+}
+
 export default defineNuxtConfig({
   compatibilityDate: '2026-02-01',
   devtools: { enabled: false },
@@ -12,6 +26,7 @@ export default defineNuxtConfig({
   runtimeConfig: { public: { productName: 'PDF Master' } },
   nitro: {
     routeRules: { '/api/**': { proxy: `${process.env.API_ORIGIN || 'http://127.0.0.1:8000'}/api/**` } },
+    publicAssets: [...pdfjsAssets('cmaps'), ...pdfjsAssets('standard_fonts'), ...pdfjsAssets('wasm')],
   },
   app: {
     head: {

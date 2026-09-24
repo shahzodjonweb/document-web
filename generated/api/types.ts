@@ -27,6 +27,8 @@ export interface Feature {
   slug?: string
   plans?: Record<string, string>
   allowed?: boolean
+  /** Server's plan verdict for this account; absent means unknown, treat as allowed. */
+  eligible?: boolean
   parameter_schema?: Record<string, unknown>
 }
 export interface FileAsset {

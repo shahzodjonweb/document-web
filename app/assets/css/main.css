@@ -611,6 +611,11 @@ strong {
   max-width: 1410px;
   margin: 0 auto;
 }
+/* The editor manages its own padding so the page canvas can use full width. */
+.main-content.main-content-wide {
+  padding: 0;
+  max-width: none;
+}
 .dashboard-top {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 258px;
@@ -2649,6 +2654,9 @@ strong {
   }
   .main-content {
     padding: 27px 22px 104px;
+  }
+  .main-content.main-content-wide {
+    padding: 0;
   }
   .header-actions {
     gap: 14px;
