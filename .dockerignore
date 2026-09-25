@@ -15,3 +15,6 @@ image.tar.gz
 .deploy-output/
 __pycache__/
 *.py[cod]
+
+# Knowledge-graph index must stay out of the build context
+graphify-out/

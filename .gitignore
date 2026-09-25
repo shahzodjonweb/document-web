@@ -14,3 +14,7 @@ image.tar.gz
 .deploy-output/
 __pycache__/
 *.py[cod]
+
+# Local knowledge-graph index (graphify) — never shipped
+graphify-out/
+.graphifyignore
