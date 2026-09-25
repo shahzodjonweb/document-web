@@ -105,16 +105,21 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Qo‘lyozma sahifangizni yuklang',
     'Добавьте страницу с рукописным текстом',
   ],
-  studioQuestionFile: ['Add the PDF', 'PDFni yuklang', 'Добавьте PDF'],
+  studioQuestionFile: ['Add a PDF', 'PDF yuklang', 'Добавьте PDF'],
   studioQuestionFileHint: [
-    'We’ll use this PDF to answer your question.',
-    'Savolingizga shu PDF asosida javob beramiz.',
-    'Ответим на ваш вопрос по этому PDF.',
+    'Optional — the text above is enough on its own.',
+    'Ixtiyoriy — yuqoridagi matnning o‘zi yetarli.',
+    'Необязательно — текста выше достаточно.',
+  ],
+  studioAnswerSourceHint: [
+    'Paste what the answer should come from, or attach a PDF below.',
+    'Javob olinadigan matnni joylashtiring yoki quyida PDF biriktiring.',
+    'Вставьте текст, по которому отвечать, или прикрепите PDF ниже.',
   ],
   studioPdfSourcesHint: [
-    'Add the PDFs you’d like us to use.',
-    'Foydalanishimiz kerak bo‘lgan PDFlarni yuklang.',
-    'Добавьте PDF, которые нужно использовать.',
+    'Optional — your typed material above is enough on its own.',
+    'Ixtiyoriy — yuqorida yozgan materialingiz o‘zi yetarli.',
+    'Необязательно — введённого выше материала достаточно.',
   ],
   studioNoDrafts: [
     'Create a document first, then come back to improve it.',

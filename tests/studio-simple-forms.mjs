@@ -33,6 +33,7 @@ let sequence = 0
 let affordable = true
 let activeFeature = ''
 let expiredFile = false
+let visualChecks = 0
 let failJobOnce = false
 let expireJobOnce = false
 const id = () => `00000000-0000-4000-8000-${String(++sequence).padStart(12, '0')}`
@@ -460,14 +461,20 @@ try {
     'Text/PDF, slides, study and teacher source-based tools require source input and preserve it as source_text',
   )
 
+  // No AI tool forces an upload: typed material is a source in its own right.
   await open('ai.pdf_sources')
-  assert.equal(await primary().count(), 0, 'PDF sources do not need another required prompt')
-  assert.equal(await review().isDisabled(), true)
+  assert.equal(await review().isDisabled(), true, 'but something has to be given')
+  await primary().fill('Tide tables list high and low water for each day of the year.')
+  const typedSources = await reviewNew()
+  assert.deepEqual(typedSources.source_ids, [], 'nothing was uploaded')
+  assert.equal(typedSources.source_text, 'Tide tables list high and low water for each day of the year.')
+
+  await open('ai.pdf_sources')
   await upload().setInputFiles('tests/fixtures/research-notes.pdf')
   await page.locator('.source-chip').waitFor()
   const pdfSources = await reviewNew()
-  assert.equal(pdfSources.source_ids.length, 1)
-  checks.push('Creating from PDFs only requires the source upload; additional instructions remain optional')
+  assert.equal(pdfSources.source_ids.length, 1, 'and a document still works when there is one')
+  checks.push('Creating from PDFs accepts typed material or an upload, and demands neither in particular')
 
   await open('study.summary')
   await upload().setInputFiles('tests/fixtures/research-notes.pdf')
@@ -477,18 +484,25 @@ try {
   assert.equal(sourceOnly.source_ids.length, 1, 'A source PDF can replace pasted source text')
   checks.push('Uploaded PDF substitutes for pasted source text without another required text field')
 
+  // A question still needs something to answer from, but that can be pasted.
   await open('study.pdf_qa')
   await primary().fill('How do leaves use sunlight?')
-  assert.equal(await review().isDisabled(), true, 'Q&A cannot run with a question but no PDF')
+  assert.equal(await review().isDisabled(), true, 'a question alone has nothing to answer from')
+  const pasted = page.getByTestId('studio-answer-source')
+  await pasted.fill('Leaves absorb light with chlorophyll and convert it into sugars.')
+  const answered = await reviewNew()
+  assert.equal(answered.prompt, 'How do leaves use sunlight?')
+  assert.deepEqual(answered.source_ids, [], 'no upload was needed')
+  assert.match(answered.source_text, /chlorophyll/)
+
+  await open('study.pdf_qa')
   await upload().setInputFiles('tests/fixtures/research-notes.pdf')
   await page.locator('.source-chip').waitFor()
-  await primary().fill('')
-  assert.equal(await review().isDisabled(), true, 'Q&A cannot run with a PDF but no question')
+  assert.equal(await review().isDisabled(), true, 'a document alone is not a question')
   await primary().fill('How do leaves use sunlight?')
   const question = await reviewNew()
-  assert.equal(question.prompt, 'How do leaves use sunlight?')
   assert.equal(question.source_ids.length, 1)
-  checks.push('PDF Q&A requires both a document and a question before quoting')
+  checks.push('PDF Q&A answers from a pasted source or an uploaded one, and needs the question either way')
 
   for (const feature of ['teacher.lesson_plan', 'teacher.worksheet', 'school.explain']) {
     await open(feature)
@@ -701,7 +715,7 @@ try {
   for (const locale of ['en', 'uz', 'ru']) {
     for (const width of [1440, 390]) {
       await page.setViewportSize({ width, height: 1000 })
-      for (const feature of ['ai.pdf_topic', 'study.summary', 'teacher.lesson_plan']) {
+      for (const feature of ['ai.pdf_topic', 'study.summary', 'teacher.lesson_plan', 'study.pdf_qa']) {
         await open(feature, locale)
         assert.equal(await more().getAttribute('open'), null)
         assert.equal(await page.locator('html').getAttribute('lang'), locale)
@@ -715,6 +729,7 @@ try {
             false,
             `${feature}/${locale}/${width}/${theme}: horizontal overflow`,
           )
+          visualChecks += 1
           const result = await new AxeBuilder({ page })
             .include('.studio-layout')
             .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
@@ -736,7 +751,7 @@ try {
     }
   }
   checks.push(
-    'Topic, source and teacher forms pass EN/UZ/RU desktop/mobile checks in both themes with no overflow or WCAG A/AA findings',
+    'Topic, source, teacher and Q&A forms pass EN/UZ/RU desktop/mobile checks in both themes with no overflow or WCAG A/AA findings',
   )
   assert.deepEqual(errors, [])
   assert.deepEqual(unexpected, [], 'Every API call is explicitly covered by the offline fixture')
@@ -750,7 +765,7 @@ try {
     draftRequests: calls('/generation/drafts').length,
     jobSubmissionRequests: countJobs(),
     acceptedJobs: jobs.size,
-    visualChecks: 36,
+    visualChecks,
   }
   await fs.writeFile(path.join(output, 'report.json'), JSON.stringify(result, null, 2))
   await Promise.all(

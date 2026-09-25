@@ -99,7 +99,7 @@ const selected = computed(() => studio.features.value.find((f) => f.id === form.
 const education = computed(() => /^(study|school|teacher)\./.test(form.feature_id))
 const sectionList = computed<any[]>(() => content.value.sections || [])
 const handwriting = computed(() => form.feature_id === 'study.handwriting')
-const fileOnly = computed(() => form.feature_id === 'ai.pdf_sources')
+const pdfSources = computed(() => form.feature_id === 'ai.pdf_sources')
 const adaptive = computed(() => form.feature_id === 'school.adaptive')
 const sourceFirst = computed(
   () =>
@@ -110,6 +110,7 @@ const sourceFirst = computed(
       form.feature_id !== 'study.pdf_qa') ||
     [
       'ai.pdf_text',
+      'ai.pdf_sources',
       'ai.source_to_slides',
       'study.summary',
       'study.definitions',
@@ -204,16 +205,22 @@ const canUseTool = computed(
     !!draft.value?.transcription_ready ||
     (!!selected.value && selected.value.eligible !== false && providerReady.value),
 )
+// Only `study.pdf_qa` still needs a source of some kind; everywhere else the
+// pasted text or the upload is genuinely optional.
+const sourceOptional = computed(
+  () => form.feature_id !== 'study.pdf_qa' || files.value.length > 0,
+)
 const hasAuthoredContent = (value: any) =>
   value?.sections?.some((section: any) => section.body?.trim()) ||
   value?.questions?.some((question: any) => question.stem?.trim())
 const hasEssentialInput = computed(() => {
   if (handwriting.value)
     return files.value.length === 1 && (!files.value[0].page_count || files.value[0].page_count === 1)
-  if (fileOnly.value) return files.value.length > 0
   if (adaptive.value) return !!form.options.project_id
   if (revision.value) return !!form.options.source_draft_id && !!form.options.selected_section_ids?.length
-  if (form.feature_id === 'study.pdf_qa') return !!form.prompt.trim() && files.value.length > 0
+  // A question needs something to answer from; either an upload or pasted text.
+  if (form.feature_id === 'study.pdf_qa')
+    return !!form.prompt.trim() && (files.value.length > 0 || !!form.source_text.trim())
   return (
     !!primaryText.value.trim() ||
     files.value.length > 0 ||
@@ -275,8 +282,7 @@ function draftFields() {
     ...form,
     title: effectiveTitle.value,
     prompt: form.prompt.trim() || name(form.feature_id, selected.value?.name),
-    source_text:
-      handwriting.value || revision.value || adaptive.value || fileOnly.value ? '' : form.source_text,
+    source_text: handwriting.value || revision.value || adaptive.value ? '' : form.source_text,
     options,
     source_ids: revision.value
       ? draft.value?.source_ids || []
@@ -775,7 +781,7 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
                 /><span>{{ section.heading }}</span></label
               >
             </section>
-            <label v-if="!handwriting && !adaptive && !fileOnly" class="form-field studio-primary-field">
+            <label v-if="!handwriting && !adaptive" class="form-field studio-primary-field">
               <span
                 >{{ primaryLabel }}<small v-if="revision"> · {{ t('studioOptional') }}</small></span
               >
@@ -791,6 +797,19 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
               <small>{{
                 t(sourceFirst ? 'studioSourceHint' : revision ? 'studioRevisionHint' : 'studioPromptHint')
               }}</small>
+            </label>
+            <label v-if="form.feature_id === 'study.pdf_qa'" class="form-field">
+              <span
+                >{{ t('sourceText')
+                }}<small v-if="sourceOptional"> · {{ t('studioOptional') }}</small></span
+              >
+              <textarea
+                v-model="form.source_text"
+                data-testid="studio-answer-source"
+                rows="4"
+                :maxlength="studio.config.value?.limits?.source_chars || 12000"
+              />
+              <small>{{ t('studioAnswerSourceHint') }}</small>
             </label>
             <div v-if="!revision && !adaptive" class="studio-source">
               <div>
@@ -812,7 +831,7 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
                         ? 'handwritingInputHint'
                         : form.feature_id === 'study.pdf_qa'
                           ? 'studioQuestionFileHint'
-                          : fileOnly
+                          : pdfSources
                             ? 'studioPdfSourcesHint'
                             : 'studioAttachHint',
                     )
@@ -1090,12 +1109,7 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
             >
             <label
               v-if="
-                !sourceFirst &&
-                !revision &&
-                !handwriting &&
-                !adaptive &&
-                !fileOnly &&
-                form.feature_id !== 'study.pdf_qa'
+                !sourceFirst && !revision && !handwriting && !adaptive && form.feature_id !== 'study.pdf_qa'
               "
               class="form-field"
               ><span>{{ t('sourceText') }} · {{ t('studioOptional') }}</span
@@ -1105,7 +1119,7 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
                 :maxlength="studio.config.value?.limits?.source_chars || 12000"
               />
             </label>
-            <label v-if="sourceFirst || handwriting || adaptive || fileOnly" class="form-field"
+            <label v-if="sourceFirst || handwriting || adaptive" class="form-field"
               ><span>{{ t('studioExtraInstructions') }}</span
               ><textarea v-model="form.prompt" rows="3" :maxlength="handwriting ? 1000 : 12000" />
             </label>
