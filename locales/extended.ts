@@ -983,6 +983,33 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   editorShortcutEscape: ['Put the tool down', 'Asbobni qo‘yish', 'Отложить инструмент'],
   editorShortcutNext: ['Go to the next change', 'Keyingi o‘zgarishga o‘tish', 'Перейти к следующему изменению'],
   editorShortcutZoom: ['Zoom in or out', 'Kattalashtirish yoki kichiklashtirish', 'Увеличить или уменьшить'],
+
+  // Document shape: how long it is and how tightly the page is set
+  studioPageCount: ['Pages', 'Sahifalar', 'Страницы'],
+  studioSlideCount: ['Slides', 'Slaydlar', 'Слайды'],
+  studioPageCountHint: ['Up to {max} on your plan', 'Tarifingizda {max} tagacha', 'До {max} на вашем тарифе'],
+  studioDensity: ['Text density', 'Matn zichligi', 'Плотность текста'],
+  studioDensity_rich: ['Text-rich', 'Matnga boy', 'Много текста'],
+  studioDensity_balanced: ['Balanced', 'Muvozanatli', 'Сбалансированно'],
+  studioDensity_airy: ['Spacious', 'Keng', 'Просторно'],
+  studioDensityHint_rich: [
+    'Fills most of the page with text',
+    'Sahifaning katta qismini matn egallaydi',
+    'Текст занимает большую часть страницы',
+  ],
+  studioDensityHint_balanced: ['Normal spacing', 'Odatiy joylashuv', 'Обычные отступы'],
+  studioDensityHint_airy: [
+    'Less text, room to write on',
+    'Kamroq matn, yozish uchun joy',
+    'Меньше текста, есть место для записей',
+  ],
+  studioTone: ['Tone', 'Uslub', 'Тон'],
+  studioToneDefault: ['Let the tool choose', 'Vosita o‘zi tanlasin', 'На усмотрение инструмента'],
+  studioTone_neutral: ['Neutral', 'Neytral', 'Нейтральный'],
+  studioTone_formal: ['Formal', 'Rasmiy', 'Официальный'],
+  studioTone_friendly: ['Friendly', 'Do‘stona', 'Дружелюбный'],
+  studioTone_academic: ['Academic', 'Akademik', 'Академический'],
+  studioTone_simple: ['Plain language', 'Sodda til', 'Простой язык'],
 }
 export const extendedToolNames: Record<string, [string, string, string]> = {
   'convert.pdf_to_docx': ['PDF to Word', 'PDF’dan Word', 'PDF в Word'],

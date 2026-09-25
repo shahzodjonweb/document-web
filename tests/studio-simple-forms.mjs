@@ -88,6 +88,7 @@ const config = {
       length: { minimum: 1, maximum: 2 },
       output_locale: { enum: ['en', 'uz', 'ru'] },
       output_format: { enum: feature.startsWith('teacher.') ? ['pdf'] : ['pdf', 'pptx'] },
+      density: { enum: ['rich', 'balanced', 'airy'] },
     },
     locales: ['en', 'uz', 'ru'],
   })),
@@ -505,7 +506,9 @@ try {
   await more().locator('summary').first().click()
   await page.getByLabel('Title (optional)', { exact: false }).fill('Fraction workshop')
   await page.getByRole('combobox', { name: 'Output language', exact: true }).selectOption('ru')
-  await page.getByLabel('Length', { exact: true }).fill('1')
+  await page.getByTestId('studio-length').fill('1')
+  await page.getByTestId('studio-density-rich').click()
+  await page.getByTestId('studio-tone').selectOption('formal')
   await page.getByLabel('Subject', { exact: true }).fill('Mathematics')
   await page.getByLabel('Grade or level', { exact: true }).fill('5')
   await page.getByLabel('Learning objectives', { exact: true }).fill('Compare simple fractions.')
@@ -516,8 +519,10 @@ try {
   assert.equal(advanced.options.subject, 'Mathematics')
   assert.equal(advanced.options.grade, '5')
   assert.equal(advanced.options.objectives, 'Compare simple fractions.')
+  assert.equal(advanced.options.density, 'rich', 'text density reaches the draft')
+  assert.equal(advanced.options.style, 'formal', 'tone reaches the draft')
   checks.push(
-    'Expanded options preserve custom title, language, length and teaching details in the quoted draft',
+    'Expanded options preserve title, language, pages, density, tone and teaching details in the quoted draft',
   )
 
   await page.getByTestId('studio-edit-outline').click()

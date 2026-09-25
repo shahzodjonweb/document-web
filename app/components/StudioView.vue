@@ -180,6 +180,22 @@ const maxQuestions = computed(() =>
 const outputLanguage = computed(
   () => ({ en: 'English', uz: 'O‘zbekcha', ru: 'Русский' })[form.output_locale] || form.output_locale,
 )
+
+/**
+ * Density decides how much of the page the body text fills. The server owns the
+ * list and the actual spacing metrics, so the UI never hardcodes either.
+ */
+const densities = computed<string[]>(
+  () => (selected.value?.parameter_schema as any)?.density?.enum || [],
+)
+const activeDensity = computed(() => form.options.density || 'balanced')
+function setDensity(value: string) {
+  form.options.density = value
+  quote.value = null
+}
+
+/** One tone select replaces the free-text audience and style boxes. */
+const TONES = ['neutral', 'formal', 'friendly', 'academic', 'simple'] as const
 const providerReady = computed(
   () => studio.config.value?.provider?.configured === true || !!draft.value?.transcription_ready,
 )
@@ -565,7 +581,7 @@ async function saveTemplate() {
   await run('template', async () => {
     await saveDraft()
     const reusableOptions = Object.fromEntries(
-      ['length', 'question_count', 'subject', 'grade', 'duration', 'audience', 'style', 'objectives']
+      ['length', 'density', 'question_count', 'subject', 'grade', 'duration', 'style', 'objectives']
         .filter((key) => form.options[key] !== undefined)
         .map((key) => [key, form.options[key]]),
     )
@@ -1103,50 +1119,57 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
                 </option>
               </select></label
             ><label class="form-field"
-              ><span>{{ t('length') }}</span
+              ><span>{{ form.output_format === 'pptx' ? t('studioSlideCount') : t('studioPageCount') }}</span
               ><input
                 v-model.number="form.options.length"
                 :disabled="revision || handwriting"
                 type="number"
                 min="1"
                 :max="maxLength"
-                @change="quote = null" /></label
-            ><label v-if="education && !handwriting" class="form-field"
+                data-testid="studio-length"
+                @change="quote = null" /><small>{{ t('studioPageCountHint', { max: maxLength }) }}</small></label
+            >
+
+            <!-- How much of the page the body text fills. Server-driven: the
+                 values come from /studio/config, the metrics live in the
+                 renderer, and every plan gets them. -->
+            <fieldset v-if="densities.length && !handwriting" class="form-field studio-density">
+              <span>{{ t('studioDensity') }}</span>
+              <div class="studio-density-row" role="radiogroup" :aria-label="t('studioDensity')">
+                <button
+                  v-for="value in densities"
+                  :key="value"
+                  type="button"
+                  class="studio-density-option"
+                  :class="{ active: activeDensity === value }"
+                  role="radio"
+                  :aria-checked="activeDensity === value"
+                  :data-testid="`studio-density-${value}`"
+                  @click="setDensity(value)"
+                >
+                  <strong>{{ t(`studioDensity_${value}`) }}</strong>
+                  <small>{{ t(`studioDensityHint_${value}`) }}</small>
+                </button>
+              </div>
+            </fieldset>
+
+            <label v-if="education && !handwriting" class="form-field"
               ><span>{{ t('questionCount') }}</span
               ><input
                 v-model.number="form.options.question_count"
                 type="number"
                 min="1"
                 :max="maxQuestions" /></label
-            ><SchemaFields
-              v-if="selected?.parameter_schema"
-              v-model="form.options"
-              :schema="selected.parameter_schema"
-              :exclude="[
-                'length',
-                'question_count',
-                'grade',
-                'subject',
-                'objectives',
-                'output_locale',
-                'output_format',
-                'audience',
-                'style',
-                'duration',
-              ]"
-            />
-            <div class="studio-preferences">
-              <label class="form-field"
-                ><span>{{ t('audience') }}</span
-                ><input v-model="form.options.audience" maxlength="200" /></label
-              ><label class="form-field"
-                ><span>{{ t('style') }}</span
-                ><input v-model="form.options.style" maxlength="120" /></label
-              ><label v-if="education" class="form-field"
-                ><span>{{ t('duration') }}</span
-                ><input v-model.number="form.options.duration" type="number" min="5" max="240"
-              /></label>
-            </div>
+            ><label v-if="!handwriting && !revision" class="form-field"
+              ><span>{{ t('studioTone') }}</span
+              ><select v-model="form.options.style" data-testid="studio-tone">
+                <option value="">{{ t('studioToneDefault') }}</option>
+                <option v-for="tone in TONES" :key="tone" :value="tone">{{ t(`studioTone_${tone}`) }}</option>
+              </select></label
+            ><label v-if="education && !handwriting" class="form-field"
+              ><span>{{ t('duration') }}</span
+              ><input v-model.number="form.options.duration" type="number" min="5" max="240"
+            /></label>
             <details v-if="!handwriting && !revision" class="branding-options">
               <summary>{{ t('branding') }}</summary>
               <label class="check-label"
