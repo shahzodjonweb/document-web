@@ -373,8 +373,35 @@ async function load() {
     }
   }
 }
+/**
+ * The bot links here as `?file_id=…` after a file has been sent to the chat, so
+ * the document carries across instead of having to be uploaded twice.
+ */
+async function adoptLinkedFiles() {
+  if (props.draftId || adaptive.value) return
+  // The bot sends one `file_id` per file already attached to its draft.
+  for (const id of linkedFileIds(route.query.file_id)) {
+    if (files.value.some((file) => file.id === id)) continue
+    try {
+      const asset: any = await ws.api(`/files/${id}`)
+      // `/files/{id}` answers 200 for an expired asset; attaching one would
+      // only show a chip that fails at generation.
+      if (asset.state !== 'ready') continue
+      // Attach it exactly as the picker would, so the same rules apply: one
+      // image for handwriting, PDFs everywhere else.
+      if (handwriting.value) {
+        files.value = [asset]
+        return
+      }
+      if (asset.mime_type === 'application/pdf') files.value = [...files.value, asset]
+    } catch {
+      // Deleted or someone else's: the page still works without it.
+    }
+  }
+}
+
 onMounted(() => {
-  load()
+  load().then(adoptLinkedFiles)
   loadProjects()
   loadDrafts()
   if (form.feature_id === 'ai.images') navigateTo(path('/app/images'))

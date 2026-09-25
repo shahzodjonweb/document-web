@@ -1,5 +1,6 @@
 <script setup lang="ts">
 const props = defineProps<{ mode?: string }>()
+const route = useRoute()
 const { t, path } = useLocale()
 const studio = useStudio()
 const { name } = useTools()
@@ -8,6 +9,13 @@ const mode = computed(() =>
 )
 const prefix = computed(() => (mode.value === 'student' ? 'study.' : `${mode.value}.`))
 const features = computed(() => studio.features.value.filter((f) => f.id.startsWith(prefix.value)))
+// The bot links here as `?file_id=…`; carry it through to the tool the learner
+// picks, otherwise the file they just sent is silently dropped at this screen.
+const linkedFile = computed(() =>
+  linkedFileIds(route.query.file_id)
+    .map((id) => `&file_id=${encodeURIComponent(id)}`)
+    .join(''),
+)
 onMounted(() => {
   if (!studio.loaded.value) studio.load()
 })
@@ -53,7 +61,7 @@ onMounted(() => {
     <NuxtLink
       v-for="feature in features"
       :key="feature.id"
-      :to="path(`/app/create?feature=${encodeURIComponent(feature.id)}`)"
+      :to="path(`/app/create?feature=${encodeURIComponent(feature.id)}${linkedFile}`)"
       class="panel education-tool"
       ><AppIcon
         :name="

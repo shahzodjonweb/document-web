@@ -149,6 +149,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   if (endpoint === '/editor/form-templates') return json({ results: [], limit: plan === 'premium' ? 30 : 0 })
 
   if (endpoint === '/editor/documents' && method === 'GET') return json({ results: [documentPayload()] })
+  if (endpoint === '/editor/documents' && method === 'POST') return json({ id: editor.id }, 201)
   if (endpoint === `/editor/documents/${editor.id}` && method === 'GET') return json(documentPayload())
   if (endpoint === `/editor/documents/${editor.id}` && method === 'PATCH') {
     if (conflictOnce) {
@@ -474,6 +475,20 @@ try {
   assert.match(await page.getByTestId('editor-shortcuts').innerText(), /Ctrl \/ ⌘ \+ Z/)
   await page.keyboard.press('Escape')
   checks.push('Every canvas gesture has a documented keyboard equivalent')
+
+  // 12b. The Telegram bot deep-links here as `?file_id=…`; open that file
+  // rather than showing the empty launcher to someone who just sent a PDF.
+  await resetDocument()
+  const linked = editor.input_ids[0]
+  const priorCalls = requests.length
+  await page.goto(`${origin}/en/app/editor?file_id=${linked}`, { waitUntil: 'domcontentloaded' })
+  await page.getByTestId('editor-page-1').waitFor()
+  assert.match(new URL(page.url()).pathname, new RegExp(`/app/editor/${editor.id}$`))
+  const created = requests
+    .slice(priorCalls)
+    .find((r) => r.path === '/editor/documents' && r.method === 'POST')
+  assert.equal(created?.body?.file_id, linked, 'the linked file is what gets opened')
+  checks.push('A file_id deep link from the bot opens that document instead of the launcher')
 
   // 13. Accessibility and layout across locales, viewports and themes.
   await resetDocument()

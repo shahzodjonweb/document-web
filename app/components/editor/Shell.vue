@@ -36,7 +36,29 @@ function applyFit() {
   if (available > 0 && widest > 0) session.zoom.value = Math.min(2, Math.max(0.2, available / widest))
 }
 
+/**
+ * The bot links here as `?file_id=…` after a file has been sent to the chat.
+ * Open that file for editing rather than showing an empty launcher.
+ */
+async function openLinkedFile() {
+  const [id] = linkedFileIds(route.query.file_id)
+  if (!id || props.documentId) return
+  try {
+    const created = await ws.api<{ id: string }>('/editor/documents', {
+      method: 'POST',
+      body: { file_id: id },
+    })
+    await navigateTo(path(`/app/editor/${created.id}`))
+  } catch {
+    // Expired, deleted, encrypted or not ours: fall back to the launcher.
+  }
+}
+
 async function start() {
+  if (!props.documentId) {
+    await openLinkedFile()
+    return
+  }
   await session.reset(props.documentId)
   void metrics.ensure()
   const current = session.doc.value

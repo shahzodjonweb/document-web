@@ -32,6 +32,7 @@ const drafts = new Map(),
 let sequence = 0
 let affordable = true
 let activeFeature = ''
+let expiredFile = false
 let failJobOnce = false
 let expireJobOnce = false
 const id = () => `00000000-0000-4000-8000-${String(++sequence).padStart(12, '0')}`
@@ -209,7 +210,8 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
       size_bytes: 4096,
       page_count: 2,
       mime_type: 'application/pdf',
-      state: 'ready',
+      // Retention answers 200 with an 'expired' state rather than a 404.
+      state: expiredFile ? 'expired' : 'ready',
     })
   if (endpoint === '/generation/drafts' && method === 'GET') return json({ results: [...drafts.values()] })
   if (endpoint === '/generation/drafts' && method === 'POST') {
@@ -641,6 +643,52 @@ try {
     'A missing handwriting provider cannot be bypassed by simplifying the form',
   )
   checks.push('Handwriting remains a single-file flow and honors missing-provider restrictions')
+
+  // The Telegram bot sends the user here as `?file_id=…` after they upload a
+  // document to the chat. The file must carry across, or they upload it twice.
+  const linked = id()
+  activeFeature = 'ai.pdf_sources'
+  await page.goto(`${origin}/en/app/create?feature=ai.pdf_sources&file_id=${linked}`, {
+    waitUntil: 'domcontentloaded',
+  })
+  await page.getByTestId('studio-brief').waitFor()
+  await page.locator('.source-chip').first().waitFor()
+  assert.equal(await page.locator('.source-chip').count(), 1)
+  assert.match(await page.locator('.source-chip').first().innerText(), /research-notes\.pdf/)
+  await reviewNew()
+  assert.deepEqual(lastDraftRequest().body.source_ids, [linked], 'The linked file is the source')
+  checks.push('A file_id deep link from the bot arrives attached and needs no second upload')
+
+  // A bot draft can hold several files, so the link repeats the parameter.
+  const many = [id(), id(), id()]
+  await page.goto(
+    `${origin}/en/app/create?feature=ai.pdf_sources&${many.map((f) => `file_id=${f}`).join('&')}`,
+    { waitUntil: 'domcontentloaded' },
+  )
+  await page.getByTestId('studio-brief').waitFor()
+  // They attach one at a time, so wait for the last rather than the first.
+  await page.locator('.source-chip').nth(many.length - 1).waitFor()
+  assert.equal(await page.locator('.source-chip').count(), many.length)
+  await reviewNew()
+  assert.deepEqual(lastDraftRequest().body.source_ids, many, 'Every linked file is a source, in order')
+  checks.push('A multi-file bot draft arrives with all of its documents attached in order')
+
+  expiredFile = true
+  await page.goto(`${origin}/en/app/create?feature=ai.pdf_sources&file_id=${id()}`, {
+    waitUntil: 'domcontentloaded',
+  })
+  await page.getByTestId('studio-brief').waitFor()
+  await page.waitForTimeout(400)
+  assert.equal(await page.locator('.source-chip').count(), 0, 'An expired link attaches nothing')
+  expiredFile = false
+  checks.push('A deep link to a file that has aged out attaches nothing instead of failing later')
+
+  // The same link on the education launcher must survive the hop to the tool.
+  await page.goto(`${origin}/en/app/study?file_id=${linked}`, { waitUntil: 'domcontentloaded' })
+  const tool = page.locator('.education-tool').first()
+  await tool.waitFor()
+  assert.match(await tool.getAttribute('href'), new RegExp(`file_id=${linked}$`))
+  checks.push('The education launcher forwards the linked file to the tool the learner picks')
 
   affordable = false
   await open('ai.pdf_topic')
