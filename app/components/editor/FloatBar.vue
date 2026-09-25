@@ -171,6 +171,13 @@ function duplicate() {
         <AppIcon name="alignLeft" :size="15" />{{ t('editorWrapToPage') }}
       </button>
 
+      <EditorAssetField
+        v-if="shape?.image"
+        :command-id="command._id"
+        :input-index="command.input_index"
+        :signature="command.type === 'signature'"
+      />
+
       <p v-if="shape?.image" class="field-hint">{{ t('editorImageLetterbox') }}</p>
       <p v-if="command.type === 'add_text'" class="field-hint">{{ t('editorOneFontNote') }}</p>
       <p class="field-hint">{{ t('editorNudgeHint') }}</p>

@@ -18,6 +18,7 @@ const session = useEditorSession()
 
 const lockedTool = ref<CommandType | ''>('')
 const modeBlocked = ref('')
+const shortcuts = ref(false)
 
 /** Absent catalog means unknown, not forbidden — let the server's 403 rule. */
 function allows(feature: string) {
@@ -168,6 +169,15 @@ function zoomBy(factor: number) {
       <button type="button" class="icon-button editor-pages-toggle" :aria-label="t('editorShowPages')" @click="emit('togglePages')">
         <AppIcon name="panelLeft" :size="18" />
       </button>
+      <button
+        type="button"
+        class="icon-button"
+        :aria-label="t('editorKeyboardHelp')"
+        data-testid="editor-shortcuts-open"
+        @click="shortcuts = true"
+      >
+        <AppIcon name="help" :size="18" />
+      </button>
     </div>
 
     <p v-if="lockedTool" class="editor-lock" role="status">
@@ -186,5 +196,7 @@ function zoomBy(factor: number) {
     <p v-else-if="session.activeTool.value !== 'select'" class="editor-tool-hint" role="status">
       {{ session.activeTool.value === 'draw' ? t('editorDrawHint') : t('editorPlaceHint') }}
     </p>
+
+    <EditorShortcutSheet v-model="shortcuts" />
   </div>
 </template>

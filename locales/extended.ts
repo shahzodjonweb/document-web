@@ -955,6 +955,34 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Для {count} изменений нужен другой тариф. Удалите их или смените тариф, чтобы продолжить сохранение.',
   ],
   editorRemoveLocked: ['Remove these changes', 'Bu o‘zgarishlarni olib tashlash', 'Удалить эти изменения'],
+
+  // Images and signatures
+  editorImageCost: [
+    'each attached image counts as one page unit',
+    'har bir biriktirilgan rasm bitta sahifa birligi hisoblanadi',
+    'каждое прикреплённое изображение считается за одну единицу страниц',
+  ],
+  editorSignatureDraw: ['Draw a signature', 'Imzo chizish', 'Нарисовать подпись'],
+  editorSignatureClear: ['Clear', 'Tozalash', 'Очистить'],
+  editorSignatureSave: ['Use this signature', 'Shu imzodan foydalanish', 'Использовать эту подпись'],
+  editorSignatureHint: [
+    'Draw with a mouse, finger or pen. It is saved as a transparent PNG in your files.',
+    'Sichqoncha, barmoq yoki qalam bilan chizing. U fayllaringizda shaffof PNG sifatida saqlanadi.',
+    'Рисуйте мышью, пальцем или пером. Подпись сохранится в ваших файлах как прозрачный PNG.',
+  ],
+
+  // Keyboard help
+  editorKeyboardHelp: ['Keyboard shortcuts', 'Klaviatura qisqartmalari', 'Горячие клавиши'],
+  editorCloseHelp: ['Close shortcuts', 'Qisqartmalarni yopish', 'Закрыть список клавиш'],
+  editorShortcutsCanvas: ['On the page', 'Sahifada', 'На странице'],
+  editorShortcutsDocument: ['Document', 'Hujjat', 'Документ'],
+  editorShortcutNudge: ['Move by 1 point', '1 punktga siljitish', 'Сдвинуть на 1 пункт'],
+  editorShortcutNudgeFar: ['Move by 10 points', '10 punktga siljitish', 'Сдвинуть на 10 пунктов'],
+  editorShortcutEdit: ['Edit the selected change', 'Tanlangan o‘zgarishni tahrirlash', 'Редактировать выбранное'],
+  editorShortcutDelete: ['Remove the selected change', 'Tanlangan o‘zgarishni o‘chirish', 'Удалить выбранное'],
+  editorShortcutEscape: ['Put the tool down', 'Asbobni qo‘yish', 'Отложить инструмент'],
+  editorShortcutNext: ['Go to the next change', 'Keyingi o‘zgarishga o‘tish', 'Перейти к следующему изменению'],
+  editorShortcutZoom: ['Zoom in or out', 'Kattalashtirish yoki kichiklashtirish', 'Увеличить или уменьшить'],
 }
 export const extendedToolNames: Record<string, [string, string, string]> = {
   'convert.pdf_to_docx': ['PDF to Word', 'PDF’dan Word', 'PDF в Word'],

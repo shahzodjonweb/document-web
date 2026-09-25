@@ -62,6 +62,10 @@ function pointFor(event: PointerEvent | MouseEvent) {
 
 /* ---------------------------------------------------------------- placing */
 
+// A pointerdown that places a mark is followed by a click on the layer. That
+// click must not clear the selection we just made.
+let justPlaced = false
+
 function onLayerPointerDown(event: PointerEvent) {
   if (!placing.value || event.button !== 0) return
   const tool = session.activeTool.value as CommandType
@@ -69,7 +73,9 @@ function onLayerPointerDown(event: PointerEvent) {
   if (tool === 'draw') return startStroke(event, at)
   event.preventDefault()
   const command = session.addCommand(tool, { page: props.page, x: at.x, y: at.y })
-  session.activeTool.value = 'select'
+  // Redaction stays armed: you almost always draw several boxes in a row.
+  if (tool !== 'redact') session.activeTool.value = 'select'
+  justPlaced = true
   if (command && (command.type === 'add_text' || command.type === 'note')) {
     editingId.value = command._id
     void nextTick(() => textInput.value?.focus())
@@ -77,6 +83,10 @@ function onLayerPointerDown(event: PointerEvent) {
 }
 
 function onLayerClick(event: MouseEvent) {
+  if (justPlaced) {
+    justPlaced = false
+    return
+  }
   if (event.target === layer.value && !placing.value) session.select(null)
 }
 

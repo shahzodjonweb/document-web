@@ -85,7 +85,9 @@ export function useEditorSession() {
   const selected = computed(() => commands.value.filter((command) => selection.value.includes(command._id)))
   const budget = computed(() => payloadBudget(commands.value))
   const issues = computed<Issue[]>(() =>
-    commands.value.map(commandIssues).filter((issue): issue is Issue => issue !== null),
+    commands.value
+      .map((command) => commandIssues(command, assets.value.length))
+      .filter((issue): issue is Issue => issue !== null),
   )
 
   function requestError(e: any) {
@@ -171,13 +173,42 @@ export function useEditorSession() {
     }, AUTOSAVE_DELAY)
   }
 
+  /**
+   * Attach an image for signature/insert_image/replace_image. Index 0 is the
+   * source PDF, so the first upload is `input_index` 1.
+   */
+  async function uploadAsset(file: File): Promise<number | null> {
+    begin('asset')
+    error.value = ''
+    try {
+      const body = new FormData()
+      body.append('file', file)
+      const asset = await ws.api<{ id: string; name: string; mime_type: string }>('/files/uploads', {
+        method: 'POST',
+        body,
+      })
+      assets.value = [...assets.value, asset]
+      // Attaching an image changes input_ids, which only a save persists.
+      markDirty()
+      return assets.value.length
+    } catch (e) {
+      error.value = requestError(e)
+      return null
+    } finally {
+      end('asset')
+    }
+  }
+
   function addCommand(type: CommandType, at: { page: number; x?: number; y?: number }) {
     if (budget.value.full) {
       error.value = t('editorBudgetFull')
       return null
     }
     const command = clampCommand(
-      seedCommand(type, { ...at, inputIndex: assets.value.length ? 1 : undefined }),
+      // With nothing attached yet the command deliberately points at 0, which
+      // `commandIssues` reports as "choose an image" instead of letting the
+      // server reject an index that does not exist.
+      seedCommand(type, { ...at, inputIndex: assets.value.length ? 1 : 0 }),
       pageSize(at.page),
     )
     mutate('add', () => {
@@ -427,6 +458,7 @@ export function useEditorSession() {
     end,
     pageSize,
     mutate,
+    uploadAsset,
     addCommand,
     patchCommand,
     removeCommands,

@@ -227,6 +227,17 @@ const open = async (locale = 'en') => {
   await page.getByTestId('editor-page-1').waitFor()
 }
 
+/**
+ * Clear the fixture document only once any autosave has landed — resetting it
+ * mid-flight lets a pending PATCH repopulate it behind the next check.
+ */
+async function resetDocument() {
+  const before = requests.length
+  await page.waitForTimeout(1400)
+  if (requests.length !== before) await page.waitForTimeout(1000)
+  editor.commands = []
+}
+
 /** Fit-to-width resizes the page once rendering settles; wait that out. */
 async function settledBox(testId) {
   let previous = null
@@ -354,7 +365,7 @@ try {
   plan = 'premium'
 
   // 9. Redaction is a mode of its own: the server cannot even save a mixed draft.
-  editor.commands = []
+  await resetDocument()
   await open()
   await page.getByTestId('editor-tool-highlight').click()
   await page.getByTestId('editor-page-1').click({ position: { x: 80, y: 80 } })
@@ -369,7 +380,7 @@ try {
   checks.push('Redaction is refused alongside other changes before anything is saved')
 
   // 10. Pages mode maps onto the right one-shot job.
-  editor.commands = []
+  await resetDocument()
   await open()
   await page.getByTestId('editor-mode-pages').click()
   await page.getByTestId('editor-pages-board').waitFor()
@@ -410,15 +421,62 @@ try {
   checks.push('Pages mode chooses delete, reorder or extract and never invents a server capability')
 
   // Redaction mode on a clean draft, for the visual record.
-  editor.commands = []
+  await resetDocument()
   await open()
   await page.getByTestId('editor-mode-redact').click()
   await page.getByTestId('editor-page-1').click({ position: { x: 150, y: 120 } })
   await page.waitForTimeout(800)
   await page.screenshot({ path: path.join(output, 'redact-mode.png'), fullPage: true })
 
-  // 11. Accessibility and layout across locales, viewports and themes.
-  editor.commands = []
+  // 11. An image command with nothing attached is caught before the server
+  // sees it, and drawing a signature satisfies it.
+  await resetDocument()
+  await open()
+  await page.getByTestId('editor-tool-signature').click()
+  await page.getByTestId('editor-page-1').click({ position: { x: 150, y: 400 } })
+  await page.getByTestId('editor-floatbar').waitFor()
+  assert.match(
+    await page.getByTestId('editor-floatbar').innerText(),
+    /Choose an image/,
+    'a signature with no image explains itself instead of failing on save',
+  )
+  assert.equal(
+    await page.getByTestId('editor-review').isDisabled(),
+    true,
+    'export is blocked while a change has no image',
+  )
+  await page.getByTestId('editor-signature-open').click()
+  const pad = page.getByTestId('editor-signature-pad')
+  await pad.waitFor()
+  const padBox = await pad.locator('canvas').boundingBox()
+  assert.ok(padBox)
+  await page.mouse.move(padBox.x + 40, padBox.y + padBox.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(padBox.x + 140, padBox.y + 30, { steps: 8 })
+  await page.mouse.move(padBox.x + 240, padBox.y + padBox.height - 30, { steps: 8 })
+  await page.mouse.up()
+  await page.getByTestId('editor-signature-save').click()
+  await page.waitForTimeout(1400)
+  const withImage = lastPatch()?.body.commands.find((c) => c.type === 'signature')
+  assert.ok(withImage, 'the signature command saved')
+  assert.equal(withImage.input_index, 1, 'it points at the first attached image')
+  assert.equal(lastPatch().body.input_ids.length, 2, 'the signature image is attached as an input')
+  assert.equal(
+    await page.getByTestId('editor-review').isDisabled(),
+    false,
+    'export unblocks once the image exists',
+  )
+  checks.push('A signature is drawn, uploaded and attached; an image-less change blocks export first')
+
+  // 12. The keyboard map is written down.
+  await page.getByTestId('editor-shortcuts-open').click()
+  await page.getByTestId('editor-shortcuts').waitFor()
+  assert.match(await page.getByTestId('editor-shortcuts').innerText(), /Ctrl \/ ⌘ \+ Z/)
+  await page.keyboard.press('Escape')
+  checks.push('Every canvas gesture has a documented keyboard equivalent')
+
+  // 13. Accessibility and layout across locales, viewports and themes.
+  await resetDocument()
   for (const locale of ['en', 'uz', 'ru']) {
     for (const width of [1440, 390]) {
       await page.setViewportSize({ width, height: 1000 })

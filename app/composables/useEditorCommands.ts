@@ -258,8 +258,12 @@ function controlCharacters(text: string): boolean {
 /**
  * Problems we can see before the server does. Bounds are checked by
  * `useEditorGeometry`; this covers the value-shaped rejections.
+ *
+ * `assetCount` is how many images are attached after the source PDF, so an
+ * image command pointing past the end is caught here rather than surfacing as
+ * `invalid_editor_command` on the next autosave.
  */
-export function commandIssues(command: ClientCommand): Issue | null {
+export function commandIssues(command: ClientCommand, assetCount = 0): Issue | null {
   const id = command._id
   switch (command.type) {
     case 'add_text':
@@ -277,8 +281,10 @@ export function commandIssues(command: ClientCommand): Issue | null {
       return !command.find ? { id, code: 'editorIssueEmptyFind' } : null
     case 'signature':
     case 'insert_image':
-    case 'replace_image':
-      return (command.input_index ?? 0) < 1 ? { id, code: 'editorIssueNoImage' } : null
+    case 'replace_image': {
+      const index = command.input_index ?? 0
+      return index < 1 || index > assetCount ? { id, code: 'editorIssueNoImage' } : null
+    }
     default:
       return null
   }
