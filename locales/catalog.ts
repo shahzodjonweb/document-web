@@ -1,5 +1,5 @@
 import { authenticationEntries } from './authentication.ts'
-import { extendedEntries, extendedToolNames } from './extended.ts'
+import { extendedEntries, extendedToolDescriptions, extendedToolNames } from './extended.ts'
 export type Locale = 'en' | 'uz' | 'ru'
 const entries: Record<string, [string, string, string]> = {
   preview: ['Preview', 'Ko‘rib chiqish', 'Предпросмотр'],
@@ -138,6 +138,7 @@ const entries: Record<string, [string, string, string]> = {
   emptySearch: ['No matching tools', 'Mos vosita topilmadi', 'Инструменты не найдены'],
   searchTools: ['Search tools…', 'Vositalarni qidirish…', 'Поиск инструментов…'],
   allCategories: ['All tools', 'Barcha vositalar', 'Все инструменты'],
+  aiCategory: ['Create with AI', 'AI bilan yaratish', 'Создать с ИИ'],
   pagesCategory: ['Organize', 'Tartiblash', 'Организация'],
   conversionCategory: ['Convert', 'O‘girish', 'Конвертация'],
   compressionCategory: ['Optimize', 'Optimallashtirish', 'Оптимизация'],
@@ -602,6 +603,9 @@ for (const [index, locale] of (['en', 'uz', 'ru'] as const).entries()) {
   )
   for (const [key, values] of Object.entries(extendedToolNames)) {
     dictionaries[locale][`${key}.name`] = values[index]!
+  }
+  for (const [key, values] of Object.entries(extendedToolDescriptions)) {
+    dictionaries[locale][`${key}.description`] = values[index]!
   }
   for (const [key, values] of Object.entries(toolEntries)) {
     dictionaries[locale][`${key}.name`] = values[index]!

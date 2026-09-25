@@ -7,6 +7,7 @@ const search = ref('')
 const selected = ref('allCategories')
 const categories = [
   'allCategories',
+  'aiCategory',
   'pagesCategory',
   'compressionCategory',
   'conversionCategory',
@@ -15,9 +16,13 @@ const categories = [
   'editor',
   'automationCategory',
 ]
+// The public directory stays file-tools only: generation needs an account, and
+// `/tools/<id>` has no page for a feature that lives in the studio.
+const publicView = computed(() => !route.path.includes('/app'))
 const filtered = computed(() =>
   sorted.value.filter(
     (f) =>
+      !(publicView.value && isGenerationFeature(f.id)) &&
       (selected.value === 'allCategories' || category(f.id) === selected.value) &&
       `${name(f.id, f.name)} ${description(f.id)}`
         .toLocaleLowerCase()
@@ -77,7 +82,7 @@ function resetSearch() {
       v-for="feature in filtered"
       :key="feature.id"
       :feature="feature"
-      :public-view="!route.path.includes('/app')"
+      :public-view="publicView"
     />
   </div>
   <div v-else class="empty-state panel">
