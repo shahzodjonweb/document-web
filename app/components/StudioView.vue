@@ -18,262 +18,73 @@ const contentEdited = ref(false)
 const reviewHandoff = useState<any>('studio-review-handoff', () => null)
 const quoteStage = ref<'document' | 'outline'>('document')
 const files = ref<any[]>([])
-const savedProjects = ref<any[]>([])
-const templateContent = ref<any>(null)
-const sourceDrafts = ref<any[]>([])
-const revisionSource = ref<any>(null)
-const logoInput = ref<HTMLInputElement>()
-const revision = computed(() => ['ai.rewrite', 'ai.regenerate_slide'].includes(form.feature_id))
-const revisionDrafts = computed(() =>
-  sourceDrafts.value.filter(
-    (item) =>
-      !item.feature_id.startsWith('teacher.') &&
-      !item.feature_id.startsWith('school.') &&
-      (form.feature_id !== 'ai.regenerate_slide' || item.output_format === 'pptx'),
-  ),
-)
-const editableSection = (section: any) =>
-  !draft.value?.revision || draft.value.revision.selected_section_ids.includes(section.id)
-async function loadDrafts() {
-  try {
-    sourceDrafts.value = (await ws.api('/generation/drafts')).results || []
-  } catch {}
-}
-async function chooseRevision() {
-  await run('source', async () => {
-    revisionSource.value = await ws.api(`/generation/drafts/${form.options.source_draft_id}`)
-    form.options.source_draft_version = revisionSource.value.version
-    form.options.selected_section_ids = revisionSource.value.content.sections
-      .slice(0, form.feature_id === 'ai.regenerate_slide' ? 1 : undefined)
-      .map((section: any) => section.id)
-    form.title = revisionSource.value.title
-    form.output_format = revisionSource.value.output_format
-    form.output_locale = revisionSource.value.output_locale
-    form.options.length = revisionSource.value.content.sections.length
-  })
-}
-function toggleBranding(event: Event) {
-  if ((event.target as HTMLInputElement).checked) form.options.branding = { name: '', accent: '#0275fc' }
-  else delete form.options.branding
-}
-async function uploadLogo(file: File | undefined) {
-  if (!file) return
-  await run('logo', async () => {
-    const body = new FormData()
-    body.append('file', file)
-    const asset = await ws.api('/files/uploads', { method: 'POST', body })
-    form.options.branding.logo_asset_id = asset.id
-  })
-}
-async function loadProjects() {
-  try {
-    savedProjects.value = (await ws.api('/education/projects')).results || []
-  } catch {}
-}
-const saveConsent = ref(false)
+const promptExamples = usePromptExamples()
+
 const form = reactive({
   feature_id: String(route.query.feature || 'ai.pdf_topic'),
   title: '',
-  prompt: '',
+  // The description is the whole brief: pages, tone, audience and questions are
+  // all read out of it server-side, so there is nothing else to collect.
+  prompt: String(route.query.prompt || ''),
   source_text: '',
   output_locale: String(ws.user.value?.preferences?.output_locale || locale.value),
-  output_format: ['ai.pptx', 'ai.source_to_slides', 'school.project_slides'].includes(
-    String(route.query.feature),
-  )
-    ? 'pptx'
-    : 'pdf',
-  options: {
-    length: 2,
-    question_count: 5,
-  } as Record<string, any>,
+  output_format: 'pdf',
+  options: {} as Record<string, any>,
 })
-watch(
-  () => form.feature_id,
-  (value) => {
-    if (value === 'school.adaptive') loadProjects()
-    if (value === 'ai.images') navigateTo(path('/app/images'))
-  },
-)
 const content = ref<any>({ title: '', sections: [], questions: [] })
 const selected = computed(() => studio.features.value.find((f) => f.id === form.feature_id))
-const education = computed(() => /^(study|school|teacher)\./.test(form.feature_id))
 const sectionList = computed<any[]>(() => content.value.sections || [])
-const handwriting = computed(() => form.feature_id === 'study.handwriting')
-const pdfSources = computed(() => form.feature_id === 'ai.pdf_sources')
-const adaptive = computed(() => form.feature_id === 'school.adaptive')
-const sourceFirst = computed(
-  () =>
-    (studio.localProvider.value &&
-      !revision.value &&
-      !handwriting.value &&
-      !adaptive.value &&
-      form.feature_id !== 'study.pdf_qa') ||
-    [
-      'ai.pdf_text',
-      'ai.pdf_sources',
-      'ai.source_to_slides',
-      'study.summary',
-      'study.definitions',
-      'study.answer_key',
-      'study.report_format',
-      'study.references',
-      'study.writing_feedback',
-      'teacher.answer_key',
-      'teacher.syllabus',
-      'teacher.feedback',
-      'study.flashcards',
-    ].includes(form.feature_id),
-)
-const primaryText = computed({
-  get: () => (sourceFirst.value ? form.source_text : form.prompt),
-  set: (value: string) => {
-    if (sourceFirst.value) form.source_text = value
-    else form.prompt = value
-  },
-})
-const primaryLabel = computed(() =>
-  t(
-    form.feature_id === 'study.pdf_qa'
-      ? 'studioQuestion'
-      : sourceFirst.value
-        ? 'studioSource'
-        : revision.value
-          ? 'studioRevisionPrompt'
-          : 'studioPrompt',
-  ),
-)
-const primaryPlaceholder = computed(() =>
-  t(
-    form.feature_id === 'study.pdf_qa'
-      ? 'studioQuestionPlaceholder'
-      : form.feature_id === 'school.check_attempt'
-        ? 'studioAttemptPlaceholder'
-        : form.feature_id === 'teacher.suggest_marks'
-          ? 'studioMarksPlaceholder'
-          : form.feature_id === 'teacher.reading_level'
-            ? 'studioReadingPlaceholder'
-            : form.feature_id === 'ai.pptx'
-              ? 'studioSlidesPlaceholder'
-              : sourceFirst.value
-                ? 'studioSourcePlaceholder'
-                : revision.value
-                  ? 'studioRevisionPlaceholder'
-                  : education.value
-                    ? 'studioEducationPlaceholder'
-                    : 'studioPromptPlaceholder',
-  ),
-)
 const formats = computed<string[]>(
-  () =>
-    selected.value?.parameter_schema?.output_format?.enum ||
-    selected.value?.parameter_schema?.properties?.output_format?.enum || ['pdf', 'pptx'],
-)
-const maxLength = computed(
-  () => studio.config.value?.limits?.[form.output_format === 'pptx' ? 'slides' : 'sections'] || 2,
-)
-const questionMultiplier = computed(
-  () =>
-    ({ 'teacher.variants': 3, 'teacher.differentiated': 3, 'school.weekly_pack': 5 })[form.feature_id] || 1,
-)
-const maxQuestions = computed(() =>
-  Math.floor((studio.config.value?.limits?.questions || 5) / questionMultiplier.value),
+  () => selected.value?.parameter_schema?.output_format?.enum || ['pdf'],
 )
 const outputLanguage = computed(
   () => ({ en: 'English', uz: 'O‘zbekcha', ru: 'Русский' })[form.output_locale] || form.output_locale,
 )
-
+const examples = computed(() => promptExamples(form.feature_id))
+const defaultPages = computed(() => studio.config.value?.default_pages ?? 5)
+const maxPages = computed(() => selected.value?.max_pages ?? defaultPages.value)
 /**
- * Density decides how much of the page the body text fills. The server owns the
- * list and the actual spacing metrics, so the UI never hardcodes either.
+ * The page count is read from the description by the server, so the form does
+ * not parse it a second time: it shows what the draft came back with, and the
+ * default until there is one.
  */
-const densities = computed<string[]>(
-  () => (selected.value?.parameter_schema as any)?.density?.enum || [],
-)
-const activeDensity = computed(() => form.options.density || 'balanced')
-function setDensity(value: string) {
-  form.options.density = value
-  quote.value = null
-}
+const readingPages = computed(() => draft.value?.options?.length ?? defaultPages.value)
+const clampedFrom = computed(() => {
+  const asked = draft.value?.options?.requested_pages
+  return asked && asked !== readingPages.value ? asked : 0
+})
 
-/** One tone select replaces the free-text audience and style boxes. */
-const TONES = ['neutral', 'formal', 'friendly', 'academic', 'simple'] as const
-const providerReady = computed(
-  () => studio.config.value?.provider?.configured === true || !!draft.value?.transcription_ready,
-)
+const providerReady = computed(() => studio.config.value?.provider?.configured === true)
 const canUseTool = computed(
+  () => !!selected.value && selected.value.eligible !== false && providerReady.value,
+)
+const hasEssentialInput = computed(
   () =>
-    !!draft.value?.transcription_ready ||
-    (!!selected.value && selected.value.eligible !== false && providerReady.value),
-)
-// Only `study.pdf_qa` still needs a source of some kind; everywhere else the
-// pasted text or the upload is genuinely optional.
-const sourceOptional = computed(
-  () => form.feature_id !== 'study.pdf_qa' || files.value.length > 0,
-)
-const hasAuthoredContent = (value: any) =>
-  value?.sections?.some((section: any) => section.body?.trim()) ||
-  value?.questions?.some((question: any) => question.stem?.trim())
-const hasEssentialInput = computed(() => {
-  if (handwriting.value)
-    return files.value.length === 1 && (!files.value[0].page_count || files.value[0].page_count === 1)
-  if (adaptive.value) return !!form.options.project_id
-  if (revision.value) return !!form.options.source_draft_id && !!form.options.selected_section_ids?.length
-  // A question needs something to answer from; either an upload or pasted text.
-  if (form.feature_id === 'study.pdf_qa')
-    return !!form.prompt.trim() && (files.value.length > 0 || !!form.source_text.trim())
-  return (
-    !!primaryText.value.trim() ||
+    !!form.prompt.trim() ||
     files.value.length > 0 ||
     !!form.source_text.trim() ||
-    hasAuthoredContent(content.value) ||
-    hasAuthoredContent(templateContent.value)
-  )
-})
+    // A draft opened from the list already has its content; it does not need
+    // the description typed out again.
+    sectionList.value.some((section: any) => section.body?.trim()),
+)
+/** The first line of the description names the document unless a title is set. */
 const effectiveTitle = computed(() =>
-  Array.from(
-    (
-      form.title.trim() ||
-      primaryText.value.trim() ||
-      form.source_text.trim() ||
-      files.value[0]?.name?.replace(/\.[^.]+$/, '') ||
-      name(form.feature_id, selected.value?.name)
-    ).split(/\r?\n/, 1)[0] || '',
+  (
+    form.title.trim() ||
+    form.prompt.trim() ||
+    form.source_text.trim() ||
+    files.value[0]?.name?.replace(/\.[^.]+$/, '') ||
+    name(form.feature_id, selected.value?.name)
   )
-    .slice(0, 160)
-    .join(''),
+    .split(/\r?\n/, 1)[0]
+    .slice(0, 160),
 )
-function defaultsForFeature() {
-  if (draft.value || templateContent.value) return
-  form.output_format = ['ai.pptx', 'ai.source_to_slides', 'school.project_slides'].includes(form.feature_id)
-    ? 'pptx'
-    : 'pdf'
-  if (!formats.value.includes(form.output_format)) form.output_format = formats.value[0] || 'pdf'
-  form.options.length = handwriting.value
-    ? 1
-    : Math.min(form.output_format === 'pptx' ? 5 : 2, maxLength.value)
-  form.options.question_count = handwriting.value ? 0 : Math.min(5, maxQuestions.value)
-}
-watch(() => studio.config.value, defaultsForFeature)
-watch(
-  () => form.output_format,
-  () => {
-    if (!draft.value) form.options.length = Math.min(form.options.length || 2, maxLength.value)
-  },
-)
-watch(
-  () => form.feature_id,
-  (_, previous) => {
-    if (draft.value || templateContent.value) return
-    delete form.options.source_draft_id
-    delete form.options.source_draft_version
-    delete form.options.selected_section_ids
-    delete form.options.project_id
-    revisionSource.value = null
-    if (previous === 'study.handwriting')
-      files.value = files.value.filter((file) => file.mime_type === 'application/pdf')
-    defaultsForFeature()
-  },
-)
+// Slides default to a PDF; only the slides service offers the editable deck.
+watch([() => form.feature_id, formats], () => {
+  if (!draft.value && !formats.value.includes(form.output_format))
+    form.output_format = formats.value[0] || 'pdf'
+})
+
 function draftFields() {
   const options = Object.fromEntries(
     Object.entries(form.options).filter(([, value]) => value !== '' && value !== undefined),
@@ -282,13 +93,9 @@ function draftFields() {
     ...form,
     title: effectiveTitle.value,
     prompt: form.prompt.trim() || name(form.feature_id, selected.value?.name),
-    source_text: handwriting.value || revision.value || adaptive.value ? '' : form.source_text,
+    source_text: form.source_text,
     options,
-    source_ids: revision.value
-      ? draft.value?.source_ids || []
-      : adaptive.value
-        ? []
-        : files.value.map((file) => file.id),
+    source_ids: files.value.map((file) => file.id),
   }
 }
 
@@ -332,7 +139,7 @@ async function load() {
       files.value = await Promise.all(
         (draft.value.source_ids || []).map((id: string) => ws.api(`/files/${id}`)),
       )
-      step.value = draft.value.transcription_ready ? 1 : 0
+      step.value = 0
       const pending = reviewHandoff.value
       if (
         pending?.draftId === draft.value.id &&
@@ -347,44 +154,14 @@ async function load() {
       }
       reviewHandoff.value = null
     })
-  else if (route.query.template) {
-    let tpl = studio.config.value?.templates?.find((v: any) => v.id === route.query.template)
-    if (!tpl) {
-      try {
-        tpl = await ws.api(`/templates/${route.query.template}`)
-      } catch (e) {
-        error.value = requestError(e)
-      }
-    }
-    if (tpl) {
-      defaultsForFeature()
-      const presets: Record<string, string> = {
-        clean: 'presetClean',
-        classroom: 'presetClassroom',
-        presentation: 'presetPresentation',
-        executive_report: 'presetExecutive',
-        compact_brief: 'presetBrief',
-        study_notes: 'presetStudy',
-      }
-      form.title = presets[tpl.id] ? t(presets[tpl.id]!) : tpl.name || ''
-      form.source_text = tpl.content?.body || tpl.content?.instructions || tpl.instructions || ''
-      if (tpl.content?.sections?.length) {
-        templateContent.value = JSON.parse(JSON.stringify(tpl.content))
-        if (tpl.content.feature_id) form.feature_id = tpl.content.feature_id
-        form.options = { ...form.options, ...tpl.content.options }
-        form.output_locale = tpl.output_locale || form.output_locale
-        form.output_format = tpl.content.output_format || form.output_format
-      }
-      form.options.template_id = tpl.id
-    }
-  }
 }
+
 /**
  * The bot links here as `?file_id=…` after a file has been sent to the chat, so
  * the document carries across instead of having to be uploaded twice.
  */
 async function adoptLinkedFiles() {
-  if (props.draftId || adaptive.value) return
+  if (props.draftId) return
   // The bot sends one `file_id` per file already attached to its draft.
   for (const id of linkedFileIds(route.query.file_id)) {
     if (files.value.some((file) => file.id === id)) continue
@@ -393,12 +170,6 @@ async function adoptLinkedFiles() {
       // `/files/{id}` answers 200 for an expired asset; attaching one would
       // only show a chip that fails at generation.
       if (asset.state !== 'ready') continue
-      // Attach it exactly as the picker would, so the same rules apply: one
-      // image for handwriting, PDFs everywhere else.
-      if (handwriting.value) {
-        files.value = [asset]
-        return
-      }
       if (asset.mime_type === 'application/pdf') files.value = [...files.value, asset]
     } catch {
       // Deleted or someone else's: the page still works without it.
@@ -408,9 +179,6 @@ async function adoptLinkedFiles() {
 
 onMounted(() => {
   load().then(adoptLinkedFiles)
-  loadProjects()
-  loadDrafts()
-  if (form.feature_id === 'ai.images') navigateTo(path('/app/images'))
 })
 watch(
   () => props.draftId,
@@ -444,18 +212,12 @@ async function upload(list: FileList | null) {
       const body = new FormData()
       body.append('file', file)
       const asset = await ws.api('/files/uploads', { method: 'POST', body })
-      if (form.feature_id === 'study.handwriting') files.value = []
       files.value.push(asset)
     }
   })
 }
 async function createDraft() {
   acceptDraft(await ws.api('/generation/drafts', { method: 'POST', body: draftFields() }))
-  if (templateContent.value) {
-    content.value = { ...templateContent.value, title: form.title }
-    await saveDraft()
-    templateContent.value = null
-  }
 }
 async function saveDraft() {
   if (!draft.value) return
@@ -466,7 +228,7 @@ async function saveDraft() {
       body: {
         version: draft.value.version,
         ...fields,
-        ...(contentEdited.value || (draft.value.transcription_ready && step.value === 1)
+        ...(contentEdited.value
           ? { content: { ...content.value, title: effectiveTitle.value } }
           : {}),
       },
@@ -518,26 +280,12 @@ async function review() {
   await run('quote', async () => {
     if (!draft.value) await createDraft()
     else await saveDraft()
-    const questions = content.value.questions?.length || 0
-    const minimumQuestions =
-      form.feature_id === 'teacher.variants'
-        ? 3
-        : form.feature_id === 'school.weekly_pack'
-          ? 5
-          : [
-                'study.flashcards',
-                'study.answer_key',
-                'teacher.answer_key',
-                'study.exam_pack',
-                'teacher.differentiated',
-                'teacher.lesson_pack',
-              ].includes(form.feature_id)
-            ? 1
-            : 0
+    // Local authoring has no model to write the body, so the content has to
+    // come from the customer before there is anything to render.
     if (
       studio.localProvider.value &&
-      ((!sectionList.value.some((section) => section.body?.trim()) && !questions) ||
-        questions < minimumQuestions)
+      !sectionList.value.some((section) => section.body?.trim()) &&
+      !content.value.questions?.length
     ) {
       step.value = 1
       notice.value = t('studioLocalContentNeeded')
@@ -610,58 +358,6 @@ async function reviewOutline() {
     })
   })
 }
-async function saveTemplate() {
-  await run('template', async () => {
-    await saveDraft()
-    const reusableOptions = Object.fromEntries(
-      ['length', 'density', 'question_count', 'subject', 'grade', 'duration', 'style', 'objectives']
-        .filter((key) => form.options[key] !== undefined)
-        .map((key) => [key, form.options[key]]),
-    )
-    if (form.options.branding) {
-      reusableOptions.branding = {
-        name: form.options.branding.name,
-        accent: form.options.branding.accent,
-      }
-    }
-    const needsOriginal = [
-      'ai.rewrite',
-      'ai.regenerate_slide',
-      'study.pdf_qa',
-      'study.handwriting',
-      'school.adaptive',
-    ].includes(form.feature_id)
-    await ws.api('/templates', {
-      method: 'POST',
-      body: {
-        name: form.title,
-        content: {
-          ...content.value,
-          feature_id: needsOriginal
-            ? form.output_format === 'pptx'
-              ? 'ai.pptx'
-              : 'ai.pdf_text'
-            : form.feature_id,
-          instructions: form.source_text,
-          options: reusableOptions,
-          output_format: form.output_format,
-        },
-        output_locale: form.output_locale,
-      },
-    })
-    notice.value = t('templateSaved')
-  })
-}
-async function saveProject() {
-  await run('save-project', async () => {
-    await saveDraft()
-    const result = await ws.api('/education/projects', {
-      method: 'POST',
-      body: { draft_id: draft.value.id, title: form.title, save_consent: saveConsent.value },
-    })
-    await navigateTo(path(`/app/projects/${result.id}`))
-  })
-}
 function invalidateQuote() {
   quote.value = null
   submissionKey.value = ''
@@ -685,10 +381,8 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
       <h1>{{ t('studioTitle') }}</h1>
       <p>{{ t('studioSub') }}</p>
     </div>
-    <NuxtLink :to="path('/app/images')" class="button secondary"
-      ><AppIcon name="image" :size="17" />{{ t('ai.images.name') }}</NuxtLink
-    ><NuxtLink :to="path('/app/templates')" class="button secondary"
-      ><AppIcon name="files" :size="17" />{{ t('templates') }}</NuxtLink
+    <NuxtLink :to="path('/app/guide')" class="button secondary"
+      ><AppIcon name="book" :size="17" />{{ t('studioGuideLink') }}</NuxtLink
     >
   </div>
   <div v-if="studio.localProvider.value" class="provider-banner">
@@ -700,16 +394,6 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
     <span class="status-badge">LOCAL</span>
   </div>
   <ErrorBanner v-if="error" :message="error" />
-  <div v-if="draft?.transcription_ready" class="info-banner">
-    <AppIcon name="edit" :size="19" />{{ t('transcriptionReviewNote') }}
-  </div>
-  <div v-if="form.feature_id === 'study.handwriting'" class="provider-banner">
-    <AppIcon name="edit" :size="23" />
-    <div>
-      <strong>{{ t('handwritingReview') }}</strong>
-      <p>{{ t(selected?.eligible === false ? 'handwritingProviderRequired' : 'handwritingInputHint') }}</p>
-    </div>
-  </div>
   <div v-if="notice" class="success-banner" role="status">
     <AppIcon name="check" :size="17" />{{ notice }}
   </div>
@@ -748,95 +432,65 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
             <p class="studio-intro">{{ t('studioQuickHint') }}</p>
             <label class="form-field"
               ><span>{{ t('purpose') }}</span
-              ><select
-                v-model="form.feature_id"
-                :disabled="!!draft"
-                data-testid="studio-purpose"
-                @change="templateContent = null"
-              >
+              ><select v-model="form.feature_id" :disabled="!!draft" data-testid="studio-purpose">
                 <option v-for="feature in studio.features.value" :key="feature.id" :value="feature.id">
                   {{ name(feature.id, feature.name) }}
                 </option>
               </select></label
             >
-            <section v-if="revision && !draft" class="revision-source">
+            <label class="form-field studio-primary-field">
+              <span>{{ t('studioDescribe') }}</span>
+              <textarea
+                v-model="form.prompt"
+                data-testid="studio-primary-input"
+                rows="7"
+                :maxlength="studio.config.value?.limits?.source_chars || 12000"
+                :placeholder="t('studioDescribePlaceholder')"
+              />
+              <small>{{ t('studioDescribeHint', { pages: defaultPages, max: maxPages }) }}</small>
+            </label>
+            <div class="studio-examples">
+              <span>{{ t('studioTryOne') }}</span>
+              <button
+                v-for="(example, index) in examples"
+                :key="index"
+                type="button"
+                class="chip"
+                :data-testid="`studio-example-${index}`"
+                @click="form.prompt = example"
+              >
+                {{ example.slice(0, 54) }}…
+              </button>
+              <NuxtLink class="text-link" :to="path('/app/guide')"
+                >{{ t('studioGuideLink') }}<AppIcon name="right" :size="15"
+              /></NuxtLink>
+            </div>
+            <div class="form-row">
               <label class="form-field"
-                ><span>{{ t('sourceDraft') }}</span
-                ><select v-model="form.options.source_draft_id" @change="chooseRevision">
-                  <option value="" disabled>{{ t('chooseDraft') }}</option>
-                  <option v-for="item in revisionDrafts" :key="item.id" :value="item.id">
-                    {{ item.title }} · {{ item.output_format.toUpperCase() }}
+                ><span>{{ t('outputLanguage') }}</span
+                ><select v-model="form.output_locale" data-testid="studio-locale">
+                  <option
+                    v-for="(label, value) in { en: 'English', uz: 'O‘zbekcha', ru: 'Русский' }"
+                    :key="value"
+                    :value="value"
+                  >
+                    {{ label }}
                   </option>
                 </select></label
               >
-              <p class="field-hint">{{ t('revisionHint') }}</p>
-              <label
-                v-for="section in revisionSource?.content?.sections || []"
-                :key="section.id"
-                class="check-label revision-section"
-                ><input
-                  v-model="form.options.selected_section_ids"
-                  type="checkbox"
-                  :value="section.id"
-                /><span>{{ section.heading }}</span></label
+              <label v-if="formats.length > 1" class="form-field"
+                ><span>{{ t('format') }}</span
+                ><select v-model="form.output_format" data-testid="studio-format">
+                  <option v-for="value in formats" :key="value" :value="value">
+                    {{ value.toUpperCase() }}
+                  </option>
+                </select></label
               >
-            </section>
-            <label v-if="!handwriting && !adaptive" class="form-field studio-primary-field">
-              <span
-                >{{ primaryLabel }}<small v-if="revision"> · {{ t('studioOptional') }}</small></span
-              >
-              <textarea
-                v-model="primaryText"
-                data-testid="studio-primary-input"
-                rows="5"
-                :maxlength="
-                  Math.min(sourceFirst ? 80000 : 12000, studio.config.value?.limits?.source_chars || 12000)
-                "
-                :placeholder="primaryPlaceholder"
-              />
-              <small>{{
-                t(sourceFirst ? 'studioSourceHint' : revision ? 'studioRevisionHint' : 'studioPromptHint')
-              }}</small>
-            </label>
-            <label v-if="form.feature_id === 'study.pdf_qa'" class="form-field">
-              <span
-                >{{ t('sourceText')
-                }}<small v-if="sourceOptional"> · {{ t('studioOptional') }}</small></span
-              >
-              <textarea
-                v-model="form.source_text"
-                data-testid="studio-answer-source"
-                rows="4"
-                :maxlength="studio.config.value?.limits?.source_chars || 12000"
-              />
-              <small>{{ t('studioAnswerSourceHint') }}</small>
-            </label>
-            <div v-if="!revision && !adaptive" class="studio-source">
+            </div>
+            <div class="studio-source">
               <div>
-                <h3>
-                  {{
-                    t(
-                      handwriting
-                        ? 'studioHandwritingFile'
-                        : form.feature_id === 'study.pdf_qa'
-                          ? 'studioQuestionFile'
-                          : 'studioAttach',
-                    )
-                  }}
-                </h3>
-                <p>
-                  {{
-                    t(
-                      handwriting
-                        ? 'handwritingInputHint'
-                        : form.feature_id === 'study.pdf_qa'
-                          ? 'studioQuestionFileHint'
-                          : pdfSources
-                            ? 'studioPdfSourcesHint'
-                            : 'studioAttachHint',
-                    )
-                  }}
-                </p>
+                <h3>{{ t('studioAttach') }}</h3>
+                <p>{{ t('studioAttachHint') }}</p>
               </div>
               <button
                 class="button secondary"
@@ -847,14 +501,14 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
               ><input
                 ref="input"
                 type="file"
-                :multiple="form.feature_id !== 'study.handwriting'"
+                multiple
                 class="visually-hidden"
-                :accept="form.feature_id === 'study.handwriting' ? '.png,.jpg,.jpeg,.pdf' : '.pdf'"
+                accept=".pdf"
                 @change="upload(($event.target as HTMLInputElement).files)"
                 :aria-label="t('sourceFiles')"
               />
             </div>
-            <div v-for="file in !revision && !adaptive ? files : []" :key="file.id" class="source-chip">
+            <div v-for="file in files" :key="file.id" class="source-chip">
               <AppIcon name="file" :size="17" /><span>{{ file.name }}</span
               ><button
                 class="icon-button"
@@ -864,25 +518,10 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
                 <AppIcon name="x" :size="15" />
               </button>
             </div>
-            <label v-if="form.feature_id === 'school.adaptive'" class="form-field"
-              ><span>{{ t('projects') }}</span
-              ><select v-model="form.options.project_id">
-                <option value="" disabled>{{ t('chooseProject') }}</option>
-                <option v-for="project in savedProjects" :key="project.id" :value="project.id">
-                  {{ project.title }}
-                </option></select
-              ><small>{{ t('adaptiveProjectHint') }}</small></label
-            >
-            <p v-if="revision && !revisionDrafts.length" class="field-hint">{{ t('studioNoDrafts') }}</p>
-            <p v-if="adaptive && !savedProjects.length" class="field-hint">{{ t('adaptiveProjectHint') }}</p>
             <div class="studio-defaults" aria-live="polite">
               <AppIcon name="sparkle" :size="16" /><span
                 >{{ form.output_format.toUpperCase() }} · {{ outputLanguage }} ·
-                {{
-                  t(form.output_format === 'pptx' ? 'studioSlidesSummary' : 'studioLengthSummary', {
-                    count: form.options.length,
-                  })
-                }}</span
+                {{ t('studioPagesReading', { count: readingPages }) }}</span
               >
             </div>
             <div class="studio-form-actions">
@@ -923,27 +562,27 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
               <div class="outline-fields">
                 <label class="form-field"
                   ><span>{{ t('sectionHeading') }}</span
-                  ><input v-model="section.heading" :disabled="!editableSection(section)" /></label
+                  ><input v-model="section.heading" /></label
                 ><label class="form-field"
                   ><span>{{ t('sectionBody') }}</span
-                  ><textarea v-model="section.body" :disabled="!editableSection(section)" rows="4" />
+                  ><textarea v-model="section.body" rows="4" />
                 </label>
                 <label v-if="form.output_format === 'pptx'" class="form-field"
                   ><span>{{ t('speakerNotes') }}</span
-                  ><textarea v-model="section.notes" :disabled="!editableSection(section)" rows="3" />
+                  ><textarea v-model="section.notes" rows="3" />
                 </label>
               </div>
               <div class="outline-actions">
                 <button
                   class="icon-button"
-                  :disabled="index === 0 || !!draft?.revision"
+                  :disabled="index === 0"
                   @click="moveSection(Number(index), -1)"
                   :aria-label="t('moveUp')"
                 >
                   <AppIcon name="up" :size="17" /></button
                 ><button
                   class="icon-button"
-                  :disabled="index === sectionList.length - 1 || !!draft?.revision"
+                  :disabled="index === sectionList.length - 1"
                   @click="moveSection(Number(index), 1)"
                   :aria-label="t('moveDown')"
                 >
@@ -951,7 +590,7 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
                 ><button
                   class="icon-button"
                   @click="content.sections.splice(index, 1)"
-                  :disabled="!!draft?.revision"
+                 
                   :aria-label="t('delete')"
                 >
                   <AppIcon name="trash" :size="17" />
@@ -961,19 +600,18 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
             <button
               class="button secondary full add-section"
               @click="addSection"
-              :disabled="!!draft?.revision"
+             
             >
               <AppIcon name="plus" :size="17" />{{ t('addSection') }}
             </button>
             <button
-              v-if="!revision && form.feature_id !== 'study.handwriting'"
               class="button secondary full outline-generation"
               :disabled="!!busy || submissionPending"
               @click="reviewOutline"
             >
               <AppIcon name="sparkle" :size="17" />{{ t('reviewOutlineGeneration') }}
             </button>
-            <div v-if="education && !handwriting" class="question-editor">
+            <div v-if="content.questions.length" class="question-editor">
               <div class="panel-heading">
                 <h3>{{ t('practice') }}</h3>
                 <button class="button secondary small" @click="addQuestion">
@@ -1052,6 +690,14 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
       <aside class="studio-rail">
         <section v-if="quote" class="panel studio-quote">
           <h2>{{ t('reviewTitle') }}</h2>
+          <div class="meter-row" data-testid="studio-pages">
+            <span>{{ t('guideRowPages') }}</span
+            ><strong>{{ readingPages }}</strong>
+          </div>
+          <!-- A clamped request is said out loud rather than quietly honoured short. -->
+          <p v-if="clampedFrom" class="field-hint" data-testid="studio-pages-clamped">
+            {{ t('studioPagesClamped', { asked: clampedFrom, given: readingPages }) }}
+          </p>
           <div v-for="meter in meters" :key="meter.meter" class="meter-row">
             <span>{{
               t(
@@ -1079,9 +725,7 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
                       ? 'retry'
                       : quoteStage === 'outline'
                         ? 'confirmOutlineGeneration'
-                        : draft?.transcription_reviewed
-                          ? 'exportTranscription'
-                          : 'generateDocument',
+                        : 'generateDocument',
                   )
             }}<AppIcon name="sparkle" :size="17" />
           </button>
@@ -1097,176 +741,13 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
           <summary>
             {{ t('studioMoreOptions') }}<span>{{ t('studioOptional') }}</span>
           </summary>
-          <fieldset class="studio-fieldset" :disabled="!!busy || submissionPending">
-            <p class="field-hint">{{ t('studioDefaultsHint') }}</p>
-            <label v-if="!revision" class="form-field"
-              ><span>{{ t('studioTitleOptional') }}</span
-              ><input
-                v-model="form.title"
-                maxlength="160"
-                :placeholder="effectiveTitle || t('studioAutoTitle')"
-              /><small>{{ t('studioAutoTitle') }}</small></label
-            >
-            <label
-              v-if="
-                !sourceFirst && !revision && !handwriting && !adaptive && form.feature_id !== 'study.pdf_qa'
-              "
-              class="form-field"
-              ><span>{{ t('sourceText') }} · {{ t('studioOptional') }}</span
-              ><textarea
-                v-model="form.source_text"
-                rows="4"
-                :maxlength="studio.config.value?.limits?.source_chars || 12000"
-              />
-            </label>
-            <label v-if="sourceFirst || handwriting || adaptive" class="form-field"
-              ><span>{{ t('studioExtraInstructions') }}</span
-              ><textarea v-model="form.prompt" rows="3" :maxlength="handwriting ? 1000 : 12000" />
-            </label>
-            <div v-if="education && !handwriting" class="form-row education-fields">
-              <label class="form-field"
-                ><span>{{ t('subject') }}</span
-                ><input v-model="form.options.subject" maxlength="120"
-              /></label>
-              <label class="form-field"
-                ><span>{{ t('grade') }}</span
-                ><input v-model="form.options.grade" maxlength="120"
-              /></label>
-            </div>
-            <label v-if="education && !handwriting" class="form-field"
-              ><span>{{ t('objectives') }}</span
-              ><textarea v-model="form.options.objectives" rows="3" maxlength="1000" />
-            </label>
+          <div class="studio-settings-body">
             <label class="form-field"
-              ><span>{{ t('outputLanguage') }}</span
-              ><select v-model="form.output_locale" @change="quote = null">
-                <option value="en">English</option>
-                <option value="uz">O‘zbekcha</option>
-                <option value="ru">Русский</option>
-              </select></label
-            ><label class="form-field"
-              ><span>{{ t('format') }}</span
-              ><select
-                v-model="form.output_format"
-                :disabled="revision || handwriting || formats.length === 1"
-                @change="quote = null"
-              >
-                <option
-                  v-for="format in formats.filter((value) => value !== 'png')"
-                  :key="format"
-                  :value="format"
-                >
-                  {{ format.toUpperCase() }}
-                </option>
-              </select></label
-            ><label class="form-field"
-              ><span>{{ form.output_format === 'pptx' ? t('studioSlideCount') : t('studioPageCount') }}</span
-              ><input
-                v-model.number="form.options.length"
-                :disabled="revision || handwriting"
-                type="number"
-                min="1"
-                :max="maxLength"
-                data-testid="studio-length"
-                @change="quote = null" /><small>{{ t('studioPageCountHint', { max: maxLength }) }}</small></label
-            >
-
-            <!-- How much of the page the body text fills. Server-driven: the
-                 values come from /studio/config, the metrics live in the
-                 renderer, and every plan gets them. -->
-            <fieldset v-if="densities.length && !handwriting" class="form-field studio-density">
-              <span>{{ t('studioDensity') }}</span>
-              <div class="studio-density-row" role="radiogroup" :aria-label="t('studioDensity')">
-                <button
-                  v-for="value in densities"
-                  :key="value"
-                  type="button"
-                  class="studio-density-option"
-                  :class="{ active: activeDensity === value }"
-                  role="radio"
-                  :aria-checked="activeDensity === value"
-                  :data-testid="`studio-density-${value}`"
-                  @click="setDensity(value)"
-                >
-                  <strong>{{ t(`studioDensity_${value}`) }}</strong>
-                  <small>{{ t(`studioDensityHint_${value}`) }}</small>
-                </button>
-              </div>
-            </fieldset>
-
-            <label v-if="education && !handwriting" class="form-field"
-              ><span>{{ t('questionCount') }}</span
-              ><input
-                v-model.number="form.options.question_count"
-                type="number"
-                min="1"
-                :max="maxQuestions" /></label
-            ><label v-if="!handwriting && !revision" class="form-field"
-              ><span>{{ t('studioTone') }}</span
-              ><select v-model="form.options.style" data-testid="studio-tone">
-                <option value="">{{ t('studioToneDefault') }}</option>
-                <option v-for="tone in TONES" :key="tone" :value="tone">{{ t(`studioTone_${tone}`) }}</option>
-              </select></label
-            ><label v-if="education && !handwriting" class="form-field"
-              ><span>{{ t('duration') }}</span
-              ><input v-model.number="form.options.duration" type="number" min="5" max="240"
+              ><span>{{ t('studioTitleOptional') }}</span
+              ><input v-model="form.title" maxlength="160" data-testid="studio-title"
             /></label>
-            <details v-if="!handwriting && !revision" class="branding-options">
-              <summary>{{ t('branding') }}</summary>
-              <label class="check-label"
-                ><input type="checkbox" :checked="!!form.options.branding" @change="toggleBranding" /><span>{{
-                  t('useBranding')
-                }}</span></label
-              ><template v-if="form.options.branding"
-                ><label class="form-field"
-                  ><span>{{ t('brandName') }}</span
-                  ><input v-model="form.options.branding.name" maxlength="120" /></label
-                ><label class="form-field"
-                  ><span>{{ t('brandAccent') }}</span
-                  ><input v-model="form.options.branding.accent" type="color" /></label
-                ><button
-                  class="button secondary full"
-                  :disabled="!!busy || submissionPending"
-                  @click="logoInput?.click()"
-                >
-                  <AppIcon name="image" :size="16" />{{ t('uploadLogo') }}</button
-                ><input
-                  ref="logoInput"
-                  type="file"
-                  accept=".png,.jpg,.jpeg"
-                  class="visually-hidden"
-                  @change="uploadLogo(($event.target as HTMLInputElement).files?.[0])"
-                  :aria-label="t('uploadLogo')" />
-                <div v-if="form.options.branding.logo_asset_id" class="brand-logo-preview">
-                  <img
-                    :src="`/api/v1/files/${form.options.branding.logo_asset_id}/download`"
-                    :alt="t('brandLogo')"
-                  /><button
-                    class="icon-button"
-                    @click="delete form.options.branding.logo_asset_id"
-                    :aria-label="t('remove')"
-                  >
-                    <AppIcon name="x" :size="16" />
-                  </button></div
-              ></template>
-            </details>
-          </fieldset>
+          </div>
         </details>
-        <section v-if="draft && education && sectionList.length && step === 1" class="panel project-save">
-          <h3>{{ t('saveProject') }}</h3>
-          <label class="check-label"
-            ><input v-model="saveConsent" type="checkbox" /><span>{{ t('projectConsent') }}</span></label
-          ><button class="button secondary full" :disabled="!saveConsent || !!busy" @click="saveProject">
-            {{ t('saveProject') }}
-          </button>
-        </section>
-        <section v-if="draft && sectionList.length && step === 1" class="panel project-save">
-          <h3>{{ t('saveTemplate') }}</h3>
-          <p class="field-hint">{{ t('templateSaveHint') }}</p>
-          <button class="button secondary full" :disabled="!!busy || submissionPending" @click="saveTemplate">
-            {{ t('saveTemplate') }}
-          </button>
-        </section>
       </aside>
     </div></template
   >

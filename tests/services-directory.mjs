@@ -21,16 +21,9 @@ assert.ok(
 const output = path.resolve(process.env.STUDIO_ARTIFACT_DIR || '../service-review/directory')
 await fs.mkdir(output, { recursive: true })
 
-const FEATURED = ['ai.pdf_topic', 'ai.pptx', 'study.summary', 'study.quiz']
+const FEATURED = ['ai.pdf_topic', 'ai.pptx']
 const STAPLES = ['pdf.merge', 'pdf.compress', 'pdf.split', 'pdf.images_to_pdf', 'convert.word_to_pdf']
-const generationIds = [
-  ...FEATURED,
-  'ai.pdf_text',
-  'ai.pdf_sources',
-  'study.flashcards',
-  'teacher.lesson_plan',
-  'school.explain',
-]
+const generationIds = [...FEATURED]
 const catalogIds = [...STAPLES, 'pdf.to_images', 'ocr.extract_text', 'batch.convert']
 
 const browser = await chromium.launch({ headless: true, channel: 'chrome' })
@@ -116,15 +109,15 @@ try {
   await page.goto(`${origin}/en/app/tools`, { waitUntil: 'domcontentloaded' })
   await page.locator('.tool-card').first().waitFor()
   const listed = (await cardIds()).map(idFromHref)
-  assert.deepEqual(listed.slice(0, 4), FEATURED, 'The four AI services lead the directory')
-  assert.deepEqual(listed.slice(4, 9), STAPLES, 'Then the familiar file tools, merge first')
+  assert.deepEqual(listed.slice(0, 2), FEATURED, 'The two AI services lead the directory')
+  assert.deepEqual(listed.slice(2, 7), STAPLES, 'Then the familiar file tools, merge first')
   assert.equal(new Set(listed).size, listed.length, 'No feature is listed twice')
   assert.deepEqual(
     [...listed].sort(),
     [...generationIds, ...catalogIds].sort(),
     'Every feature from both endpoints is offered',
   )
-  checks.push('The services directory leads with the four AI services, then the file tools')
+  checks.push('The services directory leads with the two AI services, then the file tools')
 
   // 2. Each featured card carries its own name and description, not filler.
   for (const id of FEATURED) {
@@ -163,7 +156,7 @@ try {
   const strip = await page.$$eval('.quick-tools .tool-card', (nodes) =>
     nodes.map((node) => decodeURIComponent(node.getAttribute('href') || '')),
   )
-  assert.deepEqual(strip.map(idFromHref), [...FEATURED, 'pdf.merge'], 'Popular tools leads with AI')
+  assert.deepEqual(strip.map(idFromHref), [...FEATURED, 'pdf.merge', 'pdf.compress', 'pdf.split'], 'Popular tools leads with AI')
   await page.screenshot({ path: path.join(output, 'dashboard-popular.png'), fullPage: true })
   checks.push('The dashboard "Popular tools" strip is the head of the same ordering')
 

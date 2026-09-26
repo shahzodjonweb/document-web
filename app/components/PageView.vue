@@ -61,16 +61,10 @@ useHead(() => ({
   /><ToolWorkspace
     v-else-if="view.startsWith('/app/tools/')"
     :tool-id="decodeURIComponent(view.slice('/app/tools/'.length))"
-  /><ImageStudio v-else-if="view === '/app/images'" /><StudioView
+  /><StudioView
     v-else-if="view === '/app/create' || view.startsWith('/app/create/')"
     :draft-id="view.split('/')[3]"
-  /><EducationView
-    v-else-if="['/app/study', '/app/school', '/app/teach'].includes(view)"
-    :mode="view.split('/')[2]"
-  /><ProjectsView
-    v-else-if="view === '/app/projects' || view.startsWith('/app/projects/')"
-    :project-id="view.split('/')[3]"
-  /><TemplatesView v-else-if="view === '/app/templates'" /><WorkflowsView
+  /><GuideView v-else-if="view === '/app/guide' || view === '/guide'" /><WorkflowsView
     v-else-if="view === '/app/workflows'"
   /><LazyEditorShell
     v-else-if="view === '/app/editor' || view.startsWith('/app/editor/')"

@@ -20,8 +20,7 @@ const extendedNav = computed(() =>
   studio.config.value
     ? [
         { key: 'create', url: '/app/create', icon: 'sparkle' },
-        { key: 'education', url: '/app/study', icon: 'word' },
-        { key: 'projects', url: '/app/projects', icon: 'folder' },
+        { key: 'guide', url: '/app/guide', icon: 'book' },
         { key: 'editor', url: '/app/editor', icon: 'edit' },
         { key: 'workflows', url: '/app/workflows', icon: 'reorder' },
         { key: 'bot', url: '/app/bot', icon: 'send' },
@@ -62,13 +61,7 @@ async function changeMode(event: Event) {
   try {
     const mode = (event.target as HTMLSelectElement).value
     user.value = await ws.api('/me', { method: 'PATCH', body: { mode } })
-    const destinations: Record<string, string> = {
-      general: '/app',
-      student: '/app/study',
-      school: '/app/school',
-      teacher: '/app/teach',
-    }
-    await navigateTo(path(destinations[mode] || '/app'))
+    await navigateTo(path('/app'))
   } catch {
     apiError.value = true
   }

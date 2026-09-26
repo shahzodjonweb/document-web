@@ -5,11 +5,10 @@ const GENERATION = /^(ai|study|school|teacher)\./
 export const isGenerationFeature = (id: string) => GENERATION.test(id)
 
 /**
- * What a first-time visitor should see first. The four AI services lead, then
- * the familiar file tools; everything else follows in catalogue order with the
- * remaining generation features last, where the category filter can reach them.
+ * What a first-time visitor should see first: the two AI services, then the
+ * familiar file tools, then everything else in catalogue order.
  */
-const FEATURED = ['ai.pdf_topic', 'ai.pptx', 'study.summary', 'study.quiz']
+const FEATURED = ['ai.pdf_topic', 'ai.pptx']
 const STAPLES = ['pdf.merge', 'pdf.compress', 'pdf.split', 'pdf.images_to_pdf', 'convert.word_to_pdf']
 
 export function useTools() {
@@ -19,13 +18,11 @@ export function useTools() {
   const description = (id: string) =>
     t(`${id}.description`) === `${id}.description` ? t('simpleBody') : t(`${id}.description`)
   const destination = (id: string) =>
-    id === 'ai.images'
-      ? '/app/images'
-      : id.startsWith('editor.')
-        ? `/app/editor?feature=${encodeURIComponent(id)}`
-        : GENERATION.test(id)
-          ? `/app/create?feature=${encodeURIComponent(id)}`
-          : `/app/tools/${id}`
+    id.startsWith('editor.')
+      ? `/app/editor?feature=${encodeURIComponent(id)}`
+      : GENERATION.test(id)
+        ? `/app/create?feature=${encodeURIComponent(id)}`
+        : `/app/tools/${id}`
   const icons: Record<string, string> = {
     'ocr.extract_text': 'word',
     'ocr.searchable_pdf': 'search',
@@ -48,17 +45,8 @@ export function useTools() {
     'pdf.protect': 'lock',
     'pdf.unlock_known': 'unlock',
   }
-  /** Generation ids are matched by shape rather than listed one by one. */
-  const icon = (id: string) => {
-    if (icons[id]) return icons[id]
-    if (!GENERATION.test(id)) return 'file'
-    if (id === 'ai.images') return 'image'
-    if (/slide|pptx|poster|pack/.test(id)) return 'files'
-    if (/quiz|test|mcq|marks|check|rubric|answer/.test(id)) return 'checks'
-    if (/plan|outline|schedule|syllabus|revision/.test(id)) return 'reorder'
-    if (id.startsWith('ai.')) return 'sparkle'
-    return 'book'
-  }
+  const icon = (id: string) =>
+    icons[id] || (id === 'ai.pptx' ? 'files' : GENERATION.test(id) ? 'sparkle' : 'file')
   const colors: Record<string, string> = {
     'pdf.merge': 'purple',
     'pdf.compress': 'green',
@@ -71,8 +59,6 @@ export function useTools() {
     'pdf.unlock_known': 'rose',
     'ai.pdf_topic': 'purple',
     'ai.pptx': 'sky',
-    'study.summary': 'green',
-    'study.quiz': 'blue',
   }
   const { features } = useWorkspace()
   const studio = useStudio()

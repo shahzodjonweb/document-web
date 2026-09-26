@@ -3132,3 +3132,91 @@
     gap: 8px;
   }
 }
+
+/* Prompt guide: a short reference table and examples that can be used as-is. */
+.guide-lead p {
+  font-size: 15px;
+  line-height: 1.7;
+  margin: 0;
+  max-width: 68ch;
+}
+.guide-table dl {
+  display: grid;
+  grid-template-columns: minmax(120px, 180px) 1fr;
+  gap: 14px 24px;
+  margin: 0;
+}
+.guide-table dt {
+  font-weight: 600;
+  font-size: 14px;
+}
+.guide-table dd {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.65;
+}
+.guide-service h3 {
+  font-size: 15px;
+  margin: 18px 0 10px;
+}
+.guide-examples {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.guide-examples li {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: space-between;
+}
+.guide-examples p {
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+}
+.guide-examples .button {
+  align-self: flex-start;
+}
+.studio-examples {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: -4px 0 4px;
+}
+.studio-examples > span {
+  color: var(--muted);
+  font-size: 13px;
+}
+.studio-examples .chip {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: inherit;
+  cursor: pointer;
+  font-size: 12.5px;
+  line-height: 1.4;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 6px 12px;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.studio-examples .chip:hover {
+  border-color: var(--primary);
+}
+@media (max-width: 600px) {
+  .guide-table dl {
+    grid-template-columns: 1fr;
+    gap: 4px 0;
+  }
+  .guide-table dd {
+    margin-bottom: 12px;
+  }
+}

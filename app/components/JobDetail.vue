@@ -4,13 +4,7 @@ const props = defineProps<{ jobId: string }>()
 const { t, count, path, date } = useLocale()
 const ws = useWorkspace()
 const { name, destination } = useTools()
-const nextRoute = computed(() =>
-  job.value?.feature_id === 'ai.images'
-    ? '/app/images'
-    : /^(ai|study|school|teacher)\./.test(job.value?.feature_id || '')
-      ? `/app/create?feature=${job.value?.feature_id}`
-      : destination(job.value?.feature_id || ''),
-)
+const nextRoute = computed(() => destination(job.value?.feature_id || ''))
 const job = ref<Job | null>(null)
 const error = ref('')
 let timer: ReturnType<typeof setTimeout> | undefined

@@ -7,6 +7,8 @@ export interface StudioFeature {
   parameter_schema?: Record<string, any>
   parameters?: Record<string, any>
   locales?: string[]
+  /** Most pages this account can be given in one document of this kind. */
+  max_pages?: number
 }
 export interface StudioConfig {
   provider: { mode: string; label: string; configured: boolean; image_configured?: boolean }
@@ -14,6 +16,8 @@ export interface StudioConfig {
   generation_features?: StudioFeature[]
   editor_features?: StudioFeature[]
   templates?: any[]
+  /** Pages produced when the description names no count. */
+  default_pages?: number
   [key: string]: any
 }
 export function useStudio() {

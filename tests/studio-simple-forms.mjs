@@ -31,38 +31,14 @@ const drafts = new Map(),
   idempotentJobs = new Map()
 let sequence = 0
 let affordable = true
-let activeFeature = ''
 let expiredFile = false
 let visualChecks = 0
 let failJobOnce = false
 let expireJobOnce = false
+let clampPages = 0
 const id = () => `00000000-0000-4000-8000-${String(++sequence).padStart(12, '0')}`
 const future = () => new Date(Date.now() + 300000).toISOString()
-const featureIds = [
-  'ai.pdf_topic',
-  'ai.pdf_text',
-  'ai.pdf_sources',
-  'ai.pptx',
-  'ai.source_to_slides',
-  'ai.rewrite',
-  'ai.regenerate_slide',
-  'study.summary',
-  'study.flashcards',
-  'study.pdf_qa',
-  'study.handwriting',
-  'study.definitions',
-  'study.answer_key',
-  'study.report_format',
-  'study.references',
-  'study.writing_feedback',
-  'school.explain',
-  'school.adaptive',
-  'teacher.lesson_plan',
-  'teacher.worksheet',
-  'teacher.answer_key',
-  'teacher.syllabus',
-  'teacher.feedback',
-]
+const featureIds = ['ai.pdf_topic', 'ai.pptx']
 const account = {
   id: '00000000-0000-4000-8000-999999999999',
   display_name: 'Fixture Reader',
@@ -74,28 +50,22 @@ const account = {
   login_methods: { email: true, google: false, telegram: false },
 }
 const config = {
-  provider: {
-    mode: 'openai',
-    configured: true,
-    image_configured: false,
-    handwriting_configured: false,
-  },
+  provider: { mode: 'openai', configured: true },
+  default_pages: 5,
   features: featureIds.map((feature) => ({
     id: feature,
     name: feature,
     surface: 'generate',
-    eligible: feature !== 'study.handwriting',
-    requires_provider: feature === 'study.handwriting',
+    eligible: true,
+    requires_provider: false,
     parameter_schema: {
-      length: { minimum: 1, maximum: 2 },
       output_locale: { enum: ['en', 'uz', 'ru'] },
-      output_format: { enum: feature.startsWith('teacher.') ? ['pdf'] : ['pdf', 'pptx'] },
-      density: { enum: ['rich', 'balanced', 'airy'] },
+      output_format: { enum: feature === 'ai.pptx' ? ['pdf', 'pptx'] : ['pdf'] },
     },
+    max_pages: 10,
     locales: ['en', 'uz', 'ru'],
   })),
-  limits: { sections: 2, slides: 4, questions: 5 },
-  templates: [],
+  limits: { sections: 10, slides: 20, questions: 5, source_chars: 12000 },
 }
 const sourceDraft = {
   id: '00000000-0000-4000-8000-777777777777',
@@ -130,25 +100,6 @@ const authoredDraft = {
   output_format: 'pdf',
 }
 drafts.set(authoredDraft.id, authoredDraft)
-const savedTemplate = {
-  id: '00000000-0000-4000-8000-444444444444',
-  name: 'Authored classroom template',
-  output_locale: 'ru',
-  content: {
-    ...structuredClone(sourceDraft.content),
-    feature_id: 'teacher.lesson_plan',
-    output_format: 'pdf',
-    options: { length: 1, subject: 'Biology', grade: '6' },
-  },
-}
-const project = {
-  id: '00000000-0000-4000-8000-666666666666',
-  title: 'Practised fixture project',
-  version: 1,
-  attempts: [{ weak_topics: ['Fractions'] }],
-  expires_at: future(),
-}
-
 page.on('pageerror', (error) => errors.push(error.message))
 await fs.mkdir(output, { recursive: true })
 await context.route('**/*', (route) => {
@@ -189,16 +140,13 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   if (endpoint === '/plans') return json({ plans: [], checkout_enabled: false })
   if (endpoint === '/usage') return json({ plan: 'free', remaining: { ai_credits: 100, file_tasks: 100 } })
   if (endpoint === '/studio/config') return json(config)
-  if (endpoint === '/education/projects') return json({ results: [project], limit: 10 })
-  if (endpoint === '/templates') return json({ results: [], published: [] })
-  if (endpoint === `/templates/${savedTemplate.id}`) return json(savedTemplate)
   if (endpoint === '/files/uploads')
     return json(
       {
         id: id(),
         name: 'research-notes.pdf',
         size_bytes: 4096,
-        page_count: activeFeature === 'study.handwriting' ? 1 : 2,
+        page_count: 2,
         mime_type: 'application/pdf',
         state: 'ready',
       },
@@ -216,15 +164,23 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
     })
   if (endpoint === '/generation/drafts' && method === 'GET') return json({ results: [...drafts.values()] })
   if (endpoint === '/generation/drafts' && method === 'POST') {
+    // The server reads the page count out of the description and clamps it to
+    // the plan; the fixture does the same so the form sees a real answer.
+    const named = /(\d{1,3})\s*(?:-|\s)?\s*(?:pages?|slides?)/i.exec(
+      `${body.prompt || ''}\n${body.source_text || ''}`,
+    )
+    const asked = named ? Number(named[1]) : null
+    const length = Math.min(asked || config.default_pages, clampPages || 99)
     const draft = {
       id: id(),
       version: 1,
       provider_mode: config.provider.mode,
       expires_at: future(),
       ...structuredClone(body),
+      options: { ...structuredClone(body.options || {}), length, requested_pages: asked },
       content: {
         title: body.title,
-        sections: Array.from({ length: body.options.length }, (_, index) => ({
+        sections: Array.from({ length }, (_, index) => ({
           id: `s${index + 1}`,
           heading: `Section ${index + 1}`,
           body: index ? '' : body.source_text || '',
@@ -233,12 +189,6 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
         questions: [],
         citations: [],
       },
-    }
-    if (['ai.rewrite', 'ai.regenerate_slide'].includes(body.feature_id)) {
-      const source = drafts.get(body.options.source_draft_id)
-      draft.source_ids = [...source.source_ids]
-      draft.content = structuredClone(source.content)
-      draft.revision = { selected_section_ids: body.options.selected_section_ids }
     }
     drafts.set(draft.id, draft)
     return json(draft, 201)
@@ -314,7 +264,6 @@ const lastDraftRequest = () => calls('/generation/drafts').at(-1)
 const countJobs = () => calls('/jobs').length
 
 async function open(feature, locale = 'en') {
-  activeFeature = feature
   await go(locale, feature)
   await page.getByTestId('studio-brief').waitFor()
   await page.getByTestId('studio-review').waitFor()
@@ -353,6 +302,17 @@ async function reviewNew() {
   return created
 }
 
+async function reviewSaved() {
+  const before = requests.length
+  await review().click()
+  await quotePanel().waitFor()
+  const patched = requests
+    .slice(before)
+    .find((request) => request.method === 'PATCH' && request.path.startsWith('/generation/drafts/'))
+  assert.ok(patched, 'An existing draft is saved, not recreated')
+  return patched.body
+}
+
 async function confirm() {
   const beforeJobs = countJobs()
   await generate().click()
@@ -363,29 +323,90 @@ async function confirm() {
 }
 
 try {
+  // 1. One description is the whole brief.
   await open('ai.pdf_topic')
   assert.equal(await more().getAttribute('open'), null, 'Advanced fields start collapsed')
-  assert.equal(await review().isDisabled(), true, 'An empty topic cannot be submitted')
-  assert.equal(
-    await page.locator('.studio-steps > button:visible').count(),
-    2,
-    'Only two primary stages are shown',
-  )
+  assert.equal(await review().isDisabled(), true, 'An empty description cannot be submitted')
   assert.equal(
     await page.getByTestId('studio-brief').locator('textarea:visible').count(),
     1,
-    'One main text field',
+    'One field, not a form',
   )
-  await primary().fill('Explain how to grow tomatoes on a small balcony.')
+  // Everything the retired features asked for separately now lives in the text.
+  for (const gone of ['studio-length', 'studio-tone', 'studio-density-rich']) {
+    assert.equal(await page.getByTestId(gone).count(), 0, `${gone} must no longer be asked for`)
+  }
+  await primary().fill('Explain how to grow tomatoes on a small balcony, in 4 pages.')
   const simple = await reviewNew()
-  assert.equal(simple.prompt, 'Explain how to grow tomatoes on a small balcony.')
-  assert.equal(simple.options.length, 2, 'Default length respects the free PDF section cap')
+  assert.equal(simple.prompt, 'Explain how to grow tomatoes on a small balcony, in 4 pages.')
   assert.equal(simple.options.subject, undefined)
-  assert.equal(simple.options.grade, undefined)
+  assert.equal(simple.options.length, undefined, 'The server reads the page count, not the form')
   await confirm()
-  checks.push(
-    'One topic → one review → explicit confirmation; title/defaults derived; no generation before confirmation',
+  checks.push('One description → one review → explicit confirmation, with no other field to fill')
+
+  // 2. The resolved page count is shown back, and a clamp is said out loud.
+  await open('ai.pdf_topic')
+  await primary().fill('A guide to tide tables in 4 pages.')
+  await review().click()
+  await quotePanel().waitFor()
+  assert.match(await page.getByTestId('studio-pages').innerText(), /4/)
+  assert.equal(await page.getByTestId('studio-pages-clamped').count(), 0)
+
+  clampPages = 2
+  await open('ai.pdf_topic')
+  await primary().fill('A 20 page report on tide tables.')
+  await review().click()
+  await quotePanel().waitFor()
+  await page.getByTestId('studio-pages-clamped').waitFor()
+  assert.match(await page.getByTestId('studio-pages-clamped').innerText(), /20/)
+  clampPages = 0
+  checks.push('The pages resolved from the description are shown back, and a clamp is explained')
+
+  // 3. Examples are one tap, and the guide is one click.
+  await open('ai.pdf_topic')
+  const example = await page.getByTestId('studio-example-0').innerText()
+  await page.getByTestId('studio-example-0').click()
+  assert.ok((await primary().inputValue()).startsWith(example.slice(0, 20)))
+  assert.equal(await review().isDisabled(), false, 'An example is a complete brief on its own')
+  const used = await reviewNew()
+  assert.ok(/\d/.test(used.prompt), 'every example names a page count')
+  checks.push('An example fills the description and reviews without another field being touched')
+
+  // 4. Slides are the same flow with one extra choice.
+  await open('ai.pptx')
+  assert.deepEqual(
+    await page.getByTestId('studio-format').locator('option').allInnerTexts(),
+    ['PDF', 'PPTX'],
+    'Slides can be a PDF or an editable deck',
   )
+  await page.getByTestId('studio-format').selectOption('pptx')
+  await primary().fill('8 slides introducing our results to the sales team.')
+  const deck = await reviewNew()
+  assert.equal(deck.output_format, 'pptx')
+  await open('ai.pdf_topic')
+  assert.equal(await page.getByTestId('studio-format').count(), 0, 'A document is always a PDF')
+  checks.push('Slides offer PDF or PowerPoint; a document offers no format choice at all')
+
+  // 5. A document is read when attached and never demanded.
+  await open('ai.pdf_topic')
+  await upload().setInputFiles('tests/fixtures/research-notes.pdf')
+  await page.locator('.source-chip').waitFor()
+  await primary().fill('Summarise the attached notes in 3 pages.')
+  const withFile = await reviewNew()
+  assert.equal(withFile.source_ids.length, 1)
+  checks.push('An attached PDF is used as the source without being required')
+
+  // 6. An existing draft opens without re-describing it.
+  await page.goto(`${origin}/en/app/create/${authoredDraft.id}`, { waitUntil: 'domcontentloaded' })
+  await page.getByTestId('studio-brief').waitFor()
+  assert.equal(await review().isDisabled(), false)
+  await reviewSaved()
+  assert.equal(
+    drafts.get(authoredDraft.id).content.sections.length,
+    2,
+    'The authored content is preserved',
+  )
+  checks.push('An existing draft reviews without asking for the description again')
 
   await open('ai.pdf_topic')
   await primary().fill('A fixture document for an interrupted confirmation.')
@@ -430,279 +451,49 @@ try {
   assert.notEqual(refreshedAttempt.idempotencyKey, expiredAttempt.idempotencyKey)
   checks.push('An expired estimate refreshes explicitly with a new quote and idempotency key')
 
-  for (const feature of [
-    'ai.pdf_text',
-    'ai.source_to_slides',
-    'study.summary',
-    'study.flashcards',
-    'study.definitions',
-    'study.answer_key',
-    'study.report_format',
-    'study.references',
-    'study.writing_feedback',
-    'teacher.answer_key',
-    'teacher.syllabus',
-    'teacher.feedback',
-  ]) {
-    await open(feature)
-    assert.equal(await review().isDisabled(), true, `${feature}: source is required`)
-    const text =
-      'Plants need light and water. Roots absorb water from the soil. Leaves use sunlight to make food.'
-    await primary().fill(text)
-    const created = await reviewNew()
-    assert.equal(created.source_text, text, `${feature}: primary text is grounded source material`)
-    assert.deepEqual(created.source_ids, [])
-    assert.ok(
-      created.options.length <=
-        (created.output_format === 'pptx' ? config.limits.slides : config.limits.sections),
-    )
-  }
-  checks.push(
-    'Text/PDF, slides, study and teacher source-based tools require source input and preserve it as source_text',
-  )
-
-  // No AI tool forces an upload: typed material is a source in its own right.
-  await open('ai.pdf_sources')
-  assert.equal(await review().isDisabled(), true, 'but something has to be given')
-  await primary().fill('Tide tables list high and low water for each day of the year.')
-  const typedSources = await reviewNew()
-  assert.deepEqual(typedSources.source_ids, [], 'nothing was uploaded')
-  assert.equal(typedSources.source_text, 'Tide tables list high and low water for each day of the year.')
-
-  await open('ai.pdf_sources')
-  await upload().setInputFiles('tests/fixtures/research-notes.pdf')
-  await page.locator('.source-chip').waitFor()
-  const pdfSources = await reviewNew()
-  assert.equal(pdfSources.source_ids.length, 1, 'and a document still works when there is one')
-  checks.push('Creating from PDFs accepts typed material or an upload, and demands neither in particular')
-
-  await open('study.summary')
-  await upload().setInputFiles('tests/fixtures/research-notes.pdf')
-  await page.locator('.source-chip').waitFor()
-  assert.equal(await primary().inputValue(), '')
-  const sourceOnly = await reviewNew()
-  assert.equal(sourceOnly.source_ids.length, 1, 'A source PDF can replace pasted source text')
-  checks.push('Uploaded PDF substitutes for pasted source text without another required text field')
-
-  // A question still needs something to answer from, but that can be pasted.
-  await open('study.pdf_qa')
-  await primary().fill('How do leaves use sunlight?')
-  assert.equal(await review().isDisabled(), true, 'a question alone has nothing to answer from')
-  const pasted = page.getByTestId('studio-answer-source')
-  await pasted.fill('Leaves absorb light with chlorophyll and convert it into sugars.')
-  const answered = await reviewNew()
-  assert.equal(answered.prompt, 'How do leaves use sunlight?')
-  assert.deepEqual(answered.source_ids, [], 'no upload was needed')
-  assert.match(answered.source_text, /chlorophyll/)
-
-  await open('study.pdf_qa')
-  await upload().setInputFiles('tests/fixtures/research-notes.pdf')
-  await page.locator('.source-chip').waitFor()
-  assert.equal(await review().isDisabled(), true, 'a document alone is not a question')
-  await primary().fill('How do leaves use sunlight?')
-  const question = await reviewNew()
-  assert.equal(question.source_ids.length, 1)
-  checks.push('PDF Q&A answers from a pasted source or an uploaded one, and needs the question either way')
-
-  for (const feature of ['teacher.lesson_plan', 'teacher.worksheet', 'school.explain']) {
-    await open(feature)
-    assert.equal(await page.getByTestId('studio-brief').locator('textarea:visible').count(), 1)
-    assert.equal(await more().getAttribute('open'), null)
-    await primary().fill('Teach fractions to grade 5 using a short everyday example.')
-    const created = await reviewNew()
-    assert.equal(created.options.subject, undefined, 'Optional subject is not sent as an empty requirement')
-    assert.equal(created.options.grade, undefined, 'Optional grade is not sent as an empty requirement')
-  }
-  checks.push(
-    'Teacher and school tools accept one clear request without forcing subject, grade or objectives',
-  )
-
-  await open('teacher.lesson_plan')
-  await primary().fill('A short lesson about fractions.')
-  await more().locator('summary').first().click()
-  await page.getByLabel('Title (optional)', { exact: false }).fill('Fraction workshop')
-  await page.getByRole('combobox', { name: 'Output language', exact: true }).selectOption('ru')
-  await page.getByTestId('studio-length').fill('1')
-  await page.getByTestId('studio-density-rich').click()
-  await page.getByTestId('studio-tone').selectOption('formal')
-  await page.getByLabel('Subject', { exact: true }).fill('Mathematics')
-  await page.getByLabel('Grade or level', { exact: true }).fill('5')
-  await page.getByLabel('Learning objectives', { exact: true }).fill('Compare simple fractions.')
-  const advanced = await reviewNew()
-  assert.equal(advanced.title, 'Fraction workshop')
-  assert.equal(advanced.output_locale, 'ru')
-  assert.equal(advanced.options.length, 1)
-  assert.equal(advanced.options.subject, 'Mathematics')
-  assert.equal(advanced.options.grade, '5')
-  assert.equal(advanced.options.objectives, 'Compare simple fractions.')
-  assert.equal(advanced.options.density, 'rich', 'text density reaches the draft')
-  assert.equal(advanced.options.style, 'formal', 'tone reaches the draft')
-  checks.push(
-    'Expanded options preserve title, language, pages, density, tone and teaching details in the quoted draft',
-  )
-
-  await page.getByTestId('studio-edit-outline').click()
-  await page.locator('.outline-panel').waitFor()
-  await page.getByLabel('Section heading', { exact: true }).first().fill('A better introduction')
-  assert.equal(await quotePanel().count(), 0, 'Editing invalidates the previous quote')
-  const beforeJobs = countJobs()
-  const beforeEdits = requests.length
-  await page.locator('.outline-panel').getByRole('button', { name: 'Review generation', exact: true }).click()
-  await quotePanel().waitFor()
-  assert.equal(countJobs(), beforeJobs)
-  const edits = requests
-    .slice(beforeEdits)
-    .filter(
-      (request) => ['POST', 'PATCH'].includes(request.method) && request.path.startsWith('/generation/'),
-    )
-  assert.deepEqual(
-    edits.map((request) => request.method),
-    ['PATCH', 'POST'],
-  )
-  const amended = edits.find((request) => request.method === 'PATCH')
-  assert.equal(amended.body.content.sections[0].heading, 'A better introduction')
-  assert.equal(edits.at(-1).body.version, amended.body.version + 1)
-  checks.push(
-    'Optional outline edit invalidates the quote and reviews the newly saved version before generation',
-  )
-
-  await page.goto(`${origin}/en/app/create/${authoredDraft.id}`, { waitUntil: 'domcontentloaded' })
-  await page.getByTestId('studio-brief').waitFor()
-  assert.equal(await primary().inputValue(), '')
-  assert.equal(await review().isEnabled(), true, 'Authored section bodies do not need another prompt')
-  const beforeAuthored = requests.length
-  await review().click()
-  await quotePanel().waitFor()
-  const authoredWrites = requests.slice(beforeAuthored).filter((request) => request.method !== 'GET')
-  assert.deepEqual(
-    authoredWrites.map((request) => request.method),
-    ['PATCH', 'POST'],
-  )
-  assert.equal(drafts.get(authoredDraft.id).content.sections[0].body, 'First reviewed paragraph.')
-  checks.push('An existing authored draft reviews without requiring a new topic and retains its content')
-
-  await page.goto(`${origin}/en/app/create?template=${savedTemplate.id}`, { waitUntil: 'domcontentloaded' })
-  await page.getByTestId('studio-brief').waitFor()
-  await page.waitForFunction(
-    () => document.querySelector('[data-testid="studio-purpose"]')?.value === 'teacher.lesson_plan',
-  )
-  assert.equal(await primary().inputValue(), '')
-  assert.equal(await review().isEnabled(), true, 'A content template does not require extra instructions')
-  const beforeTemplate = requests.length
-  await review().click()
-  await quotePanel().waitFor()
-  const templateWrites = requests.slice(beforeTemplate).filter((request) => request.method !== 'GET')
-  assert.deepEqual(
-    templateWrites.map((request) => request.method),
-    ['POST', 'PATCH', 'POST'],
-  )
-  const templated = lastDraftRequest().body
-  assert.equal(templated.feature_id, 'teacher.lesson_plan')
-  assert.equal(templated.options.length, 1)
-  assert.equal(templated.options.subject, 'Biology')
-  assert.equal(templated.options.grade, '6')
-  assert.equal(templated.options.template_id, savedTemplate.id)
-  assert.equal(templated.output_locale, 'ru')
-  assert.equal(templateWrites[1].body.content.sections[0].body, 'First reviewed paragraph.')
-  checks.push(
-    'A saved content template needs no extra instructions and retains its tool, language, content and options',
-  )
-
-  await open('school.adaptive')
-  assert.equal(await review().isDisabled(), true)
-  assert.equal(await primary().count(), 0, 'Adaptive practice only needs a saved project')
-  await page.getByRole('combobox', { name: /^Saved projects/ }).selectOption(project.id)
-  const adaptive = await reviewNew()
-  assert.equal(adaptive.options.project_id, project.id)
-  checks.push('Adaptive practice needs a saved project rather than another required prompt')
-
-  await open('ai.rewrite')
-  assert.equal(await review().isDisabled(), true)
-  await page.getByRole('combobox', { name: 'Original draft', exact: true }).selectOption(sourceDraft.id)
-  await page.locator('.revision-section input:checked').first().waitFor()
-  const revision = await reviewNew()
-  assert.equal(revision.options.source_draft_id, sourceDraft.id)
-  assert.equal(revision.options.source_draft_version, sourceDraft.version)
-  assert.ok(revision.options.selected_section_ids.length > 0)
-  const createdRevision = [...drafts.values()].find(
-    (draft) => draft.feature_id === 'ai.rewrite' && draft.options.source_draft_id === sourceDraft.id,
-  )
-  assert.deepEqual(createdRevision.source_ids, sourceDraft.source_ids)
-  await page.getByTestId('studio-edit-outline').click()
-  await page.locator('.outline-panel').waitFor()
-  await page.getByLabel('Section heading', { exact: true }).first().fill('Revised source-backed heading')
-  const beforeRevisionEdit = requests.length
-  await page.locator('.outline-panel').getByRole('button', { name: 'Review generation', exact: true }).click()
-  await quotePanel().waitFor()
-  const revisionSave = requests.slice(beforeRevisionEdit).find((request) => request.method === 'PATCH')
-  assert.deepEqual(
-    revisionSave.body.source_ids,
-    sourceDraft.source_ids,
-    'Revision edits retain the attached PDF source',
-  )
-  assert.equal(revisionSave.body.content.sections[0].heading, 'Revised source-backed heading')
-  checks.push(
-    'Rewriting retains source selection, version and preselected sections; optional edits preserve the attached PDF',
-  )
-
-  await open('study.handwriting')
-  assert.equal(await primary().count(), 0, 'Handwriting starts with its file requirement')
-  assert.equal(await upload().getAttribute('multiple'), null)
-  assert.equal(await upload().getAttribute('accept'), '.png,.jpg,.jpeg,.pdf')
-  await upload().setInputFiles('tests/fixtures/research-notes.pdf')
-  await page.locator('.source-chip').waitFor()
-  assert.equal(
-    await review().isDisabled(),
-    true,
-    'A missing handwriting provider cannot be bypassed by simplifying the form',
-  )
-  checks.push('Handwriting remains a single-file flow and honors missing-provider restrictions')
-
-  // The Telegram bot sends the user here as `?file_id=…` after they upload a
-  // document to the chat. The file must carry across, or they upload it twice.
+  // 7. The bot hands files over as `?file_id=…`; they must arrive attached.
   const linked = id()
-  activeFeature = 'ai.pdf_sources'
-  await page.goto(`${origin}/en/app/create?feature=ai.pdf_sources&file_id=${linked}`, {
+  await page.goto(`${origin}/en/app/create?feature=ai.pdf_topic&file_id=${linked}`, {
     waitUntil: 'domcontentloaded',
   })
   await page.getByTestId('studio-brief').waitFor()
   await page.locator('.source-chip').first().waitFor()
-  assert.equal(await page.locator('.source-chip').count(), 1)
-  assert.match(await page.locator('.source-chip').first().innerText(), /research-notes\.pdf/)
+  await primary().fill('Summarise the attached file in 2 pages.')
   await reviewNew()
   assert.deepEqual(lastDraftRequest().body.source_ids, [linked], 'The linked file is the source')
-  checks.push('A file_id deep link from the bot arrives attached and needs no second upload')
 
-  // A bot draft can hold several files, so the link repeats the parameter.
   const many = [id(), id(), id()]
   await page.goto(
-    `${origin}/en/app/create?feature=ai.pdf_sources&${many.map((f) => `file_id=${f}`).join('&')}`,
+    `${origin}/en/app/create?feature=ai.pdf_topic&${many.map((f) => `file_id=${f}`).join('&')}`,
     { waitUntil: 'domcontentloaded' },
   )
   await page.getByTestId('studio-brief').waitFor()
   // They attach one at a time, so wait for the last rather than the first.
   await page.locator('.source-chip').nth(many.length - 1).waitFor()
-  assert.equal(await page.locator('.source-chip').count(), many.length)
+  await primary().fill('Summarise all of the attached files in 3 pages.')
   await reviewNew()
   assert.deepEqual(lastDraftRequest().body.source_ids, many, 'Every linked file is a source, in order')
-  checks.push('A multi-file bot draft arrives with all of its documents attached in order')
 
   expiredFile = true
-  await page.goto(`${origin}/en/app/create?feature=ai.pdf_sources&file_id=${id()}`, {
+  await page.goto(`${origin}/en/app/create?feature=ai.pdf_topic&file_id=${id()}`, {
     waitUntil: 'domcontentloaded',
   })
   await page.getByTestId('studio-brief').waitFor()
   await page.waitForTimeout(400)
   assert.equal(await page.locator('.source-chip').count(), 0, 'An expired link attaches nothing')
   expiredFile = false
-  checks.push('A deep link to a file that has aged out attaches nothing instead of failing later')
+  checks.push('Files handed over by the bot arrive attached, in order, and expired links attach nothing')
 
-  // The same link on the education launcher must survive the hop to the tool.
-  await page.goto(`${origin}/en/app/study?file_id=${linked}`, { waitUntil: 'domcontentloaded' })
-  const tool = page.locator('.education-tool').first()
-  await tool.waitFor()
-  assert.match(await tool.getAttribute('href'), new RegExp(`file_id=${linked}$`))
-  checks.push('The education launcher forwards the linked file to the tool the learner picks')
+  // 8. A description can also arrive pre-filled, which is how the guide works.
+  const brief = 'A 3 page briefing on tide tables for a general audience.'
+  await page.goto(
+    `${origin}/en/app/create?feature=ai.pdf_topic&prompt=${encodeURIComponent(brief)}`,
+    { waitUntil: 'domcontentloaded' },
+  )
+  await page.getByTestId('studio-brief').waitFor()
+  assert.equal(await primary().inputValue(), brief)
+  assert.equal(await review().isDisabled(), false)
+  checks.push('A description arriving in the link is ready to review, which is how the guide hands one over')
 
   affordable = false
   await open('ai.pdf_topic')
@@ -715,7 +506,7 @@ try {
   for (const locale of ['en', 'uz', 'ru']) {
     for (const width of [1440, 390]) {
       await page.setViewportSize({ width, height: 1000 })
-      for (const feature of ['ai.pdf_topic', 'study.summary', 'teacher.lesson_plan', 'study.pdf_qa']) {
+      for (const feature of featureIds) {
         await open(feature, locale)
         assert.equal(await more().getAttribute('open'), null)
         assert.equal(await page.locator('html').getAttribute('lang'), locale)
@@ -751,7 +542,7 @@ try {
     }
   }
   checks.push(
-    'Topic, source, teacher and Q&A forms pass EN/UZ/RU desktop/mobile checks in both themes with no overflow or WCAG A/AA findings',
+    'Both services pass EN/UZ/RU desktop/mobile checks in both themes with no overflow or WCAG A/AA findings',
   )
   assert.deepEqual(errors, [])
   assert.deepEqual(unexpected, [], 'Every API call is explicitly covered by the offline fixture')
