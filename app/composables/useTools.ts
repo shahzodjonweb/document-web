@@ -45,8 +45,11 @@ export function useTools() {
     'pdf.protect': 'lock',
     'pdf.unlock_known': 'unlock',
   }
-  const icon = (id: string) =>
-    icons[id] || (id === 'ai.pptx' ? 'files' : GENERATION.test(id) ? 'sparkle' : 'file')
+  // The sparkle is what marks a service as the AI feature rather than another
+  // file tool, so both generation services carry it. They stay apart by their
+  // name and their tile colour, which is how the file tools differ from each
+  // other too.
+  const icon = (id: string) => icons[id] || (GENERATION.test(id) ? 'sparkle' : 'file')
   const colors: Record<string, string> = {
     'pdf.merge': 'purple',
     'pdf.compress': 'green',
