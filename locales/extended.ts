@@ -1052,6 +1052,13 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   reviseAction: ['Review the change', 'O‘zgarishni ko‘rib chiqish', 'Оценить изменение'],
   reviseExamples: ['Make it shorter · Use a friendlier tone · Add an example to each page · The same in 8 pages', 'Qisqartiring · Do‘stona uslubda · Har sahifaga misol · Xuddi shu 8 sahifada', 'Сократите · Дружелюбнее · Пример на каждую страницу · То же на 8 страницах'],
   reviseBanner: ['You are changing an existing document. Everything you did not mention stays as it is.', 'Siz mavjud hujjatni o‘zgartiryapsiz. Aytmagan narsalaringiz o‘z holicha qoladi.', 'Вы изменяете существующий документ. Всё, о чём вы не упомянули, останется как есть.'],
+  // A finished job can carry warnings. The API sends bare codes and JobDetail
+  // renders `t(code)`, so an untranslated code would show the customer the code
+  // itself. These three say what was adjusted and what it cost — nothing.
+  questions_trimmed: ['Questions you did not ask for were left out, and not charged for.', 'So‘ramagan savollar qo‘shilmadi va hisoblanmadi.', 'Вопросы, которые вы не запрашивали, не добавлены и не оплачены.'],
+  sections_trimmed: ['The document was trimmed to the number of pages you asked for.', 'Hujjat siz so‘ragan sahifa soniga qisqartirildi.', 'Документ сокращён до запрошенного количества страниц.'],
+  longer_than_quoted: ['This came out a little longer than estimated. You were charged for the pages you asked for, not the extra.', 'Hujjat taxmindan biroz uzunroq chiqdi. Siz so‘ragan sahifalar uchun hisoblandi, qo‘shimchasi uchun emas.', 'Документ вышел чуть длиннее, чем ожидалось. Оплачены страницы, которые вы запросили, а не лишние.'],
+  local_fixture_not_ai_generated: ['Written locally for testing, without the AI model.', 'Sinov uchun AI modelidan foydalanmasdan mahalliy tarzda yozildi.', 'Создано локально для теста, без модели ИИ.'],
 }
 /**
  * One line of plain description per generation feature. `extendedToolNames`

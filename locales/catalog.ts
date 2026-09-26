@@ -317,6 +317,8 @@ const entries: Record<string, [string, string, string]> = {
   ],
   fileLimit: ['per file', 'har bir fayl', 'на файл'],
   jobLimit: ['pages per task', 'har vazifaga sahifa', 'страниц на задачу'],
+  generatedPagesLimit: ['pages per AI document', 'AI hujjatida sahifa', 'страниц в ИИ-документе'],
+  generatedSlidesLimit: ['slides per AI deck', 'AI taqdimotida slayd', 'слайдов в ИИ-презентации'],
   free: ['Free', 'Free', 'Free'],
   plus: ['Plus', 'Plus', 'Plus'],
   premium: ['Premium', 'Premium', 'Premium'],

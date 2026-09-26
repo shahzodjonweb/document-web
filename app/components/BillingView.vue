@@ -91,6 +91,20 @@ const limit = (plan: any, key: string) => plan.limits?.[key] ?? plan[key]
           <AppIcon name="check" :size="17" /><strong>{{ limit(plan, 'max_pages_per_job') }}</strong
           >{{ t('jobLimit') }}
         </li>
+        <!-- The length of an AI document is what separates the plans, so it is
+             listed rather than left for someone to discover at a clamp. -->
+        <li>
+          <AppIcon name="check" :size="17" /><strong>{{ limit(plan, 'max_generated_pdf_pages') }}</strong
+          >{{ t('generatedPagesLimit') }}
+        </li>
+        <li>
+          <AppIcon name="check" :size="17" /><strong>{{ limit(plan, 'max_generated_slides') }}</strong
+          >{{ t('generatedSlidesLimit') }}
+        </li>
+        <li>
+          <AppIcon name="check" :size="17" /><strong>{{ limit(plan, 'ai_credits') }}</strong
+          >{{ t('ai_credits') }}
+        </li>
       </ul>
       <span
         v-if="plan.id === (ws.user.value?.plan || 'free')"
