@@ -1057,6 +1057,7 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   // itself. These three say what was adjusted and what it cost — nothing.
   questions_trimmed: ['Questions you did not ask for were left out, and not charged for.', 'So‘ramagan savollar qo‘shilmadi va hisoblanmadi.', 'Вопросы, которые вы не запрашивали, не добавлены и не оплачены.'],
   sections_trimmed: ['The document was trimmed to the number of pages you asked for.', 'Hujjat siz so‘ragan sahifa soniga qisqartirildi.', 'Документ сокращён до запрошенного количества страниц.'],
+  citations_dropped: ['A source reference that did not match any file you sent was left out.', 'Siz yuborgan fayllarga mos kelmagan manba havolasi qo‘shilmadi.', 'Ссылка на источник, не совпавшая с вашими файлами, не добавлена.'],
   longer_than_quoted: ['This came out a little longer than estimated. You were charged for the pages you asked for, not the extra.', 'Hujjat taxmindan biroz uzunroq chiqdi. Siz so‘ragan sahifalar uchun hisoblandi, qo‘shimchasi uchun emas.', 'Документ вышел чуть длиннее, чем ожидалось. Оплачены страницы, которые вы запросили, а не лишние.'],
   local_fixture_not_ai_generated: ['Written locally for testing, without the AI model.', 'Sinov uchun AI modelidan foydalanmasdan mahalliy tarzda yozildi.', 'Создано локально для теста, без модели ИИ.'],
 }
