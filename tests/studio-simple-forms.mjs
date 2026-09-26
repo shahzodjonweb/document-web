@@ -170,7 +170,9 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
       `${body.prompt || ''}\n${body.source_text || ''}`,
     )
     const asked = named ? Number(named[1]) : null
-    const length = Math.min(asked || config.default_pages, clampPages || 99)
+    // A change inherits the document it applies to, exactly as the server does.
+    const source = body.options?.revise_draft_id ? drafts.get(body.options.revise_draft_id) : null
+    const length = Math.min(asked || source?.content?.sections?.length || config.default_pages, clampPages || 99)
     const draft = {
       id: id(),
       version: 1,
@@ -178,7 +180,17 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
       expires_at: future(),
       ...structuredClone(body),
       options: { ...structuredClone(body.options || {}), length, requested_pages: asked },
-      content: {
+      ...(source
+        ? {
+            feature_id: source.feature_id,
+            output_format: source.output_format,
+            title: source.title,
+            revision: { request: body.prompt, source_draft_id: source.id },
+          }
+        : {}),
+      content: source
+        ? structuredClone(source.content)
+        : {
         title: body.title,
         sections: Array.from({ length }, (_, index) => ({
           id: `s${index + 1}`,
@@ -484,7 +496,33 @@ try {
   expiredFile = false
   checks.push('Files handed over by the bot arrive attached, in order, and expired links attach nothing')
 
-  // 8. A description can also arrive pre-filled, which is how the guide works.
+  // 8. A finished document can be changed by asking, from the job page.
+  await open('ai.pdf_topic')
+  await primary().fill('A 2 page guide to tide tables.')
+  await reviewNew()
+  await confirm()
+  const producedBy = lastDraftRequest().body
+  await page.getByTestId('job-revise').waitFor()
+  await page.screenshot({ path: path.join(output, 'job-revise.png'), fullPage: true })
+  await page.getByTestId('job-revise-input').fill('Use a friendlier tone and add an example.')
+  await page.getByTestId('job-revise-submit').click()
+  await page.waitForURL('**/app/create/*')
+  await page.getByTestId('studio-revising').waitFor()
+
+  const change = lastDraftRequest().body
+  assert.equal(change.prompt, 'Use a friendlier tone and add an example.')
+  assert.ok(change.options.revise_draft_id, 'the change names the document it applies to')
+  assert.equal(await primary().inputValue(), 'Use a friendlier tone and add an example.')
+  // A change is not a new brief, so the starter examples stand down.
+  assert.equal(await page.getByTestId('studio-example-0').count(), 0)
+  assert.equal(await review().isDisabled(), false, 'ready to price the change')
+  await review().click()
+  await quotePanel().waitFor()
+  assert.match(await page.getByTestId('studio-pages').innerText(), /2/, 'the length is inherited')
+  assert.ok(producedBy.prompt.includes('tide tables'))
+  checks.push('A finished document is changed by asking, and the change keeps what it did not mention')
+
+  // 9. A description can also arrive pre-filled, which is how the guide works.
   const brief = 'A 3 page briefing on tide tables for a general audience.'
   await page.goto(
     `${origin}/en/app/create?feature=ai.pdf_topic&prompt=${encodeURIComponent(brief)}`,

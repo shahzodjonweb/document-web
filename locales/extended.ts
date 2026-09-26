@@ -1045,6 +1045,13 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   guideRowSkip: ['What to leave out', 'Nimani yozmaslik kerak', 'Что не нужно писать'],
   guideRowSkipBody: ['Fonts, margins, colours and page size are set for you, and every page is filled to the bottom except the last.', 'Shrift, chekka, rang va sahifa o‘lchami tayyor; oxirgisidan tashqari har sahifa to‘liq to‘ldiriladi.', 'Шрифты, поля, цвета и размер страницы заданы; каждая страница заполняется до конца, кроме последней.'],
   guide: ['Prompt guide', 'Tavsif qo‘llanmasi', 'Руководство по описанию'],
+  reviseTitle: ['Need something changed?', 'Biror narsani o‘zgartirish kerakmi?', 'Нужно что-то изменить?'],
+  reviseBody: ['Say what should change. Everything you do not mention stays exactly as it is.', 'Nimani o‘zgartirish kerakligini yozing. Siz aytmagan hamma narsa o‘z holicha qoladi.', 'Напишите, что изменить. Всё, о чём вы не упомянете, останется как есть.'],
+  reviseLabel: ['What should change?', 'Nimani o‘zgartiramiz?', 'Что изменить?'],
+  revisePlaceholder: ['Make the second section shorter and add an example to each page.', 'Ikkinchi bo‘limni qisqartiring va har sahifaga misol qo‘shing.', 'Сократите второй раздел и добавьте пример на каждую страницу.'],
+  reviseAction: ['Review the change', 'O‘zgarishni ko‘rib chiqish', 'Оценить изменение'],
+  reviseExamples: ['Make it shorter · Use a friendlier tone · Add an example to each page · The same in 8 pages', 'Qisqartiring · Do‘stona uslubda · Har sahifaga misol · Xuddi shu 8 sahifada', 'Сократите · Дружелюбнее · Пример на каждую страницу · То же на 8 страницах'],
+  reviseBanner: ['You are changing an existing document. Everything you did not mention stays as it is.', 'Siz mavjud hujjatni o‘zgartiryapsiz. Aytmagan narsalaringiz o‘z holicha qoladi.', 'Вы изменяете существующий документ. Всё, о чём вы не упомянули, останется как есть.'],
 }
 /**
  * One line of plain description per generation feature. `extendedToolNames`

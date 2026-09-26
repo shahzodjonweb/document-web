@@ -27,6 +27,33 @@ const meters = computed(() =>
   ),
 )
 const outputs = computed(() => job.value?.artifacts || job.value?.outputs || [])
+/**
+ * A generated document can be changed by asking; a converted file cannot.
+ * The draft behind the job is what the change applies to.
+ */
+const reviseDraftId = computed(() =>
+  success.value && isGenerationFeature(job.value?.feature_id || '')
+    ? (job.value as any)?.parameters?.generation_draft_id || ''
+    : '',
+)
+const change = ref('')
+const revising = ref(false)
+async function revise() {
+  if (!change.value.trim() || revising.value) return
+  revising.value = true
+  error.value = ''
+  try {
+    const draft: any = await ws.api('/generation/drafts', {
+      method: 'POST',
+      body: { prompt: change.value.trim(), options: { revise_draft_id: reviseDraftId.value } },
+    })
+    await navigateTo(path(`/app/create/${draft.id}`))
+  } catch (e: any) {
+    error.value = e.data?.error?.message || t('genericError')
+  } finally {
+    revising.value = false
+  }
+}
 async function cancel() {
   try {
     await ws.api(`/jobs/${props.jobId}/cancel`, { method: 'POST', body: {} })
@@ -140,6 +167,32 @@ function downloadUrl(url: string | undefined, id: string) {
       </div>
     </section>
     <p v-for="warning in job.warnings" :key="warning" class="info-banner">{{ t(warning) }}</p>
+    <!-- Say what should change; everything unmentioned stays as it is. -->
+    <section v-if="reviseDraftId" class="panel revise-panel" data-testid="job-revise">
+      <h3><AppIcon name="edit" :size="18" />{{ t('reviseTitle') }}</h3>
+      <p>{{ t('reviseBody') }}</p>
+      <label class="form-field"
+        ><span>{{ t('reviseLabel') }}</span
+        ><textarea
+          v-model="change"
+          data-testid="job-revise-input"
+          rows="3"
+          :placeholder="t('revisePlaceholder')"
+        />
+        <small>{{ t('reviseExamples') }}</small>
+      </label>
+      <button
+        class="button primary"
+        data-testid="job-revise-submit"
+        :disabled="!change.trim() || revising"
+        @click="revise"
+      >
+        <AppIcon :name="revising ? 'loader' : 'sparkle'" :size="17" :class="{ spin: revising }" />{{
+          t('reviseAction')
+        }}
+      </button>
+      <p class="field-hint">{{ t('noChargeBefore') }}</p>
+    </section>
     <div class="result-actions">
       <NuxtLink
         v-if="job.parameters?.generation_draft_id && job.feature_id !== 'ai.images'"

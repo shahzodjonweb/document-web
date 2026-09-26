@@ -41,6 +41,8 @@ const outputLanguage = computed(
   () => ({ en: 'English', uz: 'O‘zbekcha', ru: 'Русский' })[form.output_locale] || form.output_locale,
 )
 const examples = computed(() => promptExamples(form.feature_id))
+/** A draft derived from a finished document changes it rather than replacing it. */
+const revising = computed(() => !!draft.value?.revision)
 const defaultPages = computed(() => studio.config.value?.default_pages ?? 5)
 const maxPages = computed(() => selected.value?.max_pages ?? defaultPages.value)
 /**
@@ -394,6 +396,9 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
     <span class="status-badge">LOCAL</span>
   </div>
   <ErrorBanner v-if="error" :message="error" />
+  <div v-if="revising" class="info-banner" data-testid="studio-revising">
+    <AppIcon name="edit" :size="19" />{{ t('reviseBanner') }}
+  </div>
   <div v-if="notice" class="success-banner" role="status">
     <AppIcon name="check" :size="17" />{{ notice }}
   </div>
@@ -439,7 +444,7 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
               </select></label
             >
             <label class="form-field studio-primary-field">
-              <span>{{ t('studioDescribe') }}</span>
+              <span>{{ t(revising ? 'reviseLabel' : 'studioDescribe') }}</span>
               <textarea
                 v-model="form.prompt"
                 data-testid="studio-primary-input"
@@ -447,9 +452,11 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
                 :maxlength="studio.config.value?.limits?.source_chars || 12000"
                 :placeholder="t('studioDescribePlaceholder')"
               />
-              <small>{{ t('studioDescribeHint', { pages: defaultPages, max: maxPages }) }}</small>
+              <small>{{
+                revising ? t('reviseExamples') : t('studioDescribeHint', { pages: defaultPages, max: maxPages })
+              }}</small>
             </label>
-            <div class="studio-examples">
+            <div v-if="!revising" class="studio-examples">
               <span>{{ t('studioTryOne') }}</span>
               <button
                 v-for="(example, index) in examples"

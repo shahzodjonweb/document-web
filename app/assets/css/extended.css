@@ -3220,3 +3220,20 @@
     margin-bottom: 12px;
   }
 }
+
+/* Asking for a change to a document that has already been generated. */
+.revise-panel h3 {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  margin: 0 0 6px;
+}
+.revise-panel > p {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 0 0 14px;
+  max-width: 62ch;
+}
+.revise-panel .form-field {
+  margin-bottom: 14px;
+}
