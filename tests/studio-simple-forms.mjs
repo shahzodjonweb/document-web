@@ -60,7 +60,7 @@ const config = {
     requires_provider: false,
     parameter_schema: {
       output_locale: { enum: ['en', 'uz', 'ru'] },
-      output_format: { enum: feature === 'ai.pptx' ? ['pdf', 'pptx'] : ['pdf'] },
+      output_format: { enum: feature === 'ai.pptx' ? ['pptx'] : ['pdf'] },
     },
     max_pages: 10,
     locales: ['en', 'uz', 'ru'],
@@ -384,20 +384,19 @@ try {
   assert.ok(/\d/.test(used.prompt), 'every example names a page count')
   checks.push('An example fills the description and reviews without another field being touched')
 
-  // 4. Slides are the same flow with one extra choice.
+  // 4. Slides are the same flow, with nothing extra to choose.
   await open('ai.pptx')
-  assert.deepEqual(
-    await page.getByTestId('studio-format').locator('option').allInnerTexts(),
-    ['PDF', 'PPTX'],
-    'Slides can be a PDF or an editable deck',
+  assert.equal(
+    await page.getByTestId('studio-format').count(),
+    0,
+    'A deck is always a PowerPoint, so there is nothing to pick',
   )
-  await page.getByTestId('studio-format').selectOption('pptx')
   await primary().fill('8 slides introducing our results to the sales team.')
   const deck = await reviewNew()
   assert.equal(deck.output_format, 'pptx')
   await open('ai.pdf_topic')
   assert.equal(await page.getByTestId('studio-format').count(), 0, 'A document is always a PDF')
-  checks.push('Slides offer PDF or PowerPoint; a document offers no format choice at all')
+  checks.push('Neither service asks for a format: a document is a PDF, a deck is a PowerPoint')
 
   // 5. A document is read when attached and never demanded.
   await open('ai.pdf_topic')

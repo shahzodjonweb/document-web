@@ -28,7 +28,9 @@ const form = reactive({
   prompt: String(route.query.prompt || ''),
   source_text: '',
   output_locale: String(ws.user.value?.preferences?.output_locale || locale.value),
-  output_format: 'pdf',
+  // The service decides the format; this is only what to show before the
+  // first draft comes back, so it must match what the server will choose.
+  output_format: String(route.query.feature) === 'ai.pptx' ? 'pptx' : 'pdf',
   options: {} as Record<string, any>,
 })
 const content = ref<any>({ title: '', sections: [], questions: [] })
@@ -51,6 +53,11 @@ const maxPages = computed(() => selected.value?.max_pages ?? defaultPages.value)
  * default until there is one.
  */
 const readingPages = computed(() => draft.value?.options?.length ?? defaultPages.value)
+/** A deck is counted in slides; only a document is counted in pages. */
+const isDeck = computed(() => form.feature_id === 'ai.pptx')
+const readingLabel = computed(() =>
+  t(isDeck.value ? 'studioSlidesReading' : 'studioPagesReading', { count: readingPages.value }),
+)
 const clampedFrom = computed(() => {
   const asked = draft.value?.options?.requested_pages
   return asked && asked !== readingPages.value ? asked : 0
@@ -528,7 +535,7 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
             <div class="studio-defaults" aria-live="polite">
               <AppIcon name="sparkle" :size="16" /><span
                 >{{ form.output_format.toUpperCase() }} · {{ outputLanguage }} ·
-                {{ t('studioPagesReading', { count: readingPages }) }}</span
+                {{ readingLabel }}</span
               >
             </div>
             <div class="studio-form-actions">
@@ -574,7 +581,7 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
                   ><span>{{ t('sectionBody') }}</span
                   ><textarea v-model="section.body" rows="4" />
                 </label>
-                <label v-if="form.output_format === 'pptx'" class="form-field"
+                <label v-if="isDeck" class="form-field"
                   ><span>{{ t('speakerNotes') }}</span
                   ><textarea v-model="section.notes" rows="3" />
                 </label>

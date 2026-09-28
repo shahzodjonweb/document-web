@@ -1016,7 +1016,7 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   studioTone_academic: ['Academic', 'Akademik', 'Академический'],
   studioTone_simple: ['Plain language', 'Sodda til', 'Простой язык'],
   'ai.pdf_topic': ['PDF Document', 'PDF hujjat', 'PDF документ'],
-  'ai.pptx': ['PDF Slides', 'PDF slaydlar', 'PDF слайды'],
+  'ai.pptx': ['PowerPoint Slides', 'PowerPoint slaydlar', 'PowerPoint слайды'],
   studioDescribe: ['Describe what you want', 'Nima kerakligini yozing', 'Опишите, что нужно'],
   studioDescribeHint: ['Everything in one description: the subject, who it is for, the tone, and how many pages. No page count means {pages}; this plan allows up to {max}.', 'Hammasi bitta tavsifda: mavzu, kim uchun, uslub va necha sahifa. Sahifa soni ko‘rsatilmasa — {pages} ta; bu tarifda {max} tagacha.', 'Всё в одном описании: тема, для кого, тон и сколько страниц. Без указания — {pages}; на этом тарифе до {max}.'],
   studioDescribePlaceholder: ['A 6 page introduction to tide tables for secondary school students, plain language, with a worked example on each page.', 'O‘rta maktab o‘quvchilari uchun 6 sahifalik kirish, sodda tilda, har sahifada misol bilan.', 'Введение на 6 страниц для старшеклассников, простым языком, с примером на каждой странице.'],
@@ -1051,6 +1051,7 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   revisePlaceholder: ['Make the second section shorter and add an example to each page.', 'Ikkinchi bo‘limni qisqartiring va har sahifaga misol qo‘shing.', 'Сократите второй раздел и добавьте пример на каждую страницу.'],
   reviseAction: ['Review the change', 'O‘zgarishni ko‘rib chiqish', 'Оценить изменение'],
   reviseExamples: ['Make it shorter · Use a friendlier tone · Add an example to each page · The same in 8 pages', 'Qisqartiring · Do‘stona uslubda · Har sahifaga misol · Xuddi shu 8 sahifada', 'Сократите · Дружелюбнее · Пример на каждую страницу · То же на 8 страницах'],
+  studioSlidesReading: ['{count} slides', '{count} slayd', '{count} слайд'],
   reviseBanner: ['You are changing an existing document. Everything you did not mention stays as it is.', 'Siz mavjud hujjatni o‘zgartiryapsiz. Aytmagan narsalaringiz o‘z holicha qoladi.', 'Вы изменяете существующий документ. Всё, о чём вы не упомянули, останется как есть.'],
   // A finished job can carry warnings. The API sends bare codes and JobDetail
   // renders `t(code)`, so an untranslated code would show the customer the code
@@ -1127,9 +1128,9 @@ export const extendedToolDescriptions: Record<string, [string, string, string]> 
     'Опишите — получите готовый оформленный PDF.',
   ],
   'ai.pptx': [
-    'Describe it and get a deck, as a PDF or an editable PowerPoint.',
-    'Yozib bering — PDF yoki tahrirlanadigan PowerPoint taqdimot oling.',
-    'Опишите — получите презентацию в PDF или редактируемом PowerPoint.',
+    'Describe it and get an editable PowerPoint deck.',
+    'Yozib bering — tahrirlanadigan PowerPoint taqdimot oling.',
+    'Опишите — получите редактируемую презентацию PowerPoint.',
   ],
 }
 
@@ -1142,7 +1143,7 @@ export const extendedToolNames: Record<string, [string, string, string]> = {
   'batch.compress': ['Batch compression', 'Guruhlab siqish', 'Пакетное сжатие'],
   'batch.image_sets': ['Image sets to PDFs', 'Rasm to‘plamlaridan PDF', 'Наборы изображений в PDF'],
   'ai.pdf_topic': ['PDF Document', 'PDF hujjat', 'PDF документ'],
-  'ai.pptx': ['PDF Slides', 'PDF slaydlar', 'PDF слайды'],
+  'ai.pptx': ['PowerPoint Slides', 'PowerPoint slaydlar', 'PowerPoint слайды'],
   'editor.visual': ['Visual PDF editor', 'Vizual PDF muharriri', 'Визуальный редактор PDF'],
   'editor.add_text': ['Add text', 'Matn qo‘shish', 'Добавить текст'],
   'editor.highlight': ['Highlight PDF', 'PDF belgilash', 'Выделить в PDF'],

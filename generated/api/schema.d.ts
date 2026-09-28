@@ -1517,7 +1517,7 @@ export interface components {
                 title?: string;
             }[];
             /** @enum {unknown} */
-            output_format: "pdf" | "pptx" | "png";
+            output_format: "pdf" | "pptx";
             /** @enum {unknown} */
             output_locale: "en" | "uz" | "ru";
             prompt?: string;
@@ -5747,7 +5747,7 @@ export interface operations {
                     feature_id: string;
                     options?: Record<string, never>;
                     /** @enum {unknown} */
-                    output_format?: "pdf" | "pptx" | "png";
+                    output_format?: "pdf" | "pptx";
                     /** @enum {unknown} */
                     output_locale?: "en" | "uz" | "ru";
                     prompt?: string;
@@ -5936,7 +5936,7 @@ export interface operations {
                         title?: string;
                     }[];
                     /** @enum {unknown} */
-                    output_format?: "pdf" | "pptx" | "png";
+                    output_format?: "pdf" | "pptx";
                     /** @enum {unknown} */
                     output_locale?: "en" | "uz" | "ru";
                     prompt?: string;

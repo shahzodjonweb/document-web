@@ -24,7 +24,7 @@ const services = computed(() =>
     ? studio.features.value
     : [
         { id: 'ai.pdf_topic', name: 'PDF Document' },
-        { id: 'ai.pptx', name: 'PDF Slides' },
+        { id: 'ai.pptx', name: 'PowerPoint Slides' },
       ],
 )
 const useExample = (featureId: string, text: string) =>

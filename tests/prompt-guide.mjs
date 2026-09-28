@@ -67,7 +67,7 @@ await page.route('**/*', async (route) => {
         eligible: true,
         parameter_schema: {
           output_locale: { enum: ['en', 'uz', 'ru'] },
-          output_format: { enum: id === 'ai.pptx' ? ['pdf', 'pptx'] : ['pdf'] },
+          output_format: { enum: id === 'ai.pptx' ? ['pptx'] : ['pdf'] },
         },
         max_pages: 10,
         locales: ['en', 'uz', 'ru'],
