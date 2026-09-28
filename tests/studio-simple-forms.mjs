@@ -3,6 +3,7 @@ import AxeBuilder from '@axe-core/playwright'
 import assert from 'node:assert/strict'
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { isDeepStrictEqual } from 'node:util'
 
 // Every API request is intercepted; this verifies browser behavior without any
 // live customer writes or paid generation calls.
@@ -91,15 +92,27 @@ const sourceDraft = {
   expires_at: future(),
 }
 drafts.set(sourceDraft.id, structuredClone(sourceDraft))
-const authoredDraft = {
+const authoredDrafts = featureIds.map((feature) => ({
   ...structuredClone(sourceDraft),
-  id: '00000000-0000-4000-8000-555555555555',
-  feature_id: 'ai.pdf_topic',
+  id: id(),
+  feature_id: feature,
   prompt: '',
+  source_text: 'Original supplied paragraph, before the author reviewed it.',
   source_ids: [],
-  output_format: 'pdf',
-}
-drafts.set(authoredDraft.id, authoredDraft)
+  output_format: feature === 'ai.pptx' ? 'pptx' : 'pdf',
+}))
+for (const draft of authoredDrafts) drafts.set(draft.id, draft)
+const sourceContent = (fields, length) => ({
+  title: fields.title,
+  sections: Array.from({ length }, (_, index) => ({
+    id: `s${index + 1}`,
+    heading: `Section ${index + 1}`,
+    body: index ? '' : fields.source_text || '',
+    notes: '',
+  })),
+  questions: [],
+  citations: [],
+})
 page.on('pageerror', (error) => errors.push(error.message))
 await fs.mkdir(output, { recursive: true })
 await context.route('**/*', (route) => {
@@ -190,17 +203,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
         : {}),
       content: source
         ? structuredClone(source.content)
-        : {
-        title: body.title,
-        sections: Array.from({ length }, (_, index) => ({
-          id: `s${index + 1}`,
-          heading: `Section ${index + 1}`,
-          body: index ? '' : body.source_text || '',
-          notes: '',
-        })),
-        questions: [],
-        citations: [],
-      },
+        : sourceContent(body, length),
     }
     drafts.set(draft.id, draft)
     return json(draft, 201)
@@ -227,7 +230,18 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
       quotes.set(quote.id, quote)
       return json(quote, 201)
     }
-    if (method === 'PATCH') Object.assign(draft, structuredClone(body), { version: draft.version + 1 })
+    if (method === 'PATCH') {
+      // Match the backend's rebuild trigger: a changed brief/source/format
+      // regenerates content unless the user explicitly supplies edited content.
+      const rebuild = ['prompt', 'source_text', 'source_ids', 'output_format'].some(
+        (key) => Object.hasOwn(body, key) && !isDeepStrictEqual(body[key], draft[key]),
+      )
+      const updated = { ...draft, ...structuredClone(body), version: draft.version + 1 }
+      if (rebuild && !Object.hasOwn(body, 'content')) {
+        updated.content = sourceContent(updated, updated.options.length)
+      }
+      Object.assign(draft, updated)
+    }
     return json(draft)
   }
   if (endpoint === '/jobs' && method === 'GET') return json({ results: [...jobs.values()], count: jobs.size })
@@ -407,17 +421,24 @@ try {
   assert.equal(withFile.source_ids.length, 1)
   checks.push('An attached PDF is used as the source without being required')
 
-  // 6. An existing draft opens without re-describing it.
-  await page.goto(`${origin}/en/app/create/${authoredDraft.id}`, { waitUntil: 'domcontentloaded' })
-  await page.getByTestId('studio-brief').waitFor()
-  assert.equal(await review().isDisabled(), false)
-  await reviewSaved()
-  assert.equal(
-    drafts.get(authoredDraft.id).content.sections.length,
-    2,
-    'The authored content is preserved',
-  )
-  checks.push('An existing draft reviews without asking for the description again')
+  // 6. Reviewing either kind of authored draft preserves an empty prompt and
+  // every authored field. A row-count assertion misses rebuilds of equal length.
+  for (const authoredDraft of authoredDrafts) {
+    const originalContent = structuredClone(authoredDraft.content)
+    await page.goto(`${origin}/en/app/create/${authoredDraft.id}`, { waitUntil: 'domcontentloaded' })
+    await page.getByTestId('studio-brief').waitFor()
+    assert.equal(await primary().inputValue(), '')
+    assert.equal(await review().isDisabled(), false)
+    const patched = await reviewSaved()
+    assert.deepEqual(
+      drafts.get(authoredDraft.id).content,
+      originalContent,
+      `${authoredDraft.feature_id}: reviewing an empty-prompt draft must preserve all authored content`,
+    )
+    assert.equal(patched.prompt, '', 'Review must not replace an existing empty prompt')
+    assert.equal(patched.content, undefined, 'Opening authored content is not an edit')
+  }
+  checks.push('Authored PDF and PPTX drafts with empty prompts review without rebuilding their content')
 
   // 7. A deck's slides each have a layout, and the fields it needs.
   await page.goto(`${origin}/en/app/create/${sourceDraft.id}`, { waitUntil: 'domcontentloaded' })

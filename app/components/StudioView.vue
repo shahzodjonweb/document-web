@@ -106,7 +106,6 @@ function draftFields() {
   return {
     ...form,
     title: effectiveTitle.value,
-    prompt: form.prompt.trim() || name(form.feature_id, selected.value?.name),
     source_text: form.source_text,
     options,
     source_ids: files.value.map((file) => file.id),
@@ -235,7 +234,17 @@ async function upload(list: FileList | null) {
   })
 }
 async function createDraft() {
-  acceptDraft(await ws.api('/generation/drafts', { method: 'POST', body: draftFields() }))
+  acceptDraft(
+    await ws.api('/generation/drafts', {
+      method: 'POST',
+      body: {
+        ...draftFields(),
+        // Only a new draft needs this fallback. Changing an existing prompt,
+        // even from empty to a service name, rebuilds its authored content.
+        prompt: form.prompt.trim() || name(form.feature_id, selected.value?.name),
+      },
+    }),
+  )
 }
 async function saveDraft() {
   if (!draft.value) return

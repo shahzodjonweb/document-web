@@ -21,6 +21,20 @@ const output = path.resolve(process.env.STUDIO_ARTIFACT_DIR || '../service-revie
 await fs.mkdir(output, { recursive: true })
 
 const SERVICES = ['ai.pdf_topic', 'ai.pptx']
+const requiredTopics = {
+  en: [
+    'Length', 'Who it is for', 'Tone', 'Structure', 'How a deck looks',
+    'Slide layouts', 'Photos in slides', 'Questions', 'Your own material', 'What to leave out',
+  ],
+  uz: [
+    'Hajm', 'Kim uchun', 'Uslub', 'Tuzilishi', 'Taqdimot ko‘rinishi',
+    'Slayd ko‘rinishlari', 'Slayddagi rasmlar', 'Savollar', 'O‘z materialingiz', 'Nimani yozmaslik kerak',
+  ],
+  ru: [
+    'Объём', 'Для кого', 'Тон', 'Структура', 'Вид презентации',
+    'Макеты слайдов', 'Фото в слайдах', 'Вопросы', 'Ваш материал', 'Что не нужно писать',
+  ],
+}
 const browser = await chromium.launch({ headless: true, channel: 'chrome' })
 const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, reducedMotion: 'reduce' })
 const page = await context.newPage()
@@ -89,14 +103,17 @@ try {
     await page.locator('.guide-table dt').first().waitFor()
     const terms = await page.locator('.guide-table dt').allInnerTexts()
     const bodies = await page.locator('.guide-table dd').allInnerTexts()
-    assert.equal(terms.length, 7, `${locale}: every row is present`)
+    for (const topic of requiredTopics[locale]) {
+      assert.ok(terms.includes(topic), `${locale}: the guide must explain “${topic}”`)
+    }
+    assert.equal(new Set(terms).size, terms.length, `${locale}: each topic appears once`)
     assert.equal(bodies.length, terms.length)
     for (const text of [...terms, ...bodies]) {
       assert.ok(text.trim(), `${locale}: an empty row teaches nothing`)
       assert.ok(!/^guideRow/.test(text), `${locale}: untranslated key "${text}"`)
     }
     // The default page count is stated, not left to be discovered.
-    assert.match(bodies.join(' '), /5/)
+    assert.match(bodies[terms.indexOf(requiredTopics[locale][0])], /5/)
   }
   checks.push('The reference table is complete and translated in all three languages')
 
