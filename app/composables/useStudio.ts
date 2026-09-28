@@ -9,6 +9,8 @@ export interface StudioFeature {
   locales?: string[]
   /** Most pages this account can be given in one document of this kind. */
   max_pages?: number
+  /** Stock photos one deck can carry on this plan; 0 when photos are off. */
+  max_images?: number
 }
 export interface StudioConfig {
   provider: { mode: string; label: string; configured: boolean; image_configured?: boolean }

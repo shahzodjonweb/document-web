@@ -419,6 +419,67 @@ try {
   )
   checks.push('An existing draft reviews without asking for the description again')
 
+  // 7. A deck's slides each have a layout, and the fields it needs.
+  await page.goto(`${origin}/en/app/create/${sourceDraft.id}`, { waitUntil: 'domcontentloaded' })
+  await page.getByTestId('studio-brief').waitFor()
+  const untouched = await reviewSaved()
+  assert.equal(untouched.content, undefined, 'Opening a deck is not an edit: no content is sent back')
+  await page.goto(`${origin}/en/app/create/${sourceDraft.id}`, { waitUntil: 'domcontentloaded' })
+  await page.getByTestId('studio-edit-outline').click()
+  const layout = page.getByTestId('slide-layout-1')
+  await layout.waitFor()
+  assert.equal(await layout.inputValue(), 'auto', 'A slide without a layout lets the AI choose')
+  assert.equal(await layout.locator('option').count(), 21, 'Let the AI choose, then the twenty layouts')
+  // Playwright's isDisabled() does not report a disabled <option>; the DOM does.
+  assert.deepEqual(
+    await layout.locator('option:disabled').evaluateAll((nodes) => nodes.map((node) => node.value)),
+    ['image_split', 'image_full'],
+    'Photo layouts are not offered when the plan has no photos',
+  )
+  assert.match(await page.locator('.outline-section').first().innerText(), /always its title slide/)
+  await layout.selectOption('stats')
+  assert.match(await page.locator('.outline-section').nth(1).innerText(), /2 to 4 items/)
+  const addItem = page.getByTestId('slide-add-item-1')
+  await addItem.click()
+  await addItem.click()
+  const items = page.locator('.outline-section').nth(1).locator('.slide-item')
+  assert.equal(await items.count(), 2)
+  await items.nth(0).getByLabel('1 · Label').fill('Revenue')
+  await items.nth(0).getByLabel('1 · Value').fill('$4.2m')
+  await items.nth(1).getByLabel('2 · Label').fill('Customers')
+  await items.nth(1).getByLabel('2 · Value').fill('1,200')
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 1000 })
+    assert.equal(
+      await page.evaluate(() => document.documentElement.scrollWidth > innerWidth),
+      false,
+      `slide editor/${width}: horizontal overflow`,
+    )
+    const audit = await new AxeBuilder({ page })
+      .include('.outline-panel')
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
+      .analyze()
+    assert.deepEqual(audit.violations.map((violation) => violation.id), [], `slide editor/${width}: accessibility`)
+    await page.screenshot({ path: path.join(output, `slide-editor-${width}.png`), fullPage: true })
+  }
+  await page.setViewportSize({ width: 1440, height: 1000 })
+  const beforeSave = requests.length
+  await page.getByRole('button', { name: 'Save draft', exact: true }).click()
+  await page.getByText('Draft saved').waitFor()
+  const saved = requests
+    .slice(beforeSave)
+    .find((request) => request.method === 'PATCH' && request.path.startsWith('/generation/drafts/')).body
+  const slide = saved.content.sections[1]
+  assert.equal(slide.layout, 'stats')
+  assert.deepEqual(slide.items, [
+    { label: 'Revenue', text: '', value: '$4.2m' },
+    { label: 'Customers', text: '', value: '1,200' },
+  ])
+  assert.deepEqual(slide.columns, [])
+  assert.equal(slide.image_query, '')
+  assert.equal(saved.content.sections[0].layout, 'auto', 'Untouched slides stay with the AI’s choice')
+  checks.push('A deck slide takes a layout and its items, and saves them; photo layouts wait for photos')
+
   await open('ai.pdf_topic')
   await primary().fill('A fixture document for an interrupted confirmation.')
   await reviewNew()

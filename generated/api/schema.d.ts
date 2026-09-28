@@ -1559,8 +1559,17 @@ export interface components {
         };
         GenerationSection: {
             body: string;
+            columns?: string[];
             heading: string;
             id: string;
+            image_query?: string;
+            items?: {
+                label?: string;
+                text?: string;
+                value?: string;
+            }[];
+            /** @enum {string} */
+            layout?: "auto" | "cover" | "agenda" | "section" | "bullets" | "two_column" | "statement" | "quote" | "big_number" | "stats" | "timeline" | "process" | "comparison" | "pros_cons" | "cards" | "matrix" | "chart" | "table" | "image_split" | "image_full" | "closing";
             notes?: string;
         };
         Invoice: {
@@ -5931,7 +5940,16 @@ export interface operations {
                     options?: Record<string, never>;
                     outline?: {
                         body?: string;
+                        columns?: string[];
                         id?: string;
+                        image_query?: string;
+                        items?: {
+                            label?: string;
+                            text?: string;
+                            value?: string;
+                        }[];
+                        /** @enum {string} */
+                        layout?: "auto" | "cover" | "agenda" | "section" | "bullets" | "two_column" | "statement" | "quote" | "big_number" | "stats" | "timeline" | "process" | "comparison" | "pros_cons" | "cards" | "matrix" | "chart" | "table" | "image_split" | "image_full" | "closing";
                         notes?: string;
                         title?: string;
                     }[];

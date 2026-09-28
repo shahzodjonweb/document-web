@@ -15,6 +15,8 @@ const rows = [
   'Tone',
   'Structure',
   'Look',
+  'Layouts',
+  'Photos',
   'Questions',
   'Sources',
   'Skip',

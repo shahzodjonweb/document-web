@@ -55,6 +55,11 @@ const maxPages = computed(() => selected.value?.max_pages ?? defaultPages.value)
 const readingPages = computed(() => draft.value?.options?.length ?? defaultPages.value)
 /** A deck is counted in slides; only a document is counted in pages. */
 const isDeck = computed(() => form.feature_id === 'ai.pptx')
+/**
+ * Photo layouts need the service to be able to fetch a photo for this plan.
+ * Without one they would only ever be drawn as text, so they are not offered.
+ */
+const photosAvailable = computed(() => (selected.value?.max_images ?? 0) > 0)
 const readingLabel = computed(() =>
   t(isDeck.value ? 'studioSlidesReading' : 'studioPagesReading', { count: readingPages.value }),
 )
@@ -74,7 +79,7 @@ const hasEssentialInput = computed(
     !!form.source_text.trim() ||
     // A draft opened from the list already has its content; it does not need
     // the description typed out again.
-    sectionList.value.some((section: any) => section.body?.trim()),
+    sectionList.value.some(sectionHasContent),
 )
 /** The first line of the description names the document unless a title is set. */
 const effectiveTitle = computed(() =>
@@ -130,13 +135,17 @@ function acceptDraft(value: any) {
   form.output_locale = value.output_locale || form.output_locale
   form.output_format = value.output_format || form.output_format
   form.options = { ...value.options, length: value.options?.length || value.content?.sections?.length || 2 }
-  content.value = structuredClone(
+  const next = structuredClone(
     value.content || {
       title: form.title,
       sections: (value.outline || []).map((s: any) => ({ heading: s.title, body: s.body })),
       questions: [],
     },
   )
+  // Every slide field is filled in before the editor binds to it, and before
+  // the edit watcher sees it, so opening a deck is not an edit.
+  if (isDeck.value) next.sections?.forEach(slideSection)
+  content.value = next
   contentEdited.value = false
   quote.value = null
 }
@@ -274,8 +283,19 @@ function addQuestion() {
 }
 function addSection() {
   if (!content.value.sections) content.value.sections = []
-  content.value.sections.push({ heading: '', body: '' })
+  const section = { heading: '', body: '' }
+  content.value.sections.push(isDeck.value ? slideSection(section) : section)
   quote.value = null
+}
+function addItem(section: any) {
+  if (section.items.length < MAX_SLIDE_ITEMS) section.items.push({ label: '', text: '', value: '' })
+}
+/** Columns are typed one box at a time; an earlier empty box stays a string, never a hole. */
+function setColumn(section: any, index: number, value: string) {
+  const columns = Array.from({ length: Math.max(section.columns.length, index + 1) }, (_, i) =>
+    i === index ? value : section.columns[i] || '',
+  )
+  section.columns = columns
 }
 function moveSection(index: number, direction: number) {
   const to = index + direction
@@ -293,7 +313,7 @@ async function review() {
     // come from the customer before there is anything to render.
     if (
       studio.localProvider.value &&
-      !sectionList.value.some((section) => section.body?.trim()) &&
+      !sectionList.value.some(sectionHasContent) &&
       !content.value.questions?.length
     ) {
       step.value = 1
@@ -574,12 +594,86 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
             <div v-for="(section, index) in sectionList" :key="index" class="outline-section">
               <div class="outline-number">{{ String(Number(index) + 1).padStart(2, '0') }}</div>
               <div class="outline-fields">
+                <label v-if="isDeck" class="form-field"
+                  ><span>{{ t('slideLayout') }}</span
+                  ><select v-model="section.layout" :data-testid="`slide-layout-${index}`">
+                    <option value="auto">{{ t('layout.auto') }}</option>
+                    <optgroup
+                      v-for="(ids, group) in SLIDE_LAYOUT_GROUPS"
+                      :key="group"
+                      :label="t(`layoutGroup.${group}`)"
+                    >
+                      <option
+                        v-for="id in ids"
+                        :key="id"
+                        :value="id"
+                        :disabled="isPhotoLayout(id) && !photosAvailable && section.layout !== id"
+                      >
+                        {{ t(`layout.${id}`) }}
+                      </option>
+                    </optgroup>
+                  </select>
+                  <small v-if="index === 0 && sectionList.length > 1">{{ t('slideCoverFirst') }}</small>
+                  <small v-else-if="section.layout !== 'auto'">{{ t(`layoutHint.${section.layout}`) }}</small>
+                </label>
                 <label class="form-field"
                   ><span>{{ t('sectionHeading') }}</span
                   ><input v-model="section.heading" /></label
                 ><label class="form-field"
                   ><span>{{ t('sectionBody') }}</span
                   ><textarea v-model="section.body" rows="4" />
+                </label>
+                <div v-if="isDeck && layoutUsesColumns(section)" class="form-field">
+                  <span>{{ t('slideColumns') }}</span>
+                  <div class="slide-columns">
+                    <input
+                      v-for="column in MAX_SLIDE_COLUMNS"
+                      :key="column"
+                      :value="section.columns[column - 1] || ''"
+                      maxlength="80"
+                      :aria-label="`${t('slideColumns')} ${column}`"
+                      @input="setColumn(section, column - 1, ($event.target as HTMLInputElement).value)"
+                    />
+                  </div>
+                </div>
+                <div v-if="isDeck && layoutUsesItems(section)" class="form-field slide-items">
+                  <span>{{ t('slideItems') }}</span>
+                  <div v-for="(item, row) in section.items" :key="row" class="slide-item">
+                    <input
+                      v-model="item.label"
+                      maxlength="160"
+                      :placeholder="t('itemLabel')"
+                      :aria-label="`${Number(row) + 1} · ${t('itemLabel')}`"
+                    />
+                    <input
+                      v-model="item.text"
+                      maxlength="600"
+                      :placeholder="t('itemText')"
+                      :aria-label="`${Number(row) + 1} · ${t('itemText')}`"
+                    />
+                    <input
+                      v-model="item.value"
+                      maxlength="160"
+                      :placeholder="t('itemValue')"
+                      :aria-label="`${Number(row) + 1} · ${t('itemValue')}`"
+                    />
+                    <button class="icon-button" :aria-label="t('removeItem')" @click="section.items.splice(row, 1)">
+                      <AppIcon name="trash" :size="15" />
+                    </button>
+                  </div>
+                  <button
+                    v-if="section.items.length < MAX_SLIDE_ITEMS"
+                    class="button secondary small"
+                    :data-testid="`slide-add-item-${index}`"
+                    @click="addItem(section)"
+                  >
+                    <AppIcon name="plus" :size="15" />{{ t('addItem') }}
+                  </button>
+                </div>
+                <label v-if="isDeck && layoutUsesPhoto(section)" class="form-field"
+                  ><span>{{ t('photoSubject') }}</span
+                  ><input v-model="section.image_query" maxlength="100" :placeholder="t('photoSubjectExample')" />
+                  <small>{{ photosAvailable ? t('photoSubjectHint') : t('photosOff') }}</small>
                 </label>
                 <label v-if="isDeck" class="form-field"
                   ><span>{{ t('speakerNotes') }}</span

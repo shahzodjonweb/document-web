@@ -101,6 +101,10 @@ const limit = (plan: any, key: string) => plan.limits?.[key] ?? plan[key]
           <AppIcon name="check" :size="17" /><strong>{{ limit(plan, 'max_generated_slides') }}</strong
           >{{ t('generatedSlidesLimit') }}
         </li>
+        <li v-if="limit(plan, 'max_deck_images') !== undefined">
+          <AppIcon name="check" :size="17" /><strong>{{ limit(plan, 'max_deck_images') }}</strong
+          >{{ t('photosPerDeck') }}
+        </li>
         <li>
           <AppIcon name="check" :size="17" /><strong>{{ limit(plan, 'ai_credits') }}</strong
           >{{ t('ai_credits') }}

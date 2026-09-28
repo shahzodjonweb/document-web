@@ -272,6 +272,21 @@
 .outline-actions .icon-button:hover {
   background: var(--soft);
 }
+/* A slide's items: label, text and value side by side, then a remove button. */
+.slide-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.slide-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 0.8fr) 44px;
+  gap: 8px;
+  align-items: center;
+}
+.slide-items > .button {
+  align-self: flex-start;
+}
 .add-section {
   border-style: dashed;
 }
@@ -1274,8 +1289,13 @@
   }
 }
 @media (max-width: 900px) {
+  /* The form takes the full width and the rail's panels sit side by side
+     beneath it; below 600px they stack too. */
   .studio-layout,
-  .library-layout,
+  .library-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
   .studio-rail {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1399,7 +1419,23 @@
     position: relative;
   }
   .outline-fields {
-    width: calc(100% - 36px);
+    /* `flex: 1` sets a zero basis, so a width alone never wraps the actions below. */
+    flex-basis: calc(100% - 36px);
+  }
+  .studio-rail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .slide-item {
+    grid-template-columns: minmax(0, 1fr) 44px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .slide-item > input:not(:first-child) {
+    grid-column: 1;
+  }
+  .slide-item > .icon-button {
+    grid-column: 2;
+    grid-row: 1;
   }
   .outline-actions {
     flex-direction: row;
