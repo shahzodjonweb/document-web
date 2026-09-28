@@ -14,6 +14,7 @@ const rows = [
   'Audience',
   'Tone',
   'Structure',
+  'Look',
   'Questions',
   'Sources',
   'Skip',
