@@ -45,6 +45,13 @@ const outputLanguage = computed(
 const examples = computed(() => promptExamples(form.feature_id))
 /** A draft derived from a finished document changes it rather than replacing it. */
 const revising = computed(() => !!draft.value?.revision)
+const revisionSelection = computed<string[]>(() => draft.value?.revision?.selected_section_ids || [])
+const revisionPageNumbers = computed(() =>
+  sectionList.value
+    .map((section, index) => (revisionSelection.value.includes(section.id) ? index + 1 : null))
+    .filter(Boolean)
+    .join(', '),
+)
 const defaultPages = computed(() => studio.config.value?.default_pages ?? 5)
 const maxPages = computed(() => selected.value?.max_pages ?? defaultPages.value)
 /**
@@ -386,7 +393,7 @@ async function generate() {
   })
 }
 async function reviewOutline() {
-  if (busy.value || submissionPending.value) return
+  if (busy.value || submissionPending.value || revisionSelection.value.length) return
   await run('outline-quote', async () => {
     await saveDraft()
     quoteStage.value = 'outline'
@@ -433,7 +440,11 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
   </div>
   <ErrorBanner v-if="error" :message="error" />
   <div v-if="revising" class="info-banner" data-testid="studio-revising">
-    <AppIcon name="edit" :size="19" />{{ t('reviseBanner') }}
+    <AppIcon name="edit" :size="19" />{{
+      revisionSelection.length
+        ? t('reviseSelectedBanner', { pages: revisionPageNumbers })
+        : t('reviseBanner')
+    }}
   </div>
   <div v-if="notice" class="success-banner" role="status">
     <AppIcon name="check" :size="17" />{{ notice }}
@@ -692,20 +703,21 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
               <div class="outline-actions">
                 <button
                   class="icon-button"
-                  :disabled="index === 0"
+                  :disabled="index === 0 || !!revisionSelection.length"
                   @click="moveSection(Number(index), -1)"
                   :aria-label="t('moveUp')"
                 >
                   <AppIcon name="up" :size="17" /></button
                 ><button
                   class="icon-button"
-                  :disabled="index === sectionList.length - 1"
+                  :disabled="index === sectionList.length - 1 || !!revisionSelection.length"
                   @click="moveSection(Number(index), 1)"
                   :aria-label="t('moveDown')"
                 >
                   <AppIcon name="moveDown" :size="17" /></button
                 ><button
                   class="icon-button"
+                  :disabled="!!revisionSelection.length"
                   @click="content.sections.splice(index, 1)"
                  
                   :aria-label="t('delete')"
@@ -716,6 +728,7 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
             </div>
             <button
               class="button secondary full add-section"
+              :disabled="!!revisionSelection.length"
               @click="addSection"
              
             >
@@ -723,7 +736,7 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
             </button>
             <button
               class="button secondary full outline-generation"
-              :disabled="!!busy || submissionPending"
+              :disabled="!!busy || submissionPending || !!revisionSelection.length"
               @click="reviewOutline"
             >
               <AppIcon name="sparkle" :size="17" />{{ t('reviewOutlineGeneration') }}

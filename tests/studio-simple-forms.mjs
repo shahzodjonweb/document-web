@@ -102,6 +102,22 @@ const authoredDrafts = featureIds.map((feature) => ({
   output_format: feature === 'ai.pptx' ? 'pptx' : 'pdf',
 }))
 for (const draft of authoredDrafts) drafts.set(draft.id, draft)
+// Server-seeded section copies, before a customer edits or generates them.
+const seededDrafts = authoredDrafts.map((draft) => {
+  const seeded = structuredClone(draft)
+  seeded.id = id()
+  seeded.prompt = 'Write a two-section report using the supplied material.'
+  seeded.source_text = 'First source paragraph.\n\nSecond source paragraph.'
+  seeded.content.sections = ['First source paragraph.', 'Second source paragraph.'].map((body, index) => ({
+    id: `s${index + 1}`,
+    heading: '',
+    body,
+    notes: '',
+  }))
+  return seeded
+})
+for (const draft of seededDrafts) drafts.set(draft.id, draft)
+
 const sourceContent = (fields, length) => ({
   title: fields.title,
   sections: Array.from({ length }, (_, index) => ({
@@ -185,7 +201,10 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
     const asked = named ? Number(named[1]) : null
     // A change inherits the document it applies to, exactly as the server does.
     const source = body.options?.revise_draft_id ? drafts.get(body.options.revise_draft_id) : null
-    const length = Math.min(asked || source?.content?.sections?.length || config.default_pages, clampPages || 99)
+    const length = Math.min(
+      asked || source?.content?.sections?.length || config.default_pages,
+      clampPages || 99,
+    )
     const draft = {
       id: id(),
       version: 1,
@@ -198,12 +217,16 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
             feature_id: source.feature_id,
             output_format: source.output_format,
             title: source.title,
-            revision: { request: body.prompt, source_draft_id: source.id },
+            revision: {
+              request: body.prompt,
+              source_draft_id: source.id,
+              ...(body.options?.revise_section_ids
+                ? { selected_section_ids: body.options.revise_section_ids, base_version: source.version }
+                : {}),
+            },
           }
         : {}),
-      content: source
-        ? structuredClone(source.content)
-        : sourceContent(body, length),
+      content: source ? structuredClone(source.content) : sourceContent(body, length),
     }
     drafts.set(draft.id, draft)
     return json(draft, 201)
@@ -243,6 +266,21 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
       Object.assign(draft, updated)
     }
     return json(draft)
+  }
+  const retryRoute = endpoint.match(/^\/generation\/jobs\/([^/]+)\/retry-quote$/)
+  if (retryRoute && method === 'POST') {
+    const failed = jobs.get(retryRoute[1])
+    assert.equal(failed.status, 'failed')
+    const quote = {
+      id: id(),
+      feature_id: failed.feature_id,
+      expires_at: future(),
+      affordable,
+      meters: [{ meter: 'ai_credits', amount: 12 }],
+      parameters: failed.parameters,
+    }
+    quotes.set(quote.id, quote)
+    return json(quote, 201)
   }
   if (endpoint === '/jobs' && method === 'GET') return json({ results: [...jobs.values()], count: jobs.size })
   if (endpoint === '/jobs' && method === 'POST') {
@@ -440,6 +478,25 @@ try {
   }
   checks.push('Authored PDF and PPTX drafts with empty prompts review without rebuilding their content')
 
+  for (const seeded of seededDrafts) {
+    await page.goto(`${origin}/en/app/create/${seeded.id}`, { waitUntil: 'domcontentloaded' })
+    await page.getByTestId('studio-brief').waitFor()
+    const before = requests.length
+    const patched = await reviewSaved()
+    assert.equal(
+      patched.content,
+      undefined,
+      `${seeded.feature_id}: unchanged source copies retain server provenance`,
+    )
+    await confirm()
+    const writes = requests.slice(before).filter((request) => request.method === 'PATCH')
+    assert.equal(writes.length, 1, 'Confirmation does not save content a second time')
+    assert.ok(writes.every((request) => request.body.content === undefined))
+  }
+  checks.push(
+    'Untouched source-seeded PDF and PPTX drafts reach confirmation without sending authored content',
+  )
+
   // 7. A deck's slides each have a layout, and the fields it needs.
   await page.goto(`${origin}/en/app/create/${sourceDraft.id}`, { waitUntil: 'domcontentloaded' })
   await page.getByTestId('studio-brief').waitFor()
@@ -480,7 +537,11 @@ try {
       .include('.outline-panel')
       .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
       .analyze()
-    assert.deepEqual(audit.violations.map((violation) => violation.id), [], `slide editor/${width}: accessibility`)
+    assert.deepEqual(
+      audit.violations.map((violation) => violation.id),
+      [],
+      `slide editor/${width}: accessibility`,
+    )
     await page.screenshot({ path: path.join(output, `slide-editor-${width}.png`), fullPage: true })
   }
   await page.setViewportSize({ width: 1440, height: 1000 })
@@ -562,7 +623,10 @@ try {
   )
   await page.getByTestId('studio-brief').waitFor()
   // They attach one at a time, so wait for the last rather than the first.
-  await page.locator('.source-chip').nth(many.length - 1).waitFor()
+  await page
+    .locator('.source-chip')
+    .nth(many.length - 1)
+    .waitFor()
   await primary().fill('Summarise all of the attached files in 3 pages.')
   await reviewNew()
   assert.deepEqual(lastDraftRequest().body.source_ids, many, 'Every linked file is a source, in order')
@@ -584,6 +648,7 @@ try {
   await confirm()
   const producedBy = lastDraftRequest().body
   await page.getByTestId('job-revise').waitFor()
+  const finishedJobUrl = page.url()
   await page.screenshot({ path: path.join(output, 'job-revise.png'), fullPage: true })
   await page.getByTestId('job-revise-input').fill('Use a friendlier tone and add an example.')
   await page.getByTestId('job-revise-submit').click()
@@ -593,6 +658,7 @@ try {
   const change = lastDraftRequest().body
   assert.equal(change.prompt, 'Use a friendlier tone and add an example.')
   assert.ok(change.options.revise_draft_id, 'the change names the document it applies to')
+  assert.equal(change.options.revise_section_ids, undefined, 'Global revisions remain the default')
   assert.equal(await primary().inputValue(), 'Use a friendlier tone and add an example.')
   // A change is not a new brief, so the starter examples stand down.
   assert.equal(await page.getByTestId('studio-example-0').count(), 0)
@@ -603,12 +669,51 @@ try {
   assert.ok(producedBy.prompt.includes('tide tables'))
   checks.push('A finished document is changed by asking, and the change keeps what it did not mention')
 
+  await page.goto(finishedJobUrl, { waitUntil: 'domcontentloaded' })
+  await page.getByTestId('job-revise-scope').selectOption('s2')
+  await page.getByTestId('job-revise-input').fill('Make this page friendlier.')
+  const sourceVersion = drafts.get(change.options.revise_draft_id).version
+  await page.getByTestId('job-revise-submit').click()
+  await page.waitForURL('**/app/create/*')
+  const selectedChange = lastDraftRequest().body
+  assert.deepEqual(selectedChange.options.revise_section_ids, ['s2'])
+  assert.equal(selectedChange.options.revise_base_version, sourceVersion)
+  await page.getByTestId('studio-revising').waitFor()
+  assert.match(await page.getByTestId('studio-revising').innerText(), /only page\/slide 2/)
+  checks.push('Optional page selection sends explicit identity and the source version')
+
+  const failedId = id()
+  jobs.set(failedId, {
+    ...structuredClone([...jobs.values()][0]),
+    id: failedId,
+    status: 'failed',
+    stage: 'failed',
+  })
+  await page.goto(`${origin}/en/app/jobs/${failedId}`, { waitUntil: 'domcontentloaded' })
+  const beforeRetry = countJobs()
+  await page.getByTestId('job-retry-review').click()
+  await page.getByTestId('job-retry-quote').waitFor()
+  assert.equal(countJobs(), beforeRetry, 'Reviewing cost does not start a paid retry')
+  assert.match(await page.getByTestId('job-retry-quote').innerText(), /12/)
+  failJobOnce = true
+  await page.getByTestId('job-retry-confirm').click()
+  await page.getByTestId('job-retry-confirm').filter({ hasText: 'Try again' }).waitFor()
+  const ambiguous = calls('/jobs').at(-1)
+  await page.getByTestId('job-retry-confirm').click()
+  await page.waitForURL((url) => /\/app\/jobs\//.test(url.pathname) && !url.pathname.endsWith(failedId))
+  const replay = calls('/jobs').at(-1)
+  assert.equal(replay.idempotencyKey, ambiguous.idempotencyKey)
+  assert.deepEqual(replay.body, ambiguous.body)
+  assert.equal(await page.evaluate(() => sessionStorage.getItem('pdf-master-pending-job')), null)
+  checks.push(
+    'A failed generation retries only after cost confirmation and preserves its key on an ambiguous response',
+  )
+
   // 9. A description can also arrive pre-filled, which is how the guide works.
   const brief = 'A 3 page briefing on tide tables for a general audience.'
-  await page.goto(
-    `${origin}/en/app/create?feature=ai.pdf_topic&prompt=${encodeURIComponent(brief)}`,
-    { waitUntil: 'domcontentloaded' },
-  )
+  await page.goto(`${origin}/en/app/create?feature=ai.pdf_topic&prompt=${encodeURIComponent(brief)}`, {
+    waitUntil: 'domcontentloaded',
+  })
   await page.getByTestId('studio-brief').waitFor()
   assert.equal(await primary().inputValue(), brief)
   assert.equal(await review().isDisabled(), false)

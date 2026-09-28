@@ -38,6 +38,78 @@ const reviseDraftId = computed(() =>
 )
 const change = ref('')
 const revising = ref(false)
+const revisionSource = ref<any>(null)
+const revisionSection = ref('')
+watch(reviseDraftId, async (id) => {
+  revisionSource.value = null
+  revisionSection.value = ''
+  if (!id) return
+  try {
+    const source = await ws.api(`/generation/drafts/${id}`)
+    if (reviseDraftId.value === id) revisionSource.value = source
+  } catch {
+    // Whole-document changes retain the existing path if this optional read fails.
+  }
+})
+const retryAvailable = computed(
+  () =>
+    job.value?.status === 'failed' &&
+    isGenerationFeature(job.value.feature_id) &&
+    job.value.feature_id !== 'ai.images',
+)
+const retryQuote = ref<any>(null)
+const retryBusy = ref(false)
+const retryPending = ref(false)
+const retryKey = ref('')
+const retryMeters = computed(() => {
+  const value = retryQuote.value?.meters || []
+  return Array.isArray(value) ? value : Object.entries(value).map(([meter, amount]) => ({ meter, amount }))
+})
+async function reviewRetry() {
+  if (retryBusy.value || retryPending.value) return
+  retryBusy.value = true
+  error.value = ''
+  try {
+    retryQuote.value = await ws.api(`/generation/jobs/${props.jobId}/retry-quote`, {
+      method: 'POST',
+      body: {},
+    })
+    retryKey.value = crypto.randomUUID()
+  } catch (e: any) {
+    error.value = e.data?.error?.message || t('genericError')
+  } finally {
+    retryBusy.value = false
+  }
+}
+async function confirmRetry() {
+  if (retryBusy.value || !retryQuote.value || retryQuote.value.affordable === false) return
+  retryBusy.value = true
+  error.value = ''
+  const key = retryKey.value || (retryKey.value = crypto.randomUUID())
+  const quoteId = retryQuote.value.id
+  retryPending.value = true
+  sessionStorage.setItem('pdf-master-pending-job', JSON.stringify({ quote_id: quoteId, key }))
+  try {
+    const result: any = await ws.api('/jobs', {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key },
+      body: { quote_id: quoteId },
+    })
+    sessionStorage.removeItem('pdf-master-pending-job')
+    retryPending.value = false
+    retryQuote.value = null
+    await navigateTo(path(`/app/jobs/${result.id}`))
+  } catch (e: any) {
+    const status = e.statusCode || e.status || e.response?.status
+    if (status >= 400 && status < 500) {
+      retryPending.value = false
+      sessionStorage.removeItem('pdf-master-pending-job')
+    }
+    error.value = e.data?.error?.message || t('genericError')
+  } finally {
+    retryBusy.value = false
+  }
+}
 async function revise() {
   if (!change.value.trim() || revising.value) return
   revising.value = true
@@ -45,7 +117,18 @@ async function revise() {
   try {
     const draft: any = await ws.api('/generation/drafts', {
       method: 'POST',
-      body: { prompt: change.value.trim(), options: { revise_draft_id: reviseDraftId.value } },
+      body: {
+        prompt: change.value.trim(),
+        options: {
+          revise_draft_id: reviseDraftId.value,
+          ...(revisionSection.value && revisionSource.value
+            ? {
+                revise_section_ids: [revisionSection.value],
+                revise_base_version: revisionSource.value.version,
+              }
+            : {}),
+        },
+      },
     })
     await navigateTo(path(`/app/create/${draft.id}`))
   } catch (e: any) {
@@ -81,6 +164,9 @@ watch(
   () => props.jobId,
   () => {
     if (timer) clearTimeout(timer)
+    retryQuote.value = null
+    retryPending.value = false
+    retryKey.value = ''
     refresh()
   },
 )
@@ -171,6 +257,20 @@ function downloadUrl(url: string | undefined, id: string) {
     <section v-if="reviseDraftId" class="panel revise-panel" data-testid="job-revise">
       <h3><AppIcon name="edit" :size="18" />{{ t('reviseTitle') }}</h3>
       <p>{{ t('reviseBody') }}</p>
+      <label v-if="revisionSource?.content?.sections?.length" class="form-field">
+        <span>{{ t('reviseScope') }}</span>
+        <select v-model="revisionSection" data-testid="job-revise-scope">
+          <option value="">{{ t('reviseWhole') }}</option>
+          <option
+            v-for="(section, index) in revisionSource.content.sections"
+            :key="section.id"
+            :value="section.id"
+          >
+            {{ Number(index) + 1 }}. {{ section.heading || t('reviseUntitled') }}
+          </option>
+        </select>
+        <small>{{ t('reviseScopeHint') }}</small>
+      </label>
       <label class="form-field"
         ><span>{{ t('reviseLabel') }}</span
         ><textarea
@@ -191,6 +291,39 @@ function downloadUrl(url: string | undefined, id: string) {
           t('reviseAction')
         }}
       </button>
+      <p class="field-hint">{{ t('noChargeBefore') }}</p>
+    </section>
+    <section v-if="retryAvailable" class="panel revise-panel" data-testid="job-retry">
+      <h3>{{ t('generationRetryTitle') }}</h3>
+      <p>{{ t('generationRetryBody') }}</p>
+      <button
+        v-if="!retryQuote"
+        class="button primary"
+        data-testid="job-retry-review"
+        :disabled="retryBusy"
+        @click="reviewRetry"
+      >
+        {{ t('generationRetryReview') }}
+      </button>
+      <div v-else data-testid="job-retry-quote">
+        <div v-for="meter in retryMeters" :key="meter.meter" class="meter-row">
+          <span>{{ t(meter.meter) }}</span
+          ><strong>{{ meter.amount }}</strong>
+        </div>
+        <p>{{ t('quoteExpires') }} {{ date(retryQuote.expires_at, true) }}</p>
+        <p v-if="retryQuote.affordable === false" class="info-banner">{{ t('quotaExceeded') }}</p>
+        <button
+          class="button primary"
+          data-testid="job-retry-confirm"
+          :disabled="retryBusy || retryQuote.affordable === false"
+          @click="confirmRetry"
+        >
+          {{ t(retryPending ? 'retry' : 'generationRetryConfirm') }}
+        </button>
+        <button class="button secondary" :disabled="retryBusy || retryPending" @click="reviewRetry">
+          {{ t('refreshQuote') }}
+        </button>
+      </div>
       <p class="field-hint">{{ t('noChargeBefore') }}</p>
     </section>
     <div class="result-actions">
