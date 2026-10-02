@@ -134,7 +134,11 @@ function selectedInvoice(value: any) {
           >{{ t('nextPlan') }} · {{ t(subscription.scheduled_plan) }}</span
         >
       </div>
-      <div class="subscription-controls">
+      <!-- A card transfer pays for one period: there is nothing to renew or switch. -->
+      <p v-if="subscription.provider === 'manual'" class="muted">
+        {{ t('paidByCardUntil', { date: date(subscription.active_until || subscription.current_period_end) }) }}
+      </p>
+      <div v-else class="subscription-controls">
         <button class="button secondary" :disabled="!!busy" @click="renewal">
           {{ t(subscription.renewal_enabled ? 'cancelRenewal' : 'resumeRenewal') }}
         </button>
@@ -271,7 +275,11 @@ function selectedInvoice(value: any) {
             >{{ date(transaction.occurred_at, true) }} · {{ transaction.sandbox ? 'SANDBOX' : '' }}</small
           >
         </div>
-        <b>{{ transaction.amount_xtr }} {{ transaction.currency }}</b
+        <b>{{
+          transaction.currency === 'UZS'
+            ? `${transaction.amount_xtr.toLocaleString('ru-RU').replace(/\u00a0/g, ' ')} so'm`
+            : `${transaction.amount_xtr} ${transaction.currency}`
+        }}</b
         ><button class="text-link" @click="refundTarget = transaction">{{ t('requestRefund') }}</button>
       </div>
       <form v-if="refundTarget" class="refund-form" @submit.prevent="refund">

@@ -4,6 +4,23 @@ const ws = useWorkspace()
 const usage = computed(() => ws.usage.value as any)
 const meters = computed(() => usage.value?.meters || {})
 const limit = (plan: any, key: string) => plan.limits?.[key] ?? plan[key]
+/** So'm per 30 days for a card transfer, or nothing when a plan isn't for sale. */
+const priceOf = (plan: any) => (Number(limit(plan, 'price_uzs')) > 0 ? Number(limit(plan, 'price_uzs')) : 0)
+const money = (amount: number) => `${amount.toLocaleString('ru-RU').replace(/\u00a0/g, ' ')} so'm`
+const currentPlan = computed(() => ws.user.value?.plan || 'free')
+/** Once plans are priced in so'm, Free reads as 0 so'm rather than 0 Stars. */
+const pricedInSom = computed(() => (ws.plans.value || []).some((plan: any) => priceOf(plan)))
+const chosen = ref('')
+async function pay(plan: string) {
+  chosen.value = plan
+  await nextTick()
+  document.querySelector('[data-testid="manual-payment"]')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+async function planChanged() {
+  chosen.value = ''
+  await ws.init()
+  await ws.loadAccount()
+}
 </script>
 <template>
   <div class="page-heading">
@@ -55,6 +72,7 @@ const limit = (plan: any, key: string) => plan.limits?.[key] ?? plan[key]
       </div>
     </div>
   </section>
+  <ManualPaymentPanel v-if="ws.user.value" :plan="chosen" @close="chosen = ''" @changed="planChanged" />
   <CommercePanel v-if="ws.user.value" />
   <div v-else class="info-banner"><AppIcon name="alert" :size="19" />{{ t('checkoutUnavailable') }}</div>
   <div class="plan-grid">
@@ -68,7 +86,11 @@ const limit = (plan: any, key: string) => plan.limits?.[key] ?? plan[key]
       <p>
         {{ t(plan.id === 'free' ? 'planFreeBody' : plan.id === 'plus' ? 'planPlusBody' : 'planPremiumBody') }}
       </p>
-      <div class="plan-price">
+      <div v-if="priceOf(plan) || (pricedInSom && plan.id === 'free')" class="plan-price">
+        <strong>{{ money(priceOf(plan)).replace(" so'm", '') }} <span>so'm</span></strong
+        ><small>{{ t('perThirtyDays') }}</small>
+      </div>
+      <div v-else class="plan-price">
         <strong v-if="plan.price_xtr === 0">0 <span>Stars</span></strong
         ><strong v-else-if="plan.price_xtr !== null">{{ plan.price_xtr }} <span>Stars</span></strong
         ><span v-else>{{ t('unavailablePrice') }}</span
@@ -110,9 +132,20 @@ const limit = (plan: any, key: string) => plan.limits?.[key] ?? plan[key]
           >{{ t('ai_credits') }}
         </li>
       </ul>
-      <span
-        v-if="plan.id === (ws.user.value?.plan || 'free')"
-        class="button secondary full current-plan-label"
+      <template v-if="priceOf(plan)">
+        <NuxtLink v-if="!ws.user.value" :to="path('/app/billing')" class="button primary full">{{
+          t('signInToPay')
+        }}</NuxtLink
+        ><button
+          v-else
+          class="button primary full"
+          :data-testid="`pay-${plan.id}`"
+          @click="pay(plan.id)"
+        >
+          {{ t(plan.id === currentPlan ? 'extendPlan' : 'payPlan', { price: money(priceOf(plan)) }) }}
+        </button>
+      </template>
+      <span v-else-if="plan.id === currentPlan" class="button secondary full current-plan-label"
         ><AppIcon name="check" :size="16" />{{ t('currentPlan') }}</span
       ><button v-else class="button secondary full" disabled>{{ t('notAvailable') }}</button>
     </section>
