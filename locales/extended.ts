@@ -1160,6 +1160,17 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   paymentRejected: ['We couldn’t confirm payment {reference}:', '{reference} to‘lovini tasdiqlay olmadik:', 'Не удалось подтвердить платёж {reference}:'],
   cardPaymentsUnavailable: ['Payments aren’t available right now. Please try again later.', 'To‘lov hozircha mavjud emas. Keyinroq urinib ko‘ring.', 'Оплата сейчас недоступна. Попробуйте позже.'],
   paidByCardUntil: ['Paid by card transfer until {date}. It doesn’t renew by itself — pay again to add 30 days.', 'Karta orqali {date} gacha to‘langan. O‘zi uzaytirilmaydi — 30 kun qo‘shish uchun qayta to‘lang.', 'Оплачено переводом на карту до {date}. Само не продлевается — оплатите снова, чтобы добавить 30 дней.'],
+  // Free for members of the owner's Telegram channels.
+  channelsTitle: ['Join our Telegram community', 'Telegram hamjamiyatimizga qo‘shiling', 'Вступите в наше Telegram-сообщество'],
+  channelsBody: ['PDF Master is free for members of our Telegram community. Join the channels below in Telegram, then tap “I’ve joined”.', 'PDF Master Telegram hamjamiyatimiz a’zolari uchun bepul. Quyidagi kanallarga Telegram’da qo‘shiling, so‘ng «Qo‘shildim» tugmasini bosing.', 'PDF Master бесплатен для участников нашего Telegram-сообщества. Подпишитесь на каналы ниже в Telegram и нажмите «Я подписался».'],
+  channelsJoined: ['I’ve joined', 'Qo‘shildim', 'Я подписался'],
+  channelsNotYet: ['You haven’t joined {titles} yet. Join, then tap “I’ve joined” again.', 'Siz hali {titles} ga qo‘shilmagansiz. Qo‘shiling va «Qo‘shildim»ni yana bosing.', 'Вы ещё не подписались на {titles}. Подпишитесь и снова нажмите «Я подписался».'],
+  channelsWelcomeTitle: ['Thanks for joining!', 'Qo‘shilganingiz uchun rahmat!', 'Спасибо за подписку!'],
+  channelsWelcome: ['Every service is open to you now. Try your task again.', 'Endi barcha xizmatlar siz uchun ochiq. Vazifani qayta bajaring.', 'Все сервисы теперь доступны. Повторите задачу.'],
+  channelsContinue: ['Continue', 'Davom etish', 'Продолжить'],
+  channelsOrPlans: ['Or choose a paid plan — no channels needed', 'Yoki pullik tarifni tanlang — kanal shart emas', 'Или выберите платный тариф — подписка не нужна'],
+  channelsBanner: ['Join our Telegram channel to keep using PDF Master for free.', 'PDF Master’dan bepul foydalanish uchun Telegram kanalimizga qo‘shiling.', 'Подпишитесь на наш Telegram-канал, чтобы пользоваться PDF Master бесплатно.'],
+  channelsBannerAction: ['Join', 'Qo‘shilish', 'Подписаться'],
   // A finished job can carry warnings. The API sends bare codes and JobDetail
   // renders `t(code)`, so an untranslated code would show the customer the code
   // itself. These three say what was adjusted and what it cost — nothing.

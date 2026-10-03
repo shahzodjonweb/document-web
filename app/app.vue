@@ -255,4 +255,5 @@ watch(
     </nav>
   </div>
   <AntiBotDialog />
+  <ChannelGateDialog />
 </template>

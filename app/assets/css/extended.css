@@ -3378,3 +3378,25 @@
     align-self: stretch;
   }
 }
+
+/* The Telegram channels a free account joins before using a service. */
+.channel-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+}
+.channel-plans {
+  align-self: center;
+  margin-top: 4px;
+}
+.channel-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}

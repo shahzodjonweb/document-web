@@ -8,6 +8,22 @@ const error = ref('')
 const dragging = ref(false)
 const officeAvailable = computed(() => ws.features.value.some((f) => f.id === 'convert.word_to_pdf'))
 const balance = computed(() => (ws.usage.value as any)?.meters?.file_tasks)
+// Free accounts are told up front which Telegram channels to join, rather than
+// only when a task is refused.
+const gate = useState<{ channels: any[] } | null>('channel-gate', () => null)
+const channels = ref<any>(null)
+onMounted(async () => {
+  if (!ws.user.value) return
+  try {
+    const state: any = await ws.api('/channels')
+    channels.value = state.required && !state.joined ? state : null
+  } catch {
+    // The banner is a courtesy; the dialog still opens when a task is refused.
+  }
+})
+watch(gate, (value) => {
+  if (value?.channels?.every((c: any) => c.joined)) channels.value = null
+})
 async function upload(files: FileList | File[] | null) {
   if (!files?.length) return
   busy.value = true
@@ -53,6 +69,12 @@ function onDrop(event: DragEvent) {
     <NuxtLink :to="path('/app/tools')" class="button secondary"
       ><AppIcon name="plus" :size="18" />{{ t('newTask') }}</NuxtLink
     >
+  </div>
+  <div v-if="channels" class="info-banner channel-banner" data-testid="channel-banner">
+    <span><AppIcon name="send" :size="18" /> {{ t('channelsBanner') }}</span>
+    <button class="button primary small" type="button" @click="gate = { channels: channels.channels }">
+      {{ t('channelsBannerAction') }}
+    </button>
   </div>
   <ErrorBanner v-if="error" :message="error" />
   <div class="dashboard-top">

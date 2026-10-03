@@ -23,17 +23,27 @@ export function useWorkspace() {
           .slice(1)
           .join('=') || ''
       : ''
+  // A free account that has not joined the owner's Telegram channels is refused
+  // any task with `channels_required`; the dialog that lists the channels opens
+  // from here, so every page that starts a task gets it.
+  const channelGate = useState<{ channels: any[] } | null>('channel-gate', () => null)
   async function api<T = any>(url: string, options: Record<string, any> = {}): Promise<T> {
-    return (await $fetch<T>(`/api/v1${url}`, {
-      credentials: 'include',
-      ...options,
-      headers: {
-        ...(options.method && options.method !== 'GET'
-          ? { 'X-CSRFToken': decodeURIComponent(cookie('csrftoken') || csrfToken.value) }
-          : {}),
-        ...options.headers,
-      },
-    })) as T
+    try {
+      return (await $fetch<T>(`/api/v1${url}`, {
+        credentials: 'include',
+        ...options,
+        headers: {
+          ...(options.method && options.method !== 'GET'
+            ? { 'X-CSRFToken': decodeURIComponent(cookie('csrftoken') || csrfToken.value) }
+            : {}),
+          ...options.headers,
+        },
+      })) as T
+    } catch (error: any) {
+      const refused = error?.data?.error
+      if (refused?.code === 'channels_required') channelGate.value = { channels: refused.message_params?.channels || [] }
+      throw error
+    }
   }
   const client = createPublicApi(api)
   async function init() {
