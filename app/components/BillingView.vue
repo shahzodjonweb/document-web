@@ -131,9 +131,11 @@ async function planChanged() {
           <AppIcon name="check" :size="17" /><strong>{{ limit(plan, 'ai_credits') }}</strong
           >{{ t('ai_credits') }}
         </li>
-        <li v-if="limit(plan, 'daily_ai_documents') !== undefined">
+        <!-- No daily limit is stored as null, which the limit() helper would
+             read as missing; ask the plan directly. -->
+        <li v-if="plan.limits && 'daily_ai_documents' in plan.limits">
           <AppIcon name="check" :size="17" /><strong>{{
-            limit(plan, 'daily_ai_documents') ?? t('unlimitedCount')
+            plan.limits.daily_ai_documents ?? t('unlimitedCount')
           }}</strong
           >{{ t('aiDocumentsPerDay') }}
         </li>

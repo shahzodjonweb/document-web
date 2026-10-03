@@ -28,6 +28,7 @@ const account = {
 const limits = (credits, price) => ({
   file_tasks: 300, file_page_units: 3000, max_file_mib: 25, max_pages_per_job: 100, max_generated_pdf_pages: 7,
   max_generated_slides: 12, max_deck_images: 4, ai_credits: credits, price_uzs: price,
+  daily_ai_documents: price ? null : 3,
 })
 const plans = [
   { id: 'free', name: 'Free', price_xtr: 0, limits: limits(3150, null) },
@@ -118,6 +119,8 @@ try {
   const cards = await page.locator('.plan-card').allInnerTexts()
   assert.ok(cards[1].includes('49 000') && cards[1].includes("so'm") && cards[2].includes('99 000'), 'prices in so\'m on the cards')
   assert.match(await page.getByTestId('pay-premium').innerText(), /Pay 99 000 so'm/)
+  assert.ok(cards[0].includes('3') && cards[0].includes('AI documents a day'), 'Free shows its daily AI documents')
+  assert.ok(cards[2].includes('Unlimited') && cards[2].includes('AI documents a day'), 'paid plans show Unlimited')
   checks.push("Plan cards show so'm prices and a Pay button")
 
   await page.getByTestId('pay-premium').click()
