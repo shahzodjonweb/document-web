@@ -1293,6 +1293,71 @@ export const extendedToolDescriptions: Record<string, [string, string, string]> 
     'Rasm to‘plamlarining har biridan alohida PDF yarating.',
     'Превратите каждый набор изображений в отдельный PDF.',
   ],
+  'editor.visual': [
+    'Edit a PDF on the page itself: text, marks, images and forms.',
+    'PDF’ni sahifaning o‘zida tahrirlang: matn, belgilar, rasmlar va shakllar.',
+    'Редактируйте PDF прямо на странице: текст, пометки, изображения и формы.',
+  ],
+  'editor.add_text': [
+    'Type new text anywhere on a page.',
+    'Sahifaning istalgan joyiga yangi matn yozing.',
+    'Добавьте текст в любое место страницы.',
+  ],
+  'editor.highlight': [
+    'Mark the lines that matter in colour.',
+    'Muhim qatorlarni rang bilan belgilang.',
+    'Выделите важные строки цветом.',
+  ],
+  'editor.annotate': [
+    'Leave notes, shapes and drawings on the page.',
+    'Sahifada izoh, shakl va chizmalar qoldiring.',
+    'Оставляйте заметки, фигуры и рисунки на странице.',
+  ],
+  'editor.fill_forms': [
+    'Fill in the fields of a PDF form and keep them editable.',
+    'PDF shakl maydonlarini to‘ldiring, ular tahrirlanadigan bo‘lib qoladi.',
+    'Заполните поля формы PDF, оставив их редактируемыми.',
+  ],
+  'editor.signature_image': [
+    'Place a picture of your signature where it belongs.',
+    'Imzongiz rasmini kerakli joyga qo‘ying.',
+    'Поставьте изображение подписи в нужное место.',
+  ],
+  'editor.existing_text': [
+    'Change words already in the PDF, in their own font.',
+    'PDF’dagi mavjud so‘zlarni o‘z shriftida o‘zgartiring.',
+    'Измените текст, который уже есть в PDF, тем же шрифтом.',
+  ],
+  'editor.insert_images': [
+    'Add a logo, a photo or a stamp to any page.',
+    'Istalgan sahifaga logotip, surat yoki muhr qo‘shing.',
+    'Добавьте логотип, фото или печать на любую страницу.',
+  ],
+  'editor.replace_images': [
+    'Swap a picture in the PDF for a new one.',
+    'PDF’dagi rasmni yangisiga almashtiring.',
+    'Замените изображение в PDF на новое.',
+  ],
+  'editor.redact': [
+    'Black out private details so they cannot be recovered.',
+    'Maxfiy ma’lumotlarni tiklab bo‘lmaydigan qilib yashiring.',
+    'Скройте личные данные без возможности восстановления.',
+  ],
+  'editor.form_templates': [
+    'Save a filled form as a template to reuse.',
+    'To‘ldirilgan shaklni qayta foydalanish uchun andoza qilib saqlang.',
+    'Сохраните заполненную форму как шаблон для повторного использования.',
+  ],
+  'editor.batch_forms': [
+    'Fill the same form for many people from one list.',
+    'Bitta ro‘yxatdan ko‘p kishi uchun bir xil shaklni to‘ldiring.',
+    'Заполните одну форму для многих людей по одному списку.',
+  ],
+  'editor.export': [
+    'Save your edits as a new, clean PDF.',
+    'Tahrirlaringizni yangi, toza PDF sifatida saqlang.',
+    'Сохраните изменения в новый чистый PDF.',
+  ],
 }
 
 export const extendedToolNames: Record<string, [string, string, string]> = {

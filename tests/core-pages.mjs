@@ -179,6 +179,8 @@ try {
   assert.equal(await page.locator('.workspace-hubs').count(), 0, 'the hub strip with dead links is gone')
   const ocr = page.locator('.tool-card[href$="ocr.extract_text"] p')
   assert.equal(await ocr.innerText(), 'Read the text from scans and photos of pages.')
+  const filler = await page.locator('.tool-card p', { hasText: 'in-between' }).count()
+  assert.equal(filler, 0, 'no tool falls back to the generic description')
   checks.push('Tools offers only categories with tools; every tool has its own description')
 
   // A tool, start to finish: files → review → start.
