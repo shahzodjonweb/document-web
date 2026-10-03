@@ -21,6 +21,9 @@ const output = path.resolve(process.env.STUDIO_ARTIFACT_DIR || '../service-revie
 await fs.mkdir(output, { recursive: true })
 
 const SERVICES = ['ai.pdf_topic', 'ai.pptx']
+// Three per service: one is shown up front in the bot, the other two sit
+// behind its expandable quote, and the guide lists all three.
+const EXAMPLES_PER_SERVICE = 3
 const requiredTopics = {
   en: [
     'Length', 'Who it is for', 'Tone', 'Structure', 'How a deck looks',
@@ -123,7 +126,11 @@ try {
   const services = await page.locator('.guide-service').count()
   assert.equal(services, SERVICES.length, 'Both services are covered')
   const examples = await page.locator('.guide-examples p').allInnerTexts()
-  assert.ok(examples.length >= 8, `expected examples for both services, saw ${examples.length}`)
+  assert.equal(
+    examples.length,
+    SERVICES.length * EXAMPLES_PER_SERVICE,
+    `${EXAMPLES_PER_SERVICE} examples per service, saw ${examples.length}`,
+  )
   for (const example of examples) {
     assert.match(example, /\d+\s*(pages?|slides?)/i, `"${example.slice(0, 40)}" names no page count`)
     assert.ok(example.length > 60, 'an example should be a real brief, not a fragment')
