@@ -24,7 +24,8 @@
     "test:editor": "node tests/editor-workspace.mjs",
     "test:payments": "node tests/manual-payment.mjs",
     "test:channels": "node tests/channel-gate.mjs",
-    "test:frame": "node tests/app-frame.mjs"
+    "test:frame": "node tests/app-frame.mjs",
+    "test:core": "node tests/core-pages.mjs"
   },
   "dependencies": {
     "lucide-vue-next": "0.563.0",

@@ -49,44 +49,8 @@ body {
 .button.primary:hover:not(:disabled) {
   background: var(--action-hover);
 }
-.tool-icon {
-  border-radius: 12px;
-}
-.tool-card {
-  border-radius: 15px;
-}
-.tool-card:hover {
-  box-shadow: 0 9px 22px #0275fc0b;
-}
-.usage-track > span {
-  background: linear-gradient(90deg, var(--brand-blue), #60a6ff);
-}
-.document-art {
-  width: 84px;
-  height: 84px;
-  display: grid;
-  place-items: center;
-  margin-bottom: 3px;
-}
-.document-art .brand-symbol {
-  width: 80px;
-  height: 80px;
-}
-.dashboard-drop {
-  border-radius: 18px;
-  border-color: var(--brand-border);
-  background: linear-gradient(130deg, var(--sage), var(--surface) 74%);
-}
-.dashboard-drop:before {
-  opacity: 0.09;
-  background-size: 18px 18px;
-}
 .workspace-drop {
   border-radius: 13px;
-}
-.quote-panel,
-.studio-quote {
-  border-top: 3px solid var(--brand-blue);
 }
 .landing-hero .eyebrow {
   width: fit-content;

@@ -87,6 +87,7 @@ await page.route('**/*', async (route) => {
   if (endpoint === '/usage')
     return json({ meters: { file_tasks: { remaining: 40, limit: 90 } }, daily: {}, resets_at: null })
   if (endpoint === '/jobs') return json({ results: [], count: 0 })
+  if (endpoint === '/channels') return json({ required: false, joined: true, channels: [] })
   // Opening the studio from a card loads its own side lists.
   if (endpoint === '/education/projects') return json({ results: [], limit: 10 })
   if (endpoint === '/generation/drafts') return json({ results: [] })
@@ -150,15 +151,15 @@ try {
   assert.deepEqual(inCategory, generationIds, 'The AI tab shows exactly the generation features')
   checks.push('The "Create with AI" category holds exactly the generation features')
 
-  // 5. The dashboard strip is the head of the same list.
+  // 5. Home: the AI services as their own shortcuts, then the file staples.
   await page.goto(`${origin}/en/app`, { waitUntil: 'domcontentloaded' })
   await page.locator('.quick-tools .tool-card').first().waitFor()
-  const strip = await page.$$eval('.quick-tools .tool-card', (nodes) =>
-    nodes.map((node) => decodeURIComponent(node.getAttribute('href') || '')),
-  )
-  assert.deepEqual(strip.map(idFromHref), [...FEATURED, 'pdf.merge', 'pdf.compress', 'pdf.split'], 'Popular tools leads with AI')
+  const hrefs = (selector) =>
+    page.$$eval(selector, (nodes) => nodes.map((node) => decodeURIComponent(node.getAttribute('href') || '')))
+  assert.deepEqual((await hrefs('.ai-shortcut')).map(idFromHref), FEATURED, 'Home leads with the AI services')
+  assert.deepEqual((await hrefs('.quick-tools .tool-card')).map(idFromHref), STAPLES, 'Then the file staples')
   await page.screenshot({ path: path.join(output, 'dashboard-popular.png'), fullPage: true })
-  checks.push('The dashboard "Popular tools" strip is the head of the same ordering')
+  checks.push('Home offers the AI services as shortcuts, then the file staples in directory order')
 
   // 6. Signed out, generation is not offered: it needs an account and
   //    `/tools/<id>` has no page for a studio feature.

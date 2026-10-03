@@ -420,465 +420,465 @@ watch(files, invalidateQuote, { deep: true, flush: 'sync' })
 const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.meters : []))
 </script>
 <template>
-  <div class="page-heading">
-    <div>
-      <span class="eyebrow">{{ t('create') }} · PDF MASTER</span>
-      <h1>{{ t('studioTitle') }}</h1>
-      <p>{{ t('studioSub') }}</p>
+  <div class="studio-page">
+    <div class="page-heading studio-head">
+      <div>
+        <h1>{{ t('studioTitle') }}</h1>
+        <p>{{ t('studioSub') }}</p>
+      </div>
+      <NuxtLink :to="path('/app/guide')" class="button quiet"
+        ><AppIcon name="book" :size="17" />{{ t('studioGuideLink') }}</NuxtLink
+      >
     </div>
-    <NuxtLink :to="path('/app/guide')" class="button secondary"
-      ><AppIcon name="book" :size="17" />{{ t('studioGuideLink') }}</NuxtLink
-    >
-  </div>
-  <div v-if="studio.localProvider.value" class="provider-banner">
-    <span class="provider-icon"><AppIcon name="sparkle" :size="22" /></span>
-    <div>
-      <strong>{{ t('localProvider') }}</strong>
-      <p>{{ t('localProviderNote') }}</p>
+    <div v-if="studio.localProvider.value" class="provider-banner">
+      <span class="provider-icon"><AppIcon name="sparkle" :size="22" /></span>
+      <div>
+        <strong>{{ t('localProvider') }}</strong>
+        <p>{{ t('localProviderNote') }}</p>
+      </div>
+      <span class="status-badge">LOCAL</span>
     </div>
-    <span class="status-badge">LOCAL</span>
-  </div>
-  <ErrorBanner v-if="error" :message="error" />
-  <div v-if="revising" class="info-banner" data-testid="studio-revising">
-    <AppIcon name="edit" :size="19" />{{
-      revisionSelection.length
-        ? t('reviseSelectedBanner', { pages: revisionPageNumbers })
-        : t('reviseBanner')
-    }}
-  </div>
-  <div v-if="notice" class="success-banner" role="status">
-    <AppIcon name="check" :size="17" />{{ notice }}
-  </div>
-  <div v-if="!studio.config.value" class="empty-state panel">
-    <AppIcon name="sparkle" :size="28" />
-    <h2>{{ studio.loaded.value ? t('notAvailable') : t('loading') }}</h2>
-    <button class="button secondary" @click="load">{{ t('refresh') }}</button>
-  </div>
-  <template v-else>
-    <div v-if="!canUseTool" class="info-banner" role="status">
-      <AppIcon name="sparkle" :size="18" />{{
-        t(providerReady ? 'studioPlanUnavailable' : 'studioUnavailable')
+    <ErrorBanner v-if="error" :message="error" />
+    <div v-if="revising" class="info-banner" data-testid="studio-revising">
+      <AppIcon name="edit" :size="19" />{{
+        revisionSelection.length
+          ? t('reviseSelectedBanner', { pages: revisionPageNumbers })
+          : t('reviseBanner')
       }}
     </div>
-    <nav class="studio-steps" :aria-label="t('create')">
-      <button
-        :class="{ active: step !== 2, complete: step === 2 }"
-        :disabled="!!busy || submissionPending"
-        @click="step = 0"
-      >
-        <b>1</b>{{ t('studioYourIdea') }}
-      </button>
-      <button
-        :class="{ active: step === 2 }"
-        :disabled="!draft || !!busy || submissionPending"
-        @click="step = 2"
-      >
-        <b>2</b>{{ t('studioReviewCreate') }}
-      </button>
-    </nav>
-    <div class="studio-layout">
-      <div class="studio-main">
-        <section v-if="step === 0" class="panel studio-form" data-testid="studio-brief">
-          <fieldset class="studio-fieldset" :disabled="!!busy || submissionPending">
-            <h2>{{ t('studioYourIdea') }}</h2>
-            <p class="studio-intro">{{ t('studioQuickHint') }}</p>
-            <label class="form-field"
-              ><span>{{ t('purpose') }}</span
-              ><select v-model="form.feature_id" :disabled="!!draft" data-testid="studio-purpose">
-                <option v-for="feature in studio.features.value" :key="feature.id" :value="feature.id">
-                  {{ name(feature.id, feature.name) }}
-                </option>
-              </select></label
-            >
-            <label class="form-field studio-primary-field">
-              <span>{{ t(revising ? 'reviseLabel' : 'studioDescribe') }}</span>
-              <textarea
-                v-model="form.prompt"
-                data-testid="studio-primary-input"
-                rows="7"
-                :maxlength="studio.config.value?.limits?.source_chars || 12000"
-                :placeholder="t('studioDescribePlaceholder')"
-              />
-              <small>{{
-                revising ? t('reviseExamples') : t('studioDescribeHint', { pages: defaultPages, max: maxPages })
-              }}</small>
-            </label>
-            <div v-if="!revising" class="studio-examples">
-              <span>{{ t('studioTryOne') }}</span>
-              <button
-                v-for="(example, index) in examples"
-                :key="index"
-                type="button"
-                class="chip"
-                :data-testid="`studio-example-${index}`"
-                @click="form.prompt = example"
-              >
-                {{ example.slice(0, 54) }}…
-              </button>
-              <NuxtLink class="text-link" :to="path('/app/guide')"
-                >{{ t('studioGuideLink') }}<AppIcon name="right" :size="15"
-              /></NuxtLink>
-            </div>
-            <div class="form-row">
+    <div v-if="notice" class="success-banner" role="status">
+      <AppIcon name="check" :size="17" />{{ notice }}
+    </div>
+    <div v-if="!studio.config.value" class="empty-state panel">
+      <AppIcon name="sparkle" :size="28" />
+      <h2>{{ studio.loaded.value ? t('notAvailable') : t('loading') }}</h2>
+      <button class="button secondary" @click="load">{{ t('refresh') }}</button>
+    </div>
+    <template v-else>
+      <div v-if="!canUseTool" class="info-banner" role="status">
+        <AppIcon name="sparkle" :size="18" />{{
+          t(providerReady ? 'studioPlanUnavailable' : 'studioUnavailable')
+        }}
+      </div>
+      <nav class="studio-steps" :aria-label="t('create')">
+        <button
+          :class="{ active: step !== 2, complete: step === 2 }"
+          :disabled="!!busy || submissionPending"
+          @click="step = 0"
+        >
+          <b>1</b>{{ t('studioYourIdea') }}
+        </button>
+        <button
+          :class="{ active: step === 2 }"
+          :disabled="!draft || !!busy || submissionPending"
+          @click="step = 2"
+        >
+          <b>2</b>{{ t('studioReviewCreate') }}
+        </button>
+      </nav>
+      <div class="studio-layout">
+        <div class="studio-main">
+          <section v-if="step === 0" class="panel studio-form" data-testid="studio-brief">
+            <fieldset class="studio-fieldset" :disabled="!!busy || submissionPending">
+              <h2>{{ t('studioYourIdea') }}</h2>
+              <p class="studio-intro">{{ t('studioQuickHint') }}</p>
               <label class="form-field"
-                ><span>{{ t('outputLanguage') }}</span
-                ><select v-model="form.output_locale" data-testid="studio-locale">
-                  <option
-                    v-for="(label, value) in { en: 'English', uz: 'O‘zbekcha', ru: 'Русский' }"
-                    :key="value"
-                    :value="value"
-                  >
-                    {{ label }}
+                ><span>{{ t('purpose') }}</span
+                ><select v-model="form.feature_id" :disabled="!!draft" data-testid="studio-purpose">
+                  <option v-for="feature in studio.features.value" :key="feature.id" :value="feature.id">
+                    {{ name(feature.id, feature.name) }}
                   </option>
                 </select></label
               >
-              <label v-if="formats.length > 1" class="form-field"
-                ><span>{{ t('format') }}</span
-                ><select v-model="form.output_format" data-testid="studio-format">
-                  <option v-for="value in formats" :key="value" :value="value">
-                    {{ value.toUpperCase() }}
-                  </option>
-                </select></label
-              >
-            </div>
-            <div class="studio-source">
-              <div>
-                <h3>{{ t('studioAttach') }}</h3>
-                <p>{{ t('studioAttachHint') }}</p>
+              <label class="form-field studio-primary-field">
+                <span>{{ t(revising ? 'reviseLabel' : 'studioDescribe') }}</span>
+                <textarea
+                  v-model="form.prompt"
+                  data-testid="studio-primary-input"
+                  rows="7"
+                  :maxlength="studio.config.value?.limits?.source_chars || 12000"
+                  :placeholder="t('studioDescribePlaceholder')"
+                />
+                <small>{{
+                  revising ? t('reviseExamples') : t('studioDescribeHint', { pages: defaultPages, max: maxPages })
+                }}</small>
+              </label>
+              <div v-if="!revising" class="studio-examples">
+                <span>{{ t('studioTryOne') }}</span>
+                <button
+                  v-for="(example, index) in examples"
+                  :key="index"
+                  type="button"
+                  class="chip"
+                  :data-testid="`studio-example-${index}`"
+                  @click="form.prompt = example"
+                >
+                  {{ example.slice(0, 54) }}…
+                </button>
+                <NuxtLink class="text-link" :to="path('/app/guide')"
+                  >{{ t('studioGuideLink') }}<AppIcon name="right" :size="15"
+                /></NuxtLink>
               </div>
-              <button
-                class="button secondary"
-                @click="input?.click()"
-                :disabled="!!busy || submissionPending"
-              >
-                <AppIcon name="upload" :size="17" />{{ t(files.length ? 'addMore' : 'upload') }}</button
-              ><input
-                ref="input"
-                type="file"
-                multiple
-                class="visually-hidden"
-                accept=".pdf"
-                @change="upload(($event.target as HTMLInputElement).files)"
-                :aria-label="t('sourceFiles')"
-              />
-            </div>
-            <div v-for="file in files" :key="file.id" class="source-chip">
-              <AppIcon name="file" :size="17" /><span>{{ file.name }}</span
-              ><button
-                class="icon-button"
-                @click="files = files.filter((f) => f.id !== file.id)"
-                :aria-label="t('remove')"
-              >
-                <AppIcon name="x" :size="15" />
-              </button>
-            </div>
-            <div class="studio-defaults" aria-live="polite">
-              <AppIcon name="sparkle" :size="16" /><span
-                >{{ form.output_format.toUpperCase() }} · {{ outputLanguage }} ·
-                {{ readingLabel }}</span
-              >
-            </div>
-            <div class="studio-form-actions">
-              <button
-                v-if="draft"
-                class="button secondary"
-                :disabled="!!busy || submissionPending"
-                data-testid="studio-edit-outline"
-                @click="step = 1"
-              >
-                {{ t('studioEditOutline') }}
-              </button>
-              <button
-                class="button primary"
-                data-testid="studio-review"
-                :disabled="!!busy || !canUseTool || !hasEssentialInput"
-                @click="review"
-              >
-                {{ busy ? t('working') : t('studioReviewCost') }}<AppIcon name="right" :size="17" />
-              </button>
-            </div>
-            <p class="field-hint studio-charge-hint">{{ t('noChargeBefore') }}</p>
-          </fieldset>
-        </section>
-        <section v-else-if="step === 1" class="panel outline-panel">
-          <fieldset class="studio-fieldset" :disabled="!!busy || submissionPending">
-            <div class="panel-heading">
-              <div>
-                <h2>{{ t('outlineStep') }}</h2>
-                <p>{{ t('outlineHelp') }}</p>
-              </div>
-              <button class="button secondary small" :disabled="!!busy || submissionPending" @click="outline">
-                <AppIcon name="rotate" :size="15" />{{ t('generateOutline') }}
-              </button>
-            </div>
-            <div v-for="(section, index) in sectionList" :key="index" class="outline-section">
-              <div class="outline-number">{{ String(Number(index) + 1).padStart(2, '0') }}</div>
-              <div class="outline-fields">
-                <label v-if="isDeck" class="form-field"
-                  ><span>{{ t('slideLayout') }}</span
-                  ><select v-model="section.layout" :data-testid="`slide-layout-${index}`">
-                    <option value="auto">{{ t('layout.auto') }}</option>
-                    <optgroup
-                      v-for="(ids, group) in SLIDE_LAYOUT_GROUPS"
-                      :key="group"
-                      :label="t(`layoutGroup.${group}`)"
-                    >
-                      <option
-                        v-for="id in ids"
-                        :key="id"
-                        :value="id"
-                        :disabled="isPhotoLayout(id) && !photosAvailable && section.layout !== id"
-                      >
-                        {{ t(`layout.${id}`) }}
-                      </option>
-                    </optgroup>
-                  </select>
-                  <small v-if="index === 0 && sectionList.length > 1">{{ t('slideCoverFirst') }}</small>
-                  <small v-else-if="section.layout !== 'auto'">{{ t(`layoutHint.${section.layout}`) }}</small>
-                </label>
-                <label class="form-field"
-                  ><span>{{ t('sectionHeading') }}</span
-                  ><input v-model="section.heading" /></label
-                ><label class="form-field"
-                  ><span>{{ t('sectionBody') }}</span
-                  ><textarea v-model="section.body" rows="4" />
-                </label>
-                <div v-if="isDeck && layoutUsesColumns(section)" class="form-field">
-                  <span>{{ t('slideColumns') }}</span>
-                  <div class="slide-columns">
-                    <input
-                      v-for="column in MAX_SLIDE_COLUMNS"
-                      :key="column"
-                      :value="section.columns[column - 1] || ''"
-                      maxlength="80"
-                      :aria-label="`${t('slideColumns')} ${column}`"
-                      @input="setColumn(section, column - 1, ($event.target as HTMLInputElement).value)"
-                    />
-                  </div>
+              <div class="studio-source">
+                <div>
+                  <h3>{{ t('studioAttach') }}</h3>
+                  <p>{{ t('studioAttachHint') }}</p>
                 </div>
-                <div v-if="isDeck && layoutUsesItems(section)" class="form-field slide-items">
-                  <span>{{ t('slideItems') }}</span>
-                  <div v-for="(item, row) in section.items" :key="row" class="slide-item">
-                    <input
-                      v-model="item.label"
-                      maxlength="160"
-                      :placeholder="t('itemLabel')"
-                      :aria-label="`${Number(row) + 1} · ${t('itemLabel')}`"
-                    />
-                    <input
-                      v-model="item.text"
-                      maxlength="600"
-                      :placeholder="t('itemText')"
-                      :aria-label="`${Number(row) + 1} · ${t('itemText')}`"
-                    />
-                    <input
-                      v-model="item.value"
-                      maxlength="160"
-                      :placeholder="t('itemValue')"
-                      :aria-label="`${Number(row) + 1} · ${t('itemValue')}`"
-                    />
-                    <button class="icon-button" :aria-label="t('removeItem')" @click="section.items.splice(row, 1)">
-                      <AppIcon name="trash" :size="15" />
+                <button
+                  class="button secondary"
+                  @click="input?.click()"
+                  :disabled="!!busy || submissionPending"
+                >
+                  <AppIcon name="upload" :size="17" />{{ t(files.length ? 'addMore' : 'upload') }}</button
+                ><input
+                  ref="input"
+                  type="file"
+                  multiple
+                  class="visually-hidden"
+                  accept=".pdf"
+                  @change="upload(($event.target as HTMLInputElement).files)"
+                  :aria-label="t('sourceFiles')"
+                />
+              </div>
+              <div v-for="file in files" :key="file.id" class="source-chip">
+                <AppIcon name="file" :size="17" /><span>{{ file.name }}</span
+                ><button
+                  class="icon-button"
+                  @click="files = files.filter((f) => f.id !== file.id)"
+                  :aria-label="t('remove')"
+                >
+                  <AppIcon name="x" :size="15" />
+                </button>
+              </div>
+              <details class="studio-more-options" data-testid="studio-more-options">
+                <summary>{{ t('studioMoreOptions') }}</summary>
+                <div class="studio-settings-body">
+                  <label class="form-field"
+                    ><span>{{ t('outputLanguage') }}</span
+                    ><select v-model="form.output_locale" data-testid="studio-locale">
+                      <option
+                        v-for="(label, value) in { en: 'English', uz: 'O‘zbekcha', ru: 'Русский' }"
+                        :key="value"
+                        :value="value"
+                      >
+                        {{ label }}
+                      </option>
+                    </select></label
+                  >
+                  <label v-if="formats.length > 1" class="form-field"
+                    ><span>{{ t('format') }}</span
+                    ><select v-model="form.output_format" data-testid="studio-format">
+                      <option v-for="value in formats" :key="value" :value="value">
+                        {{ value.toUpperCase() }}
+                      </option>
+                    </select></label
+                  >
+                  <label class="form-field"
+                    ><span>{{ t('studioTitleOptional') }}</span
+                    ><input v-model="form.title" maxlength="160" data-testid="studio-title"
+                  /></label>
+                </div>
+              </details>
+              <div class="studio-defaults" aria-live="polite">
+                <AppIcon name="sparkle" :size="16" /><span
+                  >{{ form.output_format.toUpperCase() }} · {{ outputLanguage }} ·
+                  {{ readingLabel }}</span
+                >
+              </div>
+              <div class="studio-form-actions">
+                <button
+                  v-if="draft"
+                  class="button secondary"
+                  :disabled="!!busy || submissionPending"
+                  data-testid="studio-edit-outline"
+                  @click="step = 1"
+                >
+                  {{ t('studioEditOutline') }}
+                </button>
+                <button
+                  class="button primary"
+                  data-testid="studio-review"
+                  :disabled="!!busy || !canUseTool || !hasEssentialInput"
+                  @click="review"
+                >
+                  {{ busy ? t('working') : t('studioReviewCost') }}<AppIcon name="right" :size="17" />
+                </button>
+              </div>
+              <p class="field-hint studio-charge-hint">{{ t('noChargeBefore') }}</p>
+            </fieldset>
+          </section>
+          <section v-else-if="step === 1" class="panel outline-panel">
+            <fieldset class="studio-fieldset" :disabled="!!busy || submissionPending">
+              <div class="panel-heading">
+                <div>
+                  <h2>{{ t('outlineStep') }}</h2>
+                  <p>{{ t('outlineHelp') }}</p>
+                </div>
+                <button class="button secondary small" :disabled="!!busy || submissionPending" @click="outline">
+                  <AppIcon name="rotate" :size="15" />{{ t('generateOutline') }}
+                </button>
+              </div>
+              <div v-for="(section, index) in sectionList" :key="index" class="outline-section">
+                <div class="outline-number">{{ String(Number(index) + 1).padStart(2, '0') }}</div>
+                <div class="outline-fields">
+                  <label v-if="isDeck" class="form-field"
+                    ><span>{{ t('slideLayout') }}</span
+                    ><select v-model="section.layout" :data-testid="`slide-layout-${index}`">
+                      <option value="auto">{{ t('layout.auto') }}</option>
+                      <optgroup
+                        v-for="(ids, group) in SLIDE_LAYOUT_GROUPS"
+                        :key="group"
+                        :label="t(`layoutGroup.${group}`)"
+                      >
+                        <option
+                          v-for="id in ids"
+                          :key="id"
+                          :value="id"
+                          :disabled="isPhotoLayout(id) && !photosAvailable && section.layout !== id"
+                        >
+                          {{ t(`layout.${id}`) }}
+                        </option>
+                      </optgroup>
+                    </select>
+                    <small v-if="index === 0 && sectionList.length > 1">{{ t('slideCoverFirst') }}</small>
+                    <small v-else-if="section.layout !== 'auto'">{{ t(`layoutHint.${section.layout}`) }}</small>
+                  </label>
+                  <label class="form-field"
+                    ><span>{{ t('sectionHeading') }}</span
+                    ><input v-model="section.heading" /></label
+                  ><label class="form-field"
+                    ><span>{{ t('sectionBody') }}</span
+                    ><textarea v-model="section.body" rows="4" />
+                  </label>
+                  <div v-if="isDeck && layoutUsesColumns(section)" class="form-field">
+                    <span>{{ t('slideColumns') }}</span>
+                    <div class="slide-columns">
+                      <input
+                        v-for="column in MAX_SLIDE_COLUMNS"
+                        :key="column"
+                        :value="section.columns[column - 1] || ''"
+                        maxlength="80"
+                        :aria-label="`${t('slideColumns')} ${column}`"
+                        @input="setColumn(section, column - 1, ($event.target as HTMLInputElement).value)"
+                      />
+                    </div>
+                  </div>
+                  <div v-if="isDeck && layoutUsesItems(section)" class="form-field slide-items">
+                    <span>{{ t('slideItems') }}</span>
+                    <div v-for="(item, row) in section.items" :key="row" class="slide-item">
+                      <input
+                        v-model="item.label"
+                        maxlength="160"
+                        :placeholder="t('itemLabel')"
+                        :aria-label="`${Number(row) + 1} · ${t('itemLabel')}`"
+                      />
+                      <input
+                        v-model="item.text"
+                        maxlength="600"
+                        :placeholder="t('itemText')"
+                        :aria-label="`${Number(row) + 1} · ${t('itemText')}`"
+                      />
+                      <input
+                        v-model="item.value"
+                        maxlength="160"
+                        :placeholder="t('itemValue')"
+                        :aria-label="`${Number(row) + 1} · ${t('itemValue')}`"
+                      />
+                      <button class="icon-button" :aria-label="t('removeItem')" @click="section.items.splice(row, 1)">
+                        <AppIcon name="trash" :size="15" />
+                      </button>
+                    </div>
+                    <button
+                      v-if="section.items.length < MAX_SLIDE_ITEMS"
+                      class="button secondary small"
+                      :data-testid="`slide-add-item-${index}`"
+                      @click="addItem(section)"
+                    >
+                      <AppIcon name="plus" :size="15" />{{ t('addItem') }}
                     </button>
                   </div>
+                  <label v-if="isDeck && layoutUsesPhoto(section)" class="form-field"
+                    ><span>{{ t('photoSubject') }}</span
+                    ><input v-model="section.image_query" maxlength="100" :placeholder="t('photoSubjectExample')" />
+                    <small>{{ photosAvailable ? t('photoSubjectHint') : t('photosOff') }}</small>
+                  </label>
+                  <label v-if="isDeck" class="form-field"
+                    ><span>{{ t('speakerNotes') }}</span
+                    ><textarea v-model="section.notes" rows="3" />
+                  </label>
+                </div>
+                <div class="outline-actions">
                   <button
-                    v-if="section.items.length < MAX_SLIDE_ITEMS"
-                    class="button secondary small"
-                    :data-testid="`slide-add-item-${index}`"
-                    @click="addItem(section)"
+                    class="icon-button"
+                    :disabled="index === 0 || !!revisionSelection.length"
+                    @click="moveSection(Number(index), -1)"
+                    :aria-label="t('moveUp')"
                   >
-                    <AppIcon name="plus" :size="15" />{{ t('addItem') }}
+                    <AppIcon name="up" :size="17" /></button
+                  ><button
+                    class="icon-button"
+                    :disabled="index === sectionList.length - 1 || !!revisionSelection.length"
+                    @click="moveSection(Number(index), 1)"
+                    :aria-label="t('moveDown')"
+                  >
+                    <AppIcon name="moveDown" :size="17" /></button
+                  ><button
+                    class="icon-button"
+                    :disabled="!!revisionSelection.length"
+                    @click="content.sections.splice(index, 1)"
+                 
+                    :aria-label="t('delete')"
+                  >
+                    <AppIcon name="trash" :size="17" />
                   </button>
                 </div>
-                <label v-if="isDeck && layoutUsesPhoto(section)" class="form-field"
-                  ><span>{{ t('photoSubject') }}</span
-                  ><input v-model="section.image_query" maxlength="100" :placeholder="t('photoSubjectExample')" />
-                  <small>{{ photosAvailable ? t('photoSubjectHint') : t('photosOff') }}</small>
-                </label>
-                <label v-if="isDeck" class="form-field"
-                  ><span>{{ t('speakerNotes') }}</span
-                  ><textarea v-model="section.notes" rows="3" />
-                </label>
               </div>
-              <div class="outline-actions">
-                <button
-                  class="icon-button"
-                  :disabled="index === 0 || !!revisionSelection.length"
-                  @click="moveSection(Number(index), -1)"
-                  :aria-label="t('moveUp')"
-                >
-                  <AppIcon name="up" :size="17" /></button
-                ><button
-                  class="icon-button"
-                  :disabled="index === sectionList.length - 1 || !!revisionSelection.length"
-                  @click="moveSection(Number(index), 1)"
-                  :aria-label="t('moveDown')"
-                >
-                  <AppIcon name="moveDown" :size="17" /></button
-                ><button
-                  class="icon-button"
-                  :disabled="!!revisionSelection.length"
-                  @click="content.sections.splice(index, 1)"
-                 
-                  :aria-label="t('delete')"
-                >
-                  <AppIcon name="trash" :size="17" />
-                </button>
-              </div>
-            </div>
-            <button
-              class="button secondary full add-section"
-              :disabled="!!revisionSelection.length"
-              @click="addSection"
-             
-            >
-              <AppIcon name="plus" :size="17" />{{ t('addSection') }}
-            </button>
-            <button
-              class="button secondary full outline-generation"
-              :disabled="!!busy || submissionPending || !!revisionSelection.length"
-              @click="reviewOutline"
-            >
-              <AppIcon name="sparkle" :size="17" />{{ t('reviewOutlineGeneration') }}
-            </button>
-            <div v-if="content.questions.length" class="question-editor">
-              <div class="panel-heading">
-                <h3>{{ t('practice') }}</h3>
-                <button class="button secondary small" @click="addQuestion">
-                  <AppIcon name="plus" :size="15" />{{ t('addQuestion') }}
-                </button>
-              </div>
-              <div
-                v-for="(question, index) in content.questions"
-                :key="question.id || index"
-                class="question-edit-card"
-              >
-                <label class="form-field"
-                  ><span>{{ Number(index) + 1 }} · {{ t('text') }}</span
-                  ><textarea v-model="question.stem" rows="3" />
-                </label>
-                <div v-if="Array.isArray(question.options)" class="question-options-edit">
-                  <input
-                    v-for="(_, i) in question.options"
-                    :key="i"
-                    v-model="question.options[i]"
-                    :aria-label="`${Number(index) + 1}.${Number(i) + 1}`"
-                  />
-                </div>
-                <label class="form-field"
-                  ><span>{{ t('teacherKey') }}</span
-                  ><input v-model="question.answer" /></label
-                ><label class="form-field"
-                  ><span>{{ t('explanation') }}</span
-                  ><textarea v-model="question.explanation" rows="2" />
-                </label>
-              </div>
-            </div>
-            <div class="studio-form-actions">
               <button
-                class="button secondary"
-                :disabled="!!busy || submissionPending"
-                @click="run('save', saveDraft)"
+                class="button secondary full add-section"
+                :disabled="!!revisionSelection.length"
+                @click="addSection"
+             
               >
-                {{ t('saveDraft') }}</button
-              ><button class="button primary" :disabled="!!busy || !sectionList.length" @click="review">
-                {{ busy ? t('working') : t('reviewGeneration') }}<AppIcon name="right" :size="17" />
+                <AppIcon name="plus" :size="17" />{{ t('addSection') }}
+              </button>
+              <button
+                class="button secondary full outline-generation"
+                :disabled="!!busy || submissionPending || !!revisionSelection.length"
+                @click="reviewOutline"
+              >
+                <AppIcon name="sparkle" :size="17" />{{ t('reviewOutlineGeneration') }}
+              </button>
+              <div v-if="content.questions.length" class="question-editor">
+                <div class="panel-heading">
+                  <h3>{{ t('practice') }}</h3>
+                  <button class="button secondary small" @click="addQuestion">
+                    <AppIcon name="plus" :size="15" />{{ t('addQuestion') }}
+                  </button>
+                </div>
+                <div
+                  v-for="(question, index) in content.questions"
+                  :key="question.id || index"
+                  class="question-edit-card"
+                >
+                  <label class="form-field"
+                    ><span>{{ Number(index) + 1 }} · {{ t('text') }}</span
+                    ><textarea v-model="question.stem" rows="3" />
+                  </label>
+                  <div v-if="Array.isArray(question.options)" class="question-options-edit">
+                    <input
+                      v-for="(_, i) in question.options"
+                      :key="i"
+                      v-model="question.options[i]"
+                      :aria-label="`${Number(index) + 1}.${Number(i) + 1}`"
+                    />
+                  </div>
+                  <label class="form-field"
+                    ><span>{{ t('teacherKey') }}</span
+                    ><input v-model="question.answer" /></label
+                  ><label class="form-field"
+                    ><span>{{ t('explanation') }}</span
+                    ><textarea v-model="question.explanation" rows="2" />
+                  </label>
+                </div>
+              </div>
+              <div class="studio-form-actions">
+                <button
+                  class="button secondary"
+                  :disabled="!!busy || submissionPending"
+                  @click="run('save', saveDraft)"
+                >
+                  {{ t('saveDraft') }}</button
+                ><button class="button primary" :disabled="!!busy || !sectionList.length" @click="review">
+                  {{ busy ? t('working') : t('reviewGeneration') }}<AppIcon name="right" :size="17" />
+                </button>
+              </div>
+            </fieldset>
+          </section>
+          <section v-else class="panel generation-summary">
+            <span class="result-symbol"><AppIcon name="ready" :size="34" /></span>
+            <h2>{{ form.title }}</h2>
+            <p>
+              {{ name(form.feature_id, selected?.name) }} · {{ form.output_format.toUpperCase() }} ·
+              {{ form.output_locale.toUpperCase() }}
+            </p>
+            <p class="field-hint">{{ t('studioReviewHint') }}</p>
+            <button
+              class="button secondary small"
+              :disabled="!!busy || submissionPending"
+              data-testid="studio-edit-outline"
+              @click="step = 1"
+            >
+              {{ t('studioEditOutline') }}
+            </button>
+            <div class="outline-summary">
+              <div v-for="(section, index) in sectionList" :key="index">
+                <b>{{ Number(index) + 1 }}</b
+                ><span>{{ section.heading }}</span>
+              </div>
+            </div>
+            <p class="review-advice"><AppIcon name="shield" :size="17" />{{ t('reviewBeforeShare') }}</p>
+            <div v-if="!quote" class="studio-form-actions">
+              <button class="button primary" @click="review" :disabled="!!busy || submissionPending">
+                {{ t('studioReviewCost') }}
               </button>
             </div>
-          </fieldset>
-        </section>
-        <section v-else class="panel generation-summary">
-          <span class="result-symbol"><AppIcon name="ready" :size="34" /></span>
-          <h2>{{ form.title }}</h2>
-          <p>
-            {{ name(form.feature_id, selected?.name) }} · {{ form.output_format.toUpperCase() }} ·
-            {{ form.output_locale.toUpperCase() }}
-          </p>
-          <p class="field-hint">{{ t('studioReviewHint') }}</p>
-          <button
-            class="button secondary small"
-            :disabled="!!busy || submissionPending"
-            data-testid="studio-edit-outline"
-            @click="step = 1"
-          >
-            {{ t('studioEditOutline') }}
-          </button>
-          <div class="outline-summary">
-            <div v-for="(section, index) in sectionList" :key="index">
-              <b>{{ Number(index) + 1 }}</b
-              ><span>{{ section.heading }}</span>
+          </section>
+        </div>
+        <aside v-if="quote" class="studio-rail">
+          <section class="panel studio-quote">
+            <h2>{{ t('reviewTitle') }}</h2>
+            <div class="meter-row" data-testid="studio-pages">
+              <span>{{ t('guideRowPages') }}</span
+              ><strong>{{ readingPages }}</strong>
             </div>
-          </div>
-          <p class="review-advice"><AppIcon name="shield" :size="17" />{{ t('reviewBeforeShare') }}</p>
-          <div v-if="!quote" class="studio-form-actions">
-            <button class="button primary" @click="review" :disabled="!!busy || submissionPending">
-              {{ t('studioReviewCost') }}
+            <!-- A clamped request is said out loud rather than quietly honoured short. -->
+            <p v-if="clampedFrom" class="field-hint" data-testid="studio-pages-clamped">
+              {{ t('studioPagesClamped', { asked: clampedFrom, given: readingPages }) }}
+            </p>
+            <div v-for="meter in meters" :key="meter.meter" class="meter-row">
+              <span>{{
+                t(
+                  meter.meter === 'file_tasks'
+                    ? 'standardTask'
+                    : meter.meter === 'file_page_units'
+                      ? 'pageUnits'
+                      : meter.meter,
+                )
+              }}</span
+              ><strong>{{ meter.amount }}</strong>
+            </div>
+            <p class="quote-expiry">{{ t('quoteExpires') }} {{ date(quote.expires_at, true) }}</p>
+            <div v-if="quote.affordable === false" class="warning-banner">
+              <AppIcon name="alert" :size="17" />{{ t('quotaExceeded') }}
+            </div>
+            <button
+              class="button primary full"
+              :disabled="!!busy || quote.affordable === false"
+              @click="generate"
+            >
+              {{
+                busy
+                  ? t('working')
+                  : t(
+                      submissionPending
+                        ? 'retry'
+                        : quoteStage === 'outline'
+                          ? 'confirmOutlineGeneration'
+                          : 'generateDocument',
+                    )
+              }}<AppIcon name="sparkle" :size="17" />
             </button>
-          </div>
-        </section>
-      </div>
-      <aside class="studio-rail">
-        <section v-if="quote" class="panel studio-quote">
-          <h2>{{ t('reviewTitle') }}</h2>
-          <div class="meter-row" data-testid="studio-pages">
-            <span>{{ t('guideRowPages') }}</span
-            ><strong>{{ readingPages }}</strong>
-          </div>
-          <!-- A clamped request is said out loud rather than quietly honoured short. -->
-          <p v-if="clampedFrom" class="field-hint" data-testid="studio-pages-clamped">
-            {{ t('studioPagesClamped', { asked: clampedFrom, given: readingPages }) }}
-          </p>
-          <div v-for="meter in meters" :key="meter.meter" class="meter-row">
-            <span>{{
-              t(
-                meter.meter === 'file_tasks'
-                  ? 'standardTask'
-                  : meter.meter === 'file_page_units'
-                    ? 'pageUnits'
-                    : meter.meter,
-              )
-            }}</span
-            ><strong>{{ meter.amount }}</strong>
-          </div>
-          <p>{{ t('quoteExpires') }} {{ date(quote.expires_at, true) }}</p>
-          <div v-if="quote.affordable === false" class="info-banner">{{ t('quotaExceeded') }}</div>
-          <button
-            class="button primary full"
-            :disabled="!!busy || quote.affordable === false"
-            @click="generate"
-          >
-            {{
-              busy
-                ? t('working')
-                : t(
-                    submissionPending
-                      ? 'retry'
-                      : quoteStage === 'outline'
-                        ? 'confirmOutlineGeneration'
-                        : 'generateDocument',
-                  )
-            }}<AppIcon name="sparkle" :size="17" />
-          </button>
-          <button
-            class="button secondary full"
-            :disabled="!!busy || submissionPending"
-            @click="quoteStage === 'outline' ? reviewOutline() : review()"
-          >
-            {{ t('refreshQuote') }}
-          </button>
-        </section>
-        <details class="panel studio-settings studio-more-options" data-testid="studio-more-options">
-          <summary>
-            {{ t('studioMoreOptions') }}<span>{{ t('studioOptional') }}</span>
-          </summary>
-          <div class="studio-settings-body">
-            <label class="form-field"
-              ><span>{{ t('studioTitleOptional') }}</span
-              ><input v-model="form.title" maxlength="160" data-testid="studio-title"
-            /></label>
-          </div>
-        </details>
-      </aside>
-    </div></template
-  >
+            <button
+              class="text-link refresh-quote"
+              type="button"
+              :disabled="!!busy || submissionPending"
+              @click="quoteStage === 'outline' ? reviewOutline() : review()"
+            >
+              {{ t('refreshQuote') }}
+            </button>
+          </section>
+        </aside>
+      </div></template
+    >
+  </div>
 </template>

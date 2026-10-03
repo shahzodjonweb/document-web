@@ -2,7 +2,7 @@
 const props = defineProps<{ featureId: string }>()
 const { t, path } = useLocale()
 const ws = useWorkspace()
-const { name } = useTools()
+const { icon, name } = useTools()
 const groups = ref<any[]>([])
 const input = ref<HTMLInputElement>()
 const busy = ref('')
@@ -123,115 +123,117 @@ async function resume() {
 }
 </script>
 <template>
-  <NuxtLink class="back-link" :to="path('/app/tools')"
-    ><AppIcon name="back" :size="16" />{{ t('backTools') }}</NuxtLink
-  >
-  <div class="page-heading">
-    <div>
-      <span class="eyebrow">{{ t('automationCategory') }}</span>
-      <h1>{{ name(featureId) }}</h1>
-      <p>{{ t('batchSub') }}</p>
-    </div>
-  </div>
-  <ErrorBanner v-if="error" :message="error" />
-  <div class="studio-layout">
-    <section class="panel studio-form">
-      <h2>{{ t('inputFiles') }}</h2>
-      <label v-if="featureId === 'batch.convert'" class="form-field"
-        ><span>{{ t('tool') }}</span
-        ><select v-model="target">
-          <option v-for="id in conversionIds" :key="id" :value="id">{{ name(id) }}</option>
-        </select></label
-      ><SchemaFields v-model="parameters" :schema="schema" />
-      <p class="field-hint">
-        {{ t(featureId === 'batch.image_sets' ? 'imageGroupHint' : 'batchFilesHint') }}
-      </p>
-      <button class="button secondary" :disabled="!!busy" @click="input?.click()">
-        <AppIcon name="upload" :size="17" />{{
-          t(featureId === 'batch.image_sets' ? 'addImageGroup' : 'chooseFiles')
-        }}</button
-      ><input
-        ref="input"
-        type="file"
-        class="visually-hidden"
-        multiple
-        :accept="
-          featureId === 'batch.image_sets'
-            ? '.jpg,.jpeg,.png'
-            : featureId === 'batch.compress'
-              ? '.pdf'
-              : '.pdf,.docx,.pptx'
-        "
-        @change="upload(($event.target as HTMLInputElement).files)"
-        :aria-label="t('chooseFiles')"
-      />
-      <div v-for="(group, index) in groups" :key="index" class="batch-group">
-        <div class="panel-heading">
-          <h3>{{ index + 1 }} · {{ name(group.feature_id) }}</h3>
-          <button class="icon-button" @click="remove(index)" :aria-label="t('remove')">
-            <AppIcon name="x" :size="17" />
-          </button>
-        </div>
-        <div v-for="file in group.files" :key="file.id" class="source-chip">
-          <AppIcon name="file" :size="18" /><span>{{ file.name }}</span
-          ><small>{{ file.page_count }} {{ t('pages') }}</small>
-        </div>
-      </div>
-      <p v-if="!groups.length" class="empty-batch">{{ t('pickFirst') }}</p>
-    </section>
-    <aside>
-      <section class="panel studio-quote">
-        <h2>{{ t('reviewTitle') }}</h2>
-        <p>{{ t('batchBilling') }}</p>
-        <template v-if="quote"
-          ><div v-for="meter in quote.meters" :key="meter.meter" class="meter-row">
-            <span>{{
-              t(
-                meter.meter === 'file_tasks'
-                  ? 'standardTasks'
-                  : meter.meter === 'file_page_units'
-                    ? 'pageUnits'
-                    : meter.meter,
-              )
-            }}</span
-            ><strong>{{ meter.amount }}</strong>
-          </div>
-          <button
-            class="button primary full"
-            :disabled="!!busy || quote.affordable === false"
-            @click="execute"
-          >
-            {{ busy ? t('working') : t('startProcessing') }}
-          </button></template
-        ><button v-else class="button primary full" :disabled="!!busy || !groups.length" @click="review">
-          {{ busy ? t('working') : t('getQuote') }}
-        </button>
-      </section>
-    </aside>
-  </div>
-  <section v-if="result" class="panel batch-result">
-    <div class="panel-heading">
-      <h2>{{ t('output') }}</h2>
-      <StatusBadge :status="result.status" />
-    </div>
-    <div v-for="child in result.children" :key="child.index" class="batch-child">
-      <span>{{ child.index + 1 }}</span
-      ><strong>{{ name(child.feature_id) }}</strong
-      ><StatusBadge :status="child.status" /><NuxtLink
-        v-if="child.job"
-        class="text-link"
-        :to="path(`/app/jobs/${child.job.id}`)"
-        >{{ t('view') }}<AppIcon name="arrow" :size="15"
-      /></NuxtLink>
-      <p v-if="child.error">{{ child.error.message || child.error.code || child.error }}</p>
-    </div>
-    <button
-      v-if="!['succeeded', 'failed'].includes(result.status)"
-      class="button secondary"
-      :disabled="!!busy"
-      @click="resume"
+  <div class="tool-page">
+    <NuxtLink class="back-link" :to="path('/app/tools')"
+      ><AppIcon name="back" :size="16" />{{ t('backTools') }}</NuxtLink
     >
-      {{ t('resumeBatch') }}
-    </button>
-  </section>
+    <div class="page-heading tool-head">
+      <span class="tool-icon" aria-hidden="true"><AppIcon :name="icon(featureId)" :size="24" /></span>
+      <div>
+        <h1>{{ name(featureId) }}</h1>
+        <p>{{ t('batchSub') }}</p>
+      </div>
+    </div>
+    <ErrorBanner v-if="error" :message="error" />
+    <div class="studio-layout">
+      <section class="panel studio-form">
+        <h2>{{ t('inputFiles') }}</h2>
+        <label v-if="featureId === 'batch.convert'" class="form-field"
+          ><span>{{ t('tool') }}</span
+          ><select v-model="target">
+            <option v-for="id in conversionIds" :key="id" :value="id">{{ name(id) }}</option>
+          </select></label
+        ><SchemaFields v-model="parameters" :schema="schema" />
+        <p class="field-hint">
+          {{ t(featureId === 'batch.image_sets' ? 'imageGroupHint' : 'batchFilesHint') }}
+        </p>
+        <button class="button secondary" :disabled="!!busy" @click="input?.click()">
+          <AppIcon name="upload" :size="17" />{{
+            t(featureId === 'batch.image_sets' ? 'addImageGroup' : 'chooseFiles')
+          }}</button
+        ><input
+          ref="input"
+          type="file"
+          class="visually-hidden"
+          multiple
+          :accept="
+            featureId === 'batch.image_sets'
+              ? '.jpg,.jpeg,.png'
+              : featureId === 'batch.compress'
+                ? '.pdf'
+                : '.pdf,.docx,.pptx'
+          "
+          @change="upload(($event.target as HTMLInputElement).files)"
+          :aria-label="t('chooseFiles')"
+        />
+        <div v-for="(group, index) in groups" :key="index" class="batch-group">
+          <div class="panel-heading">
+            <h3>{{ index + 1 }} · {{ name(group.feature_id) }}</h3>
+            <button class="icon-button" @click="remove(index)" :aria-label="t('remove')">
+              <AppIcon name="x" :size="17" />
+            </button>
+          </div>
+          <div v-for="file in group.files" :key="file.id" class="source-chip">
+            <AppIcon name="file" :size="18" /><span>{{ file.name }}</span
+            ><small>{{ file.page_count }} {{ t('pages') }}</small>
+          </div>
+        </div>
+        <p v-if="!groups.length" class="empty-batch">{{ t('pickFirst') }}</p>
+      </section>
+      <aside>
+        <section class="panel studio-quote">
+          <h2>{{ t('reviewTitle') }}</h2>
+          <p>{{ t('batchBilling') }}</p>
+          <template v-if="quote"
+            ><div v-for="meter in quote.meters" :key="meter.meter" class="meter-row">
+              <span>{{
+                t(
+                  meter.meter === 'file_tasks'
+                    ? 'standardTasks'
+                    : meter.meter === 'file_page_units'
+                      ? 'pageUnits'
+                      : meter.meter,
+                )
+              }}</span
+              ><strong>{{ meter.amount }}</strong>
+            </div>
+            <button
+              class="button primary full"
+              :disabled="!!busy || quote.affordable === false"
+              @click="execute"
+            >
+              {{ busy ? t('working') : t('startProcessing') }}
+            </button></template
+          ><button v-else class="button primary full" :disabled="!!busy || !groups.length" @click="review">
+            {{ busy ? t('working') : t('getQuote') }}
+          </button>
+        </section>
+      </aside>
+    </div>
+    <section v-if="result" class="panel batch-result">
+      <div class="panel-heading">
+        <h2>{{ t('output') }}</h2>
+        <StatusBadge :status="result.status" />
+      </div>
+      <div v-for="child in result.children" :key="child.index" class="batch-child">
+        <span>{{ child.index + 1 }}</span
+        ><strong>{{ name(child.feature_id) }}</strong
+        ><StatusBadge :status="child.status" /><NuxtLink
+          v-if="child.job"
+          class="text-link"
+          :to="path(`/app/jobs/${child.job.id}`)"
+          >{{ t('view') }}<AppIcon name="arrow" :size="15"
+        /></NuxtLink>
+        <p v-if="child.error">{{ child.error.message || child.error.code || child.error }}</p>
+      </div>
+      <button
+        v-if="!['succeeded', 'failed'].includes(result.status)"
+        class="button secondary"
+        :disabled="!!busy"
+        @click="resume"
+      >
+        {{ t('resumeBatch') }}
+      </button>
+    </section>
+  </div>
 </template>

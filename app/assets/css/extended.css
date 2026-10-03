@@ -50,68 +50,19 @@
   margin-bottom: 20px;
   font-size: 13px;
 }
-.studio-steps {
-  display: flex;
-  margin: 0 0 26px;
-  gap: 20px;
-  border-bottom: 1px solid var(--border);
-}
-.studio-steps button {
-  min-height: 55px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 5px 16px;
-  border-bottom: 2px solid transparent;
-  font-size: 13px;
-}
-.studio-steps b {
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  background: var(--soft);
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  font-size: 11px;
-}
-.studio-steps .active {
-  border-bottom-color: var(--primary);
-  color: var(--primary);
-  font-weight: 600;
-}
-.studio-steps .active b,
-.studio-steps .complete b {
-  background: var(--primary);
-  color: var(--on-primary);
-  border-color: var(--primary);
-}
-.studio-layout,
 .library-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 295px;
   gap: 24px;
   align-items: start;
 }
-.studio-main,
-.studio-rail {
-  min-width: 0;
-}
-.studio-main > .panel,
-.studio-settings,
-.studio-quote,
 .project-save,
 .library-editor {
   padding: 26px;
 }
-.studio-form > h2,
-.studio-settings > h2,
-.studio-quote > h2,
 .library-editor > h2 {
   margin-bottom: 22px;
 }
-.studio-form .form-field,
-.studio-settings .form-field,
 .library-editor .form-field,
 .form-field small,
 .field-hint {
@@ -119,60 +70,13 @@
   font-size: 12px;
   line-height: 1.7;
 }
-.studio-source {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin: 22px 0 15px;
-  padding-top: 18px;
-  border-top: 1px solid var(--border);
-}
-.studio-source p {
-  font-size: 12px;
-  margin-top: 3px;
-}
-.source-chip {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  margin: 8px 0;
-  padding: 4px 5px 4px 13px;
-  font-size: 12px;
-}
-.source-chip > span {
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
 .education-fields {
   margin-top: 20px;
-}
-.studio-form-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 24px;
-  flex-wrap: wrap;
-}
-.studio-rail > .panel {
-  margin-bottom: 20px;
 }
 .version-note {
   font-size: 12px;
   border-top: 1px solid var(--border);
   padding-top: 15px;
-}
-.studio-quote p {
-  font-size: 12px;
-  margin: 15px 0;
-}
-.studio-quote > .button + .button {
-  margin-top: 10px;
 }
 .meter-row {
   display: flex;
@@ -204,38 +108,6 @@
 .project-save .check-label {
   margin: 15px 0;
 }
-.outline-panel .panel-heading {
-  align-items: flex-start;
-  gap: 15px;
-}
-.outline-panel .panel-heading p {
-  font-size: 12px;
-  margin-top: 6px;
-}
-.outline-section {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  border-top: 1px solid var(--border);
-  padding: 23px 0;
-}
-.outline-number {
-  font-size: 12px;
-  color: var(--primary);
-  font-family: Manrope, sans-serif;
-  font-weight: 700;
-  background: var(--sage);
-  border-radius: 7px;
-  padding: 7px;
-  margin-top: 24px;
-}
-.outline-fields {
-  flex: 1;
-  min-width: 0;
-}
-.outline-fields .form-field {
-  margin-bottom: 12px;
-}
 .outline-actions {
   display: flex;
   flex-direction: column;
@@ -250,94 +122,6 @@
   background: var(--soft);
 }
 /* A slide's items: label, text and value side by side, then a remove button. */
-.slide-columns {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-.slide-item {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 0.8fr) 44px;
-  gap: 8px;
-  align-items: center;
-}
-.slide-items > .button {
-  align-self: flex-start;
-}
-.add-section {
-  border-style: dashed;
-}
-.question-editor {
-  border-top: 1px solid var(--border);
-  padding-top: 24px;
-  margin-top: 25px;
-}
-.question-edit-card {
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 17px;
-  margin-top: 14px;
-  background: var(--canvas);
-}
-.question-edit-card .form-field {
-  margin-bottom: 12px;
-}
-.question-options-edit {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 14px;
-}
-.question-options-edit input {
-  width: 100%;
-  min-height: 42px;
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  background: var(--surface);
-  color: var(--ink);
-  padding: 10px;
-}
-.generation-summary {
-  text-align: center;
-  padding-top: 40px !important;
-}
-.generation-summary .result-symbol {
-  margin: 0 auto 24px;
-}
-.generation-summary > p {
-  font-size: 13px;
-  margin: 10px 0 25px;
-}
-.outline-summary {
-  text-align: left;
-  margin: 25px 0;
-  border-top: 1px solid var(--border);
-}
-.outline-summary > div {
-  display: flex;
-  gap: 14px;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--border);
-}
-.outline-summary b {
-  font-size: 12px;
-  color: var(--primary);
-  width: 20px;
-}
-.outline-summary span {
-  font-size: 14px;
-  color: var(--ink);
-}
-.review-advice {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  text-align: left;
-  background: var(--soft);
-  border-radius: 9px;
-  padding: 15px;
-  font-size: 12px !important;
-}
 .education-modes {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1196,26 +980,6 @@
   margin-top: 24px;
   align-items: center;
 }
-.workspace-hubs {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 13px;
-  margin: 0 0 26px;
-}
-.workspace-hubs > a {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  font-size: 12px;
-  color: var(--ink);
-}
-.workspace-hubs > a > svg {
-  color: var(--primary);
-}
 .share-panel {
   border-top: 1px solid var(--border);
   margin-top: 16px;
@@ -1237,7 +1001,6 @@
   .offer-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .studio-layout,
   .library-layout {
     grid-template-columns: minmax(0, 1fr) 270px;
   }
@@ -1247,9 +1010,6 @@
   .education-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .workspace-hubs {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
   .bot-layout {
     grid-template-columns: minmax(0, 1fr) 190px;
   }
@@ -1257,21 +1017,9 @@
 @media (max-width: 900px) {
   /* The form takes the full width and the rail's panels sit side by side
      beneath it; below 600px they stack too. */
-  .studio-layout,
   .library-layout {
     grid-template-columns: minmax(0, 1fr);
     gap: 18px;
-  }
-  .studio-rail {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
-  }
-  .studio-rail > .panel {
-    margin: 0;
-  }
-  .studio-settings {
-    grid-row: span 2;
   }
   .workflow-layout {
     grid-template-columns: minmax(0, 1fr);
@@ -1344,75 +1092,14 @@
   .provider-banner p {
     font-size: 12px;
   }
-  .studio-steps {
-    gap: 10px;
-  }
-  .studio-steps button {
-    font-size: 12px;
-    gap: 7px;
-    flex: 1;
-  }
-  .studio-steps b {
-    width: 22px;
-    height: 22px;
-    flex-shrink: 0;
-  }
-  .studio-main > .panel,
-  .studio-settings,
-  .studio-quote,
   .project-save,
-  .library-editor,
-  .workflow-editor {
+.library-editor,
+.workflow-editor {
     padding: 20px;
-  }
-  .studio-rail {
-    display: block;
-  }
-  .studio-rail > .panel {
-    margin-bottom: 20px;
-  }
-  .studio-form-actions {
-    display: grid;
-    grid-template-columns: 1fr;
-    width: 100%;
-  }
-  .studio-form-actions > .button {
-    width: 100%;
-  }
-  .outline-section {
-    gap: 9px;
-    flex-wrap: wrap;
-    position: relative;
-  }
-  .outline-fields {
-    /* `flex: 1` sets a zero basis, so a width alone never wraps the actions below. */
-    flex-basis: calc(100% - 36px);
-  }
-  .studio-rail {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .slide-item {
-    grid-template-columns: minmax(0, 1fr) 44px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
-  }
-  .slide-item > input:not(:first-child) {
-    grid-column: 1;
-  }
-  .slide-item > .icon-button {
-    grid-column: 2;
-    grid-row: 1;
   }
   .outline-actions {
     flex-direction: row;
     margin: 0 0 0 auto;
-  }
-  .outline-panel .panel-heading {
-    flex-direction: column;
-  }
-  .outline-number {
-    padding: 6px;
-    font-size: 11px;
   }
   .education-modes {
     grid-template-columns: minmax(0, 1fr);
@@ -1634,20 +1321,8 @@
   .bot-commands {
     padding: 20px;
   }
-  .workspace-hubs {
-    gap: 10px;
-  }
-  .workspace-hubs > a {
-    font-size: 11px;
-    padding: 13px;
-    gap: 9px;
-    min-height: 58px;
-  }
   .allowance-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .question-options-edit {
-    grid-template-columns: 1fr;
   }
 }
 .batch-group {
@@ -1911,9 +1586,6 @@
 .form-batch-results > a > .status-badge {
   margin-left: auto;
 }
-.outline-generation {
-  margin-top: 12px;
-}
 .template-plan-note {
   display: flex;
   align-items: center;
@@ -2044,63 +1716,6 @@
 }
 
 /* AI creation starts with one brief; customization stays within a native disclosure. */
-.studio-fieldset {
-  min-width: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-.studio-intro {
-  margin: 8px 0 24px;
-  color: var(--muted);
-  line-height: 1.6;
-}
-.studio-primary-field textarea {
-  min-height: 150px;
-  resize: vertical;
-}
-.studio-defaults {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin-top: 22px;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.6;
-}
-.studio-defaults svg {
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-.studio-charge-hint {
-  margin-top: 12px;
-  text-align: right;
-}
-.studio-more-options > summary {
-  cursor: pointer;
-  font-weight: 600;
-  line-height: 1.6;
-}
-.studio-more-options > summary > span {
-  display: block;
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 400;
-}
-.studio-more-options[open] > summary {
-  margin-bottom: 20px;
-}
-.studio-more-options .field-hint {
-  margin-bottom: 18px;
-}
-.studio-more-options .education-fields {
-  grid-template-columns: minmax(0, 1fr);
-}
-.generation-summary h2,
-.generation-summary .outline-summary span {
-  overflow-wrap: anywhere;
-}
 
 /* ------------------------------------------------------------------ */
 /* PDF editor workspace                                                */
@@ -3105,35 +2720,6 @@
 .guide-examples .button {
   align-self: flex-start;
 }
-.studio-examples {
-  align-items: center;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: -4px 0 4px;
-}
-.studio-examples > span {
-  color: var(--muted);
-  font-size: 13px;
-}
-.studio-examples .chip {
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  color: inherit;
-  cursor: pointer;
-  font-size: 12.5px;
-  line-height: 1.4;
-  max-width: 100%;
-  overflow: hidden;
-  padding: 6px 12px;
-  text-align: left;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.studio-examples .chip:hover {
-  border-color: var(--primary);
-}
 @media (max-width: 600px) {
   .guide-table dl {
     grid-template-columns: 1fr;
@@ -3278,12 +2864,4 @@
 .channel-plans {
   align-self: center;
   margin-top: 4px;
-}
-.channel-banner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 20px;
 }

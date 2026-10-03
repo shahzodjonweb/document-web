@@ -27,6 +27,7 @@ export default defineNuxtConfig({
     '~/assets/css/extended.css',
     '~/assets/css/brand.css',
     '~/assets/css/components.css',
+    '~/assets/css/screens.css',
     '~/assets/css/frame.css',
   ],
   runtimeConfig: { public: { productName: 'PDF Master' } },

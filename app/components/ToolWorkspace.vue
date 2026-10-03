@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { Quote } from '../../generated/api/types'
 const props = defineProps<{ toolId: string }>()
-const { t, path, date } = useLocale()
+const { t, count, path, date } = useLocale()
 const ws = useWorkspace()
-const { icons, colors, name, description } = useTools()
+const { icon, name, description } = useTools()
 const feature = computed(() => ws.features.value.find((f) => f.id === props.toolId))
 const schema = computed(() => (feature.value as any)?.parameters || {})
 const basic = [
@@ -50,6 +50,17 @@ const hasPages = computed(() =>
   ['pdf.extract_pages', 'pdf.delete_pages', 'pdf.rotate', 'pdf.to_images'].includes(props.toolId),
 )
 const isReorder = computed(() => props.toolId === 'pdf.reorder')
+const schemaFields = computed(() => !basic.includes(props.toolId) && Object.keys(schema.value.properties || {}).length > 0)
+const hasOptions = computed(
+  () =>
+    ['pdf.protect', 'pdf.rotate', 'pdf.images_to_pdf', 'pdf.to_images'].includes(props.toolId) ||
+    hasPages.value ||
+    isReorder.value ||
+    schemaFields.value,
+)
+const hint = computed(() =>
+  props.toolId === 'pdf.compress' ? t('compressionHint') : props.toolId === 'pdf.split' ? t('splitHint') : '',
+)
 const accept = computed(() =>
   isImages.value
     ? '.jpg,.jpeg,.png'
@@ -83,8 +94,10 @@ const totalSize = computed(() =>
 const bytes = (n: number) =>
   n >= 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(0, Math.round(n / 1024))} KB`
 const errorMessage = (e: any) => e.data?.error?.message || e.data?.message || t('genericError')
+// A saved draft is restored after this page is set up; one for a different
+// tool must not bring its files here, so the restored tool is watched too.
 watch(
-  () => props.toolId,
+  () => [props.toolId, ws.activeTool.value],
   () => {
     if (ws.activeTool.value !== props.toolId) {
       ws.activeUploads.value = []
@@ -235,68 +248,62 @@ function onDrop(event: DragEvent) {
 }
 </script>
 <template>
-  <div v-if="supported">
+  <div v-if="supported" class="tool-page">
     <NuxtLink class="back-link" :to="path('/app/tools')"
       ><AppIcon name="back" :size="16" />{{ t('backTools') }}</NuxtLink
     >
-    <div class="page-heading tool-page-heading">
-      <div class="tool-heading-icon" :class="colors[toolId] || 'sage'">
-        <AppIcon :name="icons[toolId] || 'file'" :size="28" />
-      </div>
+    <div class="page-heading tool-head">
+      <span class="tool-icon" aria-hidden="true"><AppIcon :name="icon(toolId)" :size="24" /></span>
       <div>
         <h1>{{ name(toolId, feature?.name) }}</h1>
         <p>{{ description(toolId) }}</p>
       </div>
     </div>
-    <div class="flow-steps">
-      <span class="active"><b>1</b>{{ t('stepUpload') }}</span
-      ><i /><span :class="{ active: ws.activeUploads.value.length }"><b>2</b>{{ t('stepSettings') }}</span
-      ><i /><span :class="{ active: ws.quote.value }"><b>3</b>{{ t('stepReady') }}</span>
-    </div>
     <ErrorBanner v-if="error" :message="error" />
-    <div class="operation-grid">
-      <div>
-        <section class="panel input-panel">
-          <div class="panel-heading">
-            <h2>
-              {{ t('inputFiles')
-              }}<span v-if="ws.activeUploads.value.length" class="count-tag">{{
-                ws.activeUploads.value.length
-              }}</span>
-            </h2>
-            <button
-              v-if="ws.activeUploads.value.length"
-              class="text-link"
-              @click="fileInput?.click()"
-              :disabled="!!busy"
-            >
-              <AppIcon name="plus" :size="16" />{{ t('addMore') }}
-            </button>
-          </div>
-          <label v-if="toolId === 'pdf.unlock_known'" class="form-field password-field"
-            ><span>{{ t('password') }}</span
-            ><input v-model="password" type="password" autocomplete="off" /><small>{{
-              t('passwordHint')
-            }}</small></label
+    <ol class="tool-steps">
+      <li class="tool-step panel">
+        <div class="step-head">
+          <span class="step-number" aria-hidden="true">1</span>
+          <h2>
+            {{ t('inputFiles')
+            }}<span v-if="ws.activeUploads.value.length" class="count-tag">{{
+              ws.activeUploads.value.length
+            }}</span>
+          </h2>
+          <button
+            v-if="ws.activeUploads.value.length && isMulti"
+            class="text-link"
+            type="button"
+            @click="fileInput?.click()"
+            :disabled="!!busy"
           >
-          <div
-            class="workspace-drop"
-            :class="{ dragging, small: ws.activeUploads.value.length }"
-            @dragover.prevent="dragging = true"
-            @dragleave.prevent="dragging = false"
-            @drop.prevent="onDrop"
-          >
-            <span class="upload-circle"
-              ><AppIcon
-                :name="busy === 'upload' ? 'loader' : 'upload'"
-                :size="26"
-                :class="{ spin: busy === 'upload' }"
-            /></span>
+            <AppIcon name="plus" :size="16" />{{ t('addMore') }}
+          </button>
+        </div>
+        <p v-if="hint" class="field-hint step-hint">{{ hint }}</p>
+        <label v-if="toolId === 'pdf.unlock_known'" class="form-field password-field"
+          ><span>{{ t('password') }}</span
+          ><input v-model="password" type="password" autocomplete="off" /><small>{{
+            t('passwordHint')
+          }}</small></label
+        >
+        <div
+          v-if="!ws.activeUploads.value.length || busy === 'upload'"
+          class="workspace-drop"
+          :class="{ dragging }"
+          @dragover.prevent="dragging = true"
+          @dragleave.prevent="dragging = false"
+          @drop.prevent="onDrop"
+        >
+          <span class="upload-circle"
+            ><AppIcon
+              :name="busy === 'upload' ? 'loader' : 'upload'"
+              :size="24"
+              :class="{ spin: busy === 'upload' }"
+          /></span>
+          <div class="drop-copy">
             <h3>{{ busy === 'upload' ? t('uploading') : t('dropFiles') }}</h3>
-            <p>{{ t('orBrowse') }}</p>
-            <button class="button secondary" :disabled="!!busy" @click="fileInput?.click()">
-              {{ t('chooseFiles') }}</button
-            ><small
+            <small
               >{{ isImages ? t('images') : isOffice ? t('officeFiles') : t('pdfFiles')
               }}<template v-if="limits.max_file_mib">
                 · {{ limits.max_file_mib }} MB {{ t('fileLimit') }} · {{ limits.max_pages_per_job }}
@@ -304,144 +311,166 @@ function onDrop(event: DragEvent) {
               ></small
             >
           </div>
-          <input
-            ref="fileInput"
-            class="visually-hidden"
-            type="file"
-            :multiple="isMulti"
-            :accept="accept"
-            @change="upload(($event.target as HTMLInputElement).files)"
-            :aria-label="t('chooseFiles')"
-          />
-          <div v-if="ws.activeUploads.value.length" class="file-list">
-            <div v-for="(file, index) in ws.activeUploads.value" :key="file.id" class="file-row">
-              <span class="file-order">{{ index + 1 }}</span
-              ><button
-                v-if="file.preview_url && !thumbnailErrors[file.id]"
-                class="file-preview-button"
-                @click="openPreview(file.id)"
-                :aria-label="t('previewFile', { name: file.name || file.filename || 'PDF' })"
+          <button class="button secondary" type="button" :disabled="!!busy" @click="fileInput?.click()">
+            {{ t('chooseFiles') }}
+          </button>
+        </div>
+        <input
+          ref="fileInput"
+          class="visually-hidden"
+          type="file"
+          :multiple="isMulti"
+          :accept="accept"
+          @change="upload(($event.target as HTMLInputElement).files)"
+          :aria-label="t('chooseFiles')"
+        />
+        <div v-if="ws.activeUploads.value.length" class="file-list">
+          <div v-for="(file, index) in ws.activeUploads.value" :key="file.id" class="file-row">
+            <span v-if="isMulti" class="file-order">{{ index + 1 }}</span
+            ><button
+              v-if="file.preview_url && !thumbnailErrors[file.id]"
+              class="file-preview-button"
+              type="button"
+              @click="openPreview(file.id)"
+              :aria-label="t('previewFile', { name: file.name || file.filename || 'PDF' })"
+            >
+              <img
+                :src="file.preview_url"
+                alt=""
+                loading="lazy"
+                @error="thumbnailErrors[file.id] = true"
+              /></button
+            ><span v-else class="file-tile"
+              ><AppIcon :name="isImages ? 'image' : 'file'" :size="22"
+            /></span>
+            <div class="file-details">
+              <strong :title="file.name || file.filename">{{ file.name || file.filename }}</strong
+              ><small
+                >{{ bytes(file.size_bytes || file.size || 0) }} · {{ file.page_count || file.pages || 1 }}
+                {{ t('pages') }}</small
               >
-                <img
-                  :src="file.preview_url"
-                  alt=""
-                  loading="lazy"
-                  @error="thumbnailErrors[file.id] = true"
-                /></button
-              ><span v-else class="file-tile"
-                ><AppIcon :name="isImages ? 'image' : 'file'" :size="24"
-              /></span>
-              <div class="file-details">
-                <strong :title="file.name || file.filename">{{ file.name || file.filename }}</strong
-                ><small
-                  >{{ bytes(file.size_bytes || file.size || 0) }} · {{ file.page_count || file.pages || 1 }}
-                  {{ t('pages') }}</small
-                >
-              </div>
-              <div class="file-actions">
-                <button
-                  v-if="isMulti"
-                  class="icon-button"
-                  :disabled="index === 0 || !!busy"
-                  @click="move(index, -1)"
-                  :aria-label="t('moveUp')"
-                >
-                  <AppIcon name="up" :size="16" /></button
-                ><button
-                  v-if="isMulti"
-                  class="icon-button"
-                  :disabled="index === ws.activeUploads.value.length - 1 || !!busy"
-                  @click="move(index, 1)"
-                  :aria-label="t('moveDown')"
-                >
-                  <AppIcon name="moveDown" :size="16" /></button
-                ><button
-                  class="icon-button"
-                  :disabled="!!busy"
-                  @click="remove(index)"
-                  :aria-label="t('remove')"
-                >
-                  <AppIcon name="x" :size="17" />
-                </button>
-              </div>
             </div>
-            <p v-if="isMulti" class="input-hint">
-              <AppIcon name="reorder" :size="15" />{{ t('reorderHint') }}
-            </p>
-          </div>
-          <section v-if="previewFile" class="document-preview" :aria-label="t('preview')">
-            <div class="preview-toolbar">
-              <strong>{{ t('preview') }}</strong>
-              <div class="preview-controls">
-                <button
-                  class="icon-button"
-                  :disabled="previewPage <= 1"
-                  @click="previewPage--"
-                  :aria-label="t('previousPage')"
-                >
-                  <AppIcon name="back" :size="18" /></button
-                ><span>{{ t('pageOf', { page: previewPage, count: previewFile.page_count || 1 }) }}</span
-                ><button
-                  class="icon-button"
-                  :disabled="previewPage >= (previewFile.page_count || 1)"
-                  @click="previewPage++"
-                  :aria-label="t('nextPage')"
-                >
-                  <AppIcon name="chevron" :size="18" />
-                </button>
-              </div>
-              <button class="icon-button" @click="previewId = ''" :aria-label="t('closePreview')">
-                <AppIcon name="x" :size="18" />
+            <div class="file-actions">
+              <button
+                v-if="isMulti"
+                class="icon-button"
+                type="button"
+                :disabled="index === 0 || !!busy"
+                @click="move(index, -1)"
+                :aria-label="t('moveUp')"
+              >
+                <AppIcon name="up" :size="16" /></button
+              ><button
+                v-if="isMulti"
+                class="icon-button"
+                type="button"
+                :disabled="index === ws.activeUploads.value.length - 1 || !!busy"
+                @click="move(index, 1)"
+                :aria-label="t('moveDown')"
+              >
+                <AppIcon name="moveDown" :size="16" /></button
+              ><button
+                class="icon-button"
+                type="button"
+                :disabled="!!busy"
+                @click="remove(index)"
+                :aria-label="t('remove')"
+              >
+                <AppIcon name="x" :size="17" />
               </button>
             </div>
-            <img
-              v-if="!previewError"
-              :src="`${previewFile.preview_url}?page=${previewPage}`"
-              :alt="`${previewFile.name} · ${t('pageOf', { page: previewPage, count: previewFile.page_count || 1 })}`"
-              @error="previewError = true"
-            />
-            <p v-else class="preview-error" role="status">{{ t('previewUnavailable') }}</p>
-            <p class="preview-note"><AppIcon name="shield" :size="14" />{{ t('previewFree') }}</p>
-          </section>
-        </section>
-        <section class="panel options-panel">
-          <h2>{{ t('options') }}</h2>
-          <label v-if="toolId === 'pdf.protect'" class="form-field"
-            ><span>{{ t('password') }}</span
-            ><input v-model="password" type="password" autocomplete="new-password" /><small>{{
-              t('passwordHint')
-            }}</small></label
+          </div>
+          <p v-if="isMulti && ws.activeUploads.value.length > 1" class="input-hint">
+            <AppIcon name="reorder" :size="15" />{{ t('reorderHint') }}
+          </p>
+          <button
+            v-if="!isMulti"
+            class="text-link replace-file"
+            type="button"
+            :disabled="!!busy"
+            @click="fileInput?.click()"
           >
-          <p v-if="toolId === 'pdf.merge'" class="muted">{{ t('reorderHint') }}</p>
-          <p v-if="toolId === 'pdf.compress'" class="muted">{{ t('compressionHint') }}</p>
-          <p v-if="toolId === 'pdf.split'" class="muted">{{ t('splitHint') }}</p>
-          <label v-if="hasPages" class="form-field"
-            ><span>{{ t('rangeLabel') }}</span
-            ><input v-model="param.pages" :placeholder="t('allPages')" /><small>{{
-              t('rangeHint')
-            }}</small></label
-          ><label v-if="isReorder" class="form-field"
-            ><span>{{ t('rangeLabel') }}</span
-            ><input v-model="param.order_text" placeholder="3, 1, 2" /><small>{{
-              t('orderHint')
-            }}</small></label
-          ><label v-if="toolId === 'pdf.rotate'" class="form-field"
-            ><span>{{ t('angle') }}</span
-            ><select v-model.number="param.angle">
-              <option :value="90">90° {{ t('clockwise') }}</option>
-              <option :value="180">180°</option>
-              <option :value="270">270° {{ t('clockwise') }}</option>
+            <AppIcon name="upload" :size="15" />{{ t('chooseFiles') }}
+          </button>
+        </div>
+        <section v-if="previewFile" class="document-preview" :aria-label="t('preview')">
+          <div class="preview-toolbar">
+            <strong>{{ t('preview') }}</strong>
+            <div class="preview-controls">
+              <button
+                class="icon-button"
+                type="button"
+                :disabled="previewPage <= 1"
+                @click="previewPage--"
+                :aria-label="t('previousPage')"
+              >
+                <AppIcon name="back" :size="18" /></button
+              ><span>{{ t('pageOf', { page: previewPage, count: previewFile.page_count || 1 }) }}</span
+              ><button
+                class="icon-button"
+                type="button"
+                :disabled="previewPage >= (previewFile.page_count || 1)"
+                @click="previewPage++"
+                :aria-label="t('nextPage')"
+              >
+                <AppIcon name="chevron" :size="18" />
+              </button>
+            </div>
+            <button class="icon-button" type="button" @click="previewId = ''" :aria-label="t('closePreview')">
+              <AppIcon name="x" :size="18" />
+            </button>
+          </div>
+          <img
+            v-if="!previewError"
+            :src="`${previewFile.preview_url}?page=${previewPage}`"
+            :alt="`${previewFile.name} · ${t('pageOf', { page: previewPage, count: previewFile.page_count || 1 })}`"
+            @error="previewError = true"
+          />
+          <p v-else class="preview-error" role="status">{{ t('previewUnavailable') }}</p>
+          <p class="preview-note"><AppIcon name="shield" :size="14" />{{ t('previewFree') }}</p>
+        </section>
+      </li>
+      <li v-if="hasOptions" class="tool-step panel">
+        <div class="step-head">
+          <span class="step-number" aria-hidden="true">2</span>
+          <h2>{{ t('options') }}</h2>
+        </div>
+        <label v-if="toolId === 'pdf.protect'" class="form-field"
+          ><span>{{ t('password') }}</span
+          ><input v-model="password" type="password" autocomplete="new-password" /><small>{{
+            t('passwordHint')
+          }}</small></label
+        >
+        <label v-if="hasPages" class="form-field"
+          ><span>{{ t('rangeLabel') }}</span
+          ><input v-model="param.pages" :placeholder="t('allPages')" /><small>{{
+            t('rangeHint')
+          }}</small></label
+        ><label v-if="isReorder" class="form-field"
+          ><span>{{ t('rangeLabel') }}</span
+          ><input v-model="param.order_text" placeholder="3, 1, 2" /><small>{{
+            t('orderHint')
+          }}</small></label
+        ><label v-if="toolId === 'pdf.rotate'" class="form-field"
+          ><span>{{ t('angle') }}</span
+          ><select v-model.number="param.angle">
+            <option :value="90">90° {{ t('clockwise') }}</option>
+            <option :value="180">180°</option>
+            <option :value="270">270° {{ t('clockwise') }}</option>
+          </select></label
+        >
+        <template v-if="isImages">
+          <label class="form-field"
+            ><span>{{ t('paperSize') }}</span
+            ><select v-model="param.paper_size">
+              <option>A4</option>
+              <option>Letter</option>
+              <option value="original">{{ t('original') }}</option>
             </select></label
           >
-          <div v-if="isImages" class="form-row">
+          <details class="advanced-options">
+            <summary>{{ t('advancedOptions') }}</summary>
             <label class="form-field"
-              ><span>{{ t('paperSize') }}</span
-              ><select v-model="param.paper_size">
-                <option>A4</option>
-                <option>Letter</option>
-                <option value="original">{{ t('original') }}</option>
-              </select></label
-            ><label class="form-field"
               ><span>{{ t('orientation') }}</span
               ><select v-model="param.orientation">
                 <option value="auto">{{ t('auto') }}</option>
@@ -449,15 +478,19 @@ function onDrop(event: DragEvent) {
                 <option value="landscape">{{ t('landscape') }}</option>
               </select></label
             >
-          </div>
-          <div v-if="toolId === 'pdf.to_images'" class="form-row">
+          </details>
+        </template>
+        <template v-if="toolId === 'pdf.to_images'">
+          <label class="form-field"
+            ><span>{{ t('format') }}</span
+            ><select v-model="param.format">
+              <option value="png">PNG</option>
+              <option value="jpg">JPG</option>
+            </select></label
+          >
+          <details class="advanced-options">
+            <summary>{{ t('advancedOptions') }}</summary>
             <label class="form-field"
-              ><span>{{ t('format') }}</span
-              ><select v-model="param.format">
-                <option value="png">PNG</option>
-                <option value="jpg">JPG</option>
-              </select></label
-            ><label class="form-field"
               ><span>{{ t('resolution') }}</span
               ><select v-model.number="param.dpi">
                 <option :value="72">72 DPI</option>
@@ -466,92 +499,88 @@ function onDrop(event: DragEvent) {
                 <option :value="200">200 DPI</option>
               </select></label
             >
-          </div>
-          <SchemaFields v-if="!basic.includes(toolId)" v-model="param" :schema="schema" />
-          <p v-if="isOffice" class="muted">{{ t('simpleBody') }}</p>
-        </section>
-      </div>
-      <aside class="quote-rail">
-        <section class="panel quote-panel">
-          <span class="quote-icon"><AppIcon name="checks" :size="25" /></span>
-          <h2>{{ t('reviewTitle') }}</h2>
-          <p>{{ t('quoteBody') }}</p>
-          <div class="quote-summary">
-            <div>
-              <span>{{ t('inputFiles') }}</span
-              ><strong>{{ ws.activeUploads.value.length }}</strong>
-            </div>
-            <div>
-              <span>{{ t('pages') }}</span
-              ><strong>{{ countPages }}</strong>
-            </div>
-            <div>
-              <span>{{ t('fileName') }}</span
-              ><strong>{{ bytes(totalSize) }}</strong>
-            </div>
-          </div>
-          <template v-if="ws.quote.value"
-            ><div v-if="ws.quote.value.affordable === false" class="info-banner">
-              {{ t('quotaExceeded') }}
-            </div>
-            <div class="quote-meters">
-              <div v-for="meter in quoteMeters" :key="meter.meter">
-                <span
-                  >{{
-                    t(
-                      meter.meter === 'file_tasks'
-                        ? 'standardTask'
-                        : meter.meter === 'file_page_units'
-                          ? 'pageUnits'
-                          : meter.meter,
-                    )
-                  }}<small v-if="(ws.quote.value as any).available_balances?.[meter.meter]"
-                    >{{ (ws.quote.value as any).available_balances[meter.meter].remaining }}
-                    {{ t('remaining') }}</small
-                  ></span
-                ><strong>{{ meter.amount }}</strong>
-              </div>
-            </div>
-            <p class="quote-expiry">
-              <AppIcon name="clock" :size="14" />{{ t('quoteExpires') }}
-              {{ date(ws.quote.value.expires_at, true) }}
-            </p>
-            <button
-              class="button primary full"
-              @click="submit"
-              :disabled="!!busy || ws.quote.value.affordable === false"
-            >
-              <AppIcon :name="busy ? 'loader' : 'right'" :size="17" :class="{ spin: !!busy }" />{{
-                busy ? t('working') : t('startProcessing')
-              }}</button
-            ><button class="text-link refresh-quote" @click="review" :disabled="!!busy">
-              {{ t('refreshQuote') }}
-            </button></template
-          ><template v-else
-            ><button
-              class="button primary full"
-              @click="review"
-              :disabled="!validInput || !!busy || (toolId === 'pdf.protect' && !password)"
-            >
-              <AppIcon
-                :name="busy === 'quote' ? 'loader' : 'right'"
-                :size="17"
-                :class="{ spin: busy === 'quote' }"
-              />{{ busy === 'quote' ? t('working') : t('getQuote') }}</button
-            ><small class="quote-footnote">{{
-              validInput ? t('noChargeBefore') : toolId === 'pdf.merge' ? t('mergeMinimum') : t('pickFirst')
-            }}</small></template
-          >
-        </section>
-        <div class="rail-privacy">
-          <AppIcon name="shield" :size="20" />
-          <p>{{ t('retention') }}</p>
+          </details>
+        </template>
+        <SchemaFields v-if="schemaFields" v-model="param" :schema="schema" />
+      </li>
+      <li class="tool-step panel tool-review">
+        <div class="step-head">
+          <span class="step-number" aria-hidden="true">{{ hasOptions ? 3 : 2 }}</span>
+          <h2>{{ t('stepReview') }}</h2>
         </div>
-      </aside>
+        <p class="tool-summary">
+          {{
+            t('toolSummary', {
+              files: count('outputs', ws.activeUploads.value.length),
+              pages: countPages,
+              size: bytes(totalSize),
+            })
+          }}
+        </p>
+        <template v-if="ws.quote.value">
+          <div v-if="ws.quote.value.affordable === false" class="warning-banner">
+            <AppIcon name="alert" :size="17" />{{ t('quotaExceeded') }}
+          </div>
+          <dl class="quote-meters">
+            <div v-for="meter in quoteMeters" :key="meter.meter">
+              <dt>
+                {{
+                  t(
+                    meter.meter === 'file_tasks'
+                      ? 'standardTask'
+                      : meter.meter === 'file_page_units'
+                        ? 'pageUnits'
+                        : meter.meter,
+                  )
+                }}<small v-if="(ws.quote.value as any).available_balances?.[meter.meter]"
+                  >{{ (ws.quote.value as any).available_balances[meter.meter].remaining }}
+                  {{ t('remaining') }}</small
+                >
+              </dt>
+              <dd>{{ meter.amount }}</dd>
+            </div>
+          </dl>
+        </template>
+      </li>
+    </ol>
+    <div class="tool-action">
+      <template v-if="ws.quote.value"
+        ><button
+          class="button primary"
+          type="button"
+          @click="submit"
+          :disabled="!!busy || ws.quote.value.affordable === false"
+        >
+          <AppIcon :name="busy ? 'loader' : 'right'" :size="17" :class="{ spin: !!busy }" />{{
+            busy ? t('working') : t('startProcessing')
+          }}</button
+        ><small class="quote-footnote"
+          >{{ t('quoteExpires') }} {{ date(ws.quote.value.expires_at, true) }} ·
+          <button class="text-link" type="button" @click="review" :disabled="!!busy">
+            {{ t('refreshQuote') }}
+          </button></small
+        ></template
+      ><template v-else
+        ><button
+          class="button primary"
+          type="button"
+          @click="review"
+          :disabled="!validInput || !!busy || (toolId === 'pdf.protect' && !password)"
+        >
+          <AppIcon
+            :name="busy === 'quote' ? 'loader' : 'right'"
+            :size="17"
+            :class="{ spin: busy === 'quote' }"
+          />{{ busy === 'quote' ? t('working') : t('getQuote') }}</button
+        ><small class="quote-footnote">{{
+          validInput ? t('noChargeBefore') : toolId === 'pdf.merge' ? t('mergeMinimum') : t('pickFirst')
+        }}</small></template
+      >
     </div>
+    <p class="directory-note"><AppIcon name="shield" :size="16" />{{ t('retention') }}</p>
   </div>
   <div v-else class="empty-state panel">
-    <AppIcon name="tools" :size="32" />
+    <AppIcon name="tools" :size="28" />
     <h2>{{ t('unavailableTool') }}</h2>
     <NuxtLink class="button primary" :to="path('/app/tools')">{{ t('viewAll') }}</NuxtLink>
   </div>

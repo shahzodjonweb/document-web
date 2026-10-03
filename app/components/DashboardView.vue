@@ -1,13 +1,37 @@
 <script setup lang="ts">
 const { t, path } = useLocale()
 const ws = useWorkspace()
-const { sorted } = useTools()
+const studio = useStudio()
+const { sorted, name, description } = useTools()
 const fileInput = ref<HTMLInputElement>()
 const busy = ref(false)
 const error = ref('')
 const dragging = ref(false)
 const officeAvailable = computed(() => ws.features.value.some((f) => f.id === 'convert.word_to_pdf'))
-const balance = computed(() => (ws.usage.value as any)?.meters?.file_tasks)
+const firstName = computed(() => (ws.user.value?.display_name || '').trim().split(/\s+/)[0] || '')
+const usage = computed(() => ws.usage.value as any)
+// The plan in one row: what is left of each allowance, and today's task cap
+// when the plan has one.
+const meters = computed(() => {
+  const all = usage.value?.meters || {}
+  const rows = [
+    { key: 'standardTasks', meter: all.file_tasks },
+    { key: 'pageUnits', meter: all.file_page_units },
+    { key: 'ai_credits', meter: all.ai_credits },
+    { key: 'todayTasks', meter: usage.value?.daily?.limit ? usage.value.daily : null },
+  ]
+  return rows.filter((row) => row.meter && row.meter.limit)
+})
+const share = (meter: { remaining: number; limit: number }) =>
+  `${Math.max(0, Math.min(100, (meter.remaining / meter.limit) * 100))}%`
+// The two AI services get their own shortcuts, so the file tools below them
+// are the familiar ones.
+const aiShortcuts = computed(() =>
+  studio.config.value
+    ? studio.features.value.filter((f) => ['ai.pdf_topic', 'ai.pptx'].includes(f.id)).slice(0, 2)
+    : [],
+)
+const popular = computed(() => sorted.value.filter((f) => !isGenerationFeature(f.id)).slice(0, 5))
 // Free accounts are told up front which Telegram channels to join, rather than
 // only when a task is refused.
 const gate = useState<{ channels: any[] } | null>('channel-gate', () => null)
@@ -62,93 +86,96 @@ function onDrop(event: DragEvent) {
 <template>
   <div class="page-heading">
     <div>
-      <div class="eyebrow greeting-eyebrow"><span />{{ t('morning') }}</div>
-      <h1>{{ t('greeting') }}</h1>
-      <p>{{ t('dashboardSub') }}</p>
+      <h1>{{ firstName ? t('homeHello', { name: firstName }) : t('navHome') }}</h1>
+      <p>{{ t('homeSub') }}</p>
     </div>
-    <NuxtLink :to="path('/app/tools')" class="button secondary"
-      ><AppIcon name="plus" :size="18" />{{ t('newTask') }}</NuxtLink
-    >
   </div>
   <div v-if="channels" class="info-banner channel-banner" data-testid="channel-banner">
-    <span><AppIcon name="send" :size="18" /> {{ t('channelsBanner') }}</span>
+    <AppIcon name="send" :size="18" />
+    <p>{{ t('channelsBanner') }}</p>
     <button class="button primary small" type="button" @click="gate = { channels: channels.channels }">
       {{ t('channelsBannerAction') }}
     </button>
   </div>
   <ErrorBanner v-if="error" :message="error" />
-  <div class="dashboard-top">
-    <section
-      class="dashboard-drop"
-      :class="{ dragging }"
-      @dragover.prevent="dragging = true"
-      @dragleave.prevent="dragging = false"
-      @drop.prevent="onDrop"
-    >
-      <div class="document-art" aria-hidden="true"><BrandIcon /></div>
-      <h2>{{ busy ? t('uploading') : t('uploadTitle') }}</h2>
-      <p>{{ t('uploadSub') }}</p>
+  <section
+    class="dashboard-drop"
+    :class="{ dragging }"
+    @dragover.prevent="dragging = true"
+    @dragleave.prevent="dragging = false"
+    @drop.prevent="onDrop"
+  >
+    <span class="drop-icon" aria-hidden="true"
+      ><AppIcon :name="busy ? 'loader' : 'upload'" :size="26" :class="{ spin: busy }"
+    /></span>
+    <div class="drop-copy">
+      <h2>{{ busy ? t('uploading') : t('dropTitle') }}</h2>
+      <p>{{ t('dropSub') }}</p>
+    </div>
+    <div class="drop-action">
       <button class="button primary" @click="fileInput?.click()" :disabled="busy">
-        <AppIcon :name="busy ? 'loader' : 'upload'" :size="17" :class="{ spin: busy }" />{{
-          t('chooseFiles')
-        }}</button
-      ><input
-        ref="fileInput"
-        class="visually-hidden"
-        type="file"
-        multiple
-        :accept="officeAvailable ? '.pdf,.jpg,.jpeg,.png,.docx,.pptx' : '.pdf,.jpg,.jpeg,.png'"
-        @change="upload(($event.target as HTMLInputElement).files)"
-        :aria-label="t('chooseFiles')"
-      /><small>{{ t(officeAvailable ? 'supported' : 'supportedBasic') }}</small>
-    </section>
-    <aside class="dashboard-rail">
-      <section class="privacy-card">
-        <span class="privacy-symbol"><AppIcon name="shield" :size="26" /></span>
-        <h3>{{ t('privateTitle') }}</h3>
-        <p>{{ t('privateBody') }}</p>
-        <div class="privacy-rule" />
-        <span class="small-info"><AppIcon name="clock" :size="15" />{{ t('retention') }}</span>
-      </section>
-      <NuxtLink :to="path('/app/billing')" class="usage-card"
-        ><div>
-          <span>{{ t('standardTasks') }}</span
-          ><AppIcon name="arrow" :size="15" />
-        </div>
-        <p v-if="balance">
-          <strong>{{ balance.remaining }}</strong
-          ><span>/ {{ balance.limit }} {{ t('remaining') }}</span>
-        </p>
-        <p v-else class="muted">{{ t('loading') }}</p>
-        <div class="usage-track">
-          <span
-            :style="{
-              width: balance
-                ? `${Math.max(0, Math.min(100, (balance.remaining / balance.limit) * 100))}%`
-                : '0%',
-            }"
-          />
-        </div>
-        <small>{{ t(ws.user.value?.plan || 'free') }} · {{ t('perPeriod') }}</small></NuxtLink
-      >
-    </aside>
-  </div>
-  <section class="section-block">
+        {{ t('chooseFiles') }}</button
+      ><small>{{ t(officeAvailable ? 'supported' : 'supportedBasic') }}</small>
+    </div>
+    <input
+      ref="fileInput"
+      class="visually-hidden"
+      type="file"
+      multiple
+      :accept="officeAvailable ? '.pdf,.jpg,.jpeg,.png,.docx,.pptx' : '.pdf,.jpg,.jpeg,.png'"
+      @change="upload(($event.target as HTMLInputElement).files)"
+      :aria-label="t('chooseFiles')"
+    />
+  </section>
+  <section v-if="aiShortcuts.length" class="home-section">
     <div class="section-heading">
-      <div>
-        <h2>{{ t('popularTools') }}</h2>
-        <p>{{ t('popularSub') }}</p>
+      <h2>{{ t('navCreate') }}</h2>
+    </div>
+    <div class="ai-shortcuts">
+      <NuxtLink
+        v-for="feature in aiShortcuts"
+        :key="feature.id"
+        :to="path(`/app/create?feature=${encodeURIComponent(feature.id)}`)"
+        class="ai-shortcut panel"
+        ><span class="tool-icon ai"><AppIcon name="sparkle" :size="22" /></span
+        ><span class="ai-shortcut-copy"
+          ><strong>{{ name(feature.id, feature.name) }}</strong
+          ><span>{{ description(feature.id) }}</span></span
+        ><AppIcon class="tool-arrow" name="right" :size="18"
+      /></NuxtLink>
+    </div>
+  </section>
+  <section v-if="meters.length" class="home-section">
+    <div class="section-heading">
+      <h2>{{ t('homePlan') }} · {{ t(ws.user.value?.plan || 'free') }}</h2>
+      <NuxtLink :to="path('/app/billing')" class="text-link"
+        >{{ t('navBilling') }}<AppIcon name="right" :size="16"
+      /></NuxtLink>
+    </div>
+    <div class="plan-meters panel">
+      <div v-for="row in meters" :key="row.key" class="plan-meter">
+        <span class="plan-meter-label">{{ t(row.key) }}</span>
+        <p>
+          <strong class="tabular">{{ Math.max(0, row.meter.remaining) }}</strong>
+          <span>{{ t('meterOf', { limit: row.meter.limit }) }}</span>
+        </p>
+        <div class="usage-track"><span :style="{ width: share(row.meter) }" /></div>
       </div>
+    </div>
+  </section>
+  <section class="home-section">
+    <div class="section-heading">
+      <h2>{{ t('homeTools') }}</h2>
       <NuxtLink :to="path('/app/tools')" class="text-link"
         >{{ t('viewAll') }}<AppIcon name="right" :size="16"
       /></NuxtLink>
     </div>
-    <div class="quick-tools">
-      <ToolCard v-for="feature in sorted.slice(0, 5)" :key="feature.id" :feature="feature" compact />
+    <div v-if="popular.length" class="quick-tools">
+      <ToolCard v-for="feature in popular" :key="feature.id" :feature="feature" compact />
     </div>
-    <p v-if="!sorted.length" class="muted">{{ t('noCatalog') }}</p>
+    <p v-else class="muted">{{ t('noCatalog') }}</p>
   </section>
-  <section class="section-block">
+  <section class="home-section">
     <div class="section-heading">
       <h2>{{ t('recentTitle') }}</h2>
       <NuxtLink :to="path('/app/jobs')" class="text-link"
@@ -157,10 +184,4 @@ function onDrop(event: DragEvent) {
     </div>
     <div class="panel"><JobList :jobs="ws.jobs.value.slice(0, 4)" /></div>
   </section>
-  <div class="help-strip">
-    <span><AppIcon name="help" :size="18" />{{ t('supportTitle') }}</span
-    ><NuxtLink :to="path('/app/support')"
-      >{{ t('contactSupport') }}<AppIcon name="arrow" :size="16"
-    /></NuxtLink>
-  </div>
 </template>

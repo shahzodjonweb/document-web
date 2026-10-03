@@ -38,8 +38,27 @@ watch(
       })
   },
 )
+// The browser tab names the page, as the top bar does.
+const titles: [string, string][] = [
+  ['/app/create', 'navCreate'],
+  ['/app/tools', 'navTools'],
+  ['/tools', 'navTools'],
+  ['/app/jobs', 'navTasks'],
+  ['/app/editor', 'editor'],
+  ['/app/billing', 'navBilling'],
+  ['/pricing', 'pricing'],
+  ['/app/settings', 'settings'],
+  ['/app/support', 'navHelp'],
+  ['/app/guide', 'guide'],
+  ['/app/workflows', 'workflows'],
+  ['/app/referrals', 'referrals'],
+  ['/help', 'help'],
+]
 useHead(() => ({
-  title: `${view.value === '/' ? 'A little less paperwork' : view.value.includes('/tools') ? t('tools') : view.value.includes('/jobs') ? t('tasks') : t('workspace')} · PDF Master`,
+  title:
+    view.value === '/'
+      ? 'A little less paperwork · PDF Master'
+      : `${t(titles.find(([prefix]) => view.value.startsWith(prefix))?.[1] || 'navHome')} · PDF Master`,
 }))
 </script>
 <template>

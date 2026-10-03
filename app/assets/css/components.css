@@ -88,11 +88,29 @@ b {
   color: var(--link);
   margin-bottom: var(--space-2);
 }
+.section-block {
+  margin-top: var(--space-10);
+}
 .section-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
   margin-bottom: var(--space-4);
 }
 .section-heading h2 {
   font-size: var(--text-lg);
+}
+.section-heading p {
+  margin-top: var(--space-1);
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+.section-heading > .text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  white-space: nowrap;
 }
 
 /* ------------------------------------------------------------ buttons */
@@ -198,6 +216,225 @@ b {
 }
 .panel.raised {
   box-shadow: var(--shadow-md);
+}
+
+/* ------------------------------------------------------------ tools */
+
+/* Every tool wears the brand blue; the AI services are the filled tiles. */
+.tool-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  background: var(--blue-50);
+  color: var(--link);
+}
+.tool-icon.ai {
+  background: linear-gradient(135deg, var(--focus), var(--action));
+  color: var(--on-action);
+  box-shadow: 0 4px 12px rgba(2, 117, 252, 0.22);
+}
+.tool-card {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--text);
+  transition:
+    border-color var(--duration) var(--ease),
+    box-shadow var(--duration) var(--ease),
+    transform var(--duration) var(--ease);
+}
+.tool-card:hover {
+  border-color: var(--blue-200);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+.tool-copy {
+  flex: 1;
+  min-width: 0;
+}
+.tool-card h3 {
+  color: var(--ink);
+  font-size: var(--text-base);
+  line-height: 1.35;
+}
+.tool-card p {
+  margin-top: var(--space-1);
+  color: var(--muted);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+.tool-arrow {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--muted);
+  transition:
+    color var(--duration) var(--ease),
+    transform var(--duration) var(--ease);
+}
+.tool-card:hover .tool-arrow {
+  color: var(--link);
+  transform: translateX(2px);
+}
+.tool-card.compact {
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 116px;
+  padding: var(--space-4);
+}
+.tool-card.compact .tool-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+}
+.tool-card.compact h3 {
+  font-size: 14px;
+}
+.tool-card.compact .tool-arrow {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  margin: 0;
+}
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-4);
+}
+/* In the directory a card stacks: the tile, then a name and a full-width line. */
+.tool-grid .tool-card {
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.tool-grid .tool-card .tool-arrow {
+  position: absolute;
+  top: var(--space-5);
+  right: var(--space-5);
+  margin: 0;
+}
+.quick-tools {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.directory-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+.category-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.category-tabs button {
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--text);
+  font: 500 var(--text-sm) var(--font-body);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background var(--duration) var(--ease),
+    border-color var(--duration) var(--ease),
+    color var(--duration) var(--ease);
+}
+.category-tabs button:hover {
+  border-color: var(--action);
+  color: var(--ink);
+}
+.category-tabs button.selected {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--surface);
+}
+.search-box {
+  width: 260px;
+  min-height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--muted);
+  transition:
+    border-color var(--duration) var(--ease),
+    box-shadow var(--duration) var(--ease);
+}
+.search-box:focus-within {
+  border-color: var(--action);
+  box-shadow: 0 0 0 3px var(--blue-100);
+}
+.search-box input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font-size: 14px;
+  outline: none;
+}
+.directory-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-8);
+  color: var(--muted);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+/* ------------------------------------------------------------ meters */
+
+.usage-track {
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--hairline);
+}
+.usage-track > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--action);
+}
+
+/* ------------------------------------------------------------ empty states */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-10) var(--space-6);
+  color: var(--muted);
+  text-align: center;
+}
+.empty-state h3 {
+  color: var(--ink);
+  font-size: var(--text-md);
+}
+.empty-state p {
+  max-width: 42ch;
+  font-size: var(--text-sm);
 }
 
 /* ------------------------------------------------------------ fields */
@@ -366,7 +603,66 @@ main > *:nth-child(n + 4) {
   }
   .form-field input:not([type='checkbox']):not([type='radio']):not([type='file']),
   .form-field select,
-  .form-field textarea {
+  .form-field textarea,
+  .search-box input {
     font-size: 16px; /* below 16px, iOS zooms the page on focus */
+  }
+  .tool-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+  /* On a phone a directory row reads across again: tile, words, arrow. */
+  .tool-grid .tool-card {
+    flex-direction: row;
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-10) var(--space-4) var(--space-4);
+  }
+  .tool-grid .tool-card .tool-arrow {
+    top: 50%;
+    right: var(--space-4);
+    transform: translateY(-50%);
+  }
+  .tool-grid .tool-card:hover .tool-arrow {
+    transform: translate(2px, -50%);
+  }
+  .tool-card {
+    padding: var(--space-4);
+  }
+  .quick-tools {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .quick-tools > .tool-card:nth-child(5) {
+    display: none;
+  }
+}
+
+@media (max-width: 1100px) and (min-width: 601px) {
+  .quick-tools {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .quick-tools > .tool-card:nth-child(n + 4) {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .directory-toolbar {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+  .search-box {
+    width: 100%;
+    min-height: 44px;
+  }
+  /* One row of chips that scrolls sideways, edge to edge. */
+  .category-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin: 0 calc(-1 * var(--space-4));
+    padding: 0 var(--space-4) 2px;
+    scrollbar-width: none;
+  }
+  .category-tabs::-webkit-scrollbar {
+    display: none;
   }
 }

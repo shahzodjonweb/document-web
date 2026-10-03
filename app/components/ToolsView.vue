@@ -1,6 +1,5 @@
 <script setup lang="ts">
-const { t, path } = useLocale()
-const studio = useStudio()
+const { t } = useLocale()
 const route = useRoute()
 const { sorted, category, name, description } = useTools()
 const search = ref('')
@@ -29,6 +28,16 @@ const filtered = computed(() =>
         .includes(search.value.toLocaleLowerCase()),
   ),
 )
+// A category with nothing in it is not offered.
+const offered = computed(() =>
+  categories.filter(
+    (item) =>
+      item === 'allCategories' ||
+      sorted.value.some(
+        (f) => category(f.id) === item && !(publicView.value && isGenerationFeature(f.id)),
+      ),
+  ),
+)
 function resetSearch() {
   search.value = ''
   selected.value = 'allCategories'
@@ -37,34 +46,18 @@ function resetSearch() {
 <template>
   <div class="page-heading">
     <div>
-      <div class="eyebrow">{{ t('toolkit') }}</div>
-      <h1>{{ t('toolsTitle') }}</h1>
-      <p>{{ t('toolsSub') }}</p>
+      <h1>{{ t('tools') }}</h1>
+      <p>{{ t('toolsLead') }}</p>
     </div>
   </div>
-  <nav v-if="route.path.includes('/app') && studio.config.value" class="workspace-hubs">
-    <NuxtLink
-      v-for="item in [
-        { url: 'create', label: 'create', icon: 'sparkle' },
-        { url: 'study', label: 'education', icon: 'book' },
-        { url: 'workflows', label: 'workflows', icon: 'reorder' },
-        { url: 'bot', label: 'bot', icon: 'send' },
-        { url: 'templates', label: 'templates', icon: 'files' },
-        { url: 'projects', label: 'projects', icon: 'folder' },
-        { url: 'editor', label: 'editor', icon: 'edit' },
-        { url: 'referrals', label: 'referrals', icon: 'send' },
-      ]"
-      :key="item.url"
-      :to="path(`/app/${item.url}`)"
-      ><AppIcon :name="item.icon" :size="20" />{{ t(item.label) }}</NuxtLink
-    >
-  </nav>
   <div class="directory-toolbar">
-    <div class="category-tabs">
+    <div class="category-tabs" role="group" :aria-label="t('navTools')">
       <button
-        v-for="item in categories"
+        v-for="item in offered"
         :key="item"
+        type="button"
         :class="{ selected: selected === item }"
+        :aria-pressed="selected === item"
         @click="selected = item"
       >
         {{ t(item) }}
@@ -73,6 +66,7 @@ function resetSearch() {
     <label class="search-box"
       ><AppIcon name="search" :size="18" /><input
         v-model="search"
+        type="search"
         :placeholder="t('searchTools')"
         :aria-label="t('searchTools')"
     /></label>
@@ -86,9 +80,9 @@ function resetSearch() {
     />
   </div>
   <div v-else class="empty-state panel">
-    <AppIcon name="search" :size="30" />
+    <AppIcon name="search" :size="28" />
     <h3>{{ t('emptySearch') }}</h3>
-    <button class="text-link" @click="resetSearch">
+    <button class="text-link" type="button" @click="resetSearch">
       {{ t('viewAll') }}
     </button>
   </div>

@@ -5,7 +5,6 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Локальный режим использует ваши материалы. Перед экспортом добавьте текст или вопросы ниже.',
   ],
   studioMoreOptions: ['More options', 'Qo‘shimcha sozlamalar', 'Дополнительные настройки'],
-  studioOptional: ['Optional', 'Ixtiyoriy', 'Необязательно'],
   studioTitleOptional: ['Title (optional)', 'Sarlavha (ixtiyoriy)', 'Название (необязательно)'],
   studioAutoTitle: [
     'We’ll name it from your text. You can change it here.',
@@ -1258,6 +1257,41 @@ export const extendedToolDescriptions: Record<string, [string, string, string]> 
     'Describe it and get an editable PowerPoint deck.',
     'Yozib bering — tahrirlanadigan PowerPoint taqdimot oling.',
     'Опишите — получите редактируемую презентацию PowerPoint.',
+  ],
+  'convert.pdf_to_docx': [
+    'Turn a PDF into a Word file you can edit.',
+    'PDF’ni tahrirlanadigan Word fayliga aylantiring.',
+    'Превратите PDF в редактируемый файл Word.',
+  ],
+  'convert.pdf_to_xlsx': [
+    'Pull the tables in a PDF into an Excel sheet.',
+    'PDF’dagi jadvallarni Excel fayliga o‘tkazing.',
+    'Перенесите таблицы из PDF в лист Excel.',
+  ],
+  'ocr.extract_text': [
+    'Read the text from scans and photos of pages.',
+    'Skaner va sahifa suratlaridan matnni o‘qib oling.',
+    'Распознайте текст со сканов и фото страниц.',
+  ],
+  'ocr.searchable_pdf': [
+    'Make a scanned PDF searchable and copyable.',
+    'Skanerlangan PDF’da qidirish va nusxa olishni yoqing.',
+    'Сделайте отсканированный PDF доступным для поиска и копирования.',
+  ],
+  'batch.convert': [
+    'Convert a whole set of files in one go.',
+    'Bir nechta faylni bir martada aylantiring.',
+    'Конвертируйте сразу целый набор файлов.',
+  ],
+  'batch.compress': [
+    'Make many PDFs smaller at once.',
+    'Ko‘p PDF hajmini birdaniga kamaytiring.',
+    'Уменьшите сразу много PDF.',
+  ],
+  'batch.image_sets': [
+    'Turn folders of images into one PDF each.',
+    'Rasm to‘plamlarining har biridan alohida PDF yarating.',
+    'Превратите каждый набор изображений в отдельный PDF.',
   ],
 }
 
