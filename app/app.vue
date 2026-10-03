@@ -1,53 +1,97 @@
 <script setup lang="ts">
 const route = useRoute()
-const { t, path, locale, localePath } = useLocale()
+const { t, count, path, locale, localePath } = useLocale()
 const ws = useWorkspace()
 const studio = useStudio()
 const auth = useAuthentication()
 const miniAppError = ref('')
 const miniAppBusy = ref(false)
-const { user, sessionReady, apiError } = ws
+const { user, sessionReady } = ws
 const isApp = computed(() => route.path.includes('/app'))
 // The editor owns its own padding so the page canvas can use the full width.
 const isEditor = computed(() => /\/app\/editor(\/|$)/.test(route.path))
+// The resolved theme on screen: a saved "system" choice shows as light or dark.
 const theme = ref('light')
-const nav = [
-  { key: 'home', url: '/app', icon: 'home' },
-  { key: 'tools', url: '/app/tools', icon: 'tools' },
-  { key: 'tasks', url: '/app/jobs', icon: 'tasks' },
-]
-const extendedNav = computed(() =>
-  studio.config.value
-    ? [
-        { key: 'create', url: '/app/create', icon: 'sparkle' },
-        { key: 'guide', url: '/app/guide', icon: 'book' },
-        { key: 'editor', url: '/app/editor', icon: 'edit' },
-        { key: 'workflows', url: '/app/workflows', icon: 'reorder' },
-        { key: 'bot', url: '/app/bot', icon: 'send' },
-      ]
-    : [],
+type NavItem = { key: string; label: string; url: string; icon: string }
+const plan = computed(() => ws.plans.value.find((item: any) => item.id === (user.value?.plan || 'free')) as any)
+// Saved workflows are a paid feature (free plans keep none), so the menu only
+// offers them on a plan that includes some.
+const hasWorkflows = computed(() => Number(plan.value?.limits?.saved_workflows || 0) > 0)
+const workNav = computed<NavItem[]>(() => [
+  { key: 'home', label: 'navHome', url: '/app', icon: 'home' },
+  ...(studio.config.value ? [{ key: 'create', label: 'navCreate', url: '/app/create', icon: 'sparkle' }] : []),
+  { key: 'tools', label: 'navTools', url: '/app/tools', icon: 'tools' },
+  ...(studio.config.value ? [{ key: 'editor', label: 'editor', url: '/app/editor', icon: 'edit' }] : []),
+  { key: 'tasks', label: 'navTasks', url: '/app/jobs', icon: 'tasks' },
+  ...(studio.config.value && hasWorkflows.value
+    ? [{ key: 'workflows', label: 'workflows', url: '/app/workflows', icon: 'reorder' }]
+    : []),
+])
+const accountNav = computed<NavItem[]>(() => [
+  { key: 'billing', label: 'navBilling', url: '/app/billing', icon: 'billing' },
+  { key: 'settings', label: 'settings', url: '/app/settings', icon: 'settings' },
+  { key: 'support', label: 'navHelp', url: '/app/support', icon: 'help' },
+  ...(studio.config.value ? [{ key: 'guide', label: 'guide', url: '/app/guide', icon: 'book' }] : []),
+])
+// Phones keep the four everyday places in the bottom bar; the rest is in "More".
+const phoneNav = computed(() =>
+  workNav.value.filter((item) => ['home', 'create', 'tools', 'tasks'].includes(item.key)),
 )
+const moreNav = computed(() => [
+  ...workNav.value.filter((item) => !phoneNav.value.includes(item)),
+  ...accountNav.value,
+])
 const current = (url: string) =>
   url === '/app' ? route.path === path(url) : route.path.startsWith(path(url))
+const moreActive = computed(() => moreNav.value.some((item) => current(item.url)))
 watch(user, (value) => {
   if (value) studio.load()
   else studio.config.value = null
 })
-const crumb = computed(() =>
-  extendedNav.value.find((item) => current(item.url))
-    ? t(extendedNav.value.find((item) => current(item.url))!.key)
-    : route.path.includes('/tools')
-      ? t('tools')
-      : route.path.includes('/jobs')
-        ? t('tasks')
-        : route.path.includes('/billing')
-          ? t('billing')
-          : route.path.includes('/settings')
-            ? t('settings')
-            : route.path.includes('/support')
-              ? t('support')
-              : t('home'),
-)
+const title = computed(() => {
+  const item = [...workNav.value, ...accountNav.value]
+    .sort((a, b) => b.url.length - a.url.length)
+    .find((entry) => current(entry.url))
+  if (item) return t(item.label)
+  if (route.path.includes('/referrals')) return t('referrals')
+  if (route.path.includes('/bot')) return t('bot')
+  return t('navHome')
+})
+const tasksLeft = computed<number | undefined>(() => (ws.usage.value as any)?.meters?.file_tasks?.remaining)
+const initial = computed(() => (user.value?.display_name || 'P').slice(0, 1).toUpperCase())
+// A visitor who is not signed in gets the plain public frame around the
+// sign-in panel; the app menu would only lead back to it. While the session
+// or the mini-app sign-in is still settling, the app frame stays up so a
+// returning customer never sees the frame change under them.
+const framed = computed(() => isApp.value && (!!user.value || !sessionReady.value || miniAppBusy.value))
+const more = ref<HTMLDialogElement | null>(null)
+function openMore() {
+  more.value?.showModal()
+}
+function closeMore() {
+  if (more.value?.open) more.value.close()
+}
+function closeOnBackdrop(event: MouseEvent) {
+  if (event.target === more.value) closeMore()
+}
+watch(() => route.fullPath, closeMore)
+function applyTheme(value: string) {
+  const dark = value === 'dark' || (value === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
+  theme.value = dark ? 'dark' : 'light'
+  document.documentElement.dataset.theme = theme.value
+}
+function toggleTheme() {
+  const next = theme.value === 'dark' ? 'light' : 'dark'
+  try {
+    localStorage.setItem('pdf-master-theme', next)
+  } catch {}
+  applyTheme(next)
+}
+async function signOut() {
+  closeMore()
+  await ws.logout()
+  await navigateTo(path('/app'))
+}
 async function changeLocale(event: Event) {
   const value = (event.target as HTMLSelectElement).value
   if (user.value) {
@@ -56,15 +100,6 @@ async function changeLocale(event: Event) {
     } catch {}
   }
   await navigateTo(localePath(value))
-}
-async function changeMode(event: Event) {
-  try {
-    const mode = (event.target as HTMLSelectElement).value
-    user.value = await ws.api('/me', { method: 'PATCH', body: { mode } })
-    await navigateTo(path('/app'))
-  } catch {
-    apiError.value = true
-  }
 }
 async function signInMiniApp() {
   const telegram = (window as any).Telegram?.WebApp
@@ -83,10 +118,16 @@ async function signInMiniApp() {
   }
 }
 onMounted(async () => {
-  const saved = localStorage.getItem('pdf-master-theme') || 'light'
-  theme.value = saved
-  document.documentElement.dataset.theme =
-    saved === 'system' ? (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light') : saved
+  let saved = ''
+  try {
+    saved = localStorage.getItem('pdf-master-theme') || ''
+  } catch {}
+  // Inside Telegram, a customer who never chose a theme gets Telegram's own.
+  applyTheme(saved || (window as any).Telegram?.WebApp?.colorScheme || 'light')
+  // Settings changes the theme too; the toggle follows whatever is on screen.
+  new MutationObserver(() => {
+    theme.value = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
   await ws.init()
   if (user.value && user.value.locale !== locale.value) {
     try {
@@ -127,86 +168,81 @@ watch(
 )
 </script>
 <template>
-  <a class="skip-link" href="#main-content">{{ t('start') }}</a>
-  <div :class="isApp ? 'app-shell' : 'public-shell'">
-    <aside v-if="isApp" class="sidebar">
-      <NuxtLink :to="path('/app')" class="brand"><BrandLogo :subtitle="t('workspace')" /></NuxtLink>
-      <div class="workspace-picker">
-        <span class="workspace-avatar"><AppIcon name="folder" :size="17" /></span
-        ><select
-          v-if="user"
-          :value="user.mode || 'general'"
-          @change="changeMode"
-          :aria-label="t('workspaceMode')"
-        >
-          <option v-for="mode in ['general', 'student', 'school', 'teacher']" :key="mode" :value="mode">
-            {{ t(mode) }}
-          </option></select
-        ><span v-else>{{ t('general') }}</span>
-      </div>
-      <nav class="main-nav" aria-label="Workspace">
-        <NuxtLink
-          v-for="item in [...nav.slice(0, 2), ...extendedNav, nav[2]!]"
-          :key="item.key"
-          :to="path(item.url)"
-          :class="{ active: current(item.url) }"
-          :aria-current="current(item.url) ? 'page' : undefined"
-          ><AppIcon :name="item.icon" :size="20" /><span>{{ t(item.key) }}</span
-          ><span v-if="item.key === 'tools'" class="nav-count">{{
-            ws.features.value.length || '—'
-          }}</span></NuxtLink
-        >
-      </nav>
-      <div class="sidebar-bottom">
-        <div class="sidebar-note">
-          <span class="small-leaf"><AppIcon name="shield" :size="21" /></span
-          ><strong>{{ t('privateTitle') }}</strong>
-          <p>{{ t('retention') }}</p>
-          <NuxtLink :to="path('/help/privacy')"
-            >{{ t('learnMore') }} <AppIcon name="arrow" :size="14"
-          /></NuxtLink>
-        </div>
-        <nav class="secondary-nav">
-          <NuxtLink :to="path('/app/billing')" :class="{ active: current('/app/billing') }"
-            ><AppIcon name="billing" :size="19" />{{ t('billing') }}</NuxtLink
-          ><NuxtLink :to="path('/app/settings')" :class="{ active: current('/app/settings') }"
-            ><AppIcon name="settings" :size="19" />{{ t('settings') }}</NuxtLink
-          ><NuxtLink :to="path('/app/support')" :class="{ active: current('/app/support') }"
-            ><AppIcon name="help" :size="19" />{{ t('support') }}</NuxtLink
+  <a class="skip-link" href="#main-content">{{ t('skipToContent') }}</a>
+  <div :class="framed ? 'app-shell' : 'public-shell'">
+    <aside v-if="framed" class="sidebar">
+      <div class="sidebar-inner">
+        <NuxtLink :to="path('/app')" class="brand sidebar-brand"><BrandLogo /></NuxtLink>
+        <nav class="side-nav" :aria-label="t('navLabel')">
+          <p class="nav-group">{{ t('navWork') }}</p>
+          <NuxtLink
+            v-for="item in workNav"
+            :key="item.key"
+            :to="path(item.url)"
+            :class="{ active: current(item.url) }"
+            :aria-current="current(item.url) ? 'page' : undefined"
+            ><AppIcon :name="item.icon" :size="18" /><span>{{ t(item.label) }}</span
+            ><span v-if="item.key === 'tools' && ws.features.value.length" class="nav-count">{{
+              ws.features.value.length
+            }}</span></NuxtLink
+          >
+          <p class="nav-group">{{ t('account') }}</p>
+          <NuxtLink
+            v-for="item in accountNav"
+            :key="item.key"
+            :to="path(item.url)"
+            :class="{ active: current(item.url) }"
+            :aria-current="current(item.url) ? 'page' : undefined"
+            ><AppIcon :name="item.icon" :size="18" /><span>{{ t(item.label) }}</span></NuxtLink
           >
         </nav>
-        <div v-if="user" class="sidebar-profile">
-          <span class="avatar">{{ (user.display_name || 'P').slice(0, 1).toUpperCase() }}</span
-          ><span
-            ><strong>{{ user.display_name }}</strong
-            ><small>{{ t(user.plan || 'free') }} · {{ t('account') }}</small></span
-          ><NuxtLink :to="path('/app/settings')" :aria-label="t('settings')"
-            ><AppIcon name="chevron" :size="16"
-          /></NuxtLink>
-        </div>
-        <div v-else class="sidebar-profile">
-          <span class="avatar guest-avatar"><BrandIcon /></span
-          ><span
-            ><strong>PDF Master</strong><small>{{ t('secureNote') }}</small></span
-          >
-        </div>
+        <NuxtLink v-if="user" :to="path('/app/settings')" class="sidebar-profile"
+          ><span class="avatar" aria-hidden="true">{{ initial }}</span
+          ><span class="profile-text"
+            ><strong>{{ user.display_name }}</strong><small>{{ t(user.plan || 'free') }}</small></span
+          ><AppIcon name="chevron" :size="16"
+        /></NuxtLink>
       </div>
     </aside>
     <div class="app-body">
-      <header :class="isApp ? 'app-topbar' : 'public-topbar'">
-        <div v-if="isApp" class="breadcrumb">
-          <span>PDF Master</span><AppIcon name="chevron" :size="13" /><strong>{{ crumb }}</strong>
+      <header v-if="framed" class="app-topbar">
+        <NuxtLink :to="path('/app')" class="brand mobile-brand"><BrandLogo /></NuxtLink>
+        <p class="topbar-title">{{ title }}</p>
+        <div class="header-actions">
+          <NuxtLink v-if="user" :to="path('/app/billing')" class="plan-chip"
+            ><span class="plan-chip-name">{{ t(user.plan || 'free') }}</span
+            ><span v-if="tasksLeft !== undefined" class="plan-chip-left">{{
+              count('tasksLeft', Math.max(0, tasksLeft))
+            }}</span></NuxtLink
+          ><label class="locale-picker"
+            ><AppIcon name="globe" :size="16" /><select
+              :value="locale"
+              @change="changeLocale"
+              aria-label="Language"
+            >
+              <option value="en">English</option>
+              <option value="uz">O‘zbekcha</option>
+              <option value="ru">Русский</option></select
+            ><AppIcon name="down" :size="12" /></label
+          ><button
+            class="icon-button theme-toggle"
+            type="button"
+            :aria-label="t(theme === 'dark' ? 'switchToLight' : 'switchToDark')"
+            @click="toggleTheme"
+          >
+            <AppIcon :name="theme === 'dark' ? 'sun' : 'moon'" :size="18" />
+          </button>
         </div>
-        <NuxtLink v-else :to="path()" class="brand"><BrandLogo /></NuxtLink>
-        <NuxtLink v-if="isApp" :to="path('/app')" class="mobile-brand brand"><BrandLogo /></NuxtLink>
-        <nav v-if="!isApp" class="public-nav">
-          <NuxtLink :to="path('/tools')">{{ t('tools') }}</NuxtLink
+      </header>
+      <header v-else class="public-topbar">
+        <NuxtLink :to="path()" class="brand"><BrandLogo /></NuxtLink>
+        <nav class="public-nav">
+          <NuxtLink :to="path('/tools')">{{ t('navTools') }}</NuxtLink
           ><NuxtLink :to="path('/pricing')">{{ t('pricing') }}</NuxtLink
           ><NuxtLink :to="path('/help')">{{ t('help') }}</NuxtLink>
         </nav>
         <div class="header-actions">
-          <span v-if="isApp && user" class="plan-chip"><span />{{ t(user.plan || 'free') }}</span
-          ><label class="locale-picker"
+          <label class="locale-picker"
             ><AppIcon name="globe" :size="16" /><select
               :value="locale"
               @change="changeLocale"
@@ -223,7 +259,8 @@ watch(
       </header>
       <main
         id="main-content"
-        :class="[isApp ? 'main-content' : 'public-content', { 'main-content-wide': isApp && isEditor }]"
+        tabindex="-1"
+        :class="[framed ? 'main-content' : 'public-content', { 'main-content-wide': framed && isEditor }]"
       >
         <ErrorBanner v-if="miniAppError && !user" :message="miniAppError"
           ><button class="text-link" :disabled="miniAppBusy" @click="signInMiniApp">
@@ -244,15 +281,72 @@ watch(
         </nav>
       </footer>
     </div>
-    <nav v-if="isApp && user" class="mobile-nav">
+    <nav v-if="framed && user" class="mobile-nav" :aria-label="t('navLabel')">
       <NuxtLink
-        v-for="item in [...nav, { key: 'account', url: '/app/settings', icon: 'settings' }]"
+        v-for="item in phoneNav"
         :key="item.key"
         :to="path(item.url)"
         :class="{ active: current(item.url) }"
-        ><AppIcon :name="item.icon" :size="20" /><span>{{ t(item.key) }}</span></NuxtLink
-      >
+        :aria-current="current(item.url) ? 'page' : undefined"
+        ><AppIcon :name="item.icon" :size="20" /><span>{{
+          t(item.key === 'create' ? 'create' : item.label)
+        }}</span></NuxtLink
+      ><button type="button" :class="{ active: moreActive }" aria-haspopup="dialog" @click="openMore">
+        <AppIcon name="menu" :size="20" /><span>{{ t('navMore') }}</span>
+      </button>
     </nav>
+    <dialog
+      v-if="framed && user"
+      ref="more"
+      class="more-sheet"
+      :aria-label="t('navMore')"
+      @click="closeOnBackdrop"
+    >
+      <div class="sheet-body">
+        <div class="sheet-head">
+          <strong>{{ t('navMore') }}</strong
+          ><button class="icon-button" type="button" :aria-label="t('closeMenu')" @click="closeMore">
+            <AppIcon name="x" :size="18" />
+          </button>
+        </div>
+        <nav class="sheet-nav" :aria-label="t('navMore')">
+          <NuxtLink
+            v-for="item in moreNav"
+            :key="item.key"
+            :to="path(item.url)"
+            :class="{ active: current(item.url) }"
+            :aria-current="current(item.url) ? 'page' : undefined"
+            ><AppIcon :name="item.icon" :size="19" /><span>{{ t(item.label) }}</span
+            ><AppIcon name="chevron" :size="15"
+          /></NuxtLink>
+        </nav>
+        <div class="sheet-prefs">
+          <label class="locale-picker"
+            ><AppIcon name="globe" :size="16" /><select
+              :value="locale"
+              @change="changeLocale"
+              aria-label="Language"
+            >
+              <option value="en">English</option>
+              <option value="uz">O‘zbekcha</option>
+              <option value="ru">Русский</option></select
+            ><AppIcon name="down" :size="12" /></label
+          ><button class="button secondary small" type="button" @click="toggleTheme">
+            <AppIcon :name="theme === 'dark' ? 'sun' : 'moon'" :size="16" />{{
+              t(theme === 'dark' ? 'switchToLight' : 'switchToDark')
+            }}
+          </button>
+        </div>
+        <div class="sheet-account">
+          <span class="avatar" aria-hidden="true">{{ initial }}</span
+          ><span class="profile-text"
+            ><strong>{{ user.display_name }}</strong><small>{{ t(user.plan || 'free') }}</small></span
+          ><button class="button quiet small" type="button" @click="signOut">
+            <AppIcon name="logout" :size="16" />{{ t('logout') }}
+          </button>
+        </div>
+      </div>
+    </dialog>
   </div>
   <AntiBotDialog />
   <ChannelGateDialog />

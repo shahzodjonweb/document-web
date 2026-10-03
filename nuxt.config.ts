@@ -17,8 +17,9 @@ export default defineNuxtConfig({
   compatibilityDate: '2026-02-01',
   devtools: { enabled: false },
   ssr: false,
-  // Tokens first, so every sheet reads the palette; the shared components
-  // last, so they are the canonical look of a button, card or field.
+  // Tokens first, so every sheet reads the palette; the shared components and
+  // the app frame last, so they are the canonical look of a button, a card, a
+  // field and the menus around every screen.
   css: [
     '~/assets/css/tokens.css',
     '~/assets/css/fonts.css',
@@ -26,6 +27,7 @@ export default defineNuxtConfig({
     '~/assets/css/extended.css',
     '~/assets/css/brand.css',
     '~/assets/css/components.css',
+    '~/assets/css/frame.css',
   ],
   runtimeConfig: { public: { productName: 'PDF Master' } },
   nitro: {

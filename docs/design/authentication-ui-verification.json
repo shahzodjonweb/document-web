@@ -1,7 +1,7 @@
 {
   "status": "passed",
   "boundary": "Mocked external identity/API responses; browser behavior only. Real email lifecycle is tested separately.",
-  "verified_at": "2026-09-23T21:00:46.655Z",
+  "verified_at": "2026-10-03T21:40:48.172Z",
   "checks": [
     "Registration and 8-digit verification; localized invalid-code error; successful session enters workspace",
     "Telegram linking passes link intent, exchanges approval and refreshes linked state for the same account",
@@ -12,6 +12,6 @@
     "Incorrect login clears password; reset returns to login without silently authenticating",
     "No serious or critical automated accessibility findings in sign-in form",
     "EN/UZ/RU mobile sign-in and settings have no horizontal overflow; 320px sign-in fits with no account navigation overlay",
-    "Unconfigured providers disable their actions with localized availability messages"
+    "Sign-in offers only the methods that work; Telegram first; one message with retry when none do"
   ]
 }

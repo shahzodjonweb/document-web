@@ -241,20 +241,42 @@ try {
   checks.push(
     'EN/UZ/RU mobile sign-in and settings have no horizontal overflow; 320px sign-in fits with no account navigation overlay',
   )
-  providers = Object.fromEntries(
-    ['email', 'google', 'telegram'].map((key) => [key, { enabled: false, configured: false }]),
-  )
+  // Only the ways in that work are offered: no button for a switched-off
+  // method, and one plain message when there is no way in at all.
+  const off = { enabled: false, configured: false }
+  const on = { enabled: true, configured: true }
+  const offered = async () => ({
+    telegram: await page.getByRole('button', { name: 'Continue with Telegram', exact: true }).count(),
+    google: await page.getByRole('button', { name: 'Continue with Google', exact: true }).count(),
+    email: await page.locator('.auth-form').count(),
+    divider: await page.locator('.auth-divider').count(),
+  })
+  await page.setViewportSize({ width: 1280, height: 900 })
+  providers = { ...providers, email: off, google: off, telegram: off }
   await go('/en/app')
-  await page.getByText('Google sign-in is not available yet.', { exact: true }).waitFor()
-  assert.ok(await page.getByRole('button', { name: 'Continue with Google', exact: true }).isDisabled())
-  assert.ok(await page.getByRole('button', { name: 'Continue with Telegram', exact: true }).isDisabled())
-  assert.ok(
-    await page
-      .locator('.auth-form')
-      .getByRole('button', { name: 'Sign in with email', exact: true })
-      .isDisabled(),
+  await page
+    .getByText('Sign-in is unavailable right now. Please try again in a few minutes.', { exact: true })
+    .waitFor()
+  assert.deepEqual(await offered(), { telegram: 0, google: 0, email: 0, divider: 0 })
+  providers = { ...providers, email: on, google: off, telegram: off }
+  await go('/en/app')
+  await page.locator('.auth-form input[type=email]').waitFor()
+  assert.deepEqual(await offered(), { telegram: 0, google: 0, email: 1, divider: 0 })
+  assert.equal(await page.getByText(/not available/).count(), 0, 'no apology for a missing method')
+  providers = { ...providers, email: on, google: on, telegram: on }
+  await go('/en/app')
+  await page.locator('.auth-form input[type=email]').waitFor()
+  assert.deepEqual(await offered(), { telegram: 1, google: 1, email: 1, divider: 1 })
+  assert.match(
+    await page.locator('.auth-social-options .button').first().innerText(),
+    /Telegram/,
+    'Telegram is the first way in',
   )
-  checks.push('Unconfigured providers disable their actions with localized availability messages')
+  await page.evaluate(() => Promise.all(document.getAnimations().map((animation) => animation.finished)))
+  await page.screenshot({ path: `${shots}/login-desktop.png`, fullPage: true })
+  checks.push(
+    'Sign-in offers only the methods that work; Telegram first; one message with retry when none do',
+  )
   assert.deepEqual(errors, [])
   const report = {
     status: 'passed',

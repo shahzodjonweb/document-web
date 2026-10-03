@@ -23,7 +23,8 @@
     "test:guide": "node tests/prompt-guide.mjs",
     "test:editor": "node tests/editor-workspace.mjs",
     "test:payments": "node tests/manual-payment.mjs",
-    "test:channels": "node tests/channel-gate.mjs"
+    "test:channels": "node tests/channel-gate.mjs",
+    "test:frame": "node tests/app-frame.mjs"
   },
   "dependencies": {
     "lucide-vue-next": "0.563.0",

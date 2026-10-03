@@ -61,7 +61,12 @@ async function check() {
 <template>
   <div class="telegram-sign-in">
     <ErrorBanner v-if="error" :message="error" />
-    <button class="button secondary" type="button" @click="start" :disabled="busy || disabled">
+    <button
+      :class="['button', intent === 'login' ? 'primary telegram-button' : 'secondary']"
+      type="button"
+      @click="start"
+      :disabled="busy || disabled"
+    >
       <AppIcon name="send" :size="18" />{{ t(intent === 'link' ? 'authLinkTelegram' : 'openTelegram') }}
     </button>
     <div v-if="challenge && link" class="login-challenge">

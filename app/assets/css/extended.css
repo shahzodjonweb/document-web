@@ -1,27 +1,4 @@
 /* Task-specific surfaces share the PDF Master brand tokens. */
-.main-nav {
-  overflow-y: auto;
-  min-height: 0;
-  padding-right: 3px;
-}
-.sidebar {
-  height: 100dvh;
-}
-.sidebar-note {
-  margin-top: 10px;
-}
-.main-nav > a {
-  min-height: 43px;
-}
-.sidebar-bottom {
-  flex-shrink: 0;
-}
-.main-nav::-webkit-scrollbar {
-  width: 3px;
-}
-.main-nav::-webkit-scrollbar-thumb {
-  background: var(--border);
-}
 .provider-banner {
   display: flex;
   align-items: center;
@@ -1256,17 +1233,6 @@
 .allowance-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
-@media (min-width: 1000px) and (max-height: 850px) {
-  .sidebar-note {
-    display: none;
-  }
-  .sidebar-bottom {
-    margin-top: 15px;
-  }
-  .workspace-picker {
-    margin-bottom: 15px;
-  }
-}
 @media (max-width: 1180px) {
   .offer-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1958,85 +1924,19 @@
 .template-paper > span {
   background: var(--template-accent, var(--primary));
 }
-.workspace-picker > select {
-  width: 100%;
-  min-width: 0;
-  background: transparent;
-  border: 0;
-  color: var(--ink);
-  font-size: 12px;
-  padding: 7px 0;
-  min-height: 32px;
-}
 .adult-assistance {
   margin: 8px 0 22px;
 }
 
 /* Account access shares one workspace across verified sign-in methods. */
-.auth-methods {
-  width: 100%;
-  max-width: 390px;
-}
-.auth-social-options,
 .auth-form {
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
-.auth-social-options .button,
 .telegram-sign-in > .button,
 .auth-form > .button {
   width: 100%;
-}
-.auth-social-options .field-hint {
-  margin: -8px 0 0;
-  line-height: 1.6;
-}
-.google-letter {
-  font-family: Arial, sans-serif;
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1;
-}
-.auth-divider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 24px 0 20px;
-  font-size: 11px;
-  color: var(--muted);
-}
-.auth-divider::before,
-.auth-divider::after {
-  content: '';
-  height: 1px;
-  background: var(--border);
-  flex: 1;
-}
-.auth-tabs {
-  display: flex;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 4px;
-  gap: 4px;
-  margin-bottom: 20px;
-  background: var(--surface);
-}
-.auth-tabs button {
-  flex: 1;
-  padding: 11px 8px;
-  border: 0;
-  border-radius: 5px;
-  color: var(--body);
-  background: transparent;
-  font: inherit;
-  font-size: 12px;
-  cursor: pointer;
-}
-.auth-tabs button.selected {
-  color: var(--primary);
-  background: var(--sage);
-  font-weight: 600;
 }
 .auth-form {
   text-align: left;
@@ -2055,10 +1955,6 @@
 }
 .auth-form .field-hint {
   margin: 0;
-}
-.auth-unavailable {
-  margin-top: 15px;
-  line-height: 1.7;
 }
 .account-sign-in {
   grid-column: 2;
@@ -2141,16 +2037,9 @@
   .account-sign-in {
     padding: 22px 18px;
   }
-  .auth-methods {
-    max-width: 100%;
-  }
-  .auth-social-options .button,
   .auth-form > .button {
     white-space: normal;
     min-height: 44px;
-  }
-  .auth-illustration {
-    margin-bottom: 15px;
   }
 }
 
@@ -2781,7 +2670,6 @@
   white-space: nowrap;
 }
 
-
 /* Mode switch ------------------------------------------------------ */
 .editor-modes {
   display: inline-flex;
@@ -2895,7 +2783,6 @@
   padding-top: 18px;
   border-top: 1px solid var(--border);
 }
-
 
 /* Image and signature picker -------------------------------------- */
 .editor-assetfield {
