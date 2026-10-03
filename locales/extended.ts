@@ -1171,6 +1171,8 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   channelsOrPlans: ['Or choose a paid plan — no channels needed', 'Yoki pullik tarifni tanlang — kanal shart emas', 'Или выберите платный тариф — подписка не нужна'],
   channelsBanner: ['Join our Telegram channel to keep using PDF Master for free.', 'PDF Master’dan bepul foydalanish uchun Telegram kanalimizga qo‘shiling.', 'Подпишитесь на наш Telegram-канал, чтобы пользоваться PDF Master бесплатно.'],
   channelsBannerAction: ['Join', 'Qo‘shilish', 'Подписаться'],
+  aiDocumentsPerDay: ['AI documents a day', 'kuniga AI hujjat', 'ИИ-документов в день'],
+  unlimitedCount: ['Unlimited', 'Cheksiz', 'Без ограничений'],
   // A finished job can carry warnings. The API sends bare codes and JobDetail
   // renders `t(code)`, so an untranslated code would show the customer the code
   // itself. These three say what was adjusted and what it cost — nothing.

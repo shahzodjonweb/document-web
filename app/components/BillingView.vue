@@ -131,6 +131,12 @@ async function planChanged() {
           <AppIcon name="check" :size="17" /><strong>{{ limit(plan, 'ai_credits') }}</strong
           >{{ t('ai_credits') }}
         </li>
+        <li v-if="limit(plan, 'daily_ai_documents') !== undefined">
+          <AppIcon name="check" :size="17" /><strong>{{
+            limit(plan, 'daily_ai_documents') ?? t('unlimitedCount')
+          }}</strong
+          >{{ t('aiDocumentsPerDay') }}
+        </li>
       </ul>
       <template v-if="priceOf(plan)">
         <NuxtLink v-if="!ws.user.value" :to="path('/app/billing')" class="button primary full">{{
