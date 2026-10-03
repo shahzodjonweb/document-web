@@ -76,7 +76,10 @@ onMounted(() => {
       <h3>{{ name(service.id, service.name) }}</h3>
       <ul class="guide-examples">
         <li v-for="(example, index) in examples(service.id)" :key="index" class="panel">
-          <p>{{ example }}</p>
+          <div class="guide-example-brief">
+            <span class="guide-example-index" aria-hidden="true">{{ index + 1 }}.</span>
+            <p>{{ example }}</p>
+          </div>
           <NuxtLink
             class="button secondary small"
             :data-testid="`guide-use-${service.id}-${index}`"

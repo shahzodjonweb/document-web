@@ -2700,7 +2700,7 @@
 }
 .guide-examples {
   display: grid;
-  gap: 12px;
+  gap: 20px 12px;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   list-style: none;
   margin: 0;
@@ -2716,6 +2716,20 @@
   font-size: 14px;
   line-height: 1.6;
   margin: 0;
+}
+/* The number sits outside the paragraph: "Use this" copies the paragraph
+   verbatim into the form, so it must stay exactly the description. */
+.guide-example-brief {
+  align-items: baseline;
+  display: flex;
+  gap: 8px;
+}
+.guide-example-index {
+  color: var(--muted);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  line-height: 1.6;
 }
 .guide-examples .button {
   align-self: flex-start;
