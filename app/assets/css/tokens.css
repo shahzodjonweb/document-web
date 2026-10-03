@@ -1,0 +1,153 @@
+/*
+ * PDF Master design tokens — "paper and ink".
+ *
+ * A quiet paper page, deep ink text and hairline rules; the brand blue is the
+ * one colour that acts, and the logo's red is kept for the logo and for danger.
+ * Every text colour here is checked against the surfaces it sits on at 4.5:1
+ * or better, in both themes.
+ *
+ * Older stylesheets read the short names at the bottom of each block
+ * (--canvas, --primary, …); they are mapped onto this palette so every screen
+ * takes it up at once, and they go away as screens are rebuilt.
+ */
+:root {
+  /* Surfaces */
+  --paper: #f5f7fa;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-sunken: #eef2f7;
+  --hairline: #e3e8ef;
+  --hairline-strong: #ccd4df;
+
+  /* Ink */
+  --ink: #0e1726;
+  --text: #3b4859;
+  --muted: #5b6779;
+
+  /* Brand */
+  --brand-blue: #0275fc;
+  --brand-red: #fa3331;
+  --blue-50: #edf4ff;
+  --blue-100: #dcebff;
+  --blue-200: #b9d6ff;
+  --action: #0062d6;
+  --action-hover: #0052b8;
+  --on-action: #ffffff;
+  --link: #0059c2;
+  --focus: #0275fc;
+  --glow: rgba(2, 117, 252, 0.09);
+
+  /* Meaning */
+  --success-tint: #eaf6ef;
+  --success-ink: #1c6b43;
+  --success-border: #bfe1cc;
+  --warning-tint: #fff5dd;
+  --warning-ink: #7a4f00;
+  --warning-border: #efd59a;
+  --error-tint: #fff0f1;
+  --error-ink: #a8202c;
+  --error-border: #f3c4ca;
+  --danger: #c8232f;
+  --danger-hover: #ab1d28;
+  --info-tint: var(--blue-50);
+  --info-ink: var(--link);
+  --info-border: var(--blue-200);
+
+  /* Type */
+  --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-md: 16px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 28px;
+  --text-3xl: 34px;
+
+  /* Space, shape, depth, motion */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-pill: 999px;
+  --shadow-sm: 0 1px 2px rgba(14, 23, 38, 0.05);
+  --shadow-md: 0 1px 2px rgba(14, 23, 38, 0.04), 0 6px 20px rgba(14, 23, 38, 0.06);
+  --shadow-lg: 0 2px 6px rgba(14, 23, 38, 0.05), 0 18px 48px rgba(14, 23, 38, 0.14);
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --duration-fast: 120ms;
+  --duration: 200ms;
+
+  /* Older names, mapped onto the palette above. */
+  --canvas: var(--paper);
+  --body: var(--text);
+  --border: var(--hairline);
+  --primary: var(--action);
+  --primary-hover: var(--action-hover);
+  --on-primary: var(--on-action);
+  --sage: var(--blue-50);
+  --soft: var(--surface-sunken);
+  --accent: #ffd9d9;
+  --error: var(--error-ink);
+  --radius: var(--radius-lg);
+  --shadow: var(--shadow-sm);
+  --brand-border: var(--blue-200);
+  --red-tint: var(--error-tint);
+  --red-ink: var(--error-ink);
+
+  color-scheme: light;
+  font-family: var(--font-body);
+  font-synthesis: none;
+}
+
+:root[data-theme='dark'] {
+  --paper: #0b111c;
+  --surface: #121a27;
+  --surface-raised: #18233a;
+  --surface-sunken: #0e1522;
+  --hairline: #233047;
+  --hairline-strong: #33425c;
+
+  --ink: #eef3fa;
+  --text: #c2cddc;
+  --muted: #93a2b7;
+
+  --blue-50: #13233d;
+  --blue-100: #1a2f52;
+  --blue-200: #2b4a7a;
+  --action: #6aa8ff;
+  --action-hover: #8cbfff;
+  --on-action: #0b111c;
+  --link: #8cbfff;
+  --focus: #8cbfff;
+  --glow: rgba(106, 168, 255, 0.1);
+
+  --success-tint: #15342a;
+  --success-ink: #9fdcb8;
+  --success-border: #2f5e48;
+  --warning-tint: #372e1a;
+  --warning-ink: #f0cf8a;
+  --warning-border: #66522a;
+  --error-tint: #3a2128;
+  --error-ink: #ffb0b6;
+  --error-border: #6b3a44;
+  --danger: #c0303a;
+  --danger-hover: #d8434d;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.28);
+  --shadow-lg: 0 2px 8px rgba(0, 0, 0, 0.35), 0 20px 56px rgba(0, 0, 0, 0.45);
+
+  --accent: #733f46;
+  color-scheme: dark;
+}
