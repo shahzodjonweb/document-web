@@ -451,9 +451,9 @@ const entries: Record<string, [string, string, string]> = {
     'Временные файлы и конфиденциальность',
   ],
   helpPrivacyBody: [
-    'Files are private and expire after 24 hours. Download results before expiry. Deleting a server file does not remove copies you have already downloaded or sent to Telegram.',
-    'Fayllar maxfiy va 24 soatdan keyin o‘chiriladi. Natijani muddati tugashidan oldin yuklab oling. Serverdan o‘chirish yuklab olingan yoki Telegram’ga yuborilgan nusxalarni o‘chirmaydi.',
-    'Файлы приватны и удаляются через 24 часа. Скачайте результат заранее. Удаление на сервере не удаляет уже скачанные или отправленные в Telegram копии.',
+    'Your files are private and are deleted after 24 hours, so download results before then. Deleting a file on our server does not remove copies you have already downloaded or received in Telegram. When you create something with AI, we keep your description, its outline and the document made from it for 30 days so our team can check quality and stop misuse. Only support staff can open them, and every opening is recorded. Then they are deleted.',
+    'Fayllaringiz maxfiy va 24 soatdan keyin o‘chiriladi, shuning uchun natijani undan oldin yuklab oling. Serverdagi faylni o‘chirish yuklab olingan yoki Telegram’da olingan nusxalarni o‘chirmaydi. AI bilan biror narsa yaratganingizda tavsifingiz, uning rejasi va yaratilgan hujjat 30 kun saqlanadi — jamoamiz sifatni tekshirishi va suiiste’molning oldini olishi uchun. Ularni faqat yordam xodimlari ochishi mumkin va har bir ochish qayd etiladi. Keyin ular o‘chiriladi.',
+    'Ваши файлы приватны и удаляются через 24 часа, поэтому скачайте результат заранее. Удаление файла на сервере не удаляет уже скачанные или полученные в Telegram копии. Когда вы создаёте что-то с ИИ, мы храним ваше описание, его план и созданный документ 30 дней, чтобы команда могла проверять качество и предотвращать злоупотребления. Открыть их могут только сотрудники поддержки, и каждое открытие записывается. Затем они удаляются.',
   ],
   helpBilling: ['Usage & payments', 'Foydalanish va to‘lovlar', 'Лимиты и платежи'],
   helpBillingBody: [
