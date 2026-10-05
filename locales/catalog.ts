@@ -94,6 +94,16 @@ const entries: Record<string, [string, string, string]> = {
   ],
   noTasksFiltered: ['Nothing here with this status.', 'Bu holatda hech narsa yo‘q.', 'С таким статусом ничего нет.'],
   taskUsed: ['What it used', 'Nima sarflandi', 'Что израсходовано'],
+  // Settings.
+  settingsLead: [
+    'Your profile, language and how documents are made for you.',
+    'Profilingiz, til va hujjatlar qanday tayyorlanishi.',
+    'Ваш профиль, язык и то, как готовятся документы.',
+  ],
+  sectionLanguage: ['Language & time zone', 'Til va vaqt mintaqasi', 'Язык и часовой пояс'],
+  sectionDocuments: ['Documents', 'Hujjatlar', 'Документы'],
+  sectionWorkspace: ['Workspace', 'Ish maydoni', 'Рабочее пространство'],
+  documentLanguage: ['Language of new documents', 'Yangi hujjatlar tili', 'Язык новых документов'],
   // The app frame: menu, top bar, phone bar.
   skipToContent: ['Skip to content', 'Asosiy qismga o‘tish', 'Перейти к содержимому'],
   navLabel: ['Main menu', 'Asosiy menyu', 'Главное меню'],

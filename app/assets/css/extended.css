@@ -90,21 +90,6 @@
   font-size: 18px;
   color: var(--ink);
 }
-.check-label {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font-size: 12px;
-  line-height: 1.7;
-  cursor: pointer;
-}
-.check-label input {
-  width: 17px;
-  height: 17px;
-  accent-color: var(--primary);
-  margin-top: 2px;
-  flex-shrink: 0;
-}
 .project-save .check-label {
   margin: 15px 0;
 }
@@ -1381,9 +1366,6 @@
 .template-paper > span {
   background: var(--template-accent, var(--primary));
 }
-.adult-assistance {
-  margin: 8px 0 22px;
-}
 
 /* Account access shares one workspace across verified sign-in methods. */
 .auth-form {
@@ -1413,87 +1395,13 @@
 .auth-form .field-hint {
   margin: 0;
 }
-.account-sign-in {
-  grid-column: 2;
-  padding: 28px;
-}
-.account-sign-in > h2 {
-  font-size: 18px;
-  margin-bottom: 10px;
-}
-.account-sign-in > .field-hint {
-  line-height: 1.8;
-  margin-bottom: 20px;
-}
-.linked-methods {
-  padding: 0;
-  margin: 0;
-  list-style: none;
-}
-.linked-methods > li {
-  border-top: 1px solid var(--border);
-  padding: 21px 0;
-}
-.linked-methods > li:last-child {
-  padding-bottom: 0;
-}
-.method-summary {
-  display: flex;
-  align-items: start;
-  justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 15px;
-}
-.method-summary > div {
-  min-width: 0;
-}
-.method-summary h3 {
-  font-size: 13px;
-  margin-bottom: 6px;
-}
-.method-summary p {
-  font-size: 12px;
-  color: var(--muted);
-  overflow-wrap: anywhere;
-  margin: 0;
-}
-.method-summary .status-badge {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-.linked-methods > li > .field-hint {
-  line-height: 1.7;
-  margin-top: 10px;
-}
-.linked-methods .telegram-sign-in > .button {
-  width: auto;
-}
-.linked-method-form {
-  margin-top: 18px;
-}
-.linked-method-form > .text-link {
-  margin-top: 15px;
-}
 .auth-form-actions {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 15px;
 }
-.profile-panel dd {
-  overflow-wrap: anywhere;
-}
-@media (max-width: 900px) {
-  .account-sign-in {
-    grid-column: 1 / -1;
-  }
-}
 @media (max-width: 600px) {
-  .account-sign-in {
-    padding: 22px 18px;
-  }
   .auth-form > .button {
     white-space: normal;
     min-height: 44px;

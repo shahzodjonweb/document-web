@@ -1,7 +1,7 @@
 {
   "status": "passed",
   "boundary": "Mocked external identity/API responses; browser behavior only. Real email lifecycle is tested separately.",
-  "verified_at": "2026-10-05T01:09:42.713Z",
+  "verified_at": "2026-10-05T01:15:33.748Z",
   "checks": [
     "Registration and 8-digit verification; localized invalid-code error; successful session enters workspace",
     "Telegram linking passes link intent, exchanges approval and refreshes linked state for the same account",
