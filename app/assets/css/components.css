@@ -481,6 +481,29 @@ b {
   box-shadow: 0 0 0 3px var(--blue-100);
   outline: none;
 }
+.form-field input[type='file'] {
+  max-width: 100%;
+  padding: 6px;
+  border: 1px dashed var(--hairline-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 14px;
+}
+.form-field input[type='file']::file-selector-button {
+  margin-right: var(--space-3);
+  padding: 8px 14px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  color: var(--ink);
+  font: 600 14px var(--font-body);
+  cursor: pointer;
+}
+.form-field input[type='file']:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
 .form-field small,
 .field-hint {
   color: var(--muted);

@@ -1,7 +1,13 @@
 <script setup lang="ts">
 const { t, path } = useLocale()
 const ws = useWorkspace()
+const route = useRoute()
 const form = reactive({ category: 'processing', subject: '', job_id: '', message: '' })
+// "Ask about this payment" arrives with the payment's reference.
+if (route.query.topic === 'billing') {
+  form.category = 'billing'
+  if (route.query.ref) form.subject = t('paymentQuestion', { ref: String(route.query.ref).slice(0, 40) })
+}
 const busy = ref(false)
 const error = ref('')
 const ticket = ref('')

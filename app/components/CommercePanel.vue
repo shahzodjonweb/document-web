@@ -12,8 +12,6 @@ const error = ref('')
 const telegramRequired = ref(false)
 const success = ref('')
 const nextPlan = ref('plus')
-const refundReason = ref('')
-const refundTarget = ref<any>(null)
 async function run(action: string, fn: () => Promise<void>) {
   busy.value = action
   error.value = ''
@@ -86,17 +84,6 @@ async function schedule() {
       body: { plan: nextPlan.value },
     })
     subscription.value = result.subscription
-  })
-}
-async function refund() {
-  await run('refund', async () => {
-    await ws.api(`/billing/payments/${refundTarget.value.id}/refund-request`, {
-      method: 'POST',
-      body: { reason: refundReason.value },
-    })
-    success.value = t('refundRequested')
-    refundTarget.value = null
-    refundReason.value = ''
   })
 }
 function selectedInvoice(value: any) {
@@ -257,39 +244,36 @@ function selectedInvoice(value: any) {
         {{ t('invoicePending') }} · {{ item.amount_xtr }} XTR<AppIcon name="right" :size="16" />
       </button>
     </div>
-    <section class="panel transactions-panel">
+    <section class="panel transactions-panel" data-testid="payment-history">
       <div class="panel-heading">
-        <h2>{{ t('transactions') }}</h2>
+        <h2>{{ t('paymentHistory') }}</h2>
         <button class="icon-button" @click="run('load', refresh)" :aria-label="t('refresh')">
           <AppIcon name="rotate" :size="17" />
         </button>
       </div>
       <p v-if="!transactions.length" class="muted">{{ t('noTransactions') }}</p>
-      <div v-for="transaction in transactions" :key="transaction.id" class="transaction-row">
-        <span class="tool-icon sage"><AppIcon name="billing" :size="19" /></span>
-        <div>
-          <strong>{{
-            transaction.plan ? t(transaction.plan) : t(transaction.kind === 'ai_pack' ? 'aiPack' : 'taskPack')
-          }}</strong
-          ><small
-            >{{ date(transaction.occurred_at, true) }} · {{ transaction.sandbox ? 'SANDBOX' : '' }}</small
+      <ul v-else class="transaction-list">
+        <li v-for="transaction in transactions" :key="transaction.id" class="transaction-row">
+          <div>
+            <strong>{{
+              transaction.plan ? t(transaction.plan) : t(transaction.kind === 'ai_pack' ? 'aiPack' : 'taskPack')
+            }}</strong
+            ><small
+              >{{ date(transaction.occurred_at, true) }}{{ transaction.sandbox ? ' · SANDBOX' : '' }}</small
+            >
+          </div>
+          <b class="tabular">{{
+            transaction.currency === 'UZS'
+              ? `${transaction.amount_xtr.toLocaleString('ru-RU').replace(/\u00a0/g, ' ')} so'm`
+              : `${transaction.amount_xtr} ${transaction.currency}`
+          }}</b
+          ><NuxtLink
+            class="text-link"
+            :to="path(`/app/support?topic=billing&ref=${encodeURIComponent(transaction.reference || transaction.id.slice(0, 8))}`)"
+            >{{ t('askAboutPayment') }}</NuxtLink
           >
-        </div>
-        <b>{{
-          transaction.currency === 'UZS'
-            ? `${transaction.amount_xtr.toLocaleString('ru-RU').replace(/\u00a0/g, ' ')} so'm`
-            : `${transaction.amount_xtr} ${transaction.currency}`
-        }}</b
-        ><button class="text-link" @click="refundTarget = transaction">{{ t('requestRefund') }}</button>
-      </div>
-      <form v-if="refundTarget" class="refund-form" @submit.prevent="refund">
-        <label class="form-field"
-          ><span>{{ t('refundReason') }}</span
-          ><textarea v-model="refundReason" rows="3" minlength="3" required /></label
-        ><button class="button secondary" :disabled="!!busy || refundReason.length < 3">
-          {{ t('requestRefund') }}
-        </button>
-      </form>
+        </li>
+      </ul>
     </section>
   </section>
 </template>

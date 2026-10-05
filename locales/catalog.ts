@@ -69,6 +69,20 @@ const entries: Record<string, [string, string, string]> = {
   ],
   stepReview: ['Review and start', 'Ko‘rib chiqing va boshlang', 'Проверьте и запустите'],
   toolSummary: ['{files} · {pages} pages · {size}', '{files} · {pages} sahifa · {size}', '{files} · страниц: {pages} · {size}'],
+  // Plan & billing.
+  billingLead: [
+    'Your plan, what is left of it, and how to pay for more.',
+    'Tarifingiz, undan qancha qolgani va qanday to‘lash mumkinligi.',
+    'Ваш тариф, сколько осталось и как оплатить.',
+  ],
+  plansTitle: ['Plans', 'Tariflar', 'Тарифы'],
+  yourPlanBadge: ['Your plan', 'Sizning tarifingiz', 'Ваш тариф'],
+  paymentHistory: ['Payment history', 'To‘lovlar tarixi', 'История платежей'],
+  askAboutPayment: ['Ask about this payment', 'Bu to‘lov haqida so‘rash', 'Спросить об этом платеже'],
+  paymentQuestion: ['About my payment {ref}', '{ref} to‘lovim haqida', 'О моём платеже {ref}'],
+  stepHowToPay: ['How to pay', 'To‘lov usuli', 'Способ оплаты'],
+  stepTransfer: ['Transfer and receipt', 'O‘tkazma va kvitansiya', 'Перевод и квитанция'],
+  stepWeCheck: ['We check it', 'Biz tekshiramiz', 'Мы проверяем'],
   // The app frame: menu, top bar, phone bar.
   skipToContent: ['Skip to content', 'Asosiy qismga o‘tish', 'Перейти к содержимому'],
   navLabel: ['Main menu', 'Asosiy menyu', 'Главное меню'],

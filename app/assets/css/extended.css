@@ -604,157 +604,6 @@
 .editor-recent small {
   font-size: 11px;
 }
-.commerce-content {
-  margin-bottom: 30px;
-}
-.commerce-offers {
-  margin: 27px 0;
-}
-.offer-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
-}
-.offer-card {
-  padding: 22px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-.offer-card h3 {
-  margin: 18px 0 12px;
-  font-size: 15px;
-}
-.offer-price {
-  font-size: 29px;
-  font-weight: 650;
-  color: var(--ink);
-  margin-bottom: 15px;
-  font-family: Manrope, sans-serif;
-}
-.offer-price small {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 12px;
-  font-weight: 500;
-}
-.offer-card p {
-  font-size: 12px;
-  margin: 4px 0;
-}
-.offer-card > small {
-  font-size: 11px;
-  line-height: 1.7;
-  margin: 10px 0;
-}
-.offer-card > .button {
-  margin-top: auto;
-  padding-left: 8px;
-  padding-right: 8px;
-  font-size: 12px;
-  transform: translateY(9px);
-}
-.subscription-panel {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 35px;
-  padding: 25px;
-  margin-bottom: 26px;
-}
-.subscription-panel h2 {
-  font-size: 25px;
-  margin: 10px 0;
-}
-.subscription-panel p {
-  font-size: 12px;
-}
-.subscription-panel .status-badge {
-  margin-top: 15px;
-}
-.subscription-controls {
-  max-width: 370px;
-}
-.subscription-controls > .button {
-  margin-bottom: 15px;
-}
-.subscription-controls .form-row {
-  align-items: flex-end;
-}
-.subscription-controls .form-row > .button {
-  flex: 1;
-}
-.subscription-controls > small {
-  display: block;
-  font-size: 11px;
-  margin-top: 12px;
-  line-height: 1.8;
-}
-.invoice-panel {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 25px;
-  padding: 27px;
-  margin: 25px 0;
-  border-color: var(--primary);
-}
-.invoice-panel h2 {
-  font-size: 28px;
-  margin: 10px 0;
-}
-.invoice-panel p {
-  font-size: 12px;
-  margin: 8px 0 13px;
-}
-.invoice-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.transactions-panel {
-  padding: 24px;
-  margin-top: 27px;
-}
-.transaction-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  border-top: 1px solid var(--border);
-  padding: 17px 0;
-  font-size: 13px;
-}
-.transaction-row > div {
-  flex: 1;
-  min-width: 0;
-}
-.transaction-row strong,
-.transaction-row small {
-  display: block;
-}
-.transaction-row small {
-  font-size: 11px;
-  margin-top: 4px;
-}
-.transaction-row > .text-link {
-  font-size: 11px;
-  min-height: 44px;
-}
-.refund-form {
-  background: var(--soft);
-  border-radius: 9px;
-  padding: 20px;
-}
-.refund-form > .button {
-  margin-top: 15px;
-}
-.pending-invoices {
-  padding: 20px;
-}
-.pending-invoices > button {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
 .referral-link-panel {
   padding: 32px;
 }
@@ -994,13 +843,7 @@
 .share-panel .text-link {
   min-height: 44px;
 }
-.allowance-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
 @media (max-width: 1180px) {
-  .offer-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
   .library-layout {
     grid-template-columns: minmax(0, 1fr) 270px;
   }
@@ -1208,61 +1051,6 @@
   .editor-recent small {
     display: none;
   }
-  .offer-grid {
-    gap: 13px;
-  }
-  .offer-card {
-    padding: 18px 15px;
-  }
-  .offer-card h3 {
-    font-size: 13px;
-    min-height: 36px;
-  }
-  .offer-price {
-    font-size: 25px;
-  }
-  .offer-card > small {
-    font-size: 11px;
-  }
-  .subscription-panel {
-    display: block;
-    padding: 22px;
-  }
-  .subscription-controls {
-    margin-top: 22px;
-    max-width: none;
-  }
-  .subscription-controls .form-row {
-    gap: 10px;
-  }
-  .invoice-panel {
-    display: block;
-    padding: 23px;
-  }
-  .invoice-actions {
-    margin-top: 20px;
-  }
-  .transactions-panel {
-    padding: 20px;
-  }
-  .transaction-row {
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .transaction-row .tool-icon {
-    width: 32px;
-    height: 32px;
-  }
-  .transaction-row > .text-link {
-    margin-left: 44px;
-  }
-  .transaction-row > div {
-    min-width: calc(100% - 100px);
-  }
-  .transaction-row > b {
-    font-size: 12px;
-    margin-left: 44px;
-  }
   .referral-link-panel,
   .referral-code-panel {
     padding: 24px;
@@ -1320,9 +1108,6 @@
   }
   .bot-commands {
     padding: 20px;
-  }
-  .allowance-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 .batch-group {
@@ -2762,109 +2547,6 @@
 }
 
 /* Paying by card transfer. */
-.manual-payment {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 24px;
-  padding: 25px;
-}
-.manual-payment h2 {
-  margin: 4px 0 0;
-}
-.manual-payment > .text-link {
-  align-self: flex-start;
-}
-.manual-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  margin: 0;
-  padding-left: 20px;
-}
-.manual-steps > li > span {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 10px;
-}
-.manual-card {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 14px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 14px 16px;
-  background: var(--soft);
-}
-.manual-card > strong {
-  font-family: Manrope, sans-serif;
-  font-size: 20px;
-  letter-spacing: 0.06em;
-  font-variant-numeric: tabular-nums;
-}
-.manual-card > small {
-  flex-basis: 100%;
-  color: var(--muted);
-}
-.manual-receipt {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
-  gap: 12px;
-  align-items: end;
-}
-.manual-receipt .form-field {
-  margin-bottom: 0;
-}
-.payment-methods {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  border: 0;
-  margin: 0;
-  padding: 0;
-}
-.payment-method {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 14px 16px;
-  cursor: pointer;
-}
-.payment-method.selected {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 1px var(--primary);
-}
-.payment-method.disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-.payment-method > span {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.payment-method small {
-  color: var(--muted);
-  line-height: 1.5;
-}
-.manual-payment > .button {
-  align-self: flex-start;
-}
-@media (max-width: 700px) {
-  .manual-payment {
-    padding: 18px;
-  }
-  .manual-receipt,
-  .payment-methods {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .manual-payment > .button {
-    align-self: stretch;
-  }
-}
 
 /* The Telegram channels a free account joins before using a service. */
 .channel-list {

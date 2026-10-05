@@ -34,6 +34,9 @@ const recent = computed(
     Date.now() - new Date(payment.value.decided_at).getTime() < 7 * 86400000,
 )
 const visible = computed(() => !!props.plan || open.value || recent.value)
+// Where the customer is: choosing how to pay, transferring, or waiting for the check.
+const stage = computed(() => (payment.value?.status === 'submitted' ? 2 : open.value ? 1 : 0))
+const steps = ['stepHowToPay', 'stepTransfer', 'stepWeCheck']
 
 async function run(task: string, fn: () => Promise<void>) {
   busy.value = task
@@ -112,6 +115,18 @@ function pick(event: Event) {
 <template>
   <section v-if="visible" class="panel manual-payment" data-testid="manual-payment" aria-live="polite">
     <ErrorBanner v-if="error" :message="error" />
+    <ol v-if="open || (plan && !(recent && !plan))" class="pay-stepper" data-testid="pay-stepper">
+      <li
+        v-for="(label, index) in steps"
+        :key="label"
+        :class="{ done: index < stage, current: index === stage }"
+        :aria-current="index === stage ? 'step' : undefined"
+      >
+        <span class="pay-step-number" aria-hidden="true"
+          ><AppIcon v-if="index < stage" name="check" :size="14" /><template v-else>{{ index + 1 }}</template></span
+        >{{ t(label) }}
+      </li>
+    </ol>
 
     <!-- A payment on its way or waiting for the owner. -->
     <template v-if="open">
