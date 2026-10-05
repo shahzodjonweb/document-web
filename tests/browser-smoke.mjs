@@ -8,7 +8,7 @@ const errors=[];page.on('pageerror',e=>errors.push(e.message))
 const shots='docs/design/screenshots';await fs.mkdir(shots,{recursive:true})
 const checks=[];let jobId
 try {
- await page.goto('http://127.0.0.1:3000/en');await page.getByRole('heading',{name:'Your documents. A little more organized.'}).waitFor();await page.screenshot({path:`${shots}/landing-en-desktop.png`,fullPage:true})
+ await page.goto('http://127.0.0.1:3000/en');await page.getByRole('heading',{name:'PDF tools and AI documents, in one place.'}).waitFor();await page.screenshot({path:`${shots}/landing-en-desktop.png`,fullPage:true})
  await page.goto('http://127.0.0.1:3000/en/app');await page.getByRole('button',{name:'Use local development account'}).click();await page.getByRole('heading',{name:'A little less paperwork.'}).waitFor()
  if(!process.env.SKIP_JOURNEY){
  await page.goto('http://127.0.0.1:3000/en/app/tools/pdf.merge');await page.locator('input[type=file]').setInputFiles(['tests/fixtures/research-notes.pdf','tests/fixtures/appendix.pdf']);await page.locator('.file-row').nth(1).waitFor();assert.equal(await page.locator('.file-row').count(),2)

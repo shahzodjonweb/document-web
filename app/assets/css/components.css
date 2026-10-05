@@ -475,6 +475,28 @@ b {
   color: var(--muted);
 }
 
+/* A read-only value with its copy button beside it (links, codes). */
+.copy-field {
+  display: flex;
+  gap: var(--space-2);
+}
+.copy-field input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  color: var(--ink);
+  font-size: 14px;
+}
+.copy-field input:focus {
+  border-color: var(--action);
+  box-shadow: 0 0 0 3px var(--blue-100);
+  outline: none;
+}
+
 /* ------------------------------------------------------------ meters */
 
 .usage-track {

@@ -116,6 +116,9 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   }
   if (endpoint.startsWith('/jobs/')) return json(jobs.get(endpoint.split('/')[2]) || {})
   if (endpoint === '/support' && method === 'GET') return json({ results: [] })
+  if (endpoint === '/referrals')
+    return json({ code: 'MALIKA7', url: 'https://pdfmaster.orderdesk.live/r/MALIKA7', rewards_count: 2, pending_count: 1,
+      awarded_credits: 400, monthly_cap: 5, expires_in_days: 90, qualification: '', sandbox: false })
   if (endpoint === '/support' && method === 'POST') {
     tickets.push(request.postDataJSON())
     return json({ id: 'TKT-1', status: 'open' }, 201)
@@ -278,6 +281,32 @@ try {
   await shot('help-1440', true)
   checks.push('Help: searchable articles and the guide; the contact form asks only for the message')
 
+  // The public front page: what it does, the AI services, tools, plans and questions.
+  await go('/en')
+  await page.locator('.landing-hero h1').waitFor()
+  assert.equal(await page.locator('.landing-hero h1').innerText(), 'PDF tools and AI documents, in one place.')
+  assert.equal(await page.getByText(/paperwork/i).count(), 0, 'no old taglines')
+  assert.equal(await page.locator('.landing-section .ai-shortcut').count(), 2)
+  assert.equal(await page.locator('.faq details').count(), 4)
+  await page.locator('.faq summary').first().click()
+  assert.ok(await page.locator('.faq details').first().getAttribute('open') !== null)
+  for (const mode of ['light', 'dark']) {
+    await theme(mode)
+    assert.equal(await overflow(), false, `landing 1440 ${mode} overflow`)
+    await axe(`landing 1440 ${mode}`)
+  }
+  await theme('light')
+  await shot('landing-1440', true)
+
+  // Referrals: the link with a copy button, and two numbers.
+  await go('/en/app/referrals')
+  await page.locator('.referral-link-panel').waitFor()
+  assert.equal(await page.locator('.copy-field input').first().inputValue(), 'https://pdfmaster.orderdesk.live/r/MALIKA7')
+  assert.deepEqual(await texts(page.locator('.referral-numbers strong')), ['2', '400'])
+  await axe('referrals 1440')
+  await shot('referrals-1440', true)
+  checks.push('Landing: what it does, AI services, tools, plans and questions; referrals: link, copy and two numbers')
+
   // Phone: one column, and the next step stays in reach above the phone bar.
   await page.setViewportSize({ width: 390, height: 844 })
   for (const mode of ['light', 'dark']) {
@@ -290,6 +319,11 @@ try {
   }
   await theme('light')
   uploads = 0
+  await go('/en')
+  await page.locator('.landing-hero h1').waitFor()
+  assert.equal(await overflow(), false, 'landing 390 overflow')
+  await axe('landing 390')
+  await shot('landing-390', true)
   await go('/en/app/tools/pdf.merge')
   await page.locator('input[type=file]').setInputFiles(['tests/fixtures/research-notes.pdf', 'tests/fixtures/appendix.pdf'])
   await page.locator('.file-row').nth(1).waitFor()

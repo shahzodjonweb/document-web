@@ -65,7 +65,7 @@ const titles: [string, string][] = [
 useHead(() => ({
   title:
     view.value === '/'
-      ? 'A little less paperwork · PDF Master'
+      ? `PDF Master · ${t('heroTitle')}`
       : `${t(titles.find(([prefix]) => view.value.startsWith(prefix))?.[1] || 'navHome')} · PDF Master`,
 }))
 </script>

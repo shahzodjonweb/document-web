@@ -37,53 +37,53 @@ async function apply() {
 }
 </script>
 <template>
-  <div class="page-heading">
-    <div>
-      <span class="eyebrow">{{ t('referrals') }}</span>
-      <h1>{{ t('referralTitle') }}</h1>
-      <p>{{ t('referralSub') }}</p>
+  <div class="referrals-page">
+    <div class="page-heading">
+      <div>
+        <h1>{{ t('referrals') }}</h1>
+        <p>{{ t('referralLead') }}</p>
+      </div>
     </div>
+    <ErrorBanner v-if="error" :message="error" />
+    <div v-if="notice" class="success-banner" role="status"><AppIcon name="check" :size="17" />{{ notice }}</div>
+    <template v-if="data">
+      <section class="panel referral-link-panel">
+        <h2>{{ t(data.url ? 'yourLink' : 'referralCode') }}</h2>
+        <div class="copy-field">
+          <input
+            :value="data.url || data.code"
+            readonly
+            :aria-label="t(data.url ? 'yourLink' : 'referralCode')"
+          /><button class="button primary" type="button" @click="copy">
+            <AppIcon :name="copied ? 'check' : 'copy'" :size="16" />{{
+              t(copied ? 'copied' : data.url ? 'copyLink' : 'copyCode')
+            }}
+          </button>
+        </div>
+        <div class="referral-numbers">
+          <div>
+            <strong class="tabular">{{ data.rewards_count }}</strong><span>{{ t('qualifiedInvites') }}</span>
+          </div>
+          <div>
+            <strong class="tabular">{{ data.awarded_credits }}</strong><span>{{ t('rewardCredits') }}</span>
+          </div>
+        </div>
+        <p class="field-hint">
+          {{ t('rewardExpiry', { days: data.expires_in_days }) }} · {{ t('pendingInvites') }}:
+          {{ data.pending_count }} · {{ t('monthlyCap') }}: {{ data.monthly_cap }}
+        </p>
+      </section>
+      <details class="panel referral-code-panel">
+        <summary>{{ t('haveCode') }}</summary>
+        <form class="copy-field" @submit.prevent="apply">
+          <input v-model="code" required :aria-label="t('referralCode')" :placeholder="t('referralCode')" /><button
+            class="button secondary"
+            :disabled="busy || !code.trim()"
+          >
+            {{ t('apply') }}
+          </button>
+        </form>
+      </details>
+    </template>
   </div>
-  <ErrorBanner v-if="error" :message="error" />
-  <div v-if="notice" class="success-banner">{{ notice }}</div>
-  <template v-if="data"
-    ><section class="panel referral-link-panel">
-      <span class="tool-icon sage"><AppIcon name="send" :size="27" /></span>
-      <h2>{{ t(data.url ? 'yourLink' : 'referralCode') }}</h2>
-      <div class="copy-field">
-        <input
-          :value="data.url || data.code"
-          readonly
-          :aria-label="t(data.url ? 'yourLink' : 'referralCode')"
-        /><button class="button primary" @click="copy">
-          {{ t(copied ? 'copied' : data.url ? 'copyLink' : 'copyCode') }}
-        </button>
-      </div>
-      <p>{{ t('rewardExpiry', { days: data.expires_in_days }) }}</p>
-    </section>
-    <section class="referral-stats">
-      <div
-        v-for="[key, label] in [
-          ['rewards_count', 'qualifiedInvites'],
-          ['pending_count', 'pendingInvites'],
-          ['awarded_credits', 'rewardCredits'],
-          ['monthly_cap', 'monthlyCap'],
-        ]"
-        :key="key"
-        class="panel"
-      >
-        <strong>{{ data[key!] }}</strong
-        ><span>{{ t(label!) }}</span>
-      </div>
-    </section>
-    <form class="panel referral-code-panel" @submit.prevent="apply">
-      <h2>{{ t('redeemCode') }}</h2>
-      <div class="copy-field">
-        <label class="form-field"
-          ><span>{{ t('referralCode') }}</span
-          ><input v-model="code" required /></label
-        ><button class="button secondary" :disabled="busy || !code.trim()">{{ t('apply') }}</button>
-      </div>
-    </form></template
-  >
 </template>

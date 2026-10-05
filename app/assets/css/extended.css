@@ -589,60 +589,6 @@
 .editor-recent small {
   font-size: 11px;
 }
-.referral-link-panel {
-  padding: 32px;
-}
-.referral-link-panel h2 {
-  margin: 22px 0;
-}
-.copy-field {
-  display: flex;
-  gap: 12px;
-  align-items: flex-end;
-}
-.copy-field > input,
-.copy-field > .form-field {
-  flex: 1;
-}
-.copy-field > input {
-  min-height: 46px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px;
-  background: var(--canvas);
-  color: var(--ink);
-}
-.referral-link-panel > p {
-  font-size: 12px;
-  margin: 18px 0 0;
-}
-.referral-stats {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 18px;
-  margin: 24px 0;
-}
-.referral-stats > div {
-  padding: 23px;
-}
-.referral-stats strong {
-  display: block;
-  font-size: 30px;
-  color: var(--ink);
-  font-family: Manrope, sans-serif;
-}
-.referral-stats span {
-  display: block;
-  font-size: 12px;
-  margin-top: 5px;
-}
-.referral-code-panel {
-  padding: 28px;
-  max-width: 650px;
-}
-.referral-code-panel h2 {
-  margin-bottom: 20px;
-}
 .bot-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 225px;
@@ -1035,29 +981,6 @@
   }
   .editor-recent small {
     display: none;
-  }
-  .referral-link-panel,
-  .referral-code-panel {
-    padding: 24px;
-  }
-  .copy-field {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .copy-field > input,
-  .copy-field > .form-field {
-    width: 100%;
-    flex: auto;
-  }
-  .referral-stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 13px;
-  }
-  .referral-stats > div {
-    padding: 20px;
-  }
-  .referral-stats strong {
-    font-size: 26px;
   }
   .bot-chat-heading {
     padding: 16px;
