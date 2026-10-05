@@ -2220,3 +2220,28 @@
     flex-direction: column;
   }
 }
+
+/* ------------------------------------------------------------ editor: pages mode */
+
+/* Each page card keeps its controls on one row under a larger thumbnail. */
+.editor-board {
+  grid-template-columns: repeat(auto-fill, minmax(188px, 1fr));
+}
+.editor-board-card {
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+}
+.editor-board-thumb {
+  width: 116px;
+}
+.editor-board-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px;
+}
+.editor-board-actions .icon-button {
+  min-width: 34px;
+  min-height: 34px;
+}
