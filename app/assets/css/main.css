@@ -157,10 +157,7 @@ strong {
   padding: 10px 14px;
   font-size: 12px;
 }
-.button.large {
-  min-height: 49px;
-  padding: 14px 22px;
-}
+
 .button.full {
   width: 100%;
 }
@@ -524,7 +521,6 @@ strong {
   }
 }
 @media (max-width: 760px) {
-
   .page-heading {
     gap: 14px;
     align-items: flex-start;
@@ -629,7 +625,6 @@ strong {
     right: -23px;
     bottom: 48px;
   }
-
 }
 @media (max-width: 360px) {
   .page-heading h1 {
