@@ -40,6 +40,7 @@ const features = [
 const plans = [{ id: 'free', name: 'Free', price_xtr: 0, limits: { max_file_mib: 25, max_pages_per_job: 100, saved_workflows: 0 } }]
 let uploads = 0
 const jobs = new Map()
+const tickets = []
 
 await context.route('**/*', (route) => {
   const url = new URL(route.request().url())
@@ -114,6 +115,11 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
     return json(job, 201)
   }
   if (endpoint.startsWith('/jobs/')) return json(jobs.get(endpoint.split('/')[2]) || {})
+  if (endpoint === '/support' && method === 'GET') return json({ results: [] })
+  if (endpoint === '/support' && method === 'POST') {
+    tickets.push(request.postDataJSON())
+    return json({ id: 'TKT-1', status: 'open' }, 201)
+  }
   unexpected.push(`${method} ${endpoint}`)
   return json({})
 })
@@ -243,6 +249,34 @@ try {
   await page.locator('.advanced-options summary').click()
   assert.equal(await field('Resolution').isVisible(), true)
   checks.push('Options show what matters; the rest is folded under More options')
+
+  // Help: articles with a search, the guide, and a message box — nothing else to fill in.
+  await go('/en/app/support')
+  await page.locator('.help-card').first().waitFor()
+  const articles = await page.locator('section.help-card').count()
+  await page.getByPlaceholder('Search help…').fill('24 hours')
+  assert.ok((await page.locator('section.help-card').count()) < articles, 'search narrows the articles')
+  await page.getByPlaceholder('Search help…').fill('')
+  assert.equal(await page.locator('.support-form select, .support-form input').count(), 0, 'only the message is asked for')
+  await page.locator('.support-form textarea').fill('The merged file is missing a page.\nIt was the second file.')
+  await page.getByRole('button', { name: 'Send to support', exact: true }).click()
+  await page.locator('.support-form .success-banner').waitFor()
+  assert.deepEqual(tickets.at(-1), { category: 'other', subject: 'The merged file is missing a page.',
+    message: 'The merged file is missing a page.\nIt was the second file.' })
+  await go('/en/app/support?topic=billing&ref=PM-7K3QX')
+  await page.getByText('About my payment PM-7K3QX', { exact: true }).waitFor()
+  await page.locator('.support-form textarea').fill('I paid but the plan did not switch on.')
+  await page.getByRole('button', { name: 'Send to support', exact: true }).click()
+  await page.locator('.support-form .success-banner').waitFor()
+  assert.equal(tickets.at(-1).category, 'billing')
+  assert.equal(tickets.at(-1).subject, 'About my payment PM-7K3QX')
+  for (const mode of ['light', 'dark']) {
+    await theme(mode)
+    await axe(`help 1440 ${mode}`)
+  }
+  await theme('light')
+  await shot('help-1440', true)
+  checks.push('Help: searchable articles and the guide; the contact form asks only for the message')
 
   // Phone: one column, and the next step stays in reach above the phone bar.
   await page.setViewportSize({ width: 390, height: 844 })

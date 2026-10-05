@@ -104,6 +104,24 @@ const entries: Record<string, [string, string, string]> = {
   sectionDocuments: ['Documents', 'Hujjatlar', 'Документы'],
   sectionWorkspace: ['Workspace', 'Ish maydoni', 'Рабочее пространство'],
   documentLanguage: ['Language of new documents', 'Yangi hujjatlar tili', 'Язык новых документов'],
+  // Help.
+  helpLead: [
+    'Answers to common questions, and a way to reach us when you need one.',
+    'Ko‘p beriladigan savollarga javoblar va kerak bo‘lsa biz bilan bog‘lanish.',
+    'Ответы на частые вопросы и связь с нами, когда это нужно.',
+  ],
+  helpSearch: ['Search help…', 'Yordamdan qidirish…', 'Поиск по справке…'],
+  helpNoResults: [
+    'Nothing matches. Write to us below and we will help.',
+    'Hech narsa topilmadi. Pastda bizga yozing, yordam beramiz.',
+    'Ничего не найдено. Напишите нам ниже, и мы поможем.',
+  ],
+  writeToUs: ['Write to us', 'Bizga yozing', 'Напишите нам'],
+  writeToUsHint: [
+    'Say what happened. We reply here and in Telegram. Please don’t include passwords or document contents.',
+    'Nima bo‘lganini yozing. Javobni shu yerda va Telegram’da beramiz. Parol yoki hujjat mazmunini yozmang.',
+    'Опишите, что произошло. Мы ответим здесь и в Telegram. Не указывайте пароли и содержимое документов.',
+  ],
   // The app frame: menu, top bar, phone bar.
   skipToContent: ['Skip to content', 'Asosiy qismga o‘tish', 'Перейти к содержимому'],
   navLabel: ['Main menu', 'Asosiy menyu', 'Главное меню'],
@@ -492,9 +510,9 @@ const entries: Record<string, [string, string, string]> = {
   ],
   helpBilling: ['Usage & payments', 'Foydalanish va to‘lovlar', 'Лимиты и платежи'],
   helpBillingBody: [
-    'A confirmed task uses its quoted allowance once. Failed tasks release their reservation. No-change compression is not charged. Paid checkout remains disabled until prices are configured.',
-    'Tasdiqlangan vazifa limitni bir marta sarflaydi. Xatolik bo‘lsa, band qilingan limit qaytariladi. O‘zgarishsiz siqish bepul. Narxlar belgilanguncha to‘lov o‘chirilgan.',
-    'Подтверждённая задача расходует лимит один раз. При ошибке резерв возвращается. Сжатие без изменений бесплатно. Оплата отключена до настройки цен.',
+    'A task uses the allowance shown before you confirm it, once; if it fails, the allowance comes back, and compression that changes nothing is free. Plus and Premium are paid by card transfer: choose a plan in Plan & billing, transfer the amount and send the receipt, and we switch the plan on after checking it.',
+    'Vazifa tasdiqlashdan oldin ko‘rsatilgan limitni bir marta sarflaydi; xato bo‘lsa, limit qaytadi, hech narsani o‘zgartirmagan siqish esa bepul. Plus va Premium karta orqali to‘lanadi: Tarif va to‘lov bo‘limida tarifni tanlang, summani o‘tkazing va kvitansiyani yuboring — tekshirgach tarifni yoqamiz.',
+    'Задача расходует лимит, показанный перед подтверждением, один раз; при ошибке лимит возвращается, а сжатие без изменений бесплатно. Plus и Premium оплачиваются переводом на карту: выберите тариф в разделе «Тариф и оплата», переведите сумму и отправьте квитанцию — после проверки мы включим тариф.',
   ],
   legalDraft: [
     'Local development information — public terms require review before launch.',

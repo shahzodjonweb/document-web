@@ -41,7 +41,6 @@ onMounted(() => {
 <template>
   <div class="page-heading">
     <div>
-      <span class="eyebrow">{{ t('guide') }} · PDF MASTER</span>
       <h1>{{ t('guideTitle') }}</h1>
       <p>{{ t('guideSub') }}</p>
     </div>
