@@ -38,14 +38,14 @@ export default defineNuxtConfig({
   app: {
     head: {
       script: [{ src: 'https://telegram.org/js/telegram-web-app.js', defer: true }],
-      title: 'PDF Master — a little less paperwork',
+      title: 'PDF Master — PDF tools and AI documents',
       meta: [
         {
           name: 'description',
           content:
-            'A calm workspace for your PDFs. Merge, compress, organize and convert documents with transparent usage.',
+            'PDF tools and AI documents in Uzbek, Russian and English: merge, compress and convert files, or describe what you need and get a finished PDF or slide deck.',
         },
-        { name: 'theme-color', content: '#F4F7FC' },
+        { name: 'theme-color', content: '#f5f7fa' },
       ],
       link: [
         { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg?v=pdf-master-2026' },
