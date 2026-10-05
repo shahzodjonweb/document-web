@@ -210,7 +210,29 @@ try {
   await shot('merge-review-1440', true)
   await page.getByRole('button', { name: 'Start processing', exact: true }).click()
   await page.waitForURL('**/app/jobs/*')
+  await page.locator('.job-detail').waitFor()
+  assert.equal(await page.locator('.job-detail h1').count(), 1)
+  await shot('job-1440', true)
   checks.push('Merge: two files in, reordered, reviewed, started; one column with no options step')
+
+  // Tasks: newest first, filtered by what people ask — done, going, or not finished.
+  await go('/en/app/jobs')
+  await page.locator('.job-row').first().waitFor()
+  assert.deepEqual(await texts(page.locator('.task-filter button')), ['All', 'Ready', 'In progress', 'Did not finish'])
+  assert.equal(await page.locator('.job-row').count(), 1)
+  assert.doesNotMatch(await page.locator('.job-row').innerText(), /00000000/, 'no raw task id up front')
+  await page.locator('.task-filter button', { hasText: 'Did not finish' }).click()
+  assert.equal(await page.locator('.job-row').count(), 0)
+  await page.getByText('Nothing here with this status.', { exact: true }).waitFor()
+  await page.locator('.task-filter button', { hasText: 'All' }).click()
+  for (const mode of ['light', 'dark']) {
+    await theme(mode)
+    assert.equal(await overflow(), false, `tasks 1440 ${mode} overflow`)
+    await axe(`tasks 1440 ${mode}`)
+  }
+  await theme('light')
+  await shot('tasks-1440', true)
+  checks.push('Tasks: one row per task without raw ids, and status chips that filter')
 
   // A tool with options: essentials shown, the rest folded.
   await go('/en/app/tools/pdf.to_images')

@@ -1300,3 +1300,204 @@
     grid-column: 1 / -1;
   }
 }
+
+/* ------------------------------------------------------------ tasks */
+
+.task-filter {
+  margin-bottom: var(--space-4);
+}
+.job-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.job-list li + li {
+  border-top: 1px solid var(--hairline);
+}
+.job-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  color: var(--text);
+  transition: background var(--duration) var(--ease);
+}
+.job-row:hover {
+  background: var(--surface-sunken);
+}
+.job-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.job-main strong {
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.job-main small {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+.job-arrow {
+  color: var(--muted);
+}
+.job-row:hover .job-arrow {
+  color: var(--link);
+}
+/* One task: what happened, the result, what it used, and what next. */
+.job-page {
+  max-width: 820px;
+  margin: 0 auto;
+}
+.job-detail {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.result-heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) 0 var(--space-2);
+  text-align: center;
+}
+.result-heading h1 {
+  font-size: var(--text-2xl);
+}
+.result-heading p {
+  color: var(--muted);
+}
+.processing-stages {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-2);
+  padding: var(--space-3);
+}
+.processing-stages > div {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--muted);
+  font-size: 14px;
+}
+.processing-stages > div.active {
+  background: var(--blue-50);
+  color: var(--ink);
+}
+.processing-stages > div.done {
+  color: var(--success-ink);
+}
+.processing-stages strong {
+  font-weight: 600;
+}
+.result-panel,
+.receipt-panel,
+.revise-panel {
+  padding: var(--space-5) var(--space-6);
+}
+.result-panel .panel-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+.result-panel .panel-heading h2 {
+  font-size: var(--text-lg);
+}
+.artifact-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+}
+.artifact-row + .artifact-row {
+  margin-top: var(--space-2);
+}
+.artifact-row > div {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.artifact-row strong {
+  overflow: hidden;
+  color: var(--ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.artifact-row small {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+.retention-note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+.receipt-panel h3,
+.revise-panel h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  font-size: var(--text-md);
+}
+.receipt-panel > div {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--hairline);
+  font-size: 14px;
+}
+.receipt-panel strong {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.revise-panel > p {
+  margin-bottom: var(--space-4);
+  color: var(--muted);
+  font-size: 14px;
+}
+.revise-panel .meter-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+
+@media (max-width: 760px) {
+  .job-row {
+    padding: var(--space-3);
+  }
+  .result-panel,
+  .receipt-panel,
+  .revise-panel {
+    padding: var(--space-4);
+  }
+  .artifact-row {
+    flex-wrap: wrap;
+  }
+  .artifact-row .button {
+    width: 100%;
+  }
+}

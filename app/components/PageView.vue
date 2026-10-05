@@ -3,10 +3,18 @@ const route = useRoute()
 const { t } = useLocale()
 const ws = useWorkspace()
 const view = computed(() => route.path.replace(/^\/(en|uz|ru)/, '').replace(/\/$/, '') || '/')
-const selectedStatus = ref('allStatuses')
-const filteredJobs = computed(() =>
-  ws.jobs.value.filter((j) => selectedStatus.value === 'allStatuses' || j.status === selectedStatus.value),
-)
+// Statuses grouped the way people think of a task: done, still going, or not finished.
+const STATUS_GROUPS: Record<string, string[] | null> = {
+  statusAll: null,
+  succeeded: ['succeeded', 'no_op'],
+  statusInProgress: ['queued', 'running', 'finalizing'],
+  statusProblems: ['failed', 'canceled', 'expired'],
+}
+const selectedStatus = ref('statusAll')
+const filteredJobs = computed(() => {
+  const group = STATUS_GROUPS[selectedStatus.value]
+  return ws.jobs.value.filter((j) => !group || group.includes(j.status))
+})
 const error = ref('')
 const authNotice = ref('')
 const callbackError = ref('')
@@ -94,30 +102,29 @@ useHead(() => ({
     v-else-if="view.startsWith('/tools/')"
     :tool-id="decodeURIComponent(view.slice('/tools/'.length))"
   /><JobDetail v-else-if="view.startsWith('/app/jobs/')" :job-id="view.slice('/app/jobs/'.length)" />
-  <div v-else-if="view === '/app/jobs'">
+  <div v-else-if="view === '/app/jobs'" class="tasks-page">
     <div class="page-heading">
       <div>
-        <h1>{{ t('tasks') }}</h1>
-        <p>{{ t('historySub') }}</p>
+        <h1>{{ t('navTasks') }}</h1>
+        <p>{{ t('tasksLead') }}</p>
       </div>
-      <button class="button secondary" @click="ws.loadAccount">
+      <button class="button secondary small" type="button" @click="ws.loadAccount">
         <AppIcon name="rotate" :size="16" />{{ t('refresh') }}
       </button>
     </div>
-    <div class="history-toolbar">
-      <label class="form-field"
-        ><select v-model="selectedStatus" :aria-label="t('status')">
-          <option
-            v-for="status in ['allStatuses', 'succeeded', 'queued', 'running', 'failed', 'no_op']"
-            :key="status"
-            :value="status"
-          >
-            {{ t(status) }}
-          </option>
-        </select></label
+    <div class="category-tabs task-filter" role="group" :aria-label="t('status')">
+      <button
+        v-for="status in Object.keys(STATUS_GROUPS)"
+        :key="status"
+        type="button"
+        :class="{ selected: selectedStatus === status }"
+        :aria-pressed="selectedStatus === status"
+        @click="selectedStatus = status"
       >
+        {{ t(status) }}
+      </button>
     </div>
-    <section class="panel"><JobList :jobs="filteredJobs" /></section>
+    <section class="panel"><JobList :jobs="filteredJobs" :filtered="selectedStatus !== 'statusAll'" /></section>
   </div>
   <BillingView v-else-if="view === '/app/billing' || view === '/pricing'" /><SettingsView
     v-else-if="view === '/app/settings'"

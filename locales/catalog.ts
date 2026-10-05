@@ -83,6 +83,17 @@ const entries: Record<string, [string, string, string]> = {
   stepHowToPay: ['How to pay', 'To‘lov usuli', 'Способ оплаты'],
   stepTransfer: ['Transfer and receipt', 'O‘tkazma va kvitansiya', 'Перевод и квитанция'],
   stepWeCheck: ['We check it', 'Biz tekshiramiz', 'Мы проверяем'],
+  // Tasks.
+  statusAll: ['All', 'Barchasi', 'Все'],
+  statusInProgress: ['In progress', 'Jarayonda', 'В работе'],
+  statusProblems: ['Did not finish', 'Tugamagan', 'Не завершены'],
+  tasksLead: [
+    'Everything you have run, newest first. Results can be downloaded for 24 hours.',
+    'Bajargan barcha vazifalaringiz, eng yangisi birinchi. Natijalarni 24 soat ichida yuklab olish mumkin.',
+    'Все ваши задачи, сначала новые. Результаты можно скачать в течение 24 часов.',
+  ],
+  noTasksFiltered: ['Nothing here with this status.', 'Bu holatda hech narsa yo‘q.', 'С таким статусом ничего нет.'],
+  taskUsed: ['What it used', 'Nima sarflandi', 'Что израсходовано'],
   // The app frame: menu, top bar, phone bar.
   skipToContent: ['Skip to content', 'Asosiy qismga o‘tish', 'Перейти к содержимому'],
   navLabel: ['Main menu', 'Asosiy menyu', 'Главное меню'],
