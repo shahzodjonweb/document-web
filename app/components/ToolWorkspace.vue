@@ -107,9 +107,9 @@ watch(
     }
     if (props.toolId === 'pdf.rotate' && !param.value.angle) param.value.angle = 90
     if (props.toolId === 'pdf.images_to_pdf') {
-      if (!param.value.paper_size) param.value.paper_size = ws.user.value?.preferences?.paper_size || 'A4'
-      if (param.value.orientation === undefined) param.value.orientation = 'portrait'
-      if (param.value.margin === undefined) param.value.margin = 24
+      if (!param.value.paper_size) param.value.paper_size = 'fit'
+      if (param.value.orientation === undefined) param.value.orientation = 'auto'
+      if (param.value.margin === undefined) param.value.margin = 0
       // Older saved drafts receive the defaults too; an explicit opt-out stays off.
       if (param.value.auto_crop === undefined) param.value.auto_crop = true
       if (param.value.enhance_text === undefined) param.value.enhance_text = true
@@ -498,10 +498,12 @@ function onDrop(event: DragEvent) {
           <label class="form-field"
             ><span>{{ t('paperSize') }}</span
             ><select v-model="param.paper_size">
+              <option value="fit">{{ t('scanFitPage') }}</option>
               <option>A4</option>
               <option>Letter</option>
               <option value="original">{{ t('original') }}</option>
-            </select></label
+            </select
+            ><small v-if="param.paper_size === 'fit'">{{ t('scanFitPageHint') }}</small></label
           >
           <details class="advanced-options">
             <summary>{{ t('advancedOptions') }}</summary>

@@ -49,7 +49,7 @@ try {
       id: 'fixture-reader',
       locale,
       plan: 'free',
-      preferences: {},
+      preferences: { paper_size: 'A4' },
       display_name: 'Fixture Reader',
       time_zone: 'UTC',
     }
@@ -121,6 +121,7 @@ try {
     const enhance = page.getByRole('switch', { name: enhanceLabel, exact: true })
     const review = page.getByRole('button', { name: reviewLabel, exact: true })
     const start = page.getByRole('button', { name: startLabel, exact: true })
+    const paperSize = page.locator('.tool-page select').first()
     const savedDraft = () =>
       page.evaluate(() => JSON.parse(sessionStorage.getItem('pdf-master-draft') || 'null'))
     const quote = async () => {
@@ -130,6 +131,10 @@ try {
     }
     await page.goto(`${origin}/${locale}/app/tools/pdf.images_to_pdf`)
     await crop.waitFor()
+    assert.equal(await paperSize.inputValue(), 'fit', 'Fresh scans ignore the generic A4 profile default')
+    assert.equal(await paperSize.locator('option[value="fit"]').textContent(), {
+      en: 'Fit scanned page', uz: 'Skan o‘lchamiga mos', ru: 'По размеру скана',
+    }[locale])
     assert.equal(await crop.isChecked(), true)
     assert.equal(await enhance.isChecked(), true)
     assert.equal(
@@ -142,11 +147,29 @@ try {
     await page.waitForFunction(
       () => JSON.parse(sessionStorage.getItem('pdf-master-draft') || 'null')?.files?.length === 1,
     )
+    const fresh = await quote()
     assert.deepEqual(
-      { auto_crop: (await quote()).auto_crop, enhance_text: quotes.at(-1).parameters.enhance_text },
+      { auto_crop: fresh.auto_crop, enhance_text: fresh.enhance_text },
       { auto_crop: true, enhance_text: true },
     )
+    assert.equal(fresh.paper_size, 'fit')
+    assert.equal(fresh.margin, 0)
+    assert.equal(fresh.orientation, 'auto')
     checks.push(`${locale}: both default-on switches reach the quote`)
+    checks.push(`${locale}: fresh scans fit the image without paper margins or a forced portrait layout`)
+
+    await paperSize.selectOption('A4')
+    await review.waitFor({ state: 'visible' })
+    assert.equal(await start.count(), 0, 'Changing paper layout invalidates the quote')
+    assert.equal((await quote()).paper_size, 'A4')
+    await page.reload()
+    await crop.waitFor()
+    assert.equal(await paperSize.inputValue(), 'A4', 'An explicit A4 tool choice survives reload')
+    assert.equal((await quote()).paper_size, 'A4')
+    await paperSize.selectOption('fit')
+    await review.waitFor({ state: 'visible' })
+    await quote()
+    checks.push(`${locale}: explicit paper layout choices persist and invalidate an existing quote`)
 
     await crop.uncheck()
     await review.waitFor({ state: 'visible' })
@@ -181,7 +204,7 @@ try {
           JSON.stringify({
             tool: 'pdf.images_to_pdf',
             files: [file],
-            parameters: { paper_size: 'Letter', orientation: 'landscape', margin: 0 },
+            parameters: { paper_size: 'Letter', orientation: 'landscape', margin: 24 },
           }),
         ),
       image,
@@ -195,10 +218,17 @@ try {
     assert.equal(older.enhance_text, true)
     assert.equal(older.paper_size, 'Letter')
     assert.equal(older.orientation, 'landscape')
-    assert.equal(older.margin, 0)
+    assert.equal(older.margin, 24)
     checks.push(
       `${locale}: older saved drafts get scanning defaults without replacing existing paper settings`,
     )
+    await paperSize.selectOption('fit')
+    await review.waitFor({ state: 'visible' })
+    const fitted = await quote()
+    assert.equal(fitted.paper_size, 'fit')
+    assert.equal(fitted.margin, 24, 'Selecting Fit preserves an explicit custom margin')
+    assert.equal(fitted.orientation, 'landscape', 'Selecting Fit preserves an explicit orientation')
+    checks.push(`${locale}: selecting Fit preserves explicit custom margins and orientation`)
 
     for (const [width, theme] of [[1440, 'light'], [390, 'light'], [390, 'dark']]) {
       await page.setViewportSize({ width, height: 1000 })

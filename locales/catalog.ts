@@ -330,6 +330,12 @@ const entries: Record<string, [string, string, string]> = {
     'Оптимизирует структуру PDF, сохраняя текст и векторы. Если файл уже оптимизирован, лимит не расходуется.',
   ],
   paperSize: ['Paper size', 'Qog‘oz o‘lchami', 'Размер бумаги'],
+  scanFitPage: ['Fit scanned page', 'Skan o‘lchamiga mos', 'По размеру скана'],
+  scanFitPageHint: [
+    'The PDF page fits your image.',
+    'PDF sahifasi rasm o‘lchamiga moslanadi.',
+    'Размер страницы подстраивается под изображение.',
+  ],
   scanAutoCrop: [
     'Crop & straighten document',
     'Hujjatni qirqish va tekislash',
