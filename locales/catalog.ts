@@ -330,6 +330,22 @@ const entries: Record<string, [string, string, string]> = {
     'Оптимизирует структуру PDF, сохраняя текст и векторы. Если файл уже оптимизирован, лимит не расходуется.',
   ],
   paperSize: ['Paper size', 'Qog‘oz o‘lchami', 'Размер бумаги'],
+  scanAutoCrop: [
+    'Crop & straighten document',
+    'Hujjatni qirqish va tekislash',
+    'Обрезать и выровнять документ',
+  ],
+  scanAutoCropHint: [
+    'When a page is detected, trim its edges and fix the angle.',
+    'Sahifa aniqlansa, chetlari qirqiladi va qiyaligi to‘g‘rilanadi.',
+    'Если страница распознана, обрежем края и исправим перспективу.',
+  ],
+  scanEnhanceText: ['Enhance text', 'Matnni tiniqlashtirish', 'Улучшить читаемость'],
+  scanEnhanceTextHint: [
+    'Reduce shadows and boost contrast for easier reading.',
+    'Oson o‘qish uchun soyalarni kamaytiradi va kontrastni oshiradi.',
+    'Уменьшим тени и повысим контраст для удобного чтения.',
+  ],
   orientation: ['Orientation', 'Yo‘nalish', 'Ориентация'],
   portrait: ['Portrait', 'Portret', 'Книжная'],
   landscape: ['Landscape', 'Albom', 'Альбомная'],
