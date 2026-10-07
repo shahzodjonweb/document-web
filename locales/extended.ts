@@ -993,6 +993,9 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   studioGuideLink: ['How to describe it', 'Qanday yozish kerak', 'Как описать'],
   studioPagesReading: ['{count} pages', '{count} sahifa', '{count} страниц'],
   studioPagesClamped: ['You asked for {asked}; this plan allows {given}.', 'Siz {asked} so‘radingiz; bu tarifda {given} ta mumkin.', 'Вы запросили {asked}; тариф допускает {given}.'],
+  studioFewer: ['One fewer', 'Bittaga kamroq', 'На одну меньше'],
+  studioMore: ['One more', 'Bittaga ko‘proq', 'На одну больше'],
+  studioSeePlans: ['See plans', 'Tariflarni ko‘rish', 'Посмотреть тарифы'],
   guideTitle: ['How to describe what you want', 'Nimani xohlashingizni qanday yozish kerak', 'Как описать, что вам нужно'],
   guideSub: ['One description is the whole brief. Here is what it understands.', 'Bitta tavsif — butun topshiriq. U nimani tushunishini ko‘ring.', 'Одно описание — всё задание. Вот что оно понимает.'],
   guideLead: ['Write it as you would explain it to a colleague. Say what the document is about, who will read it, how it should sound, and how long it should be. There is nothing else to fill in.', 'Hamkasbingizga tushuntirgandek yozing. Hujjat nima haqida, kim o‘qiydi, qanday ohangda va qancha hajmda bo‘lishini ayting. Boshqa hech narsa to‘ldirilmaydi.', 'Пишите так, как объяснили бы коллеге. О чём документ, кто его прочитает, каким тоном и какого объёма. Больше ничего заполнять не нужно.'],
@@ -1185,9 +1188,9 @@ export const promptExamples: Record<string, [string, string, string][]> = {
   ],
   'ai.pptx': [
     [
-      '10 slides for an open lesson — year 9 geography, the shrinking of the Aral Sea. One idea per slide, 5 questions at the end. Make it look good, in navy.',
-      'Ochiq darsga 10 ta slayd kerak — 9-sinf geografiya, Orol dengizi muammosi. Har slaydda bitta fikr, oxirida 5 ta savol. Ko‘k rangda chiroyli chiqsin.',
-      'Нужно 10 слайдов для открытого урока — география, 9 класс, проблема Аральского моря. Одна мысль на слайд, 5 вопросов в конце. В синем, чтобы выглядело красиво.',
+      '10 slides for an open lesson — year 9 geography, the shrinking of the Aral Sea. Explain each point with an example, 5 questions at the end. Make it look good, in navy.',
+      'Ochiq darsga 10 ta slayd kerak — 9-sinf geografiya, Orol dengizi muammosi. Har slaydda tushuntirish va misol, oxirida 5 ta savol. Ko‘k rangda chiroyli chiqsin.',
+      'Нужно 10 слайдов для открытого урока — география, 9 класс, проблема Аральского моря. С пояснениями и примерами, 5 вопросов в конце. В синем, чтобы выглядело красиво.',
     ],
     [
       '6 slides pitching my online shop to investors: the problem, the solution, the market, the numbers, the ask. Confident, no jargon.',

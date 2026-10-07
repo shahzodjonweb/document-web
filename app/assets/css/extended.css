@@ -60,6 +60,7 @@
 
 .meter-row {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 15px;
   padding: 12px 0;
@@ -69,6 +70,23 @@
 .meter-row strong {
   font-size: 18px;
   color: var(--ink);
+}
+/* The count on the review rail, put right in a tap before paying. */
+.page-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.page-stepper .icon-button {
+  min-width: 32px;
+  min-height: 32px;
+  border: 1px solid var(--border);
+  font-size: 18px;
+  line-height: 1;
+}
+.page-stepper strong {
+  min-width: 2ch;
+  text-align: center;
 }
 
 .outline-actions {

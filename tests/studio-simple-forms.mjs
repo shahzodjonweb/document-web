@@ -260,7 +260,13 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
         (key) => Object.hasOwn(body, key) && !isDeepStrictEqual(body[key], draft[key]),
       )
       const updated = { ...draft, ...structuredClone(body), version: draft.version + 1 }
-      if (rebuild && !Object.hasOwn(body, 'content')) {
+      // A count chosen on the review rail beats the description, clamped like any other.
+      if (Number.isInteger(updated.options?.pages)) {
+        const pages = updated.options.pages
+        updated.options = { ...updated.options, length: Math.min(pages, clampPages || 99), requested_pages: pages }
+      }
+      const resized = updated.options?.length !== draft.options?.length
+      if ((rebuild || resized) && !Object.hasOwn(body, 'content')) {
         updated.content = sourceContent(updated, updated.options.length)
       }
       Object.assign(draft, updated)
@@ -423,8 +429,36 @@ try {
   await quotePanel().waitFor()
   await page.getByTestId('studio-pages-clamped').waitFor()
   assert.match(await page.getByTestId('studio-pages-clamped').innerText(), /20/)
+  assert.equal(
+    await page.getByTestId('studio-pages-clamped').getByRole('link').count(),
+    1,
+    'A clamp offers the way to more pages',
+  )
   clampPages = 0
   checks.push('The pages resolved from the description are shown back, and a clamp is explained')
+
+  // 2b. A count read wrong is put right on the review rail, and quoted again.
+  await open('ai.pdf_topic')
+  await primary().fill('A guide to tide tables in 4 pages.')
+  await review().click()
+  await quotePanel().waitFor()
+  const quoteCalls = () => requests.filter((request) => request.path.endsWith('/quote')).length
+  const quotesBefore = quoteCalls()
+  await page.getByTestId('studio-pages-more').click()
+  await page.waitForFunction(
+    () => document.querySelector('[data-testid="studio-pages"] strong')?.textContent?.trim() === '5',
+  )
+  const resized = requests
+    .filter((request) => request.method === 'PATCH' && request.path.startsWith('/generation/drafts/'))
+    .at(-1).body
+  assert.equal(resized.options.pages, 5, 'The chosen count is sent as the count')
+  assert.ok(quoteCalls() > quotesBefore, 'The new count is quoted again')
+  await page.getByTestId('studio-pages-fewer').click()
+  await page.waitForFunction(
+    () => document.querySelector('[data-testid="studio-pages"] strong')?.textContent?.trim() === '4',
+  )
+  await quotePanel().screenshot({ path: path.join(output, 'review-pages.png') })
+  checks.push('The count can be changed on the review rail before paying')
 
   // 3. Examples are one tap, and the guide is one click.
   await open('ai.pdf_topic')

@@ -72,8 +72,20 @@ const readingLabel = computed(() =>
 )
 const clampedFrom = computed(() => {
   const asked = draft.value?.options?.requested_pages
-  return asked && asked !== readingPages.value ? asked : 0
+  return asked && asked > readingPages.value ? asked : 0
 })
+/** The most pages (or slides) this plan allows for the chosen service. */
+const pageCeiling = computed(() => selected.value?.max_pages ?? readingPages.value)
+/**
+ * A count read wrong from the description is put right here, before paying:
+ * the chosen count wins over the description and the cost is quoted again.
+ */
+async function setPages(count: number) {
+  if (busy.value || submissionPending.value || count < 1 || count > pageCeiling.value) return
+  form.options.pages = count
+  quote.value = null
+  await review()
+}
 
 const providerReady = computed(() => studio.config.value?.provider?.configured === true)
 const canUseTool = computed(
@@ -495,6 +507,7 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
                 <textarea
                   v-model="form.prompt"
                   data-testid="studio-primary-input"
+                  @input="delete form.options.pages"
                   rows="7"
                   :maxlength="studio.config.value?.limits?.source_chars || 12000"
                   :placeholder="t('studioDescribePlaceholder')"
@@ -555,7 +568,11 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
                 <div class="studio-settings-body">
                   <label class="form-field"
                     ><span>{{ t('outputLanguage') }}</span
-                    ><select v-model="form.output_locale" data-testid="studio-locale">
+                    ><select
+                      v-model="form.output_locale"
+                      data-testid="studio-locale"
+                      @change="form.options.locale_chosen = true"
+                    >
                       <option
                         v-for="(label, value) in { en: 'English', uz: 'O‘zbekcha', ru: 'Русский' }"
                         :key="value"
@@ -829,11 +846,33 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
             <h2>{{ t('reviewTitle') }}</h2>
             <div class="meter-row" data-testid="studio-pages">
               <span>{{ t('guideRowPages') }}</span
-              ><strong>{{ readingPages }}</strong>
+              ><span class="page-stepper">
+                <button
+                  type="button"
+                  class="icon-button"
+                  data-testid="studio-pages-fewer"
+                  :aria-label="t('studioFewer')"
+                  :disabled="!!busy || submissionPending || readingPages <= 1"
+                  @click="setPages(readingPages - 1)"
+                >
+                  −</button
+                ><strong>{{ readingPages }}</strong
+                ><button
+                  type="button"
+                  class="icon-button"
+                  data-testid="studio-pages-more"
+                  :aria-label="t('studioMore')"
+                  :disabled="!!busy || submissionPending || readingPages >= pageCeiling"
+                  @click="setPages(readingPages + 1)"
+                >
+                  +
+                </button>
+              </span>
             </div>
-            <!-- A clamped request is said out loud rather than quietly honoured short. -->
+            <!-- A clamped request is said out loud, with the way to more. -->
             <p v-if="clampedFrom" class="field-hint" data-testid="studio-pages-clamped">
               {{ t('studioPagesClamped', { asked: clampedFrom, given: readingPages }) }}
+              <NuxtLink :to="path('/app/billing')" class="text-link">{{ t('studioSeePlans') }}</NuxtLink>
             </p>
             <div v-for="meter in meters" :key="meter.meter" class="meter-row">
               <span>{{
