@@ -3,6 +3,21 @@ import { extendedEntries, extendedToolDescriptions, extendedToolNames } from './
 export type Locale = 'en' | 'uz' | 'ru'
 const entries: Record<string, [string, string, string]> = {
   preview: ['Preview', 'Ko‘rib chiqish', 'Предпросмотр'],
+  // Contacts: the support and advertising Telegram accounts set in the admin.
+  contactsTitle: ['Contacts', 'Aloqa', 'Контакты'],
+  contactsLead: [
+    'Write to us on Telegram — a person will answer.',
+    'Bizga Telegram orqali yozing — javobni odam beradi.',
+    'Напишите нам в Telegram — ответит человек.',
+  ],
+  supportAccount: ['Support', 'Yordam', 'Поддержка'],
+  adsAccount: ['Advertising and partnerships', 'Reklama va hamkorlik', 'Реклама и сотрудничество'],
+  writeOnTelegram: ['Write on Telegram', 'Telegram’da yozish', 'Написать в Telegram'],
+  contactsNone: [
+    'Contacts will appear here soon.',
+    'Aloqa ma’lumotlari tez orada shu yerda bo‘ladi.',
+    'Контакты скоро появятся здесь.',
+  ],
   previewFile: ['Preview {name}', '{name} faylini ko‘rish', 'Просмотреть {name}'],
   previousPage: ['Previous page', 'Oldingi sahifa', 'Предыдущая страница'],
   nextPage: ['Next page', 'Keyingi sahifa', 'Следующая страница'],
@@ -79,7 +94,6 @@ const entries: Record<string, [string, string, string]> = {
   yourPlanBadge: ['Your plan', 'Sizning tarifingiz', 'Ваш тариф'],
   paymentHistory: ['Payment history', 'To‘lovlar tarixi', 'История платежей'],
   askAboutPayment: ['Ask about this payment', 'Bu to‘lov haqida so‘rash', 'Спросить об этом платеже'],
-  paymentQuestion: ['About my payment {ref}', '{ref} to‘lovim haqida', 'О моём платеже {ref}'],
   stepHowToPay: ['How to pay', 'To‘lov usuli', 'Способ оплаты'],
   stepTransfer: ['Transfer and receipt', 'O‘tkazma va kvitansiya', 'Перевод и квитанция'],
   stepWeCheck: ['We check it', 'Biz tekshiramiz', 'Мы проверяем'],
@@ -115,12 +129,6 @@ const entries: Record<string, [string, string, string]> = {
     'Nothing matches. Write to us below and we will help.',
     'Hech narsa topilmadi. Pastda bizga yozing, yordam beramiz.',
     'Ничего не найдено. Напишите нам ниже, и мы поможем.',
-  ],
-  writeToUs: ['Write to us', 'Bizga yozing', 'Напишите нам'],
-  writeToUsHint: [
-    'Say what happened. We reply here and in Telegram. Please don’t include passwords or document contents.',
-    'Nima bo‘lganini yozing. Javobni shu yerda va Telegram’da beramiz. Parol yoki hujjat mazmunini yozmang.',
-    'Опишите, что произошло. Мы ответим здесь и в Telegram. Не указывайте пароли и содержимое документов.',
   ],
   // Landing.
   heroTitle: ['PDF tools and AI documents, in one place.', 'PDF vositalari va AI hujjatlar — bir joyda.', 'Инструменты PDF и AI-документы — в одном месте.'],
@@ -472,12 +480,6 @@ const entries: Record<string, [string, string, string]> = {
   saved: ['Preferences saved.', 'Sozlamalar saqlandi.', 'Настройки сохранены.'],
   testAccount: ['Local development account', 'Mahalliy test hisobi', 'Локальный тестовый аккаунт'],
   message: ['Your message', 'Xabaringiz', 'Ваше сообщение'],
-  sendMessage: ['Send to support', 'Yordamga yuborish', 'Отправить в поддержку'],
-  supportSent: [
-    'Your request has been received. Reference:',
-    'So‘rovingiz qabul qilindi. Raqami:',
-    'Запрос получен. Номер:',
-  ],
   exploreTools: ['Explore the tools', 'Vositalarni ko‘rish', 'Посмотреть инструменты'],
   noInstall: [
     'No installation. No added watermarks.',
@@ -567,7 +569,6 @@ const entries: Record<string, [string, string, string]> = {
     'Пока нет доступных инструментов.',
   ],
   connection: ['Connected to your workspace', 'Ish maydoniga ulandi', 'Подключено к пространству'],
-  contactSupport: ['Contact support', 'Yordamga murojaat qilish', 'Связаться с поддержкой'],
   secureNote: [
     'Private, temporary file processing',
     'Maxfiy, vaqtinchalik qayta ishlash',

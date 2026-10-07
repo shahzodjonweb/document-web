@@ -1752,161 +1752,8 @@
 .help-empty {
   padding: var(--space-4) 0;
 }
-.help-contact {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-4) var(--space-5);
-}
-.help-contact > span {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  color: var(--ink);
-  font-weight: 600;
-}
-.support-form {
-  padding: var(--space-5) var(--space-6);
-}
-.support-form h2 {
-  font-size: var(--text-lg);
-}
-.support-form > .field-hint {
-  margin: var(--space-1) 0 var(--space-4);
-}
-.support-about {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-4);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-pill);
-  background: var(--blue-50);
-  color: var(--link);
-  font-size: var(--text-sm);
-  font-weight: 600;
-}
-.support-actions {
-  display: flex;
-  justify-content: flex-end;
-}
-/* Conversations with support. */
-.support-threads .section-heading .text-link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-}
-.empty-conversations {
-  padding: var(--space-5);
-  color: var(--muted);
-  text-align: center;
-}
-.support-thread-layout {
-  display: grid;
-  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
-  gap: var(--space-4);
-  align-items: start;
-}
-.ticket-list {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-.ticket-list button {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-4);
-  border: 0;
-  border-bottom: 1px solid var(--hairline);
-  background: none;
-  color: var(--text);
-  text-align: left;
-  cursor: pointer;
-}
-.ticket-list button:last-child {
-  border-bottom: 0;
-}
-.ticket-list button:hover {
-  background: var(--surface-sunken);
-}
-.ticket-list button.active {
-  background: var(--blue-50);
-}
-.ticket-list button > span {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-.ticket-list strong {
-  overflow: hidden;
-  color: var(--ink);
-  font-size: 14px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.ticket-list small {
-  color: var(--muted);
-  font-size: var(--text-xs);
-}
-.ticket-thread {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-5);
-}
-.ticket-thread .panel-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-.ticket-message {
-  max-width: 85%;
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-lg);
-  background: var(--surface-sunken);
-}
-.ticket-message:not(.staff) {
-  align-self: flex-end;
-  background: var(--blue-50);
-}
-.ticket-message > div {
-  display: flex;
-  gap: var(--space-2);
-  align-items: baseline;
-  margin-bottom: var(--space-1);
-  font-size: var(--text-xs);
-}
-.ticket-message strong {
-  color: var(--ink);
-}
-.ticket-message time {
-  color: var(--muted);
-}
-.ticket-message p {
-  font-size: 14px;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
 
-@media (max-width: 760px) {
-  .support-form {
-    padding: var(--space-4);
-  }
-  .support-actions .button {
-    width: 100%;
-  }
-  .support-thread-layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .help-contact {
-    flex-direction: column;
-    align-items: stretch;
-  }
-}
+/* Conversations with support. */
 
 /* ------------------------------------------------------------ landing */
 
@@ -2244,4 +2091,60 @@
 .editor-board-actions .icon-button {
   min-width: 34px;
   min-height: 34px;
+}
+
+/* ------------------------------------------------------------ contacts */
+
+/* Where to reach a person: the support and advertising Telegram accounts. */
+.contact-card {
+  margin-bottom: var(--space-6);
+  padding: var(--space-6);
+}
+.contact-card h2 {
+  font-size: var(--text-lg);
+}
+.contact-card > .field-hint {
+  margin-top: var(--space-1);
+}
+.contact-list {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+.contact-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  transition:
+    border-color var(--duration) var(--ease),
+    background var(--duration) var(--ease);
+}
+.contact-row:hover {
+  border-color: var(--blue-200);
+  background: var(--blue-50);
+}
+.contact-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.contact-copy strong {
+  color: var(--ink);
+}
+.contact-copy small {
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+@media (max-width: 640px) {
+  .contact-row {
+    flex-wrap: wrap;
+  }
+  .contact-row .button {
+    width: 100%;
+  }
 }

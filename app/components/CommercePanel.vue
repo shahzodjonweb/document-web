@@ -267,11 +267,7 @@ function selectedInvoice(value: any) {
               ? `${transaction.amount_xtr.toLocaleString('ru-RU').replace(/\u00a0/g, ' ')} so'm`
               : `${transaction.amount_xtr} ${transaction.currency}`
           }}</b
-          ><NuxtLink
-            class="text-link"
-            :to="path(`/app/support?topic=billing&ref=${encodeURIComponent(transaction.reference || transaction.id.slice(0, 8))}`)"
-            >{{ t('askAboutPayment') }}</NuxtLink
-          >
+          ><NuxtLink class="text-link" :to="path('/app/support')">{{ t('askAboutPayment') }}</NuxtLink>
         </li>
       </ul>
     </section>

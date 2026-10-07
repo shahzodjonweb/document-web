@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { t, path } = useLocale()
+const { t } = useLocale()
 defineProps<{ legal?: string }>()
 </script>
 <template>
@@ -11,11 +11,6 @@ defineProps<{ legal?: string }>()
       </div>
     </div>
     <HelpArticles :keys="legal ? ['helpPrivacy', 'helpBilling'] : undefined" />
-    <div class="panel help-contact">
-      <span><AppIcon name="help" :size="20" />{{ t('writeToUs') }}</span
-      ><NuxtLink :to="path('/app/support')" class="button secondary small"
-        >{{ t('contactSupport') }}<AppIcon name="right" :size="15"
-      /></NuxtLink>
-    </div>
+    <ContactLinks />
   </div>
 </template>

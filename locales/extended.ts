@@ -344,24 +344,8 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   sentToBot: ['Delivered to bot', 'Botga yetkazildi', 'Доставлено в бот'],
   addQuestion: ['Add practice question', 'Mashq savolini qo‘shish', 'Добавить вопрос'],
   unlimited: ['No daily cap', 'Kunlik cheklov yo‘q', 'Без дневного лимита'],
-  supportConversations: [
-    'Your support conversations',
-    'Yordam bo‘yicha suhbatlaringiz',
-    'Ваши обращения в поддержку',
-  ],
-  noConversations: [
-    'No support conversations yet.',
-    'Hozircha yordam suhbatlari yo‘q.',
-    'Обращений пока нет.',
-  ],
-  selectConversation: [
-    'Select a conversation to read and reply.',
-    'O‘qish va javob berish uchun suhbatni tanlang.',
-    'Выберите обращение для чтения и ответа.',
-  ],
   supportTeam: ['Support team', 'Yordam jamoasi', 'Служба поддержки'],
   you: ['You', 'Siz', 'Вы'],
-  reply: ['Reply', 'Javob', 'Ответ'],
   speakerNotes: ['Speaker notes', 'Taqdimotchi qaydlari', 'Заметки докладчика'],
   chooseProject: ['Choose a saved project', 'Saqlangan loyihani tanlang', 'Выберите сохранённый проект'],
   adaptiveProjectHint: [
