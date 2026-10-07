@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { t, localePath } = useLocale()
+const { t, localePath, timeZone } = useLocale()
 const ws = useWorkspace()
 const saving = ref(false)
 const error = ref('')
@@ -10,7 +10,6 @@ const form = reactive({
   locale: ws.user.value?.locale || 'en',
   mode: ws.user.value?.mode || 'general',
   adult_assistance: !!ws.user.value?.preferences?.adult_assistance,
-  time_zone: ws.user.value?.time_zone || Intl.DateTimeFormat().resolvedOptions().timeZone,
   theme: import.meta.client ? localStorage.getItem('pdf-master-theme') || 'light' : 'light',
 })
 async function save() {
@@ -18,22 +17,17 @@ async function save() {
   error.value = ''
   saved.value = false
   try {
-    const account = await ws.api('/me', {
-      method: 'PATCH',
-      body: {
-        locale: form.locale,
-        mode: form.mode,
-        time_zone: form.time_zone,
-        preferences: {
-          ...ws.user.value?.preferences,
-          theme: form.theme,
-          output_locale: form.output_locale,
-          paper_size: form.paper_size,
-          adult_assistance: form.adult_assistance,
-        },
+    await ws.updateProfile({
+      locale: form.locale,
+      mode: form.mode,
+      preferences: {
+        ...ws.user.value?.preferences,
+        theme: form.theme,
+        output_locale: form.output_locale,
+        paper_size: form.paper_size,
+        adult_assistance: form.adult_assistance,
       },
     })
-    ws.user.value = account.user || account
     localStorage.setItem('pdf-master-theme', form.theme)
     document.documentElement.dataset.theme =
       form.theme === 'system'
@@ -98,15 +92,9 @@ async function save() {
             </select></label
           ><label class="form-field"
             ><span>{{ t('timezone') }}</span
-            ><input v-model="form.time_zone" :aria-label="t('timezone')" list="timezones" required /><datalist
-              id="timezones"
-            >
-              <option>Asia/Tashkent</option>
-              <option>UTC</option>
-              <option>Europe/Moscow</option>
-              <option>Europe/London</option>
-              <option>America/New_York</option>
-            </datalist></label
+            ><input :value="timeZone || '—'" :aria-label="t('timezone')" readonly /><small>{{
+              t('timezoneFromDevice')
+            }}</small></label
           >
         </div>
       </fieldset>

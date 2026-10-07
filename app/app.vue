@@ -96,7 +96,7 @@ async function changeLocale(event: Event) {
   const value = (event.target as HTMLSelectElement).value
   if (user.value) {
     try {
-      user.value = await ws.api('/me', { method: 'PATCH', body: { locale: value } })
+      await ws.updateProfile({ locale: value })
     } catch {}
   }
   await navigateTo(localePath(value))
@@ -131,7 +131,7 @@ onMounted(async () => {
   await ws.init()
   if (user.value && user.value.locale !== locale.value) {
     try {
-      user.value = await ws.api('/me', { method: 'PATCH', body: { locale: locale.value } })
+      await ws.updateProfile({ locale: locale.value })
     } catch {}
   }
   ws.restoreDraft()

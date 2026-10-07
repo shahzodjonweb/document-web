@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { Job } from '../../generated/api/types'
 const props = defineProps<{ jobId: string }>()
-const { t, count, path, date } = useLocale()
+const { t, count, path, date, timeZone } = useLocale()
 const ws = useWorkspace()
 const { name, destination } = useTools()
 const nextRoute = computed(() => destination(job.value?.feature_id || ''))
@@ -241,7 +241,7 @@ function downloadUrl(url: string | undefined, id: string) {
         <ArtifactActions v-for="artifact in outputs" :key="`actions-${artifact.id}`" :artifact="artifact" />
         <p v-if="job.expires_at || outputs[0]?.expires_at" class="retention-note">
           <AppIcon name="clock" :size="15" />{{ t('expires') }}
-          {{ date(job.expires_at || outputs[0]?.expires_at, true) }} · {{ ws.user.value?.time_zone || 'UTC' }}
+          {{ date(job.expires_at || outputs[0]?.expires_at, true) }} · {{ timeZone }}
         </p>
       </section>
       <section v-if="meters.length" class="panel receipt-panel">

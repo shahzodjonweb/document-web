@@ -1,4 +1,12 @@
 import dictionaries, { type Locale } from '../../locales/catalog'
+/** The zone of this device's clock (e.g. Asia/Tashkent); every time on screen is shown in it. */
+export const deviceTimeZone = () => {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || ''
+  } catch {
+    return ''
+  }
+}
 export function useLocale() {
   const route = useRoute()
   const locale = computed<Locale>(() =>
@@ -17,8 +25,7 @@ export function useLocale() {
       ? new Intl.DateTimeFormat(locale.value === 'uz' ? 'uz-Latn' : locale.value, {
           dateStyle: 'medium',
           ...(time ? { timeStyle: 'short' as const } : {}),
-          timeZone: useWorkspace().user.value?.time_zone || useWorkspace().user.value?.timezone || 'UTC',
         }).format(new Date(value))
       : '—'
-  return { locale, t, count, path, localePath, date }
+  return { locale, t, count, path, localePath, date, timeZone: deviceTimeZone() }
 }

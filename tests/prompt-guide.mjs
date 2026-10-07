@@ -67,7 +67,7 @@ await page.route('**/*', async (route) => {
       development_login_enabled: false,
     })
   if (endpoint === '/auth/providers') return json({ providers: [] })
-  if (endpoint === '/me') return json({ id: 'u1', plan: 'premium', locale: 'en', preferences: {}, time_zone: 'UTC' })
+  if (endpoint === '/me') return json({ id: 'u1', plan: 'premium', locale: 'en', display_name: 'Reader', preferences: {}, time_zone: 'UTC' })
   if (endpoint === '/catalog') return json({ features: [], draft: true })
   if (endpoint === '/plans') return json({ plans: [], checkout_enabled: false })
   if (endpoint === '/usage') return json({ meters: {}, daily: {}, resets_at: null })

@@ -1,5 +1,7 @@
 import { createPublicApi } from '../../generated/api/client'
 import type { User, Feature, Usage, Plan, Job, FileAsset, Quote } from '../../generated/api/types'
+let profileWrites: Promise<unknown> = Promise.resolve()
+let zoneSent = ''
 export function useWorkspace() {
   const user = useState<User | null>('account', () => null)
   const sessionReady = useState('session-ready', () => false)
@@ -46,6 +48,21 @@ export function useWorkspace() {
     }
   }
   const client = createPublicApi(api)
+  // PATCH /me saves every profile field it read, so writes in flight together could undo
+  // each other; they go one at a time.
+  function updateProfile(body: Record<string, unknown>) {
+    const write = profileWrites.then(() => api<User>('/me', { method: 'PATCH', body }))
+    profileWrites = write.catch(() => {})
+    return write.then((account) => (user.value?.id === account.id ? (user.value = account) : account))
+  }
+  // The bot has no device clock to read, so the account keeps the zone of the device last used.
+  function syncTimeZone() {
+    const zone = deviceTimeZone()
+    if (!user.value || !zone || user.value.time_zone === zone || zoneSent === `${user.value.id}:${zone}`)
+      return
+    zoneSent = `${user.value.id}:${zone}`
+    updateProfile({ time_zone: zone }).catch(() => {})
+  }
   async function init() {
     try {
       const s = await client.session()
@@ -53,6 +70,7 @@ export function useWorkspace() {
       devAvailable.value = !!s.development_login_enabled
       csrfToken.value = s.csrf_token || ''
       apiError.value = false
+      syncTimeZone()
     } catch {
       apiError.value = true
     } finally {
@@ -151,6 +169,7 @@ export function useWorkspace() {
     activeParameters,
     quote,
     api,
+    updateProfile,
     init,
     loadCatalog,
     loadPlans,

@@ -476,6 +476,11 @@ const entries: Record<string, [string, string, string]> = {
   displayName: ['Display name', 'Ko‘rinadigan ism', 'Имя'],
   interfaceLanguage: ['Interface language', 'Interfeys tili', 'Язык интерфейса'],
   timezone: ['Timezone', 'Vaqt mintaqasi', 'Часовой пояс'],
+  timezoneFromDevice: [
+    'Set from this device’s clock. Times here are shown in this zone.',
+    'Ushbu qurilma soatidan olingan. Bu yerdagi vaqtlar shu mintaqada ko‘rsatiladi.',
+    'Определён по часам этого устройства. Время здесь показано в этом поясе.',
+  ],
   theme: ['Appearance', 'Ko‘rinish', 'Оформление'],
   light: ['Light', 'Yorug‘', 'Светлая'],
   dark: ['Dark', 'Qorong‘i', 'Тёмная'],

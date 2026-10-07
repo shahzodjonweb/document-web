@@ -30,7 +30,7 @@ Open `http://127.0.0.1:3000/en/app`. `/uz` and `/ru` select the other languages.
 - `/app/workflows`, `/app/templates`: owner-scoped versioned definitions. Workflows submit the server's bound confirmation token and show real child results; failed steps stop subsequent work.
 - `/app/billing`, `/app/referrals`: server balances, invoices, explicit sandbox payment confirmation, subscription renewal controls, next-period plan scheduling, transaction/refund requests, invitation codes and actual reward counts.
 - `/app/bot`: the actual aiogram handlers through a clearly labeled local transport. Text, callback buttons, file uploads and artifact delivery are persisted by the platform; the local conversation does not send to external Telegram.
-- `/app/support`: tickets, owner-only conversation history and replies. Settings persist language, timezone, output preferences and light/dark theme.
+- `/app/support`: tickets, owner-only conversation history and replies. Settings persist language, output preferences and light/dark theme. Every date and time is shown in the device's own timezone, which is also kept on the account for the bot.
 - `/app/jobs`: real job progress, positive settled usage, private downloads, idempotent bot delivery and expiring/revocable learner-only share links. Teacher answer keys have no public sharing control.
 
 The server remains authoritative for eligibility, limits, prices, ownership, retention and payment state. Raw PDF passwords stay out of persisted quote/job parameters; protection uses a short-lived secret handle. Original source files and edited output files remain separate. No staff assets or routes are bundled here.

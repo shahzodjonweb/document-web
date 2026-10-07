@@ -576,6 +576,10 @@ b {
   box-shadow: 0 0 0 3px var(--blue-100);
   outline: none;
 }
+.form-field input[readonly]:not([type='checkbox']):not([type='radio']):not([type='file']) {
+  border-color: var(--hairline-strong);
+  background: var(--surface-sunken);
+}
 .form-field input[type='file'] {
   max-width: 100%;
   padding: 6px;

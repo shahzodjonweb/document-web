@@ -130,7 +130,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
       development_login_enabled: false,
     })
   if (endpoint === '/auth/providers') return json({ providers: [] })
-  if (endpoint === '/me') return json({ id: 'u1', plan, locale: 'en', preferences: {}, time_zone: 'UTC' })
+  if (endpoint === '/me') return json({ id: 'u1', plan, locale: 'en', display_name: 'Fixture Reader', preferences: {}, time_zone: 'UTC' })
   if (endpoint === '/catalog')
     return json({
       features: editorFeatures.map((feature) => ({

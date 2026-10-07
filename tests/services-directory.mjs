@@ -66,7 +66,7 @@ await page.route('**/*', async (route) => {
   if (endpoint === '/auth/providers') return json({ providers: [] })
   if (endpoint === '/me')
     return signedIn
-      ? json({ id: 'u1', plan: 'premium', locale: 'en', preferences: {}, time_zone: 'UTC' })
+      ? json({ id: 'u1', plan: 'premium', locale: 'en', display_name: 'Directory', preferences: {}, time_zone: 'UTC' })
       : json({ error: { code: 'not_authenticated' } }, 401)
   if (endpoint === '/catalog')
     return json({

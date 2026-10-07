@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { t, path, date } = useLocale()
+const { t, path, date, timeZone } = useLocale()
 const ws = useWorkspace()
 const usage = computed(() => ws.usage.value as any)
 const meters = computed(() => usage.value?.meters || {})
@@ -66,7 +66,7 @@ async function planChanged() {
       </div>
       <p class="muted">
         {{ t('cycleEnd') }} {{ date(usage.resets_at || usage.period_end, true) }} ·
-        {{ ws.user.value.time_zone || 'UTC' }}
+        {{ timeZone }}
       </p>
     </div>
     <div v-if="planMeters.length" class="plan-meters">
