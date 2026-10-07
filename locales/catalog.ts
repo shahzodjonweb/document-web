@@ -338,11 +338,15 @@ const entries: Record<string, [string, string, string]> = {
     'Оптимизирует структуру PDF, сохраняя текст и векторы. Если файл уже оптимизирован, лимит не расходуется.',
   ],
   paperSize: ['Paper size', 'Qog‘oz o‘lchami', 'Размер бумаги'],
-  scanFitPage: ['Fit scanned page', 'Skan o‘lchamiga mos', 'По размеру скана'],
+  scanFitPage: [
+    'Automatic page size',
+    'Avtomatik sahifa o‘lchami',
+    'Автоматический размер страницы',
+  ],
   scanFitPageHint: [
-    'The PDF page fits your image.',
-    'PDF sahifasi rasm o‘lchamiga moslanadi.',
-    'Размер страницы подстраивается под изображение.',
+    'With cropping on, detected documents use A4. Other photos get a page sized to the image.',
+    'Qirqish yoqilgan bo‘lsa, aniqlangan hujjatlar A4 formatida bo‘ladi. Boshqa rasmlarda sahifa rasmga moslanadi.',
+    'При включённой обрезке распознанные документы будут в формате A4. Для остальных фото размер страницы подстраивается под изображение.',
   ],
   scanAutoCrop: [
     'Crop & straighten document',

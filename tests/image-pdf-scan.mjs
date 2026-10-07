@@ -133,7 +133,7 @@ try {
     await crop.waitFor()
     assert.equal(await paperSize.inputValue(), 'fit', 'Fresh scans ignore the generic A4 profile default')
     assert.equal(await paperSize.locator('option[value="fit"]').textContent(), {
-      en: 'Fit scanned page', uz: 'Skan o‘lchamiga mos', ru: 'По размеру скана',
+      en: 'Automatic page size', uz: 'Avtomatik sahifa o‘lchami', ru: 'Автоматический размер страницы',
     }[locale])
     assert.equal(await crop.isChecked(), true)
     assert.equal(await enhance.isChecked(), true)
