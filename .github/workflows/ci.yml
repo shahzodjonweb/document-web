@@ -25,7 +25,8 @@ jobs:
       - run: npm run build
       - run: python3 -m unittest discover -s scripts/deploy/tests -v
   package:
-    needs: verify
+    # Builds and smoke-tests the image while the checks run. Deploy still
+    # needs both to pass.
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
