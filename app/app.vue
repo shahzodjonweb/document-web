@@ -55,6 +55,7 @@ const title = computed(() => {
   if (item) return t(item.label)
   if (route.path.includes('/referrals')) return t('referrals')
   if (route.path.includes('/bot')) return t('bot')
+  if (route.path.includes('/deck-setup')) return t('navCreate')
   return t('navHome')
 })
 const tasksLeft = computed<number | undefined>(() => (ws.usage.value as any)?.meters?.file_tasks?.remaining)

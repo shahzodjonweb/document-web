@@ -49,6 +49,7 @@ watch(
 // The browser tab names the page, as the top bar does.
 const titles: [string, string][] = [
   ['/app/create', 'navCreate'],
+  ['/app/deck-setup', 'deckSetupTitle'],
   ['/app/tools', 'navTools'],
   ['/tools', 'navTools'],
   ['/app/jobs', 'navTasks'],
@@ -88,7 +89,7 @@ useHead(() => ({
   /><ToolWorkspace
     v-else-if="view.startsWith('/app/tools/')"
     :tool-id="decodeURIComponent(view.slice('/app/tools/'.length))"
-  /><StudioView
+  /><DeckSetupView v-else-if="view === '/app/deck-setup'" /><StudioView
     v-else-if="view === '/app/create' || view.startsWith('/app/create/')"
     :draft-id="view.split('/')[3]"
   /><GuideView v-else-if="view === '/app/guide' || view === '/guide'" /><WorkflowsView

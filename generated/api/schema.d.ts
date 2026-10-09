@@ -943,6 +943,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/generation/drafts/{id}/setup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description A deck's slide count and design chosen over what its description says (`deck_design` is a design id or `auto`). Returns the new quote; the review in the Telegram chat is redrawn with it. */
+        post: operations["setupGenerationDraft"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/generation/jobs/{id}/retry-quote": {
         parameters: {
             query?: never;
@@ -1162,6 +1179,23 @@ export interface paths {
             cookie?: never;
         };
         get: operations["getStudioConfig"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/studio/deck-designs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Every design a deck can wear, grouped by category, in the colours each renders in. `locale` (en, uz, ru) names the categories. */
+        get: operations["listDeckDesigns"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6707,6 +6741,72 @@ export interface operations {
             };
         };
     };
+    setupGenerationDraft: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRFToken": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    deck_design?: string;
+                    pages?: number;
+                };
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        draft: components["schemas"]["GenerationDraft"];
+                        quote: components["schemas"]["Quote"];
+                    };
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     quoteGenerationRetry: {
         parameters: {
             query?: never;
@@ -7867,6 +7967,79 @@ export interface operations {
                             name: string;
                             style?: Record<string, never>;
                         }[];
+                    };
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    listDeckDesigns: {
+        parameters: {
+            query?: {
+                locale?: "en" | "uz" | "ru";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        categories: {
+                            designs: {
+                                body_font?: string;
+                                colours: {
+                                    [key: string]: string;
+                                };
+                                heading_font?: string;
+                                id: string;
+                                name: string;
+                                pattern?: string;
+                                photo?: boolean;
+                                /** @enum {unknown} */
+                                theme: "light" | "dark" | "bold";
+                            }[];
+                            id: string;
+                            name: string;
+                        }[];
+                        default_pages: number;
                     };
                 };
             };
