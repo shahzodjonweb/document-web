@@ -2148,3 +2148,214 @@
     width: 100%;
   }
 }
+
+/* Deck setup: a deck's slide count and design, opened from the bot as a Mini App. */
+.deck-setup {
+  display: grid;
+  gap: var(--space-5);
+  max-width: 980px;
+  min-width: 0;
+}
+.deck-setup .panel {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+  padding: var(--space-5);
+}
+.deck-setup-count .meter-row {
+  padding: 0;
+  border: 0;
+  color: var(--ink);
+  font: 600 var(--text-md) var(--font-display);
+}
+.deck-setup-count .field-hint {
+  margin: 0;
+}
+.deck-setup h2 {
+  margin: 0;
+  font: 600 var(--text-lg) var(--font-display);
+  color: var(--ink);
+}
+.deck-auto {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+.deck-auto span {
+  display: grid;
+  gap: 2px;
+}
+.deck-auto small {
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+.deck-auto[aria-checked='true'],
+.deck-card[aria-checked='true'] {
+  border-color: var(--action);
+  box-shadow: 0 0 0 2px var(--action);
+}
+.deck-categories {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding-bottom: var(--space-1);
+  scrollbar-width: thin;
+}
+.deck-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--space-3);
+}
+.deck-card {
+  position: relative;
+  display: grid;
+  gap: var(--space-2);
+  padding: 6px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+.deck-card:hover,
+.deck-auto:hover {
+  border-color: var(--action);
+}
+.deck-cover {
+  position: relative;
+  display: block;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-sm);
+}
+.deck-cover i {
+  position: absolute;
+  display: block;
+}
+.deck-bar {
+  inset: 0 auto 0 0;
+  width: 4px;
+}
+.deck-mark {
+  right: -18%;
+  bottom: -35%;
+  width: 62%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.18;
+}
+/* A hint of the design's pattern, at the side of the cover where the deck has it. */
+.deck-mark[class*='pattern-'] {
+  inset: 0 0 0 auto;
+  width: 34%;
+  aspect-ratio: auto;
+  border-radius: 0;
+  opacity: 0.45;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 60%);
+  mask-image: linear-gradient(90deg, transparent, #000 60%);
+}
+.deck-mark.pattern-dots,
+.deck-mark.pattern-confetti {
+  background: radial-gradient(currentColor 1.3px, transparent 1.6px) 0 0 / 7px 7px;
+}
+.deck-mark.pattern-grid,
+.deck-mark.pattern-plus,
+.deck-mark.pattern-hexagons {
+  background:
+    linear-gradient(currentColor 1px, transparent 1px) 0 0 / 9px 9px,
+    linear-gradient(90deg, currentColor 1px, transparent 1px) 0 0 / 9px 9px;
+}
+.deck-mark.pattern-lines,
+.deck-mark.pattern-triangles {
+  background: repeating-linear-gradient(45deg, currentColor 0 1.5px, transparent 1.5px 6px);
+}
+.deck-mark.pattern-waves,
+.deck-mark.pattern-topo,
+.deck-mark.pattern-rings,
+.deck-mark.pattern-arcs {
+  background: repeating-radial-gradient(circle at 100% 0, currentColor 0 1px, transparent 1px 6px);
+}
+.deck-mark.pattern-glow,
+.deck-mark.pattern-blobs {
+  background: radial-gradient(circle at 80% 30%, currentColor, transparent 70%);
+}
+.deck-photo {
+  inset: 0 0 18% 48%;
+}
+.deck-title {
+  position: absolute;
+  left: 12%;
+  top: 26%;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1;
+}
+.deck-rule {
+  left: 12%;
+  top: 62%;
+  width: 18%;
+  height: 2px;
+}
+.deck-name {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+.deck-name small {
+  color: var(--muted);
+  font-weight: 400;
+}
+.deck-check {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 2px;
+  border-radius: 50%;
+  background: var(--action);
+  color: var(--on-action);
+}
+.deck-auto .deck-check {
+  top: 50%;
+  translate: 0 -50%;
+}
+.deck-setup-actions {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  background: var(--paper);
+}
+.deck-setup-actions .success-banner {
+  margin: 0;
+}
+@media (max-width: 640px) {
+  .deck-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .deck-setup-actions .button {
+    width: 100%;
+  }
+}
+/* Above the phone bar, as the editor's action bar is. */
+@media (max-width: 760px) {
+  .deck-setup-actions {
+    bottom: calc(var(--phonebar-height) + env(safe-area-inset-bottom));
+  }
+}
