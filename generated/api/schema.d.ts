@@ -1204,6 +1204,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/studio/deck-designs/{design}.png": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description A design's cover as the theme picker shows it, with a sample title in `locale`. Public and immutable: the catalogue's `preview` URL carries the design's version. */
+        get: operations["getDeckDesignPreview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/telegram/local/messages": {
         parameters: {
             query?: never;
@@ -8028,11 +8045,13 @@ export interface operations {
                                 colours: {
                                     [key: string]: string;
                                 };
+                                composition?: string;
                                 heading_font?: string;
                                 id: string;
                                 name: string;
                                 pattern?: string;
                                 photo?: boolean;
+                                preview?: string;
                                 /** @enum {unknown} */
                                 theme: "light" | "dark" | "bold";
                             }[];
@@ -8041,6 +8060,63 @@ export interface operations {
                         }[];
                         default_pages: number;
                     };
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getDeckDesignPreview: {
+        parameters: {
+            query?: {
+                locale?: "en" | "uz" | "ru";
+                v?: string;
+            };
+            header?: never;
+            path: {
+                design: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description PNG cover thumbnail */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/png": string;
                 };
             };
             /** @description Invalid request */

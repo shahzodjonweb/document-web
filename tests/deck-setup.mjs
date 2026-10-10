@@ -38,6 +38,7 @@ const design = (id, name, theme, accent, fill, ink, extra = {}) => ({
   name,
   theme,
   pattern: '',
+  preview: `/api/v1/studio/deck-designs/${id}.png?locale=en&v=fixture`,
   heading_font: 'Georgia',
   body_font: 'Calibri',
   colours: colours(accent, fill, ink),
@@ -57,6 +58,8 @@ const fixture = {
 }
 const realDesigns = process.env.DECK_DESIGNS_FIXTURE
 if (realDesigns) Object.assign(fixture, JSON.parse(await fs.readFile(realDesigns, 'utf8')))
+// The design the test picks: the last one in the Dark category of whichever catalogue is used.
+const picked = () => fixture.categories.find((group) => group.id === 'dark').designs.at(-1).id
 const draft = {
   id: draftId,
   feature_id: 'ai.pptx',
@@ -69,6 +72,11 @@ const draft = {
   content: { title: 'Tides', sections: [], questions: [], citations: [] },
   expires_at: new Date(Date.now() + 300000).toISOString(),
 }
+// A 16x9 PNG in the accent blue, standing in for a rendered cover.
+const THUMBNAIL = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAABAAAAAJCAIAAAC0SDtlAAAAGklEQVR4nGOUt8pgIAUwkaSaYVQDcYDkYAUAW/cA0wJTz7QAAAAASUVORK5CYII=',
+  'base64',
+)
 const requests = []
 const errors = []
 const browser = await chromium.launch({ headless: true, channel: 'chrome' })
@@ -113,6 +121,13 @@ async function open(width, theme, insideTelegram) {
     if (endpoint === '/studio/config')
       return json({ provider: { mode: 'openai', configured: true }, default_pages: 5, features: [{ id: 'ai.pptx', name: 'Slides', surface: 'generate', eligible: true, max_pages: 15 }] })
     if (endpoint === '/studio/deck-designs') return json(fixture)
+    // A design's cover thumbnail: any small PNG will do.
+    if (/^\/studio\/deck-designs\/[\w-]+\.png$/.test(endpoint)) {
+      // DECK_THUMBNAILS=<dir> serves real rendered covers (<dir>/<id>.png) for a visual check.
+      const real = process.env.DECK_THUMBNAILS && path.join(process.env.DECK_THUMBNAILS, path.basename(endpoint))
+      const body = real ? await fs.readFile(real).catch(() => THUMBNAIL) : THUMBNAIL
+      return route.fulfill({ status: 200, contentType: 'image/png', body })
+    }
     if (endpoint === `/generation/drafts/${draftId}` && method === 'GET') return json(draft)
     if (endpoint === `/generation/drafts/${draftId}/setup` && method === 'POST') {
       const options = { ...draft.options, pages: body.pages, length: body.pages, deck_design: body.deck_design }
@@ -137,9 +152,12 @@ for (const [width, theme] of [[390, 'light'], [1440, 'dark']]) {
   assert.equal(await page.getByTestId('deck-design-auto').getAttribute('aria-checked'), 'true')
   await page.getByTestId('deck-setup-more').click()
   assert.equal((await stepper.locator('strong').textContent()).trim(), '8')
+  // Each design shows its real rendered cover, not a drawn swatch.
+  await page.locator('[data-design="forest"] img.deck-thumb').waitFor()
+  assert.ok(await page.locator('[data-design="forest"] img.deck-thumb').evaluate((img) => img.naturalWidth > 0))
   await page.getByRole('button', { name: 'Dark', exact: true }).click()
-  await page.locator('[data-design="sapphire_night"]').click()
-  assert.equal(await page.locator('[data-design="sapphire_night"]').getAttribute('aria-checked'), 'true')
+  await page.locator(`[data-design="${picked()}"]`).click()
+  assert.equal(await page.locator(`[data-design="${picked()}"]`).getAttribute('aria-checked'), 'true')
   assert.equal(await page.getByTestId('deck-design-auto').getAttribute('aria-checked'), 'false')
   assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${width}: horizontal overflow`)
   const audit = await new AxeBuilder({ page }).include('.deck-setup').withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()
@@ -148,7 +166,7 @@ for (const [width, theme] of [[390, 'light'], [1440, 'dark']]) {
   await page.getByTestId('deck-setup-save').click()
   await page.getByTestId('deck-setup-saved').waitFor()
   const sent = requests.filter((request) => request.path.endsWith('/setup'))
-  assert.deepEqual(sent.at(-1).body, { pages: 8, deck_design: 'sapphire_night' })
+  assert.deepEqual(sent.at(-1).body, { pages: 8, deck_design: picked() })
   assert.ok(requests.some((request) => request.path === '/studio/deck-designs' && request.query === '?locale=en'))
   if (width === 390) {
     await page.waitForFunction(() => window.__closed === true)

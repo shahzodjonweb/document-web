@@ -8,6 +8,9 @@ interface DeckDesign {
   theme: 'light' | 'dark' | 'bold'
   photo?: boolean
   pattern?: string
+  composition?: string
+  /** The design's real cover, rendered by the platform with a sample title. */
+  preview?: string
   heading_font?: string
   colours: Record<string, string>
 }
@@ -27,6 +30,8 @@ const category = ref('')
 const design = ref('auto')
 const pages = ref(7)
 const loading = ref(true)
+// A thumbnail that fails to load falls back to the drawn swatch.
+const broken = reactive<Record<string, boolean>>({})
 const saving = ref(false)
 const saved = ref(false)
 const error = ref('')
@@ -199,7 +204,10 @@ const coverStyle = (entry: DeckDesign) => ({
             :data-design="entry.id"
             @click="choose(entry.id)"
           >
-            <span class="deck-cover" :style="coverStyle(entry)" aria-hidden="true">
+            <span v-if="entry.preview && !broken[entry.id]" class="deck-cover" aria-hidden="true">
+              <img class="deck-thumb" :src="entry.preview" alt="" loading="lazy" @error="broken[entry.id] = true" />
+            </span>
+            <span v-else class="deck-cover" :style="coverStyle(entry)" aria-hidden="true">
               <i class="deck-bar" :style="{ background: entry.colours.accent }" />
               <i
                 v-if="entry.photo"

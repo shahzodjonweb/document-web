@@ -2242,6 +2242,13 @@
   position: absolute;
   display: block;
 }
+.deck-thumb {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .deck-bar {
   inset: 0 auto 0 0;
   width: 4px;
