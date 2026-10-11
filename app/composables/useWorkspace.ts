@@ -151,8 +151,10 @@ export function useWorkspace() {
       if (d) {
         activeTool.value = d.tool
         activeUploads.value = d.files || []
-        // Image-to-PDF no longer has scanning switches; a draft saved while it
-        // did still carries them, and they are dropped rather than sent again.
+        // Image-to-PDF had scanning switches from 6 to 11 Oct 2026. A draft a
+        // tab saved then still carries them, and the server would only drop
+        // them and log an out-of-date client. Drafts last as long as their
+        // tab, so this can go once the server's warning has stopped.
         const parameters = { ...(d.parameters || {}) }
         delete parameters.auto_crop
         delete parameters.enhance_text
