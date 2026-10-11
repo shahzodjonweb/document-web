@@ -344,25 +344,9 @@ const entries: Record<string, [string, string, string]> = {
     'Автоматический размер страницы',
   ],
   scanFitPageHint: [
-    'With cropping on, detected documents use A4. Other photos get a page sized to the image.',
-    'Qirqish yoqilgan bo‘lsa, aniqlangan hujjatlar A4 formatida bo‘ladi. Boshqa rasmlarda sahifa rasmga moslanadi.',
-    'При включённой обрезке распознанные документы будут в формате A4. Для остальных фото размер страницы подстраивается под изображение.',
-  ],
-  scanAutoCrop: [
-    'Crop & straighten document',
-    'Hujjatni qirqish va tekislash',
-    'Обрезать и выровнять документ',
-  ],
-  scanAutoCropHint: [
-    'When a page is detected, trim its edges and fix the angle.',
-    'Sahifa aniqlansa, chetlari qirqiladi va qiyaligi to‘g‘rilanadi.',
-    'Если страница распознана, обрежем края и исправим перспективу.',
-  ],
-  scanEnhanceText: ['Enhance text', 'Matnni tiniqlashtirish', 'Улучшить читаемость'],
-  scanEnhanceTextHint: [
-    'Reduce shadows and boost contrast for easier reading.',
-    'Oson o‘qish uchun soyalarni kamaytiradi va kontrastni oshiradi.',
-    'Уменьшим тени и повысим контраст для удобного чтения.',
+    'Documents get their matched page size (A4, Letter or Legal). Other photos keep their shape.',
+    'Hujjatlar o‘ziga mos sahifa o‘lchamini oladi (A4, Letter yoki Legal). Boshqa rasmlar o‘z shaklini saqlaydi.',
+    'Документы получат подходящий размер страницы (A4, Letter или Legal). Остальные фото сохранят свои пропорции.',
   ],
   orientation: ['Orientation', 'Yo‘nalish', 'Ориентация'],
   portrait: ['Portrait', 'Portret', 'Книжная'],

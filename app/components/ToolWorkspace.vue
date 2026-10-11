@@ -110,9 +110,6 @@ watch(
       if (!param.value.paper_size) param.value.paper_size = 'fit'
       if (param.value.orientation === undefined) param.value.orientation = 'auto'
       if (param.value.margin === undefined) param.value.margin = 0
-      // Older saved drafts receive the defaults too; an explicit opt-out stays off.
-      if (param.value.auto_crop === undefined) param.value.auto_crop = true
-      if (param.value.enhance_text === undefined) param.value.enhance_text = true
     }
     if (props.toolId === 'pdf.to_images' && !param.value.format) {
       param.value.format = 'png'
@@ -463,38 +460,6 @@ function onDrop(event: DragEvent) {
           </select></label
         >
         <template v-if="isImages">
-          <div class="scan-options">
-            <label class="scan-option">
-              <span>
-                <strong>{{ t('scanAutoCrop') }}</strong>
-                <small id="scan-auto-crop-hint">{{ t('scanAutoCropHint') }}</small>
-              </span>
-              <input
-                v-model="param.auto_crop"
-                class="scan-switch"
-                type="checkbox"
-                role="switch"
-                :aria-label="t('scanAutoCrop')"
-                aria-describedby="scan-auto-crop-hint"
-                :disabled="!!busy"
-              />
-            </label>
-            <label class="scan-option">
-              <span>
-                <strong>{{ t('scanEnhanceText') }}</strong>
-                <small id="scan-enhance-text-hint">{{ t('scanEnhanceTextHint') }}</small>
-              </span>
-              <input
-                v-model="param.enhance_text"
-                class="scan-switch"
-                type="checkbox"
-                role="switch"
-                :aria-label="t('scanEnhanceText')"
-                aria-describedby="scan-enhance-text-hint"
-                :disabled="!!busy"
-              />
-            </label>
-          </div>
           <label class="form-field"
             ><span>{{ t('paperSize') }}</span
             ><select v-model="param.paper_size">
@@ -622,64 +587,3 @@ function onDrop(event: DragEvent) {
     <NuxtLink class="button primary" :to="path('/app/tools')">{{ t('viewAll') }}</NuxtLink>
   </div>
 </template>
-
-<style scoped>
-.scan-options {
-  display: grid;
-  gap: var(--space-3);
-  margin-bottom: var(--space-4);
-}
-.scan-option {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  cursor: pointer;
-}
-.scan-option strong,
-.scan-option small {
-  display: block;
-}
-.scan-option strong {
-  color: var(--ink);
-  font-size: 14px;
-  font-weight: 650;
-}
-.scan-option small {
-  margin-top: 3px;
-  color: var(--muted);
-  font-size: 12px;
-}
-.scan-switch {
-  appearance: none;
-  flex: 0 0 44px;
-  width: 44px;
-  height: 26px;
-  margin: 0;
-  padding: 2px;
-  border: 1px solid var(--hairline);
-  border-radius: 20px;
-  background: var(--muted);
-  cursor: pointer;
-}
-.scan-switch::before {
-  display: block;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--surface);
-  content: '';
-}
-.scan-switch:checked {
-  border-color: var(--action);
-  background: var(--action);
-}
-.scan-switch:checked::before {
-  background: var(--on-action);
-  transform: translateX(18px);
-}
-.scan-switch:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-</style>

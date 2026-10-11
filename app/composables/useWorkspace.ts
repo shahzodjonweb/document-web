@@ -151,7 +151,12 @@ export function useWorkspace() {
       if (d) {
         activeTool.value = d.tool
         activeUploads.value = d.files || []
-        activeParameters.value = d.parameters || {}
+        // Image-to-PDF no longer has scanning switches; a draft saved while it
+        // did still carries them, and they are dropped rather than sent again.
+        const parameters = { ...(d.parameters || {}) }
+        delete parameters.auto_crop
+        delete parameters.enhance_text
+        activeParameters.value = parameters
       }
     } catch {}
   }

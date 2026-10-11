@@ -15,15 +15,25 @@ const errors = []
 const unexpected = []
 const external = []
 const labels = {
-  en: ['Crop & straighten document', 'Enhance text', 'Review task', 'Start processing'],
+  en: [
+    'Documents get their matched page size (A4, Letter or Legal). Other photos keep their shape.',
+    'Review task',
+    'Start processing',
+  ],
   uz: [
-    'Hujjatni qirqish va tekislash',
-    'Matnni tiniqlashtirish',
+    'Hujjatlar o‘ziga mos sahifa o‘lchamini oladi (A4, Letter yoki Legal). Boshqa rasmlar o‘z shaklini saqlaydi.',
     'Vazifani tekshirish',
     'Qayta ishlashni boshlash',
   ],
-  ru: ['Обрезать и выровнять документ', 'Улучшить читаемость', 'Проверить задачу', 'Начать обработку'],
+  ru: [
+    'Документы получат подходящий размер страницы (A4, Letter или Legal). Остальные фото сохранят свои пропорции.',
+    'Проверить задачу',
+    'Начать обработку',
+  ],
 }
+// The scanner always runs; these switches were removed and must never reach a quote.
+const removed = ['auto_crop', 'enhance_text']
+const legacyKeys = (parameters) => removed.filter((key) => Object.hasOwn(parameters, key))
 const image = {
   id: '00000000-0000-4000-8000-000000000101',
   name: 'document-photo.png',
@@ -116,9 +126,8 @@ try {
       unexpected.push({ locale, endpoint, method })
       return route.abort('blockedbyclient')
     })
-    const [cropLabel, enhanceLabel, reviewLabel, startLabel] = labels[locale]
-    const crop = page.getByRole('switch', { name: cropLabel, exact: true })
-    const enhance = page.getByRole('switch', { name: enhanceLabel, exact: true })
+    const [fitHint, reviewLabel, startLabel] = labels[locale]
+    const hint = page.getByText(fitHint, { exact: true })
     const review = page.getByRole('button', { name: reviewLabel, exact: true })
     const start = page.getByRole('button', { name: startLabel, exact: true })
     const paperSize = page.locator('.tool-page select').first()
@@ -130,73 +139,49 @@ try {
       return quotes.at(-1).parameters
     }
     await page.goto(`${origin}/${locale}/app/tools/pdf.images_to_pdf`)
-    await crop.waitFor()
+    await hint.waitFor()
     assert.equal(await paperSize.inputValue(), 'fit', 'Fresh scans ignore the generic A4 profile default')
     assert.equal(await paperSize.locator('option[value="fit"]').textContent(), {
       en: 'Automatic page size', uz: 'Avtomatik sahifa o‘lchami', ru: 'Автоматический размер страницы',
     }[locale])
-    assert.equal(await crop.isChecked(), true)
-    assert.equal(await enhance.isChecked(), true)
-    assert.equal(
-      await crop.evaluate((input) => !!input.closest('details')),
-      false,
-      'Scanning controls are visible without opening advanced options',
+    assert.deepEqual(
+      await paperSize.locator('option').evaluateAll((options) => options.map((option) => option.value)),
+      ['fit', 'A4', 'Letter', 'original'],
+      'Legal is matched automatically and is not a paper choice',
     )
+    assert.equal(await page.getByRole('switch').count(), 0, 'The scanning switches are gone')
+    assert.equal(await page.locator('.tool-page input[type="checkbox"]').count(), 0)
     await page.locator('input[type="file"]').setInputFiles('tests/fixtures/brand-logo.png')
     await review.waitFor({ state: 'visible' })
     await page.waitForFunction(
       () => JSON.parse(sessionStorage.getItem('pdf-master-draft') || 'null')?.files?.length === 1,
     )
     const fresh = await quote()
-    assert.deepEqual(
-      { auto_crop: fresh.auto_crop, enhance_text: fresh.enhance_text },
-      { auto_crop: true, enhance_text: true },
-    )
+    assert.deepEqual(legacyKeys(fresh), [], 'No scanning switch reaches the quote')
     assert.equal(fresh.paper_size, 'fit')
     assert.equal(fresh.margin, 0)
     assert.equal(fresh.orientation, 'auto')
-    checks.push(`${locale}: both default-on switches reach the quote`)
+    assert.deepEqual(legacyKeys((await savedDraft()).parameters), [])
+    checks.push(`${locale}: no scanning switches are shown or sent; the fit hint names the matched sizes`)
     checks.push(`${locale}: fresh scans fit the image without paper margins or a forced portrait layout`)
 
     await paperSize.selectOption('A4')
     await review.waitFor({ state: 'visible' })
     assert.equal(await start.count(), 0, 'Changing paper layout invalidates the quote')
+    assert.equal(await hint.count(), 0, 'The fit hint describes only the automatic page size')
     assert.equal((await quote()).paper_size, 'A4')
     await page.reload()
-    await crop.waitFor()
+    await paperSize.waitFor()
+    await review.waitFor({ state: 'visible' })
     assert.equal(await paperSize.inputValue(), 'A4', 'An explicit A4 tool choice survives reload')
     assert.equal((await quote()).paper_size, 'A4')
     await paperSize.selectOption('fit')
+    await hint.waitFor()
     await review.waitFor({ state: 'visible' })
     await quote()
     checks.push(`${locale}: explicit paper layout choices persist and invalidate an existing quote`)
 
-    await crop.uncheck()
-    await review.waitFor({ state: 'visible' })
-    assert.equal(await start.count(), 0, 'Changing a switch invalidates an existing quote')
-    const cropOff = await quote()
-    assert.equal(cropOff.auto_crop, false)
-    assert.equal(cropOff.enhance_text, true)
-    await crop.check()
-    await enhance.focus()
-    await page.keyboard.press('Space')
-    const textOff = await quote()
-    assert.equal(textOff.auto_crop, true)
-    assert.equal(textOff.enhance_text, false)
-    await crop.uncheck()
-    await review.waitFor({ state: 'visible' })
-    assert.equal((await savedDraft()).parameters.auto_crop, false)
-    assert.equal((await savedDraft()).parameters.enhance_text, false)
-    await page.reload()
-    await crop.waitFor()
-    assert.equal(await crop.isChecked(), false)
-    assert.equal(await enhance.isChecked(), false)
-    const bothOff = await quote()
-    assert.equal(bothOff.auto_crop, false)
-    assert.equal(bothOff.enhance_text, false)
-    checks.push(`${locale}: independent opt-outs, quote invalidation and explicit false restore`)
-
-    // Restoring an older draft that already has paper options adds only the new defaults.
+    // A draft saved while the switches existed keeps its paper settings and loses only the switches.
     await page.evaluate(
       (file) =>
         sessionStorage.setItem(
@@ -204,24 +189,28 @@ try {
           JSON.stringify({
             tool: 'pdf.images_to_pdf',
             files: [file],
-            parameters: { paper_size: 'Letter', orientation: 'landscape', margin: 24 },
+            parameters: {
+              paper_size: 'Letter',
+              orientation: 'landscape',
+              margin: 24,
+              auto_crop: false,
+              enhance_text: true,
+            },
           }),
         ),
       image,
     )
     await page.reload()
-    await crop.waitFor()
-    assert.equal(await crop.isChecked(), true)
-    assert.equal(await enhance.isChecked(), true)
+    await paperSize.waitFor()
+    await review.waitFor({ state: 'visible' })
+    assert.equal(await paperSize.inputValue(), 'Letter')
     const older = await quote()
-    assert.equal(older.auto_crop, true)
-    assert.equal(older.enhance_text, true)
+    assert.deepEqual(legacyKeys(older), [], 'A restored draft does not send the removed switches')
     assert.equal(older.paper_size, 'Letter')
     assert.equal(older.orientation, 'landscape')
     assert.equal(older.margin, 24)
-    checks.push(
-      `${locale}: older saved drafts get scanning defaults without replacing existing paper settings`,
-    )
+    assert.deepEqual(legacyKeys((await savedDraft()).parameters), [], 'The draft is saved without them')
+    checks.push(`${locale}: older saved drafts drop the scanning switches and keep their paper settings`)
     await paperSize.selectOption('fit')
     await review.waitFor({ state: 'visible' })
     const fitted = await quote()
@@ -261,9 +250,8 @@ try {
         JSON.parse(sessionStorage.getItem('pdf-master-draft') || 'null')?.files?.length === 1,
     )
     const otherTool = await quote()
-    assert.equal(Object.hasOwn(otherTool, 'auto_crop'), false)
-    assert.equal(Object.hasOwn(otherTool, 'enhance_text'), false)
-    checks.push(`${locale}: switches and scanning parameters are absent from other tools`)
+    assert.deepEqual(legacyKeys(otherTool), [])
+    checks.push(`${locale}: scanning parameters are absent from other tools`)
     await context.close()
   }
   assert.deepEqual(errors, [], 'No browser errors')
@@ -274,7 +262,7 @@ try {
     JSON.stringify({ passed: true, checks, errors, unexpected, external }, null, 2),
   )
   console.log(
-    `Pass: ${checks.length} checks; defaults, opt-outs, draft restoration and responsive accessibility in EN/UZ/RU`,
+    `Pass: ${checks.length} checks; no switches, fit hint, draft restoration and responsive accessibility in EN/UZ/RU`,
   )
 } finally {
   await browser.close()
