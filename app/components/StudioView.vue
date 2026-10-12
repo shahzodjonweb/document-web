@@ -229,6 +229,8 @@ watch(
       form.title = ''
       form.prompt = ''
       form.source_text = ''
+      // The last draft's language was its own; a new one starts from the settings.
+      form.output_locale = String(ws.user.value?.preferences?.output_locale || locale.value)
       form.options = { length: 2, question_count: 5 }
       content.value = { title: '', sections: [], questions: [] }
       await load()
@@ -405,7 +407,9 @@ async function generate() {
   })
 }
 async function reviewOutline() {
-  if (busy.value || submissionPending.value || revisionSelection.value.length) return
+  // A change request is planned from the document it changes; the server
+  // refuses an AI outline for it, which would replace the document's text.
+  if (busy.value || submissionPending.value || revising.value) return
   await run('outline-quote', async () => {
     await saveDraft()
     quoteStage.value = 'outline'
@@ -759,8 +763,9 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
                 <AppIcon name="plus" :size="17" />{{ t('addSection') }}
               </button>
               <button
+                v-if="!revising"
                 class="button secondary full outline-generation"
-                :disabled="!!busy || submissionPending || !!revisionSelection.length"
+                :disabled="!!busy || submissionPending"
                 @click="reviewOutline"
               >
                 <AppIcon name="sparkle" :size="17" />{{ t('reviewOutlineGeneration') }}
