@@ -701,6 +701,11 @@ try {
   await quotePanel().waitFor()
   assert.match(await page.getByTestId('studio-pages').innerText(), /2/, 'the length is inherited')
   assert.ok(producedBy.prompt.includes('tide tables'))
+  // A change is planned from the document it changes: no AI outline is offered,
+  // which would replace the document's text with one-line summaries.
+  await page.getByTestId('studio-edit-outline').first().click()
+  await page.locator('.outline-section').first().waitFor()
+  assert.equal(await page.locator('.outline-generation').count(), 0, 'No AI outline for a change request')
   checks.push('A finished document is changed by asking, and the change keeps what it did not mention')
 
   await page.goto(finishedJobUrl, { waitUntil: 'domcontentloaded' })
