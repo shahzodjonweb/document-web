@@ -21,7 +21,7 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Kerakli rasmni ta’riflang. Qolganini biz tayyorlaymiz.',
     'Просто опишите изображение. Остальное мы подготовим.',
   ],
-  studioReviewCost: ['Review cost', 'Narxni ko‘rish', 'Посмотреть стоимость'],
+  studioReviewStep: ['Review and create', 'Ko‘rib chiqish va yaratish', 'Проверить и создать'],
   studioYourIdea: ['Your idea', 'G‘oyangiz', 'Ваша идея'],
   studioReviewCreate: ['Review & create', 'Tekshirish va yaratish', 'Проверка и создание'],
   studioQuickHint: [
@@ -143,9 +143,9 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Дополнительные пожелания (необязательно)',
   ],
   studioReviewHint: [
-    'Ready to create. Review the cost, or adjust the outline if you want to.',
-    'Yaratishga tayyor. Narxni tekshiring yoki xohlasangiz rejani o‘zgartiring.',
-    'Всё готово. Проверьте стоимость или при желании измените план.',
+    'Ready to create. Check the details, or adjust the outline if you want to.',
+    'Yaratishga tayyor. Tafsilotlarni tekshiring yoki xohlasangiz rejani o‘zgartiring.',
+    'Всё готово. Проверьте детали или при желании измените план.',
   ],
   studioUnavailable: [
     'AI tools are unavailable right now. Please try again later.',
@@ -225,11 +225,6 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Keyingi g‘oyangiz uchun rasm.',
     'Изображение для новой идеи.',
   ],
-  imageStudioSub: [
-    'Describe your idea and review the cost before creating.',
-    'G‘oyangizni ta’riflang va yaratishdan oldin narxni ko‘ring.',
-    'Опишите идею и проверьте стоимость перед созданием.',
-  ],
   imageProviderRequired: [
     'Image generation is unavailable right now.',
     'Rasm yaratish hozircha mavjud emas.',
@@ -250,9 +245,9 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   generateImage: ['Generate image', 'Rasm yaratish', 'Создать изображение'],
   batchForms: ['Fill a batch of forms', 'Bir nechta shaklni to‘ldirish', 'Заполнить набор форм'],
   batchFormHint: [
-    'Apply the saved template values to each PDF. Every successful form is billed separately.',
-    'Saqlangan shablon qiymatlarini har bir PDF’ga qo‘llang. Har bir muvaffaqiyatli shakl alohida hisoblanadi.',
-    'Примените сохранённые значения к каждому PDF. Каждая успешная форма оплачивается отдельно.',
+    'Apply the saved template values to each PDF. Each form counts as one file task.',
+    'Saqlangan shablon qiymatlarini har bir PDF’ga qo‘llang. Har bir shakl bitta fayl vazifasi hisoblanadi.',
+    'Примените сохранённые значения к каждому PDF. Каждая форма считается одной задачей с файлами.',
   ],
   currentDocumentIncluded: [
     'The current document is included.',
@@ -324,9 +319,9 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Обработайте набор файлов с отдельным результатом для каждого.',
   ],
   batchFilesHint: [
-    'Each selected file becomes one independently billed child job.',
-    'Har bir tanlangan fayl alohida hisoblanadigan vazifa bo‘ladi.',
-    'Каждый файл становится отдельной оплачиваемой задачей.',
+    'Each selected file becomes its own task and counts as one file task.',
+    'Har bir tanlangan fayl alohida vazifa bo‘ladi va bitta fayl vazifasi hisoblanadi.',
+    'Каждый выбранный файл становится отдельной задачей и считается одной задачей с файлами.',
   ],
   imageGroupHint: [
     'Each selection creates one image set and one PDF output.',
@@ -335,15 +330,14 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   ],
   addImageGroup: ['Add an image set', 'Rasm to‘plamini qo‘shish', 'Добавить набор изображений'],
   batchBilling: [
-    'Only child jobs are charged. A failed item does not undo successful results.',
-    'Faqat ichki vazifalar hisoblanadi. Bitta xato muvaffaqiyatli natijalarni bekor qilmaydi.',
-    'Оплачиваются только дочерние задачи. Ошибка одного файла не отменяет успешные результаты.',
+    'Each file counts as one file task. A failed file doesn’t count and doesn’t undo the others.',
+    'Har bir fayl bitta fayl vazifasi hisoblanadi. Xato bo‘lgan fayl hisoblanmaydi va boshqalarini bekor qilmaydi.',
+    'Каждый файл считается одной задачей с файлами. Файл с ошибкой не считается и не отменяет остальные.',
   ],
   resumeBatch: ['Resume remaining items', 'Qolgan fayllarni davom ettirish', 'Продолжить оставшиеся файлы'],
   sendToBot: ['Send to my bot', 'Botimga yuborish', 'Отправить в мой бот'],
   sentToBot: ['Delivered to bot', 'Botga yetkazildi', 'Доставлено в бот'],
   addQuestion: ['Add practice question', 'Mashq savolini qo‘shish', 'Добавить вопрос'],
-  unlimited: ['No daily cap', 'Kunlik cheklov yo‘q', 'Без дневного лимита'],
   supportTeam: ['Support team', 'Yordam jamoasi', 'Служба поддержки'],
   you: ['You', 'Siz', 'Вы'],
   speakerNotes: ['Speaker notes', 'Taqdimotchi qaydlari', 'Заметки докладчика'],
@@ -398,9 +392,9 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'От идеи к полезному документу.',
   ],
   studioSub: [
-    'Describe it, review the cost, and create.',
-    'Ta’riflang, narxni ko‘ring va yarating.',
-    'Опишите задачу, проверьте стоимость и создайте.',
+    'Describe it, review it, and create.',
+    'Ta’riflang, ko‘rib chiqing va yarating.',
+    'Опишите задачу, проверьте и создайте.',
   ],
   localProvider: ['Local fixture provider', 'Mahalliy sinov generatori', 'Локальный тестовый генератор'],
   localProviderNote: [
@@ -447,7 +441,6 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   reviewGeneration: ['Review generation', 'Yaratishni tekshirish', 'Проверить генерацию'],
   generateDocument: ['Generate document', 'Hujjat yaratish', 'Создать документ'],
   draftVersion: ['Draft version', 'Qoralama versiyasi', 'Версия черновика'],
-  quotedCredits: ['Quoted credits', 'Hisoblangan kreditlar', 'Оценка в кредитах'],
   draftNotFound: ['This draft is unavailable.', 'Qoralama mavjud emas.', 'Черновик недоступен.'],
   contentRequired: [
     'Add a short description, text or a file to begin.',
@@ -521,9 +514,9 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Повседневные задачи — по шаблону.',
   ],
   workflowSub: [
-    'Save an ordered set of file operations. Every run uses a fresh server quote.',
-    'Fayl amallarini tartib bilan saqlang. Har safar server yangi hisob beradi.',
-    'Сохраните последовательность операций. Для каждого запуска сервер рассчитывает расход заново.',
+    'Save an ordered set of file operations. Each step counts as one file task.',
+    'Fayl amallarini tartib bilan saqlang. Har bir bosqich bitta fayl vazifasi hisoblanadi.',
+    'Сохраните последовательность операций. Каждый шаг считается одной задачей с файлами.',
   ],
   workflowName: ['Workflow name', 'Jarayon nomi', 'Название процесса'],
   addStep: ['Add a step', 'Bosqich qo‘shish', 'Добавить шаг'],
@@ -655,25 +648,12 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Новый тариф начнётся после текущего оплаченного периода и нового подтверждения оплаты.',
   ],
   subscription: ['Subscription', 'Obuna', 'Подписка'],
-  taskPack: ['Additional standard tasks', 'Qo‘shimcha oddiy vazifalar', 'Дополнительные обычные задачи'],
-  aiPack: ['Additional AI credits', 'Qo‘shimcha AI kreditlar', 'Дополнительные ИИ-кредиты'],
-  purchasedCredits: [
-    'Purchased credits do not expire and do not unlock excluded tools or larger file limits.',
-    'Xarid qilingan kreditlar tugamaydi; ular yopiq vositalar yoki kattaroq fayl limitlarini ochmaydi.',
-    'Купленные кредиты не сгорают и не открывают недоступные инструменты или увеличенные лимиты файлов.',
-  ],
+  oneTimePurchase: ['One-time purchase', 'Bir martalik xarid', 'Разовая покупка'],
   yourLink: ['Your referral link', 'Taklif havolangiz', 'Ваша ссылка'],
   copyLink: ['Copy link', 'Havolani nusxalash', 'Скопировать ссылку'],
   copied: ['Copied', 'Nusxalandi', 'Скопировано'],
   qualifiedInvites: ['Qualified invitations', 'Shartlarga mos takliflar', 'Засчитанные приглашения'],
   pendingInvites: ['Pending invitations', 'Kutilayotgan takliflar', 'Ожидающие приглашения'],
-  rewardCredits: ['Awarded credits', 'Berilgan kreditlar', 'Начисленные кредиты'],
-  monthlyCap: ['Monthly reward cap', 'Davriy mukofot chegarasi', 'Лимит наград за период'],
-  rewardExpiry: [
-    'Referral credits expire after {days} days.',
-    'Taklif kreditlari {days} kundan keyin tugaydi.',
-    'Реферальные кредиты действуют {days} дней.',
-  ],
   referralCode: ['Invitation code', 'Taklif kodi', 'Код приглашения'],
   apply: ['Apply', 'Qo‘llash', 'Применить'],
   shareMaterial: ['Share learner material', 'O‘quvchi materialini ulashish', 'Поделиться материалом ученика'],
@@ -931,11 +911,6 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   editorRemoveLocked: ['Remove these changes', 'Bu o‘zgarishlarni olib tashlash', 'Удалить эти изменения'],
 
   // Images and signatures
-  editorImageCost: [
-    'each attached image counts as one page unit',
-    'har bir biriktirilgan rasm bitta sahifa birligi hisoblanadi',
-    'каждое прикреплённое изображение считается за одну единицу страниц',
-  ],
   editorSignatureDraw: ['Draw a signature', 'Imzo chizish', 'Нарисовать подпись'],
   editorSignatureClear: ['Clear', 'Tozalash', 'Очистить'],
   editorSignatureSave: ['Use this signature', 'Shu imzodan foydalanish', 'Использовать эту подпись'],
@@ -1020,9 +995,9 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   deckSetupPhoto: ['Photo', 'Foto', 'Фото'],
   deckSetupSave: ['Save: {count} slides, {design}', 'Saqlash: {count} ta slayd, {design}', 'Сохранить: {count} слайдов, {design}'],
   deckSetupSaved: [
-    'Saved. The review in the chat shows the new price.',
-    'Saqlandi. Chatdagi ko‘rib chiqishda yangi narx ko‘rsatilgan.',
-    'Сохранено. В чате показана новая стоимость.',
+    'Saved. The review in the chat shows the new settings.',
+    'Saqlandi. Chatdagi ko‘rib chiqishda yangi sozlamalar ko‘rsatilgan.',
+    'Сохранено. В чате показаны новые настройки.',
   ],
   deckSetupExpired: [
     'This deck is no longer open. Describe it again in the bot.',
@@ -1047,7 +1022,11 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   guideRowLook: ['How a deck looks', 'Taqdimot ko‘rinishi', 'Вид презентации'],
   guideRowLookBody: ['“a dark deck”, “bold, in navy”, “minimal, in burgundy”. Slides only — a document has one fixed style.', '«qorong‘i taqdimot», «yorqin, ko‘k rangda», «sodda, bordo rangda». Faqat slaydlar uchun — hujjat uslubi o‘zgarmas.', '«тёмная презентация», «ярко, в синем», «минимально, бордовый». Только для слайдов — у документа один стиль.'],
   guideRowQuestions: ['Questions', 'Savollar', 'Вопросы'],
-  guideRowQuestionsBody: ['“with 10 review questions at the end”. Questions are only added when you ask, and only then are they charged.', '«oxirida 10 ta takrorlash savoli». Savollar faqat so‘ralganda qo‘shiladi va faqat o‘shanda hisoblanadi.', '«10 вопросов для повторения в конце». Вопросы добавляются только по запросу и только тогда оплачиваются.'],
+  guideRowQuestionsBody: [
+    '“with 10 review questions at the end”. Questions are only added when you ask.',
+    '«oxirida 10 ta takrorlash savoli». Savollar faqat so‘ralganda qo‘shiladi.',
+    '«10 вопросов для повторения в конце». Вопросы добавляются только по запросу.',
+  ],
   guideRowSources: ['Your own material', 'O‘z materialingiz', 'Ваш материал'],
   guideRowSourcesBody: ['Paste it into the description, or attach PDFs. Anything you supply is used as the source rather than invented.', 'Tavsifga joylashtiring yoki PDF biriktiring. Bergan materialingiz manba sifatida ishlatiladi, to‘qib chiqarilmaydi.', 'Вставьте его в описание или приложите PDF. То, что вы дали, используется как источник, а не выдумывается.'],
   guideRowSkip: ['What to leave out', 'Nimani yozmaslik kerak', 'Что не нужно писать'],
@@ -1061,12 +1040,22 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   reviseUntitled: ['Untitled', 'Sarlavhasiz', 'Без названия'],
   reviseScopeHint: ['Choose a page or slide to keep all others unchanged. Use the whole document to change its title, questions or length.', 'Boshqalari o‘zgarmasligi uchun sahifa yoki slaydni tanlang. Sarlavha, savollar yoki hajmni o‘zgartirish uchun butun hujjatni tanlang.', 'Выберите страницу или слайд — остальные сохранятся. Для изменения названия, вопросов или объёма выберите весь документ.'],
   generationRetryTitle: ['Continue generation', 'Yaratishni davom ettirish', 'Продолжить создание'],
-  generationRetryBody: ['Completed AI work can be reused when the draft and settings are unchanged. Review the cost before continuing.', 'Hujjat va sozlamalar o‘zgarmagan bo‘lsa, tayyor AI natijalari qayta ishlatiladi. Davom etishdan oldin narxni ko‘ring.', 'Готовые результаты ИИ можно использовать повторно, если документ и настройки не изменились. Проверьте стоимость перед продолжением.'],
-  generationRetryReview: ['Review & retry', 'Narxni ko‘rish va qayta urinish', 'Стоимость и повтор'],
+  generationRetryBody: [
+    'Completed AI work is reused when the draft and settings are unchanged. A failed attempt doesn’t count against your week.',
+    'Hujjat va sozlamalar o‘zgarmagan bo‘lsa, tayyor AI natijalari qayta ishlatiladi. Muvaffaqiyatsiz urinish haftalik limitga hisoblanmaydi.',
+    'Если документ и настройки не изменились, готовые результаты ИИ используются повторно. Неудачная попытка не засчитывается в недельный лимит.',
+  ],
+  // A failed edit is retried the same way, but it never touches the week's documents.
+  editRetryBody: [
+    'Completed AI work is reused when nothing in the request has changed. A failed edit doesn’t count against this file’s AI edits.',
+    'So‘rovda hech narsa o‘zgarmagan bo‘lsa, tayyor AI natijalari qayta ishlatiladi. Muvaffaqiyatsiz tahrir bu faylning AI tahrirlariga hisoblanmaydi.',
+    'Если в запросе ничего не изменилось, готовые результаты ИИ используются повторно. Неудачная правка не засчитывается в ИИ-правки этого файла.',
+  ],
+  generationRetryReview: ['Review & retry', 'Ko‘rib chiqish va qayta urinish', 'Проверить и повторить'],
   generationRetryConfirm: ['Confirm & continue', 'Tasdiqlash va davom etish', 'Подтвердить и продолжить'],
   reviseLabel: ['What should change?', 'Nimani o‘zgartiramiz?', 'Что изменить?'],
   revisePlaceholder: ['Make the second section shorter and add an example to each page.', 'Ikkinchi bo‘limni qisqartiring va har sahifaga misol qo‘shing.', 'Сократите второй раздел и добавьте пример на каждую страницу.'],
-  reviseAction: ['Review the change', 'O‘zgarishni ko‘rib chiqish', 'Оценить изменение'],
+  reviseAction: ['Review the change', 'O‘zgarishni ko‘rib chiqish', 'Проверить изменение'],
   reviseExamples: ['Make it shorter · Use a friendlier tone · Add an example to each page · The same in 8 pages', 'Qisqartiring · Do‘stona uslubda · Har sahifaga misol · Xuddi shu 8 sahifada', 'Сократите · Дружелюбнее · Пример на каждую страницу · То же на 8 страницах'],
   studioSlidesReading: ['{count} slides', '{count} slayd', '{count} слайд'],
   reviseBanner: ['You are changing an existing document. Everything you did not mention stays as it is.', 'Siz mavjud hujjatni o‘zgartiryapsiz. Aytmagan narsalaringiz o‘z holicha qoladi.', 'Вы изменяете существующий документ. Всё, о чём вы не упомянули, останется как есть.'],
@@ -1166,28 +1155,53 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   paymentRejected: ['We couldn’t confirm payment {reference}:', '{reference} to‘lovini tasdiqlay olmadik:', 'Не удалось подтвердить платёж {reference}:'],
   cardPaymentsUnavailable: ['Payments aren’t available right now. Please try again later.', 'To‘lov hozircha mavjud emas. Keyinroq urinib ko‘ring.', 'Оплата сейчас недоступна. Попробуйте позже.'],
   paidByCardUntil: ['Paid by card transfer until {date}. It doesn’t renew by itself — pay again to add 30 days.', 'Karta orqali {date} gacha to‘langan. O‘zi uzaytirilmaydi — 30 kun qo‘shish uchun qayta to‘lang.', 'Оплачено переводом на карту до {date}. Само не продлевается — оплатите снова, чтобы добавить 30 дней.'],
-  // Free for members of the owner's Telegram channels.
+  // Free and Plus accounts join the owner's Telegram channels; Premium is never asked.
   channelsTitle: ['Join our Telegram community', 'Telegram hamjamiyatimizga qo‘shiling', 'Вступите в наше Telegram-сообщество'],
-  channelsBody: ['PDF Master is free for members of our Telegram community. Join the channels below in Telegram, then tap “I’ve joined”.', 'PDF Master Telegram hamjamiyatimiz a’zolari uchun bepul. Quyidagi kanallarga Telegram’da qo‘shiling, so‘ng «Qo‘shildim» tugmasini bosing.', 'PDF Master бесплатен для участников нашего Telegram-сообщества. Подпишитесь на каналы ниже в Telegram и нажмите «Я подписался».'],
+  channelsBody: [
+    'The Free and Plus plans are for members of our Telegram community. Join the channels below in Telegram, then tap “I’ve joined”.',
+    'Free va Plus tariflari Telegram hamjamiyatimiz a’zolari uchun. Quyidagi kanallarga Telegram’da qo‘shiling, so‘ng «Qo‘shildim» tugmasini bosing.',
+    'Тарифы Free и Plus — для участников нашего Telegram-сообщества. Подпишитесь на каналы ниже в Telegram и нажмите «Я подписался».',
+  ],
   channelsJoined: ['I’ve joined', 'Qo‘shildim', 'Я подписался'],
   channelsNotYet: ['You haven’t joined {titles} yet. Join, then tap “I’ve joined” again.', 'Siz hali {titles} ga qo‘shilmagansiz. Qo‘shiling va «Qo‘shildim»ni yana bosing.', 'Вы ещё не подписались на {titles}. Подпишитесь и снова нажмите «Я подписался».'],
   channelsWelcomeTitle: ['Thanks for joining!', 'Qo‘shilganingiz uchun rahmat!', 'Спасибо за подписку!'],
   channelsWelcome: ['Every service is open to you now. Try your task again.', 'Endi barcha xizmatlar siz uchun ochiq. Vazifani qayta bajaring.', 'Все сервисы теперь доступны. Повторите задачу.'],
   channelsContinue: ['Continue', 'Davom etish', 'Продолжить'],
-  channelsOrPlans: ['Or choose a paid plan — no channels needed', 'Yoki pullik tarifni tanlang — kanal shart emas', 'Или выберите платный тариф — подписка не нужна'],
-  channelsBanner: ['Join our Telegram channel to keep using PDF Master for free.', 'PDF Master’dan bepul foydalanish uchun Telegram kanalimizga qo‘shiling.', 'Подпишитесь на наш Telegram-канал, чтобы пользоваться PDF Master бесплатно.'],
+  // The same ending as the server's channels_required message, so the dialog and
+  // the banner beside it never disagree about what Premium needs.
+  channelsOrPlans: [
+    'Or choose Premium, which needs no channels',
+    'Yoki kanallarsiz ishlaydigan Premium tarifini tanlang',
+    'Или выберите Premium, где каналы не нужны',
+  ],
+  channelsBanner: [
+    'Join our Telegram channel to keep using PDF Master.',
+    'PDF Master’dan foydalanishda davom etish uchun Telegram kanalimizga qo‘shiling.',
+    'Подпишитесь на наш Telegram-канал, чтобы и дальше пользоваться PDF Master.',
+  ],
   channelsBannerAction: ['Join', 'Qo‘shilish', 'Подписаться'],
-  aiDocumentsPerDay: ['AI documents a day', 'kuniga AI hujjat', 'ИИ-документов в день'],
   unlimitedCount: ['Unlimited', 'Cheksiz', 'Без ограничений'],
   // A finished job can carry warnings. The API sends bare codes and JobDetail
   // renders `t(code)`, so an untranslated code would show the customer the code
-  // itself. These three say what was adjusted and what it cost — nothing.
-  questions_trimmed: ['Questions you did not ask for were left out, and not charged for.', 'So‘ramagan savollar qo‘shilmadi va hisoblanmadi.', 'Вопросы, которые вы не запрашивали, не добавлены и не оплачены.'],
+  // itself. These say what was adjusted, and why.
+  questions_trimmed: [
+    'Questions you did not ask for were left out.',
+    'So‘ramagan savollar qo‘shilmadi.',
+    'Вопросы, которые вы не запрашивали, не добавлены.',
+  ],
   sections_trimmed: ['The document was trimmed to the number of pages you asked for.', 'Hujjat siz so‘ragan sahifa soniga qisqartirildi.', 'Документ сокращён до запрошенного количества страниц.'],
   citations_dropped: ['A source reference that did not match any file you sent was left out.', 'Siz yuborgan fayllarga mos kelmagan manba havolasi qo‘shilmadi.', 'Ссылка на источник, не совпавшая с вашими файлами, не добавлена.'],
   shortened_to_fit: ['A section was longer than its page, so its end was trimmed to keep the page count you asked for.', 'Bir bo‘lim sahifasiga sig‘madi, shuning uchun siz so‘ragan sahifa soni saqlanib, oxiri qisqartirildi.', 'Один раздел не помещался на страницу, поэтому его конец сокращён, чтобы сохранить запрошенное число страниц.'],
-  longer_than_quoted: ['This came out a little longer than estimated. You were charged for the pages you asked for, not the extra.', 'Hujjat taxmindan biroz uzunroq chiqdi. Siz so‘ragan sahifalar uchun hisoblandi, qo‘shimchasi uchun emas.', 'Документ вышел чуть длиннее, чем ожидалось. Оплачены страницы, которые вы запросили, а не лишние.'],
-  images_skipped: ['A photo could not be added, so that slide was set as text. Nothing extra was charged.', 'Rasm qo‘shib bo‘lmadi, shuning uchun o‘sha slayd matn sifatida tayyorlandi. Qo‘shimcha to‘lov olinmadi.', 'Фото добавить не удалось, поэтому слайд оформлен текстом. Ничего дополнительно не списано.'],
+  longer_than_quoted: [
+    'This came out a little longer than you asked for.',
+    'Hujjat so‘ralganidan biroz uzunroq chiqdi.',
+    'Документ получился немного длиннее, чем вы просили.',
+  ],
+  images_skipped: [
+    'A photo could not be added, so that slide was set as text.',
+    'Rasm qo‘shib bo‘lmadi, shuning uchun o‘sha slayd matn sifatida tayyorlandi.',
+    'Фото добавить не удалось, поэтому слайд оформлен текстом.',
+  ],
   images_limited: ['Your plan includes a set number of photos per deck; the other photo slides were set as text.', 'Tarifingizda bir taqdimot uchun rasmlar soni cheklangan; qolgan rasmli slaydlar matn sifatida tayyorlandi.', 'В вашем тарифе ограничено число фото на презентацию; остальные слайды с фото оформлены текстом.'],
   local_fixture_not_ai_generated: ['Written locally for testing, without the AI model.', 'Sinov uchun AI modelidan foydalanmasdan mahalliy tarzda yozildi.', 'Создано локально для теста, без модели ИИ.'],
 }

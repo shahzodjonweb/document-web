@@ -4,8 +4,9 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
-// The Telegram channels a free account joins before using a service: the
+// The Telegram channels a Free or Plus account joins before using a service: the
 // dashboard banner, the dialog, "I've joined", and a refused task opening it.
+// Premium is never asked, and the dialog says so.
 const origin = process.env.CHANNEL_WEB_ORIGIN || 'http://127.0.0.1:3002'
 assert.ok(['127.0.0.1', 'localhost'].includes(new URL(origin).hostname), 'Use the local web server')
 const output = path.resolve(process.env.CHANNEL_ARTIFACT_DIR || '../studio-review/channel-gate')
@@ -25,14 +26,14 @@ const account = {
   id: '00000000-0000-4000-8000-999999999999', display_name: 'Card payer', locale: 'en', time_zone: 'UTC',
   mode: 'general', plan: 'free', preferences: {}, login_methods: { email: false, google: false, telegram: true },
 }
-const limits = (credits, price) => ({
-  file_tasks: 300, file_page_units: 3000, max_file_mib: 25, max_pages_per_job: 100, max_generated_pdf_pages: 7,
-  max_generated_slides: 12, max_deck_images: 4, ai_credits: credits, price_uzs: price,
+const limits = (price, documents, files, edits) => ({
+  weekly_ai_documents: documents, weekly_file_jobs: files, edits_per_file: edits, max_file_mib: 25,
+  max_pages_per_job: 100, max_generated_pdf_pages: 7, max_generated_slides: 12, max_deck_images: 4, price_uzs: price,
 })
 const plans = [
-  { id: 'free', name: 'Free', price_xtr: 0, limits: limits(3150, null) },
-  { id: 'plus', name: 'Plus', price_xtr: null, limits: limits(10500, 49000) },
-  { id: 'premium', name: 'Premium', price_xtr: null, limits: limits(30000, 99000) },
+  { id: 'free', name: 'Free', price_xtr: 0, limits: limits(null, 5, 15, 3) },
+  { id: 'plus', name: 'Plus', price_xtr: null, limits: limits(20000, 20, null, 10) },
+  { id: 'premium', name: 'Premium', price_xtr: null, limits: limits(60000, null, null, null) },
 ]
 let payment = null
 let joinedAll = false
@@ -43,7 +44,7 @@ const channelState = () => ({ required: true, joined: joinedAll, channels: [
   { title: 'PDF Tips', url: 'https://t.me/pdfmaster_tips', joined: true }] })
 const options = () => ({
   enabled: true, currency: 'UZS', period_days: 30, automatic: { available: false },
-  plans: [{ plan: 'plus', price: 49000 }, { plan: 'premium', price: 99000 }], payment,
+  plans: [{ plan: 'plus', price: 20000 }, { plan: 'premium', price: 60000 }], payment,
 })
 
 await context.route('**/*', (route) => {
@@ -71,8 +72,9 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   if (endpoint === '/catalog') return json({ features: [], draft: false })
   if (endpoint === '/plans') return json({ plans, checkout_enabled: false, currency: 'XTR', draft: true })
   if (endpoint === '/usage')
-    return json({ plan: 'free', meters: { file_tasks: { limit: 300, remaining: 300 }, file_page_units: { limit: 3000, remaining: 3000 },
-      ai_credits: { limit: 3150, remaining: 3150 } }, daily: { limit: 20, remaining: 20 }, resets_at: '2026-11-01T00:00:00Z' })
+    return json({ plan: 'free', week: { starts_at: '2026-10-11T19:00:00Z', resets_at: '2026-10-18T19:00:00Z', time_zone: 'Asia/Tashkent' },
+      ai_documents: { limit: 5, used: 0, remaining: 5 }, file_jobs: { limit: 15, used: 0, remaining: 15 }, edits_per_file: 3,
+      resets_at: '2026-10-18T19:00:00Z' })
   if (endpoint === '/billing/offers')
     return json({ offers: [], sandbox: false, checkout_enabled: false, currency: 'XTR', billing_mode: 'disabled' })
   if (endpoint === '/billing/subscription') return json({ plan: 'free', subscription: null, sandbox: false, checkout_enabled: false })
@@ -84,12 +86,12 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
     return json(channelState())
   }
   if (endpoint === '/billing/manual' && method === 'POST' && refuseTasks)
-    return json({ error: { code: 'channels_required', message: 'PDF Master is free for members of our Telegram community.',
+    return json({ error: { code: 'channels_required', message: 'The Free and Plus plans are for members of our Telegram community. Join our channel, then try again — or choose Premium, which needs no channels.',
       message_params: { channels: channelState().channels } } }, 403)
   if (endpoint === '/billing/manual' && method === 'GET') return json(options())
   if (endpoint === '/billing/manual' && method === 'POST') {
     const { plan } = request.postDataJSON()
-    payment = { id: '00000000-0000-4000-8000-000000000101', reference: 'PM-7K3QX', plan, amount: plan === 'plus' ? 49000 : 99000,
+    payment = { id: '00000000-0000-4000-8000-000000000101', reference: 'PM-7K3QX', plan, amount: plan === 'plus' ? 20000 : 60000,
       currency: 'UZS', status: 'awaiting', channel: 'web', card: { number: CARD, last4: '9012', holder: 'Shakhzod Uralov', label: 'Uzcard' },
       receipt_received: false, payer_note: '', created_at: new Date().toISOString(), expires_at: new Date(Date.now() + 172800000).toISOString(),
       submitted_at: null, decided_at: null, rejection_reason: null, starts_at: null, active_until: null }
@@ -106,7 +108,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   }
   if (endpoint === '/studio/config') return json({ provider: { mode: 'openai', configured: true }, features: [], default_pages: 5 })
   if (endpoint === '/jobs') return json({ results: [], count: 0 })
-  if (endpoint === '/referrals') return json({ code: 'x', url: null, rewards_count: 0, pending_count: 0, awarded_credits: 0, monthly_cap: 5, expires_in_days: 7, qualification: '', sandbox: false })
+  if (endpoint === '/referrals') return json({ code: 'x', url: null, rewards_count: 0, pending_count: 0, monthly_cap: 5, expires_in_days: 7, qualification: '', sandbox: false })
   unexpected.push(`${method} ${endpoint}`)
   return json({ error: { code: 'not_found', message: 'not found' } }, 404)
 })
@@ -135,8 +137,11 @@ try {
   await dialog.waitFor()
   const links = await dialog.locator('a[href^="https://t.me/"]').evaluateAll((nodes) => nodes.map((n) => [n.textContent.trim(), n.target, n.rel]))
   assert.deepEqual(links, [['PDF Master News', '_blank', 'noopener'], ['PDF Tips', '_blank', 'noopener']])
+  assert.match(await dialog.locator('#channel-description').innerText(), /Free and Plus plans/)
+  const premium = dialog.getByRole('link', { name: 'Or choose Premium, which needs no channels' })
+  assert.equal(await premium.getAttribute('href'), '/en/app/billing')
   await audit('dialog')
-  checks.push('The dashboard says which channels to join, and the dialog links to each in a new tab')
+  checks.push('The dashboard says which channels to join, the dialog links to each in a new tab, and offers Premium instead')
 
   await page.getByTestId('channels-joined').click()
   await dialog.getByRole('alert').waitFor()

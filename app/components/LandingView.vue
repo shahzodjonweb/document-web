@@ -10,6 +10,8 @@ const price = (plan: any) => {
   const value = Number(plan.limits?.price_uzs ?? 0)
   return `${value.toLocaleString('ru-RU').replace(/ /g, ' ')} so'm`
 }
+// Each card says what a week holds: its AI documents and file tasks.
+const { allowances } = usePlanPhrases()
 const faq = ['faqFree', 'faqPay', 'faqFiles', 'faqTelegram']
 </script>
 <template>
@@ -115,6 +117,8 @@ const faq = ['faqFree', 'faqPay', 'faqFiles', 'faqTelegram']
     <div class="pricing-teaser">
       <NuxtLink v-for="plan in ws.plans.value" :key="plan.id" :to="path('/pricing')" class="panel"
         ><strong>{{ t(plan.id) }}</strong><span class="teaser-price">{{ price(plan) }}</span
+        ><span v-for="(row, index) in allowances(plan).slice(0, 2)" :key="index" class="teaser-week"
+          >{{ row.pre }}{{ row.value }}{{ row.post }}</span
         ><small>{{
           t(plan.id === 'free' ? 'planFreeBody' : plan.id === 'plus' ? 'planPlusBody' : 'planPremiumBody')
         }}</small></NuxtLink

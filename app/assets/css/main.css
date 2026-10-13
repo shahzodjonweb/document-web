@@ -448,23 +448,6 @@ strong {
 .form-field:last-child {
   margin-bottom: 0;
 }
-.quote-meters > div {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 11px;
-  margin-bottom: 10px;
-}
-.quote-meters strong {
-  color: var(--ink);
-  font-weight: 600;
-}
-.quote-meters {
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 13px;
-  margin-bottom: 13px;
-}
 .login-challenge {
   border: 1px solid var(--border);
   border-radius: 9px;
@@ -511,13 +494,6 @@ strong {
     width: 34px;
     grid-row: span 2;
     margin: 0;
-  }
-  .quote-meters {
-    display: flex;
-    gap: 25px;
-  }
-  .quote-meters > div {
-    flex: 1;
   }
 }
 @media (max-width: 760px) {
@@ -698,10 +674,4 @@ strong {
   .public-tool-intro h2 {
     font-size: 18px;
   }
-}
-.quote-meters small {
-  display: block;
-  color: var(--muted);
-  font-size: 11px;
-  margin-top: 4px;
 }

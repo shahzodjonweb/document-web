@@ -140,11 +140,6 @@ async function execute() {
     quote.value = null
   })
 }
-const meters = computed(() =>
-  Array.isArray(quote.value?.meters)
-    ? quote.value.meters
-    : Object.entries(quote.value?.meters || {}).map(([meter, amount]) => ({ meter, amount })),
-)
 </script>
 <template>
   <div class="page-heading">
@@ -253,18 +248,7 @@ const meters = computed(() =>
           </button>
         </div>
         <div v-if="quote" class="workflow-quote">
-          <div v-for="meter in meters" :key="meter.meter" class="meter-row">
-            <span>{{
-              t(
-                meter.meter === 'file_tasks'
-                  ? 'standardTask'
-                  : meter.meter === 'file_page_units'
-                    ? 'pageUnits'
-                    : meter.meter,
-              )
-            }}</span
-            ><strong>{{ meter.amount }}</strong>
-          </div>
+          <WeeklyLine kind="file" />
           <button class="button primary full" :disabled="!!busy" @click="execute">
             {{ busy === 'run' ? t('working') : t('runWorkflow') }}
           </button>

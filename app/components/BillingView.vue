@@ -1,44 +1,32 @@
 <script setup lang="ts">
+import type { PlanPhrase } from '../composables/usePlanPhrases'
 const { t, path, date, timeZone } = useLocale()
 const ws = useWorkspace()
-const usage = computed(() => ws.usage.value as any)
-const meters = computed(() => usage.value?.meters || {})
+const usage = computed(() => ws.usage.value)
+// The week's limits reset on Monday 00:00 in Tashkent, shown in this device's zone.
+const resetsAt = computed(() => usage.value?.week?.resets_at ?? usage.value?.resets_at)
 const limit = (plan: any, key: string) => plan.limits?.[key] ?? plan[key]
 /** So'm per 30 days for a card transfer, or nothing when a plan isn't for sale. */
 const priceOf = (plan: any) => (Number(limit(plan, 'price_uzs')) > 0 ? Number(limit(plan, 'price_uzs')) : 0)
-const money = (amount: number) => `${amount.toLocaleString('ru-RU').replace(/ /g, ' ')} so'm`
-const count = (value: any) =>
-  typeof value === 'number' ? value.toLocaleString('ru-RU').replace(/ /g, ' ') : value
+const money = (amount: number) => `${amount.toLocaleString('ru-RU').replace(/\u00a0/g, ' ')} so'm`
 const currentPlan = computed(() => ws.user.value?.plan || 'free')
 /** Once plans are priced in so'm, Free reads as 0 so'm rather than 0 Stars. */
 const pricedInSom = computed(() => (ws.plans.value || []).some((plan: any) => priceOf(plan)))
-// The plan in one row, as on Home: what is left of each allowance, and today's cap.
-const planMeters = computed(() =>
-  [
-    { key: 'standardTasks', meter: meters.value.file_tasks },
-    { key: 'pageUnits', meter: meters.value.file_page_units },
-    { key: 'ai_credits', meter: meters.value.ai_credits },
-    { key: 'todayTasks', meter: usage.value?.daily?.limit ? usage.value.daily : null },
-  ].filter((row) => row.meter && row.meter.limit),
-)
-const share = (meter: { remaining: number; limit: number }) =>
-  `${Math.max(0, Math.min(100, (meter.remaining / meter.limit) * 100))}%`
+const { number, phrase, allowances } = usePlanPhrases()
+const sized = (key: string, label: string, plan: any, unit = '') =>
+  limit(plan, key) != null ? phrase(t(label), `${number(limit(plan, key))}${unit}`) : null
 // What sets the plans apart, in the order people compare them.
 const features = (plan: any) =>
   [
-    { value: count(limit(plan, 'file_tasks')), label: 'standardTasks' },
-    { value: count(limit(plan, 'file_page_units')), label: 'pageUnits' },
-    { value: `${limit(plan, 'max_file_mib')} MB`, label: 'fileLimit' },
-    { value: count(limit(plan, 'max_pages_per_job')), label: 'jobLimit' },
-    { value: limit(plan, 'max_generated_pdf_pages'), label: 'generatedPagesLimit' },
-    { value: limit(plan, 'max_generated_slides'), label: 'generatedSlidesLimit' },
-    { value: limit(plan, 'max_deck_images'), label: 'photosPerDeck' },
-    { value: count(limit(plan, 'ai_credits')), label: 'ai_credits' },
-    // No daily limit is stored as null; ask the plan directly.
-    plan.limits && 'daily_ai_documents' in plan.limits
-      ? { value: plan.limits.daily_ai_documents ?? t('unlimitedCount'), label: 'aiDocumentsPerDay' }
-      : null,
-  ].filter((row) => row && row.value !== undefined && row.value !== null) as { value: any; label: string }[]
+    ...allowances(plan),
+    // Only Free and Plus are asked to join the Telegram channels.
+    plan.id === 'premium' ? { pre: t('planNoChannels'), value: '', post: '' } : null,
+    sized('max_file_mib', 'fileLimit', plan, ' MB'),
+    sized('max_pages_per_job', 'jobLimit', plan),
+    sized('max_generated_pdf_pages', 'generatedPagesLimit', plan),
+    sized('max_generated_slides', 'generatedSlidesLimit', plan),
+    sized('max_deck_images', 'photosPerDeck', plan),
+  ].filter((row): row is PlanPhrase => !!row)
 const chosen = ref('')
 async function pay(plan: string) {
   chosen.value = plan
@@ -64,21 +52,11 @@ async function planChanged() {
         <span class="muted">{{ t('currentPlan') }}</span>
         <h2>{{ t(usage.plan || 'free') }}</h2>
       </div>
-      <p class="muted">
-        {{ t('cycleEnd') }} {{ date(usage.resets_at || usage.period_end, true) }} ·
-        {{ timeZone }}
+      <p v-if="resetsAt" class="muted" data-testid="week-reset">
+        {{ t('weekResets') }} {{ date(resetsAt, true) }} · {{ timeZone }}
       </p>
     </div>
-    <div v-if="planMeters.length" class="plan-meters">
-      <div v-for="row in planMeters" :key="row.key" class="plan-meter">
-        <span class="plan-meter-label">{{ t(row.key) }}</span>
-        <p>
-          <strong class="tabular">{{ count(Math.max(0, row.meter.remaining)) }}</strong>
-          <span>{{ t('meterOf', { limit: count(row.meter.limit) }) }}</span>
-        </p>
-        <div class="usage-track"><span :style="{ width: share(row.meter) }" /></div>
-      </div>
-    </div>
+    <WeeklyUsage edits />
   </section>
   <ManualPaymentPanel v-if="ws.user.value" :plan="chosen" @close="chosen = ''" @changed="planChanged" />
   <section class="home-section">
@@ -117,9 +95,9 @@ async function planChanged() {
           </button>
         </template>
         <ul class="plan-features">
-          <li v-for="row in features(plan)" :key="row.label">
+          <li v-for="(row, index) in features(plan)" :key="index">
             <AppIcon name="check" :size="16" /><span
-              ><strong>{{ row.value }}</strong> {{ t(row.label) }}</span
+              >{{ row.pre }}<strong v-if="row.value !== ''">{{ row.value }}</strong>{{ row.post }}</span
             >
           </li>
         </ul>

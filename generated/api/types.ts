@@ -54,18 +54,24 @@ export interface Artifact {
   download_url?: string
   expires_at?: string
 }
+/** One weekly allowance; a null limit is unlimited. */
+export interface WeeklyAllowance {
+  limit: number | null
+  used: number
+  remaining: number | null
+}
 export interface Quote {
   id: string
   feature_id: string
   expires_at: string
+  /** False when this week's allowance (or the file's edits) has no room for the task. */
   affordable?: boolean
-  meters?: { meter: string; amount: number }[]
-  cost?: Record<string, number>
-  estimated_usage?: Record<string, number>
-  remaining?: Record<string, number>
-  input_pages?: number
-  task_count?: number
-  page_units?: number
+  usage?: {
+    ai_documents?: WeeklyAllowance
+    file_jobs?: WeeklyAllowance
+    edits_per_file?: number | null
+    resets_at?: string
+  }
   [key: string]: unknown
 }
 export interface Job {
@@ -82,28 +88,23 @@ export interface Job {
   parameters?: Record<string, unknown>
   error?: unknown
   warnings?: string[]
-  settled_usage?: Record<string, number>
-  usage?: Record<string, number>
   [key: string]: unknown
 }
+/** This week's allowance. A week starts on Monday 00:00 in Tashkent for everyone. */
 export interface Usage {
   plan?: string
-  plan_id?: string
-  balances?: Record<string, number>
-  remaining?: Record<string, number>
-  daily_remaining?: number
-  period_end?: string
-  cycle_end?: string
+  week?: { starts_at: string; resets_at: string; time_zone: string }
+  ai_documents?: WeeklyAllowance
+  file_jobs?: WeeklyAllowance
+  edits_per_file?: number | null
+  resets_at?: string
   [key: string]: unknown
 }
 export interface Plan {
   id: string
   name?: string
   price_xtr: number | null
-  file_tasks?: number
-  max_file_mib?: number
-  max_pages_per_job?: number
-  daily_file_tasks?: number | null
-  limits?: Record<string, number>
+  /** Plan limits by key (weekly_ai_documents, weekly_file_jobs, edits_per_file, price_uzs, …); null is unlimited. */
+  limits?: Record<string, number | null>
   [key: string]: unknown
 }

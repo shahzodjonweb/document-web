@@ -32,6 +32,14 @@ const drafts = new Map(),
   idempotentJobs = new Map()
 let sequence = 0
 let affordable = true
+// This week's AI documents, as /usage and every generation quote report them.
+const week = { starts_at: '2026-10-11T19:00:00Z', resets_at: '2026-10-18T19:00:00Z', time_zone: 'Asia/Tashkent' }
+const weekUsage = () => ({
+  ai_documents: affordable ? { limit: 5, used: 2, remaining: 3 } : { limit: 5, used: 5, remaining: 0 },
+  file_jobs: { limit: 15, used: 0, remaining: 15 },
+  edits_per_file: 3,
+  resets_at: week.resets_at,
+})
 let expiredFile = false
 let visualChecks = 0
 let failJobOnce = false
@@ -167,7 +175,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   }
   if (endpoint === '/catalog') return json({ features: [], draft: false })
   if (endpoint === '/plans') return json({ plans: [], checkout_enabled: false })
-  if (endpoint === '/usage') return json({ plan: 'free', remaining: { ai_credits: 100, file_tasks: 100 } })
+  if (endpoint === '/usage') return json({ plan: 'free', week, ...weekUsage() })
   if (endpoint === '/studio/config') return json(config)
   if (endpoint === '/files/uploads')
     return json(
@@ -243,7 +251,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
         feature_id: draft.feature_id,
         expires_at: future(),
         affordable,
-        meters: [{ meter: 'ai_credits', amount: 0 }],
+        usage: weekUsage(),
         parameters: {
           generation_draft_id: draft.id,
           generation_draft_version: draft.version,
@@ -282,8 +290,10 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
       feature_id: failed.feature_id,
       expires_at: future(),
       affordable,
-      meters: [{ meter: 'ai_credits', amount: 12 }],
+      usage: weekUsage(),
       parameters: failed.parameters,
+      // The API names a quote's parameters this way; a retried edit carries `revision`.
+      normalized_parameters: failed.parameters,
     }
     quotes.set(quote.id, quote)
     return json(quote, 201)
@@ -300,7 +310,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
     if (!quote) return failure('quote_expired')
     const draft = drafts.get(quote.parameters.generation_draft_id)
     if (quote.parameters.generation_draft_version !== draft.version) return failure('quote_stale')
-    if (!quote.affordable) return failure('quota_exceeded')
+    if (!quote.affordable) return failure('weekly_ai_limit')
     const job = {
       id: id(),
       feature_id: draft.feature_id,
@@ -311,7 +321,6 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
       parameters: quote.parameters,
       artifacts: [],
       warnings: [],
-      settled_meters: {},
     }
     jobs.set(job.id, job)
     idempotentJobs.set(request.headers()['idempotency-key'], job)
@@ -345,7 +354,7 @@ const review = () => page.getByTestId('studio-review')
 const quotePanel = () => page.locator('.studio-quote')
 // An uncertain submission relabels the same control, so match both states.
 const generate = () => quotePanel().getByRole('button', { name: /^(Generate document|Try again)$/ })
-const refreshQuote = () => quotePanel().getByRole('button', { name: 'Refresh estimate', exact: true })
+const refreshQuote = () => quotePanel().getByRole('button', { name: 'Refresh', exact: true })
 const upload = () => page.getByLabel('Source files', { exact: true })
 
 async function reviewNew() {
@@ -457,8 +466,9 @@ try {
   await page.waitForFunction(
     () => document.querySelector('[data-testid="studio-pages"] strong')?.textContent?.trim() === '4',
   )
+  assert.match(await quotePanel().getByTestId('weekly-line').innerText(), /AI documents this week\s+2 of 5 used/)
   await quotePanel().screenshot({ path: path.join(output, 'review-pages.png') })
-  checks.push('The count can be changed on the review rail before paying')
+  checks.push('The count can be changed on the review rail before creating, beside the week’s AI documents')
 
   // 3. Examples are one tap, and the guide is one click.
   await open('ai.pdf_topic')
@@ -729,11 +739,12 @@ try {
     stage: 'failed',
   })
   await page.goto(`${origin}/en/app/jobs/${failedId}`, { waitUntil: 'domcontentloaded' })
+  assert.match(await page.getByTestId('job-retry-body').innerText(), /doesn’t count against your week/)
   const beforeRetry = countJobs()
   await page.getByTestId('job-retry-review').click()
   await page.getByTestId('job-retry-quote').waitFor()
-  assert.equal(countJobs(), beforeRetry, 'Reviewing cost does not start a paid retry')
-  assert.match(await page.getByTestId('job-retry-quote').innerText(), /12/)
+  assert.equal(countJobs(), beforeRetry, 'Reviewing does not start a retry')
+  assert.match(await page.getByTestId('job-retry-quote').innerText(), /AI documents this week\s+2 of 5 used/)
   failJobOnce = true
   await page.getByTestId('job-retry-confirm').click()
   await page.getByTestId('job-retry-confirm').filter({ hasText: 'Try again' }).waitFor()
@@ -745,8 +756,44 @@ try {
   assert.deepEqual(replay.body, ambiguous.body)
   assert.equal(await page.evaluate(() => sessionStorage.getItem('pdf-master-pending-job')), null)
   checks.push(
-    'A failed generation retries only after cost confirmation and preserves its key on an ambiguous response',
+    'A failed generation retries only after confirmation and preserves its key on an ambiguous response',
   )
+
+  // A failed AI edit is retried the same way, but it counts against the file's
+  // own edits: the week's AI documents are neither shown nor blamed.
+  const failedEditId = id()
+  const editSource = [...jobs.values()][0]
+  jobs.set(failedEditId, {
+    ...structuredClone(editSource),
+    id: failedEditId,
+    status: 'failed',
+    stage: 'failed',
+    parameters: {
+      ...editSource.parameters,
+      revision: true,
+      root_draft_id: editSource.parameters.generation_draft_id,
+    },
+  })
+  await page.goto(`${origin}/en/app/jobs/${failedEditId}`, { waitUntil: 'domcontentloaded' })
+  const editRetryBody = await page.getByTestId('job-retry-body').innerText()
+  assert.match(editRetryBody, /doesn’t count against this file’s AI edits/)
+  assert.doesNotMatch(editRetryBody, /week/)
+  await page.getByTestId('job-retry-review').click()
+  await page.getByTestId('job-retry-quote').waitFor()
+  const editQuote = page.getByTestId('job-retry-quote')
+  assert.equal(await editQuote.getByTestId('weekly-line').count(), 0, 'An edit shows no weekly AI-documents line')
+  assert.match(await editQuote.innerText(), /AI edits per file on your plan: 3\./)
+  affordable = false
+  await editQuote.getByRole('button', { name: 'Refresh', exact: true }).click()
+  await page.getByTestId('job-retry-refused').waitFor()
+  const editRefusal = await page.getByTestId('job-retry-refused').innerText()
+  assert.match(editRefusal, /used all AI edits for this file[\s\S]*See plans/)
+  assert.doesNotMatch(editRefusal, /week|Monday/)
+  assert.equal(await editQuote.getByTestId('weekly-line').count(), 0, 'Even a week used up is not blamed for an edit')
+  assert.equal(await page.getByTestId('job-retry-confirm').isDisabled(), true)
+  await page.getByTestId('job-retry').screenshot({ path: path.join(output, 'job-retry-edit-refused.png') })
+  affordable = true
+  checks.push('Retrying a failed AI edit speaks of the file’s edits, never the week’s AI documents')
 
   // 9. A description can also arrive pre-filled, which is how the guide works.
   const brief = 'A 3 page briefing on tide tables for a general audience.'
@@ -763,8 +810,11 @@ try {
   await primary().fill('A short fixture document.')
   await reviewNew()
   assert.equal(await generate().isDisabled(), true)
+  assert.match(await page.getByTestId('weekly-limit').innerText(), /reached this week’s limit[\s\S]*See plans/)
+  assert.match(await quotePanel().getByTestId('weekly-line').innerText(), /AI documents this week\s+5 of 5 used/)
+  await quotePanel().screenshot({ path: path.join(output, 'review-week-used-up.png') })
   affordable = true
-  checks.push('Unaffordable quotes cannot submit generation')
+  checks.push('A quote past the week’s limit cannot submit generation, and offers the plans')
 
   for (const locale of ['en', 'uz', 'ru']) {
     for (const width of [1440, 390]) {

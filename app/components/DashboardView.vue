@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { t, path } = useLocale()
+const { t, path, date, timeZone } = useLocale()
 const ws = useWorkspace()
 const studio = useStudio()
 const { sorted, name, description } = useTools()
@@ -9,21 +9,8 @@ const error = ref('')
 const dragging = ref(false)
 const officeAvailable = computed(() => ws.features.value.some((f) => f.id === 'convert.word_to_pdf'))
 const firstName = computed(() => (ws.user.value?.display_name || '').trim().split(/\s+/)[0] || '')
-const usage = computed(() => ws.usage.value as any)
-// The plan in one row: what is left of each allowance, and today's task cap
-// when the plan has one.
-const meters = computed(() => {
-  const all = usage.value?.meters || {}
-  const rows = [
-    { key: 'standardTasks', meter: all.file_tasks },
-    { key: 'pageUnits', meter: all.file_page_units },
-    { key: 'ai_credits', meter: all.ai_credits },
-    { key: 'todayTasks', meter: usage.value?.daily?.limit ? usage.value.daily : null },
-  ]
-  return rows.filter((row) => row.meter && row.meter.limit)
-})
-const share = (meter: { remaining: number; limit: number }) =>
-  `${Math.max(0, Math.min(100, (meter.remaining / meter.limit) * 100))}%`
+// The week's limits reset on Monday 00:00 in Tashkent, shown in this device's zone.
+const resetsAt = computed(() => ws.usage.value?.week?.resets_at ?? ws.usage.value?.resets_at)
 // The two AI services get their own shortcuts, so the file tools below them
 // are the familiar ones.
 const aiShortcuts = computed(() =>
@@ -145,23 +132,15 @@ function onDrop(event: DragEvent) {
       /></NuxtLink>
     </div>
   </section>
-  <section v-if="meters.length" class="home-section">
+  <section v-if="ws.usage.value?.ai_documents || ws.usage.value?.file_jobs" class="home-section">
     <div class="section-heading">
       <h2>{{ t('homePlan') }} · {{ t(ws.user.value?.plan || 'free') }}</h2>
       <NuxtLink :to="path('/app/billing')" class="text-link"
         >{{ t('navBilling') }}<AppIcon name="right" :size="16"
       /></NuxtLink>
     </div>
-    <div class="plan-meters panel">
-      <div v-for="row in meters" :key="row.key" class="plan-meter">
-        <span class="plan-meter-label">{{ t(row.key) }}</span>
-        <p>
-          <strong class="tabular">{{ Math.max(0, row.meter.remaining) }}</strong>
-          <span>{{ t('meterOf', { limit: row.meter.limit }) }}</span>
-        </p>
-        <div class="usage-track"><span :style="{ width: share(row.meter) }" /></div>
-      </div>
-    </div>
+    <WeeklyUsage class="panel" />
+    <p v-if="resetsAt" class="week-reset">{{ t('weekResets') }} {{ date(resetsAt, true) }} · {{ timeZone }}</p>
   </section>
   <section class="home-section">
     <div class="section-heading">

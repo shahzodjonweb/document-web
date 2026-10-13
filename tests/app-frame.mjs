@@ -24,12 +24,16 @@ const account = {
   id: '00000000-0000-4000-8000-777777777777', display_name: 'Dilnoza Karimova', locale: 'en', time_zone: 'UTC',
   mode: 'general', plan: 'free', preferences: {}, login_methods: { email: false, google: false, telegram: true },
 }
-const limits = (workflows) => ({ file_tasks: 300, file_page_units: 3000, ai_credits: 3150, saved_workflows: workflows })
+const limits = (workflows, documents, files, edits) =>
+  ({ weekly_ai_documents: documents, weekly_file_jobs: files, edits_per_file: edits, saved_workflows: workflows })
 const plans = [
-  { id: 'free', name: 'Free', price_xtr: 0, limits: limits(0) },
-  { id: 'plus', name: 'Plus', price_xtr: null, limits: limits(5) },
-  { id: 'premium', name: 'Premium', price_xtr: null, limits: limits(20) },
+  { id: 'free', name: 'Free', price_xtr: 0, limits: limits(0, 5, 15, 3) },
+  { id: 'plus', name: 'Plus', price_xtr: null, limits: limits(5, 20, null, 10) },
+  { id: 'premium', name: 'Premium', price_xtr: null, limits: limits(20, null, null, null) },
 ]
+// This week, as /usage reports it: a null limit is unlimited.
+const allowance = (limit, used) => ({ limit, used, remaining: limit === null ? null : limit - used })
+const week = { starts_at: '2026-10-11T19:00:00Z', resets_at: '2026-10-18T19:00:00Z', time_zone: 'Asia/Tashkent' }
 let providers = { email: false, google: false, telegram: true }
 
 await context.route('**/*', (route) => {
@@ -55,17 +59,14 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   if (endpoint === '/me') return json(account)
   if (endpoint === '/catalog') return json({ features: [], draft: false })
   if (endpoint === '/plans') return json({ plans, checkout_enabled: false, currency: 'XTR', draft: true })
-  if (endpoint === '/usage')
+  if (endpoint === '/usage') {
+    const plan = plans.find((row) => row.id === account.plan).limits
     return json({
-      plan: account.plan,
-      meters: {
-        file_tasks: { limit: 300, remaining: 287 },
-        file_page_units: { limit: 3000, remaining: 2950 },
-        ai_credits: { limit: 3150, remaining: 3150 },
-      },
-      daily: { limit: 20, remaining: 20 },
-      resets_at: '2026-11-01T00:00:00Z',
+      plan: account.plan, week, resets_at: week.resets_at, edits_per_file: plan.edits_per_file,
+      ai_documents: allowance(plan.weekly_ai_documents, 1),
+      file_jobs: allowance(plan.weekly_file_jobs, 3),
     })
+  }
   if (endpoint === '/channels') return json({ required: false, joined: true, channels: [] })
   if (endpoint === '/studio/config')
     return json({ provider: { mode: 'openai', configured: true }, features: [], default_pages: 5 })
@@ -120,7 +121,7 @@ try {
   assert.equal(await page.getByText('Local bot').count(), 0, 'the development bot is not in the customer menu')
   assert.equal(await page.locator('.topbar-title').innerText(), 'Home')
   const chip = page.locator('.plan-chip')
-  assert.equal(await chip.innerText().then((text) => text.replace(/\s+/g, ' ')), 'Free 287 tasks left')
+  assert.equal(await chip.innerText().then((text) => text.replace(/\s+/g, ' ')), 'Free 12 tasks left')
   assert.equal(await chip.getAttribute('href'), '/en/app/billing')
   checks.push('Sidebar has Work and Account groups; no Local bot; the top bar shows the page and tasks left')
 
@@ -161,8 +162,10 @@ try {
   await go('/en/app')
   await sidebar.locator('.side-nav a').first().waitFor()
   assert.ok((await names(sidebar.locator('.side-nav a'))).includes('Saved workflows'))
+  assert.equal(await page.locator('.plan-chip').innerText().then((text) => text.trim()), 'Plus',
+    'unlimited file tasks show no count')
   account.plan = 'free'
-  checks.push('Saved workflows appears only on a plan that includes them')
+  checks.push('Saved workflows appears only on a plan that includes them; unlimited file tasks show no count')
 
   // Skip link: hidden until focused, then visible and it moves focus to the page.
   await go('/en/app')

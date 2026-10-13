@@ -65,13 +65,11 @@ async function apply() {
             <strong class="tabular">{{ data.rewards_count }}</strong><span>{{ t('qualifiedInvites') }}</span>
           </div>
           <div>
-            <strong class="tabular">{{ data.awarded_credits }}</strong><span>{{ t('rewardCredits') }}</span>
+            <strong class="tabular">{{ data.pending_count }}</strong><span>{{ t('pendingInvites') }}</span>
           </div>
         </div>
-        <p class="field-hint">
-          {{ t('rewardExpiry', { days: data.expires_in_days }) }} · {{ t('pendingInvites') }}:
-          {{ data.pending_count }} · {{ t('monthlyCap') }}: {{ data.monthly_cap }}
-        </p>
+        <!-- Invitations are counted, but earn nothing for now. -->
+        <p class="field-hint" data-testid="referral-rewards">{{ t('referralRewardsSoon') }}</p>
       </section>
       <details class="panel referral-code-panel">
         <summary>{{ t('haveCode') }}</summary>

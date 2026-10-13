@@ -117,7 +117,9 @@ async function open(width, theme, insideTelegram) {
     if (endpoint === '/me') return json(account)
     if (endpoint === '/catalog') return json({ features: [], draft: false })
     if (endpoint === '/plans') return json({ plans: [], checkout_enabled: false })
-    if (endpoint === '/usage') return json({ plan: 'premium', remaining: { ai_credits: 100, file_tasks: 100 } })
+    if (endpoint === '/usage')
+      return json({ plan: 'premium', week: { starts_at: '2026-10-11T19:00:00Z', resets_at: '2026-10-18T19:00:00Z', time_zone: 'Asia/Tashkent' }, resets_at: '2026-10-18T19:00:00Z',
+      ai_documents: { limit: null, used: 0, remaining: null }, file_jobs: { limit: null, used: 0, remaining: null }, edits_per_file: null })
     if (endpoint === '/studio/config')
       return json({ provider: { mode: 'openai', configured: true }, default_pages: 5, features: [{ id: 'ai.pptx', name: 'Slides', surface: 'generate', eligible: true, max_pages: 15 }] })
     if (endpoint === '/studio/deck-designs') return json(fixture)

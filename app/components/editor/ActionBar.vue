@@ -1,6 +1,6 @@
 <script setup lang="ts">
-/** Save state, change budget, pre-flight problems, cost review and export. */
-const { t, date } = useLocale()
+/** Save state, change budget, pre-flight problems, the week's file tasks and export. */
+const { t, date, path } = useLocale()
 const session = useEditorSession()
 
 const redacting = computed(() => session.commands.value.some((command) => command.type === 'redact'))
@@ -9,7 +9,6 @@ const mixedRedaction = computed(
 )
 const consent = ref(false)
 
-const meters = computed(() => (Array.isArray(session.quote.value?.meters) ? session.quote.value.meters : []))
 const blocked = computed(
   () =>
     !session.commands.value.length ||
@@ -75,13 +74,13 @@ const saveLabel = computed(() => {
     <div class="editor-actionbar-actions">
       <template v-if="session.quote.value">
         <span class="editor-quote-meters">
-          <span v-for="meter in meters" :key="meter.meter" class="editor-quote-meter">
-            {{ t(meter.meter === 'file_tasks' ? 'standardTask' : meter.meter === 'file_page_units' ? 'pageUnits' : meter.meter) }}
-            <strong>{{ meter.amount }}</strong>
-          </span>
+          <WeeklyLine kind="file" :usage="session.quote.value.usage" />
           <small v-if="session.quote.value.expires_at">{{ t('quoteExpires') }} {{ date(session.quote.value.expires_at, true) }}</small>
         </span>
-        <span v-if="session.quote.value.affordable === false" class="info-banner">{{ t('quotaExceeded') }}</span>
+        <span v-if="session.quote.value.affordable === false" class="info-banner"
+          >{{ t('quotaExceeded') }}
+          <NuxtLink :to="path('/app/billing')" class="text-link">{{ t('studioSeePlans') }}</NuxtLink></span
+        >
         <button
           type="button"
           class="button secondary"

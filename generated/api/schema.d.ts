@@ -625,7 +625,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description Telegram channels a free account must join before using a service. When required and not joined, task requests fail with channels_required and the same channels in message_params. */
+        /** @description Telegram channels a Free or Plus account must join before using a service (Premium is never asked). When required and not joined, task requests fail with channels_required and the same channels in message_params. */
         get: operations["getRequiredChannels"];
         put?: never;
         post?: never;
@@ -1385,14 +1385,8 @@ export interface components {
             size_bytes: number;
             state: string;
         };
-        Balances: {
-            ai_credits: components["schemas"]["MeterBalance"];
-            file_page_units: components["schemas"]["MeterBalance"];
-            file_tasks: components["schemas"]["MeterBalance"];
-        };
         BatchQuote: {
             affordable: boolean;
-            available_balances?: components["schemas"]["Balances"];
             /** Format: date-time */
             expires_at: string;
             feature_id: string;
@@ -1400,19 +1394,12 @@ export interface components {
                 feature_id?: string;
                 index?: number;
                 input_ids?: string[];
-                meters?: {
-                    [key: string]: number;
-                };
                 normalized_parameters?: Record<string, never>;
             }[];
             /** Format: uuid */
             id: string;
             limitations: string[];
             max_children?: number;
-            meters: {
-                amount?: number;
-                meter?: string;
-            }[];
             /** Format: uuid */
             quote_id: string;
             reservation_mode: string;
@@ -1442,14 +1429,8 @@ export interface components {
             /** Format: uuid */
             id: string;
             jobs: components["schemas"]["Job"][];
-            meters: {
-                [key: string]: number;
-            };
             /** Format: uuid */
             quote_id: string;
-            settled_meters: {
-                [key: string]: number;
-            };
             status: string;
         };
         BillingOffer: {
@@ -1461,9 +1442,6 @@ export interface components {
             period_seconds?: number | null;
             plan?: string | null;
             price_xtr: number;
-            quantities: {
-                [key: string]: number;
-            };
             sandbox: boolean;
             version: string;
         };
@@ -1722,14 +1700,8 @@ export interface components {
             /** Format: uuid */
             id: string;
             input_files: components["schemas"]["Asset"][];
-            meters: {
-                [key: string]: number;
-            };
             origin_channel?: string;
             parameters?: Record<string, never>;
-            settled_meters: {
-                [key: string]: number;
-            };
             /** Format: date-time */
             started_at?: string | null;
             /** @enum {unknown} */
@@ -1783,12 +1755,6 @@ export interface components {
                 price: number;
             }[];
         };
-        MeterBalance: {
-            limit: number;
-            remaining: number;
-            reserved: number;
-            used: number;
-        };
         Payment: {
             amount_xtr: number;
             currency: string;
@@ -1830,7 +1796,6 @@ export interface components {
         };
         Quote: {
             affordable: boolean;
-            available_balances: components["schemas"]["Balances"];
             /** Format: date-time */
             expires_at: string;
             feature_id: string;
@@ -1842,10 +1807,6 @@ export interface components {
                 sha256?: string;
             }[];
             limitations?: string[];
-            meters: {
-                amount: number;
-                meter: string;
-            }[];
             normalized_parameters?: Record<string, never>;
             output_expectations?: Record<string, never>;
             plan?: string;
@@ -1854,6 +1815,13 @@ export interface components {
             quote_id: string;
             quote_version?: string;
             tariff_version_id?: string;
+            usage?: {
+                ai_documents?: components["schemas"]["WeeklyAllowance"];
+                edits_per_file?: number | null;
+                file_jobs?: components["schemas"]["WeeklyAllowance"];
+                /** Format: date-time */
+                resets_at?: string;
+            };
         };
         Refund: {
             amount_xtr: number;
@@ -1917,19 +1885,19 @@ export interface components {
             subscription: components["schemas"]["Subscription"] | null;
         };
         Usage: {
-            daily: {
-                limit?: number | null;
-                remaining?: number | null;
-                reserved?: number;
-                /** Format: date-time */
-                resets_at?: string;
-                used?: number;
-            };
-            draft?: boolean;
-            meters: components["schemas"]["Balances"];
+            ai_documents: components["schemas"]["WeeklyAllowance"];
+            edits_per_file: number | null;
+            file_jobs: components["schemas"]["WeeklyAllowance"];
             plan: string;
             /** Format: date-time */
             resets_at: string;
+            week: {
+                /** Format: date-time */
+                resets_at: string;
+                /** Format: date-time */
+                starts_at: string;
+                time_zone: string;
+            };
         };
         User: {
             /** Format: date-time */
@@ -1958,6 +1926,11 @@ export interface components {
             timezone?: string;
             username?: string;
         };
+        WeeklyAllowance: {
+            limit: number | null;
+            remaining: number | null;
+            used: number;
+        };
         WorkflowQuote: {
             confirmation_required: boolean;
             confirmation_token: string;
@@ -1965,10 +1938,6 @@ export interface components {
             expires_at: string;
             input_ids: string[];
             limitations: string[];
-            meters: {
-                amount: number;
-                meter: string;
-            }[];
             steps: components["schemas"]["WorkflowStep"][];
             version: number;
             /** Format: uuid */
@@ -1982,7 +1951,6 @@ export interface components {
         };
         WorkflowStep: {
             feature_id: string;
-            meters?: Record<string, never>;
             parameters?: Record<string, never>;
         };
     };
@@ -7480,7 +7448,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        awarded_credits?: number;
                         code?: string;
                         expires_in_days?: number;
                         monthly_cap?: number;

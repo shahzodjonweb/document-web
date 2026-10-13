@@ -102,7 +102,8 @@ try {
           checkout_enabled: false,
         })
       if (endpoint === '/usage')
-        return json({ plan: 'free', meters: { file_tasks: { remaining: 30, limit: 30 } } })
+        return json({ plan: 'free', week: { starts_at: '2026-10-11T19:00:00Z', resets_at: '2026-10-18T19:00:00Z', time_zone: 'Asia/Tashkent' }, resets_at: '2026-10-18T19:00:00Z',
+      ai_documents: { limit: 5, used: 0, remaining: 5 }, file_jobs: { limit: 15, used: 0, remaining: 15 }, edits_per_file: 3 })
       if (endpoint === '/studio/config') return json({ features: [], provider: {}, limits: {} })
       if (endpoint === '/jobs' && method === 'GET') return json({ results: [], count: 0 })
       if (endpoint === '/channels') return json({ required: false, joined: true, channels: [] })
@@ -118,7 +119,6 @@ try {
             parameters: body.parameters,
             affordable: true,
             expires_at: new Date(Date.now() + 600000).toISOString(),
-            meters: [{ meter: 'file_tasks', amount: 1 }],
           },
           201,
         )

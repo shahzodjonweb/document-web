@@ -21,11 +21,6 @@ const stageIndex = computed(() =>
       )
     : 0,
 )
-const meters = computed(() =>
-  Object.entries((job.value as any)?.settled_meters || job.value?.settled_usage || {}).filter(
-    ([, amount]) => Number(amount) > 0,
-  ),
-)
 const outputs = computed(() => job.value?.artifacts || job.value?.outputs || [])
 /**
  * A generated document can be changed by asking; a converted file cannot.
@@ -58,13 +53,17 @@ const retryAvailable = computed(
     job.value.feature_id !== 'ai.images',
 )
 const retryQuote = ref<any>(null)
+/**
+ * A failed AI edit is retried through the same quote as a new document, but it
+ * is checked against the file's own edits, never the week's AI documents. The
+ * job says so before a quote exists; the quote says so once it does.
+ */
+const retryIsEdit = computed(
+  () => !!(retryQuote.value?.normalized_parameters?.revision || (job.value as any)?.parameters?.revision),
+)
 const retryBusy = ref(false)
 const retryPending = ref(false)
 const retryKey = ref('')
-const retryMeters = computed(() => {
-  const value = retryQuote.value?.meters || []
-  return Array.isArray(value) ? value : Object.entries(value).map(([meter, amount]) => ({ meter, amount }))
-})
 async function reviewRetry() {
   if (retryBusy.value || retryPending.value) return
   retryBusy.value = true
@@ -244,15 +243,6 @@ function downloadUrl(url: string | undefined, id: string) {
           {{ date(job.expires_at || outputs[0]?.expires_at, true) }} · {{ timeZone }}
         </p>
       </section>
-      <section v-if="meters.length" class="panel receipt-panel">
-        <h3>{{ t('taskUsed') }}</h3>
-        <div v-for="[meter, amount] in meters" :key="meter">
-          <span>{{
-            t(meter === 'file_tasks' ? 'standardTask' : meter === 'file_page_units' ? 'pageUnits' : meter)
-          }}</span
-          ><strong>{{ amount }}</strong>
-        </div>
-      </section>
       <p v-for="warning in job.warnings" :key="warning" class="info-banner">{{ t(warning) }}</p>
       <!-- Say what should change; everything unmentioned stays as it is. -->
       <section v-if="reviseDraftId" class="panel revise-panel" data-testid="job-revise">
@@ -292,11 +282,16 @@ function downloadUrl(url: string | undefined, id: string) {
             t('reviseAction')
           }}
         </button>
-        <p class="field-hint">{{ t('noChargeBefore') }}</p>
+        <p class="field-hint">
+          {{ t('noChargeBefore') }}
+          <template v-if="typeof ws.usage.value?.edits_per_file === 'number'">
+            {{ t('editsAllowance', { count: ws.usage.value.edits_per_file }) }}</template
+          >
+        </p>
       </section>
       <section v-if="retryAvailable" class="panel revise-panel" data-testid="job-retry">
         <h3>{{ t('generationRetryTitle') }}</h3>
-        <p>{{ t('generationRetryBody') }}</p>
+        <p data-testid="job-retry-body">{{ t(retryIsEdit ? 'editRetryBody' : 'generationRetryBody') }}</p>
         <button
           v-if="!retryQuote"
           class="button primary"
@@ -307,12 +302,16 @@ function downloadUrl(url: string | undefined, id: string) {
           {{ t('generationRetryReview') }}
         </button>
         <div v-else data-testid="job-retry-quote">
-          <div v-for="meter in retryMeters" :key="meter.meter" class="meter-row">
-            <span>{{ t(meter.meter) }}</span
-            ><strong>{{ meter.amount }}</strong>
-          </div>
+          <!-- An edit counts against the file's own edits, not the week's documents. -->
+          <WeeklyLine v-if="!retryIsEdit" kind="ai" :usage="retryQuote.usage" />
+          <p v-else-if="typeof retryQuote.usage?.edits_per_file === 'number'" class="field-hint">
+            {{ t('editsAllowance', { count: retryQuote.usage.edits_per_file }) }}
+          </p>
           <p>{{ t('quoteExpires') }} {{ date(retryQuote.expires_at, true) }}</p>
-          <p v-if="retryQuote.affordable === false" class="info-banner">{{ t('quotaExceeded') }}</p>
+          <p v-if="retryQuote.affordable === false" class="info-banner" data-testid="job-retry-refused">
+            {{ t(retryIsEdit ? 'editLimitReached' : 'quotaExceeded') }}
+            <NuxtLink :to="path('/app/billing')" class="text-link">{{ t('studioSeePlans') }}</NuxtLink>
+          </p>
           <button
             class="button primary"
             data-testid="job-retry-confirm"
