@@ -185,17 +185,14 @@ async function resume() {
           <h2>{{ t('reviewTitle') }}</h2>
           <p>{{ t('batchBilling') }}</p>
           <template v-if="quote"
-            ><div v-for="meter in quote.meters" :key="meter.meter" class="meter-row">
-              <span>{{
-                t(
-                  meter.meter === 'file_tasks'
-                    ? 'standardTasks'
-                    : meter.meter === 'file_page_units'
-                      ? 'pageUnits'
-                      : meter.meter,
-                )
-              }}</span
-              ><strong>{{ meter.amount }}</strong>
+            ><WeeklyLine kind="file" />
+            <div v-if="quote.affordable === false" class="warning-banner" data-testid="weekly-limit">
+              <AppIcon name="alert" :size="17" /><span
+                >{{ t('quotaExceeded') }}
+                <NuxtLink :to="path('/app/billing')" class="text-link">{{
+                  t('studioSeePlans')
+                }}</NuxtLink></span
+              >
             </div>
             <button
               class="button primary full"

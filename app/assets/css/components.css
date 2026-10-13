@@ -511,6 +511,24 @@ b {
   border-radius: inherit;
   background: var(--action);
 }
+/* This week's allowance beside a task: the label left, "4 of 15 used" right. */
+.weekly-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--hairline);
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+.weekly-line strong {
+  color: var(--ink);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
 
 /* ------------------------------------------------------------ empty states */
 

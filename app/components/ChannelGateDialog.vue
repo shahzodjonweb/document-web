@@ -1,8 +1,9 @@
 <script setup lang="ts">
 /**
- * PDF Master is free for members of the owner's Telegram channels. When a task
- * is refused because a free account has not joined them, this lists the
- * channels, opens each in Telegram, and asks the server again on "I've joined".
+ * The Free and Plus plans are for members of the owner's Telegram channels;
+ * Premium is never asked. When a task is refused because a Free or Plus account
+ * has not joined them, this lists the channels, opens each in Telegram, and asks
+ * the server again on "I've joined".
  */
 const { t, path } = useLocale()
 const ws = useWorkspace()

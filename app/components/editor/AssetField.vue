@@ -102,6 +102,6 @@ function onSigned(index: number) {
 
     <EditorSignaturePad v-if="padOpen" @saved="onSigned" @close="padOpen = false" />
 
-    <p class="field-hint">{{ t('editorImageTypes') }} · {{ t('editorImageCost') }}</p>
+    <p class="field-hint">{{ t('editorImageTypes') }}</p>
   </div>
 </template>

@@ -2,6 +2,8 @@ import { createPublicApi } from '../../generated/api/client'
 import type { User, Feature, Usage, Plan, Job, FileAsset, Quote } from '../../generated/api/types'
 let profileWrites: Promise<unknown> = Promise.resolve()
 let zoneSent = ''
+/** Refusals because this week's allowance, or a file's AI edits, ran out. */
+export const LIMIT_CODES = ['weekly_ai_limit', 'weekly_file_limit', 'edit_limit']
 export function useWorkspace() {
   const user = useState<User | null>('account', () => null)
   const sessionReady = useState('session-ready', () => false)
@@ -29,6 +31,9 @@ export function useWorkspace() {
   // any task with `channels_required`; the dialog that lists the channels opens
   // from here, so every page that starts a task gets it.
   const channelGate = useState<{ channels: any[] } | null>('channel-gate', () => null)
+  // The last limit refusal's message: the error banner that shows it also offers
+  // the plans, wherever the refusal came from.
+  const limitMessage = useState('limit-message', () => '')
   async function api<T = any>(url: string, options: Record<string, any> = {}): Promise<T> {
     try {
       return (await $fetch<T>(`/api/v1${url}`, {
@@ -44,6 +49,7 @@ export function useWorkspace() {
     } catch (error: any) {
       const refused = error?.data?.error
       if (refused?.code === 'channels_required') channelGate.value = { channels: refused.message_params?.channels || [] }
+      if (LIMIT_CODES.includes(refused?.code) && refused.message) limitMessage.value = refused.message
       throw error
     }
   }
@@ -175,6 +181,7 @@ export function useWorkspace() {
     activeTool,
     activeParameters,
     quote,
+    limitMessage,
     api,
     updateProfile,
     init,

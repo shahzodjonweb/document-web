@@ -25,20 +25,23 @@ const account = {
   id: '00000000-0000-4000-8000-999999999999', display_name: 'Card payer', locale: 'en', time_zone: 'UTC',
   mode: 'general', plan: 'free', preferences: {}, login_methods: { email: false, google: false, telegram: true },
 }
-const limits = (credits, price) => ({
-  file_tasks: 300, file_page_units: 3000, max_file_mib: 25, max_pages_per_job: 100, max_generated_pdf_pages: 7,
-  max_generated_slides: 12, max_deck_images: 4, ai_credits: credits, price_uzs: price,
-  daily_ai_documents: price ? null : 3,
+// Weekly limits as the plan seed sets them; null is unlimited.
+const limits = (price, documents, files, edits) => ({
+  weekly_ai_documents: documents, weekly_file_jobs: files, edits_per_file: edits, max_file_mib: 25,
+  max_pages_per_job: 100, max_generated_pdf_pages: 7, max_generated_slides: 12, max_deck_images: 4, price_uzs: price,
 })
 const plans = [
-  { id: 'free', name: 'Free', price_xtr: 0, limits: limits(3150, null) },
-  { id: 'plus', name: 'Plus', price_xtr: null, limits: limits(10500, 49000) },
-  { id: 'premium', name: 'Premium', price_xtr: null, limits: limits(30000, 99000) },
+  { id: 'free', name: 'Free', price_xtr: 0, limits: limits(null, 5, 15, 3) },
+  { id: 'plus', name: 'Plus', price_xtr: null, limits: limits(20000, 20, null, 10) },
+  { id: 'premium', name: 'Premium', price_xtr: null, limits: limits(60000, null, null, null) },
 ]
 let payment = null
+// Stars offers, empty by default as in production; a platform still on credits
+// also returns packs, which have no plan.
+let offers = []
 const options = () => ({
   enabled: true, currency: 'UZS', period_days: 30, automatic: { available: false },
-  plans: [{ plan: 'plus', price: 49000 }, { plan: 'premium', price: 99000 }], payment,
+  plans: [{ plan: 'plus', price: 20000 }, { plan: 'premium', price: 60000 }], payment,
 })
 
 await context.route('**/*', (route) => {
@@ -66,16 +69,18 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   if (endpoint === '/catalog') return json({ features: [], draft: false })
   if (endpoint === '/plans') return json({ plans, checkout_enabled: false, currency: 'XTR', draft: true })
   if (endpoint === '/usage')
-    return json({ plan: 'free', meters: { file_tasks: { limit: 300, remaining: 300 }, file_page_units: { limit: 3000, remaining: 3000 },
-      ai_credits: { limit: 3150, remaining: 3150 } }, daily: { limit: 20, remaining: 20 }, resets_at: '2026-11-01T00:00:00Z' })
+    return json({ plan: 'free', week: { starts_at: '2026-10-11T19:00:00Z', resets_at: '2026-10-18T19:00:00Z', time_zone: 'Asia/Tashkent' },
+      ai_documents: { limit: 5, used: 0, remaining: 5 }, file_jobs: { limit: 15, used: 0, remaining: 15 }, edits_per_file: 3,
+      resets_at: '2026-10-18T19:00:00Z' })
   if (endpoint === '/billing/offers')
-    return json({ offers: [], sandbox: false, checkout_enabled: false, currency: 'XTR', billing_mode: 'disabled' })
+    return json({ offers, sandbox: offers.length > 0, checkout_enabled: offers.length > 0, currency: 'XTR',
+      billing_mode: offers.length ? 'sandbox' : 'disabled' })
   if (endpoint === '/billing/subscription') return json({ plan: 'free', subscription: null, sandbox: false, checkout_enabled: false })
   if (endpoint === '/billing/transactions' || endpoint === '/billing/invoices') return json({ results: [] })
   if (endpoint === '/billing/manual' && method === 'GET') return json(options())
   if (endpoint === '/billing/manual' && method === 'POST') {
     const { plan } = request.postDataJSON()
-    payment = { id: '00000000-0000-4000-8000-000000000101', reference: 'PM-7K3QX', plan, amount: plan === 'plus' ? 49000 : 99000,
+    payment = { id: '00000000-0000-4000-8000-000000000101', reference: 'PM-7K3QX', plan, amount: plan === 'plus' ? 20000 : 60000,
       currency: 'UZS', status: 'awaiting', channel: 'web', card: { number: CARD, last4: '9012', holder: 'Shakhzod Uralov', label: 'Uzcard' },
       receipt_received: false, payer_note: '', created_at: new Date().toISOString(), expires_at: new Date(Date.now() + 172800000).toISOString(),
       submitted_at: null, decided_at: null, rejection_reason: null, starts_at: null, active_until: null }
@@ -92,7 +97,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   }
   if (endpoint === '/studio/config') return json({ provider: { mode: 'openai', configured: true }, features: [], default_pages: 5 })
   if (endpoint === '/jobs') return json({ results: [], count: 0 })
-  if (endpoint === '/referrals') return json({ code: 'x', url: null, rewards_count: 0, pending_count: 0, awarded_credits: 0, monthly_cap: 5, expires_in_days: 7, qualification: '', sandbox: false })
+  if (endpoint === '/referrals') return json({ code: 'x', url: null, rewards_count: 0, pending_count: 0, monthly_cap: 5, expires_in_days: 7, qualification: '', sandbox: false })
   unexpected.push(`${method} ${endpoint}`)
   return json({ error: { code: 'not_found', message: 'not found' } }, 404)
 })
@@ -117,11 +122,20 @@ try {
   await page.goto(`${origin}/en/app/billing`, { waitUntil: 'domcontentloaded' })
   await page.getByTestId('pay-premium').waitFor()
   const cards = await page.locator('.plan-card').allInnerTexts()
-  assert.ok(cards[1].includes('49 000') && cards[1].includes("so'm") && cards[2].includes('99 000'), 'prices in so\'m on the cards')
-  assert.match(await page.getByTestId('pay-premium').innerText(), /Pay 99 000 so'm/)
-  assert.ok(cards[0].includes('3') && cards[0].includes('AI documents a day'), 'Free shows its daily AI documents')
-  assert.ok(cards[2].includes('Unlimited') && cards[2].includes('AI documents a day'), 'paid plans show Unlimited')
-  checks.push("Plan cards show so'm prices and a Pay button")
+  assert.ok(cards[1].includes('20 000') && cards[1].includes("so'm") && cards[2].includes('60 000'), 'prices in so\'m on the cards')
+  assert.match(await page.getByTestId('pay-premium').innerText(), /Pay 60 000 so'm/)
+  const features = (index) => page.locator('.plan-card').nth(index).locator('.plan-features li').allInnerTexts()
+  const [free, plus, premium] = [await features(0), await features(1), await features(2)]
+  assert.deepEqual(free.slice(0, 3), ['5 AI documents a week', '15 file tasks a week', '3 AI edits per file'])
+  assert.deepEqual(plus.slice(0, 3), ['20 AI documents a week', 'Unlimited file tasks', '10 AI edits per file'])
+  assert.deepEqual(premium.slice(0, 4),
+    ['Unlimited AI documents', 'Unlimited file tasks', 'Unlimited AI edits', 'No channel subscription needed'])
+  assert.ok(!free.concat(plus).some((row) => row.includes('channel')), 'only Premium skips the channels')
+  assert.ok(!cards.join(' ').match(/credit|a day/i), 'no credits or daily caps left on the cards')
+  assert.deepEqual(await page.getByTestId('current-plan').locator('.plan-meter-label').allInnerTexts(),
+    ['AI documents this week', 'File tasks this week', 'AI edits per file'])
+  assert.match(await page.getByTestId('week-reset').innerText(), /^Limits renew .+ · \S+/)
+  checks.push("Plan cards show so'm prices, the weekly limits, Premium without channels, and a Pay button")
 
   await page.getByTestId('pay-premium').click()
   const panel = page.getByTestId('manual-payment')
@@ -135,7 +149,7 @@ try {
   await page.getByTestId('manual-card-number').waitFor()
   assert.equal(await page.getByTestId('manual-card-number').innerText(), '8600 1234 5678 9012')
   const text = await panel.innerText()
-  assert.ok(text.includes('PM-7K3QX') && text.includes("99 000 so'm") && text.includes('Shakhzod Uralov'))
+  assert.ok(text.includes('PM-7K3QX') && text.includes("60 000 so'm") && text.includes('Shakhzod Uralov'))
   assert.equal(await page.getByTestId('manual-send').isDisabled(), true, 'nothing to send until a receipt is chosen')
   await audit('card')
   checks.push('The card, the exact amount, the holder and the payment code are shown')
@@ -149,6 +163,21 @@ try {
   assert.ok(sent.type.startsWith('multipart/form-data'), 'the receipt goes as a file upload')
   await audit('waiting')
   checks.push('Sending the receipt shows the payment waiting for review')
+
+  // Web ships before the platform: an older platform still lists a credit pack
+  // (plan null) beside the plan. Only the plan is offered, and nothing breaks.
+  offers = [
+    { id: 'sandbox-plus', kind: 'subscription', plan: 'plus', price_xtr: 250, currency: 'XTR', checkout_enabled: true },
+    { id: 'sandbox-ai-pack', kind: 'ai_pack', plan: null, price_xtr: 100, currency: 'XTR', checkout_enabled: true,
+      quantities: { ai_credits: 50 } },
+  ]
+  await page.goto(`${origin}/en/app/billing`, { waitUntil: 'domcontentloaded' })
+  await page.getByTestId('commerce-offers').waitFor()
+  assert.deepEqual(await page.getByTestId('commerce-offers').locator('.offer-card h3').allInnerTexts(), ['Plus'])
+  assert.equal(await page.getByTestId('payment-history').count(), 1, 'the panel below the offers still renders')
+  assert.deepEqual(errors, [], 'an offer without a plan breaks nothing')
+  offers = []
+  checks.push('Stars offers list plans only; a pack from an older platform is left out without an error')
 
   signedIn = false
   await page.goto(`${origin}/en/pricing`, { waitUntil: 'domcontentloaded' })

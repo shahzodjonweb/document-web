@@ -79,12 +79,6 @@ const countPages = computed(() =>
 )
 const validInput = computed(() => ws.activeUploads.value.length >= (props.toolId === 'pdf.merge' ? 2 : 1))
 const param = ws.activeParameters
-const quoteMeters = computed(() => {
-  const q = ws.quote.value
-  return Array.isArray(q?.meters)
-    ? q!.meters
-    : Object.entries(q?.cost || q?.estimated_usage || {}).map(([meter, amount]) => ({ meter, amount }))
-})
 const limits = computed(
   () => ws.plans.value.find((p) => p.id === (ws.user.value?.plan || 'free'))?.limits || {},
 )
@@ -520,28 +514,13 @@ function onDrop(event: DragEvent) {
           }}
         </p>
         <template v-if="ws.quote.value">
-          <div v-if="ws.quote.value.affordable === false" class="warning-banner">
-            <AppIcon name="alert" :size="17" />{{ t('quotaExceeded') }}
+          <div v-if="ws.quote.value.affordable === false" class="warning-banner" data-testid="weekly-limit">
+            <AppIcon name="alert" :size="17" /><span
+              >{{ t('quotaExceeded') }}
+              <NuxtLink :to="path('/app/billing')" class="text-link">{{ t('studioSeePlans') }}</NuxtLink></span
+            >
           </div>
-          <dl class="quote-meters">
-            <div v-for="meter in quoteMeters" :key="meter.meter">
-              <dt>
-                {{
-                  t(
-                    meter.meter === 'file_tasks'
-                      ? 'standardTask'
-                      : meter.meter === 'file_page_units'
-                        ? 'pageUnits'
-                        : meter.meter,
-                  )
-                }}<small v-if="(ws.quote.value as any).available_balances?.[meter.meter]"
-                  >{{ (ws.quote.value as any).available_balances[meter.meter].remaining }}
-                  {{ t('remaining') }}</small
-                >
-              </dt>
-              <dd>{{ meter.amount }}</dd>
-            </div>
-          </dl>
+          <WeeklyLine kind="file" :usage="ws.quote.value.usage" />
         </template>
       </li>
     </ol>

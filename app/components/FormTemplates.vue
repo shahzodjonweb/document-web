@@ -178,18 +178,11 @@ async function remove(id: string) {
         </button>
       </div>
       <template v-if="quote"
-        ><div v-for="meter in quote.meters" :key="meter.meter" class="meter-row">
-          <span>{{
-            t(
-              meter.meter === 'file_tasks'
-                ? 'standardTask'
-                : meter.meter === 'file_page_units'
-                  ? 'pageUnits'
-                  : meter.meter,
-            )
-          }}</span
-          ><strong>{{ meter.amount }}</strong>
-        </div>
+        ><WeeklyLine kind="file" />
+        <p v-if="quote.affordable === false" class="info-banner" data-testid="weekly-limit">
+          {{ t('quotaExceeded') }}
+          <NuxtLink :to="path('/app/billing')" class="text-link">{{ t('studioSeePlans') }}</NuxtLink>
+        </p>
         <button class="button primary full" :disabled="busy || quote.affordable === false" @click="runBatch">
           {{ t('startProcessing') }}
         </button></template

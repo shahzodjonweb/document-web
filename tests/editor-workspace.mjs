@@ -143,7 +143,8 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
     })
   if (endpoint === '/plans') return json({ plans: [{ id: plan, name: plan, limits: {} }], draft: true })
   if (endpoint === '/usage')
-    return json({ meters: { file_tasks: { remaining: 50, limit: 90 } }, daily: {}, resets_at: null })
+    return json({ plan: 'free', week: { starts_at: '2026-10-11T19:00:00Z', resets_at: '2026-10-18T19:00:00Z', time_zone: 'Asia/Tashkent' }, resets_at: '2026-10-18T19:00:00Z',
+      ai_documents: { limit: 5, used: 0, remaining: 5 }, file_jobs: { limit: 15, used: 4, remaining: 11 }, edits_per_file: 3 })
   if (endpoint === '/jobs' && method === 'GET') return json({ results: [...jobs.values()], count: jobs.size })
   if (endpoint === '/studio/config') return json({ features: [], limits: {}, provider: {} })
   if (endpoint === '/editor/form-templates') return json({ results: [], limit: plan === 'premium' ? 30 : 0 })
@@ -178,11 +179,8 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
     const quote = {
       id: id(),
       feature_id: 'editor.visual',
-      meters: [
-        { meter: 'file_tasks', amount: 1 },
-        { meter: 'file_page_units', amount: 2 },
-      ],
       affordable: true,
+      usage: { file_jobs: { limit: 15, used: 4, remaining: 11 }, resets_at: '2026-10-18T19:00:00Z' },
       expires_at: new Date(Date.now() + 600000).toISOString(),
     }
     quotes.set(quote.id, quote)
@@ -192,7 +190,6 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
     const quote = {
       id: id(),
       feature_id: body.feature_id,
-      meters: [{ meter: 'file_tasks', amount: 1 }],
       affordable: true,
       expires_at: new Date(Date.now() + 600000).toISOString(),
     }
@@ -203,7 +200,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
     const key = request.headers()['idempotency-key']
     if (acceptedKeys.has(key)) return json(acceptedKeys.get(key))
     if (!quotes.has(body.quote_id)) return failure('quote_expired')
-    const job = { id: id(), feature_id: 'editor.visual', status: 'succeeded', artifacts: [], warnings: [], settled_meters: {} }
+    const job = { id: id(), feature_id: 'editor.visual', status: 'succeeded', artifacts: [], warnings: [] }
     jobs.set(job.id, job)
     acceptedKeys.set(key, job)
     if (failJobOnce) {
@@ -307,12 +304,14 @@ try {
   // 5. Review then export, with a working idempotency key.
   await page.getByTestId('editor-review').click()
   await page.getByTestId('editor-export').waitFor()
-  assert.equal(jobPosts().length, 0, 'reviewing cost never submits a job')
+  assert.equal(jobPosts().length, 0, 'reviewing never submits a job')
+  assert.match(await page.getByTestId('editor-actionbar').getByTestId('weekly-line').innerText(),
+    /File tasks this week\s+4 of 15 used/)
   await page.getByTestId('editor-export').click()
   await page.waitForURL('**/app/jobs/*')
   assert.equal(jobPosts().length, 1, 'confirming submits exactly one job')
   assert.ok(jobPosts()[0].key, 'the job carries an idempotency key')
-  checks.push('Review shows cost without charging; export submits one idempotent job')
+  checks.push('Review shows the week’s file tasks without using one; export submits one idempotent job')
 
   // 6. An uncertain submission keeps its key and retries onto the same job.
   failJobOnce = true

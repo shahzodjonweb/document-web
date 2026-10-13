@@ -433,7 +433,6 @@ watch(
 )
 watch(form, invalidateQuote, { deep: true, flush: 'sync' })
 watch(files, invalidateQuote, { deep: true, flush: 'sync' })
-const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.meters : []))
 </script>
 <template>
   <div class="studio-page">
@@ -622,7 +621,7 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
                   :disabled="!!busy || !canUseTool || !hasEssentialInput"
                   @click="review"
                 >
-                  {{ busy ? t('working') : t('studioReviewCost') }}<AppIcon name="right" :size="17" />
+                  {{ busy ? t('working') : t('studioReviewStep') }}<AppIcon name="right" :size="17" />
                 </button>
               </div>
               <p class="field-hint studio-charge-hint">{{ t('noChargeBefore') }}</p>
@@ -841,7 +840,7 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
             <p class="review-advice"><AppIcon name="shield" :size="17" />{{ t('reviewBeforeShare') }}</p>
             <div v-if="!quote" class="studio-form-actions">
               <button class="button primary" @click="review" :disabled="!!busy || submissionPending">
-                {{ t('studioReviewCost') }}
+                {{ t('studioReviewStep') }}
               </button>
             </div>
           </section>
@@ -879,21 +878,14 @@ const meters = computed(() => (Array.isArray(quote.value?.meters) ? quote.value.
               {{ t('studioPagesClamped', { asked: clampedFrom, given: readingPages }) }}
               <NuxtLink :to="path('/app/billing')" class="text-link">{{ t('studioSeePlans') }}</NuxtLink>
             </p>
-            <div v-for="meter in meters" :key="meter.meter" class="meter-row">
-              <span>{{
-                t(
-                  meter.meter === 'file_tasks'
-                    ? 'standardTask'
-                    : meter.meter === 'file_page_units'
-                      ? 'pageUnits'
-                      : meter.meter,
-                )
-              }}</span
-              ><strong>{{ meter.amount }}</strong>
-            </div>
+            <!-- An edit counts against the file's own edits, not the week's documents. -->
+            <WeeklyLine v-if="!revising" kind="ai" :usage="quote.usage" />
             <p class="quote-expiry">{{ t('quoteExpires') }} {{ date(quote.expires_at, true) }}</p>
-            <div v-if="quote.affordable === false" class="warning-banner">
-              <AppIcon name="alert" :size="17" />{{ t('quotaExceeded') }}
+            <div v-if="quote.affordable === false" class="warning-banner" data-testid="weekly-limit">
+              <AppIcon name="alert" :size="17" /><span
+                >{{ t(revising ? 'editLimitReached' : 'quotaExceeded') }}
+                <NuxtLink :to="path('/app/billing')" class="text-link">{{ t('studioSeePlans') }}</NuxtLink></span
+              >
             </div>
             <button
               class="button primary full"

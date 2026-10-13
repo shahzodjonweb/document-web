@@ -115,13 +115,17 @@
   grid-auto-columns: minmax(0, 1fr);
   grid-auto-flow: column;
 }
+/* A label that wraps takes the extra height, so the numbers line up. */
 .plan-meter {
+  display: flex;
+  flex-direction: column;
   padding: var(--space-5);
 }
 .plan-meter + .plan-meter {
   border-left: 1px solid var(--hairline);
 }
 .plan-meter-label {
+  flex: 1;
   color: var(--muted);
   font-size: var(--text-sm);
   font-weight: 500;
@@ -138,6 +142,12 @@
   letter-spacing: -0.02em;
 }
 .plan-meter p span {
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+/* When the week's limits renew, under the plan row on Home. */
+.week-reset {
+  margin: var(--space-2) 0 0;
   color: var(--muted);
   font-size: var(--text-sm);
 }
@@ -439,35 +449,13 @@
 .tool-review .warning-banner {
   margin: var(--space-4) 0 0;
 }
-.tool-review .quote-meters {
-  display: grid;
-  gap: var(--space-2);
+/* The week's file tasks, under the summary. */
+.tool-review .weekly-line {
   margin: var(--space-4) 0 0;
-  padding: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 0;
   border-radius: var(--radius-md);
   background: var(--surface-sunken);
-}
-.tool-review .quote-meters > div {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-3);
-}
-.tool-review .quote-meters dt {
-  color: var(--text);
-  font-size: 14px;
-}
-.tool-review .quote-meters dt small {
-  display: block;
-  margin: 2px 0 0;
-  color: var(--muted);
-  font-size: var(--text-xs);
-}
-.tool-review .quote-meters dd {
-  margin: 0;
-  color: var(--ink);
-  font: 700 var(--text-md) var(--font-display);
-  font-variant-numeric: tabular-nums;
 }
 .tool-action {
   display: flex;
@@ -1399,7 +1387,6 @@
   font-weight: 600;
 }
 .result-panel,
-.receipt-panel,
 .revise-panel {
   padding: var(--space-5) var(--space-6);
 }
@@ -1447,7 +1434,6 @@
   color: var(--muted);
   font-size: var(--text-sm);
 }
-.receipt-panel h3,
 .revise-panel h3 {
   display: flex;
   align-items: center;
@@ -1455,27 +1441,10 @@
   margin-bottom: var(--space-2);
   font-size: var(--text-md);
 }
-.receipt-panel > div {
-  display: flex;
-  justify-content: space-between;
-  padding: var(--space-2) 0;
-  border-top: 1px solid var(--hairline);
-  font-size: 14px;
-}
-.receipt-panel strong {
-  color: var(--ink);
-  font-variant-numeric: tabular-nums;
-}
 .revise-panel > p {
   margin-bottom: var(--space-4);
   color: var(--muted);
   font-size: 14px;
-}
-.revise-panel .meter-row {
-  display: flex;
-  justify-content: space-between;
-  padding: var(--space-2) 0;
-  border-bottom: 1px solid var(--hairline);
 }
 .result-actions {
   display: flex;
@@ -1490,7 +1459,6 @@
     padding: var(--space-3);
   }
   .result-panel,
-  .receipt-panel,
   .revise-panel {
     padding: var(--space-4);
   }
@@ -1938,6 +1906,11 @@
 }
 .pricing-teaser small {
   color: var(--muted);
+  font-size: var(--text-sm);
+}
+/* What a week on the plan holds, under its price. */
+.teaser-week {
+  color: var(--text);
   font-size: var(--text-sm);
 }
 .faq {

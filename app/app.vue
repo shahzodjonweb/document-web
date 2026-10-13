@@ -58,7 +58,8 @@ const title = computed(() => {
   if (route.path.includes('/deck-setup')) return t('navCreate')
   return t('navHome')
 })
-const tasksLeft = computed<number | undefined>(() => (ws.usage.value as any)?.meters?.file_tasks?.remaining)
+// File tasks left this week; an unlimited plan (null) shows no count.
+const tasksLeft = computed(() => ws.usage.value?.file_jobs?.remaining ?? null)
 const initial = computed(() => (user.value?.display_name || 'P').slice(0, 1).toUpperCase())
 // A visitor who is not signed in gets the plain public frame around the
 // sign-in panel; the app menu would only lead back to it. While the session
@@ -212,7 +213,7 @@ watch(
         <div class="header-actions">
           <NuxtLink v-if="user" :to="path('/app/billing')" class="plan-chip"
             ><span class="plan-chip-name">{{ t(user.plan || 'free') }}</span
-            ><span v-if="tasksLeft !== undefined" class="plan-chip-left">{{
+            ><span v-if="tasksLeft !== null" class="plan-chip-left">{{
               count('tasksLeft', Math.max(0, tasksLeft))
             }}</span></NuxtLink
           ><label class="locale-picker"

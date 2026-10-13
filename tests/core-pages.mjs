@@ -37,8 +37,23 @@ const features = [
     properties: { language: { type: 'string', enum: ['eng', 'rus', 'uzb'], default: 'eng' } },
   }),
 ]
-const plans = [{ id: 'free', name: 'Free', price_xtr: 0, limits: { max_file_mib: 25, max_pages_per_job: 100, saved_workflows: 0 } }]
+const limits = (price, documents, files, edits) => ({ max_file_mib: 25, max_pages_per_job: 100, saved_workflows: 0,
+  price_uzs: price, weekly_ai_documents: documents, weekly_file_jobs: files, edits_per_file: edits })
+const plans = [
+  { id: 'free', name: 'Free', price_xtr: 0, limits: limits(null, 5, 15, 3) },
+  { id: 'plus', name: 'Plus', price_xtr: null, limits: limits(20000, 20, null, 10) },
+  { id: 'premium', name: 'Premium', price_xtr: null, limits: limits(60000, null, null, null) },
+]
+// This week's allowance, as /usage and a quote report it.
+const week = { starts_at: '2026-10-11T19:00:00Z', resets_at: '2026-10-18T19:00:00Z', time_zone: 'Asia/Tashkent' }
+const usage = {
+  plan: 'free', week, resets_at: week.resets_at, edits_per_file: 3,
+  ai_documents: { limit: 5, used: 2, remaining: 3 },
+  file_jobs: { limit: 15, used: 3, remaining: 12 },
+}
 let uploads = 0
+// Compress is refused once the week is used up, as the server says it.
+let fileWeekUsedUp = false
 const jobs = new Map()
 
 await context.route('**/*', (route) => {
@@ -58,17 +73,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   if (endpoint === '/me') return json(account)
   if (endpoint === '/catalog') return json({ features, draft: false })
   if (endpoint === '/plans') return json({ plans, checkout_enabled: false })
-  if (endpoint === '/usage')
-    return json({
-      plan: 'free',
-      meters: {
-        file_tasks: { limit: 300, remaining: 262 },
-        file_page_units: { limit: 3000, remaining: 2710 },
-        ai_credits: { limit: 3150, remaining: 2900 },
-      },
-      daily: { limit: 20, remaining: 17 },
-      resets_at: '2026-11-01T00:00:00Z',
-    })
+  if (endpoint === '/usage') return json(usage)
   if (endpoint === '/channels') return json({ required: false, joined: true, channels: [] })
   if (endpoint === '/studio/config')
     return json({
@@ -92,16 +97,16 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   if (endpoint.startsWith('/files/') && method === 'DELETE') return json({})
   if (endpoint === '/quotes' && method === 'POST') {
     const body = request.postDataJSON()
+    if (fileWeekUsedUp)
+      return json({ error: { code: 'weekly_file_limit', message: 'This week’s file tasks are used up.',
+        message_params: { limit: 15, used: 15, requested: 1, resets_at: week.resets_at } } }, 429)
+    const { plan, week: _, ...summary } = usage
     return json({
       id: '00000000-0000-4000-8000-000000000300',
       feature_id: body.feature_id,
       input_ids: body.input_ids,
-      meters: [
-        { meter: 'file_tasks', amount: 1 },
-        { meter: 'file_page_units', amount: 9 },
-      ],
-      available_balances: { file_tasks: { remaining: 262 }, file_page_units: { remaining: 2710 } },
       affordable: true,
+      usage: summary,
       expires_at: new Date(Date.now() + 900000).toISOString(),
     })
   }
@@ -119,7 +124,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
       ads: { username: 'pdfmaster_ads', url: 'https://t.me/pdfmaster_ads' } })
   if (endpoint === '/referrals')
     return json({ code: 'MALIKA7', url: 'https://pdfmaster.orderdesk.live/r/MALIKA7', rewards_count: 2, pending_count: 1,
-      awarded_credits: 400, monthly_cap: 5, expires_in_days: 90, qualification: '', sandbox: false })
+      monthly_cap: 5, expires_in_days: 90, qualification: '', sandbox: false })
   unexpected.push(`${method} ${endpoint}`)
   return json({})
 })
@@ -164,17 +169,17 @@ try {
   assert.equal(await page.locator('h1').innerText(), 'Hello, Malika')
   assert.equal(await page.locator('.eyebrow').count(), 0, 'no eyebrow over the greeting')
   assert.deepEqual(await ids('.ai-shortcut'), ['ai.pdf_topic', 'ai.pptx'])
-  assert.deepEqual(await texts(page.locator('.plan-meter-label')), [
-    'Standard tasks', 'Processed pages', 'AI credits', 'Tasks today',
-  ])
-  assert.match(await page.locator('.plan-meter').first().innerText(), /262\s+of 300/)
+  assert.deepEqual(await texts(page.locator('.plan-meter-label')), ['AI documents this week', 'File tasks this week'])
+  assert.match(await page.locator('.plan-meter').first().innerText(), /2\s+of 5 used/)
+  assert.match(await page.locator('.plan-meter').nth(1).innerText(), /3\s+of 15 used/)
+  assert.match(await page.locator('.week-reset').innerText(), /^Limits renew .+ · \S+/)
   assert.deepEqual(await ids('.quick-tools .tool-card'), [
     'pdf.merge', 'pdf.compress', 'pdf.split', 'pdf.images_to_pdf', 'convert.word_to_pdf',
   ])
   for (const gone of ['.privacy-card', '.help-strip', '.usage-card']) {
     assert.equal(await page.locator(gone).count(), 0, `${gone} is gone from Home`)
   }
-  checks.push('Home: greeting, drop zone, the two AI shortcuts, four plan meters, five file tools, recent tasks')
+  checks.push('Home: greeting, drop zone, the two AI shortcuts, the week in two meters with its reset, five file tools, recent tasks')
 
   // Tools: categories that have tools, real descriptions.
   await go('/en/app/tools')
@@ -211,15 +216,27 @@ try {
   }
   await theme('light')
   await start.click()
-  await page.locator('.quote-meters').waitFor()
-  assert.match(await page.locator('.quote-meters').innerText(), /Standard task[\s\S]*1/)
+  await page.locator('.weekly-line').waitFor()
+  assert.match(await page.locator('.weekly-line').innerText(), /File tasks this week\s+3 of 15 used/)
   await shot('merge-review-1440', true)
   await page.getByRole('button', { name: 'Start processing', exact: true }).click()
   await page.waitForURL('**/app/jobs/*')
   await page.locator('.job-detail').waitFor()
   assert.equal(await page.locator('.job-detail h1').count(), 1)
   await shot('job-1440', true)
-  checks.push('Merge: two files in, reordered, reviewed, started; one column with no options step')
+  checks.push('Merge: two files in, reordered, reviewed with the week’s file tasks, started; no options step')
+
+  // A week used up: the refusal says so and offers the plans.
+  fileWeekUsedUp = true
+  await go('/en/app/tools/pdf.compress')
+  await page.locator('input[type=file]').setInputFiles(['tests/fixtures/research-notes.pdf'])
+  await page.locator('.file-row').first().waitFor()
+  await page.locator('.tool-action .button.primary').click()
+  await page.getByTestId('limit-plans').waitFor()
+  assert.match(await page.locator('.error-banner').innerText(), /file tasks are used up/)
+  assert.match(await page.getByTestId('limit-plans').getAttribute('href'), /\/en\/app\/billing$/)
+  fileWeekUsedUp = false
+  checks.push('A used-up week is refused with the way to the plans')
 
   // Tasks: newest first, filtered by what people ask — done, going, or not finished.
   await go('/en/app/jobs')
@@ -276,6 +293,10 @@ try {
   assert.equal(await page.getByText(/paperwork/i).count(), 0, 'no old taglines')
   assert.equal(await page.locator('.landing-section .ai-shortcut').count(), 2)
   assert.equal(await page.locator('.faq details').count(), 4)
+  assert.deepEqual(await texts(page.locator('.pricing-teaser .panel').first().locator('.teaser-week')),
+    ['5 AI documents a week', '15 file tasks a week'])
+  assert.deepEqual(await texts(page.locator('.pricing-teaser .panel').last().locator('.teaser-week')),
+    ['Unlimited AI documents', 'Unlimited file tasks'])
   await page.locator('.faq summary').first().click()
   assert.ok(await page.locator('.faq details').first().getAttribute('open') !== null)
   for (const mode of ['light', 'dark']) {
@@ -290,10 +311,11 @@ try {
   await go('/en/app/referrals')
   await page.locator('.referral-link-panel').waitFor()
   assert.equal(await page.locator('.copy-field input').first().inputValue(), 'https://pdfmaster.orderdesk.live/r/MALIKA7')
-  assert.deepEqual(await texts(page.locator('.referral-numbers strong')), ['2', '400'])
+  assert.deepEqual(await texts(page.locator('.referral-numbers strong')), ['2', '1'])
+  assert.equal(await page.getByTestId('referral-rewards').innerText(), 'Rewards for invitations are coming soon.')
   await axe('referrals 1440')
   await shot('referrals-1440', true)
-  checks.push('Landing: what it does, AI services, tools, plans and questions; referrals: link, copy and two numbers')
+  checks.push('Landing: what it does, AI services, tools, plans with their weeks and questions; referrals: link, copy and two numbers')
 
   // Phone: one column, and the next step stays in reach above the phone bar.
   await page.setViewportSize({ width: 390, height: 844 })

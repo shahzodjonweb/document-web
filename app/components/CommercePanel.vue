@@ -12,6 +12,14 @@ const error = ref('')
 const telegramRequired = ref(false)
 const success = ref('')
 const nextPlan = ref('plus')
+/**
+ * Only plans are sold now. A platform still on the credit model also returns
+ * task and AI packs, which have no plan to name; they are left out rather than
+ * shown as cards nobody can describe.
+ */
+const offers = computed(() =>
+  (data.value?.offers || []).filter((offer: any) => offer?.kind === 'subscription' && offer.plan),
+)
 async function run(action: string, fn: () => Promise<void>) {
   busy.value = action
   error.value = ''
@@ -148,7 +156,7 @@ function selectedInvoice(value: any) {
         <small>{{ t('scheduledPlanNote') }}</small>
       </div>
     </div>
-    <div v-if="data?.offers?.length" class="commerce-offers">
+    <div v-if="offers.length" class="commerce-offers" data-testid="commerce-offers">
       <div class="section-heading">
         <h2>{{ t('offers') }}</h2>
         <NuxtLink class="text-link" :to="path('/app/referrals')"
@@ -156,43 +164,18 @@ function selectedInvoice(value: any) {
         /></NuxtLink>
       </div>
       <div class="offer-grid">
-        <section v-for="offer in data.offers" :key="offer.id" class="panel offer-card">
-          <span class="tool-icon" :class="offer.kind === 'subscription' ? 'sage' : 'purple'"
-            ><AppIcon
-              :name="offer.kind === 'ai_pack' ? 'sparkle' : offer.kind === 'task_pack' ? 'files' : 'billing'"
-              :size="23"
-          /></span>
-          <h3>{{ offer.plan ? t(offer.plan) : t(offer.kind === 'ai_pack' ? 'aiPack' : 'taskPack') }}</h3>
+        <section v-for="offer in offers" :key="offer.id" class="panel offer-card">
+          <span class="tool-icon sage"><AppIcon name="billing" :size="23" /></span>
+          <h3>{{ t(offer.plan) }}</h3>
           <div class="offer-price">
             {{ offer.price_xtr }} <small>{{ offer.currency }}</small>
           </div>
-          <p v-for="(quantity, meter) in offer.quantities" :key="meter" v-show="Number(quantity) > 0">
-            <strong>{{ quantity }}</strong>
-            {{
-              t(
-                meter === 'file_tasks'
-                  ? 'standardTasks'
-                  : meter === 'file_page_units'
-                    ? 'pageUnits'
-                    : 'ai_credits',
-              )
-            }}
-          </p>
-          <small v-if="offer.kind !== 'subscription'">{{ t('purchasedCredits') }}</small
-          ><button
+          <button
             class="button secondary full"
-            :disabled="
-              !!busy ||
-              !offer.checkout_enabled ||
-              (offer.kind === 'subscription' && !!subscription?.active_until)
-            "
+            :disabled="!!busy || !offer.checkout_enabled || !!subscription?.active_until"
             @click="choose(offer)"
           >
-            {{
-              offer.kind === 'subscription' && subscription?.active_until
-                ? t('currentPlan')
-                : t('selectOffer')
-            }}
+            {{ subscription?.active_until ? t('currentPlan') : t('selectOffer') }}
           </button>
         </section>
       </div>
@@ -255,9 +238,8 @@ function selectedInvoice(value: any) {
       <ul v-else class="transaction-list">
         <li v-for="transaction in transactions" :key="transaction.id" class="transaction-row">
           <div>
-            <strong>{{
-              transaction.plan ? t(transaction.plan) : t(transaction.kind === 'ai_pack' ? 'aiPack' : 'taskPack')
-            }}</strong
+            <!-- Packs are no longer sold; an earlier one still shows in the history. -->
+            <strong>{{ transaction.plan ? t(transaction.plan) : t('oneTimePurchase') }}</strong
             ><small
               >{{ date(transaction.occurred_at, true) }}{{ transaction.sandbox ? ' · SANDBOX' : '' }}</small
             >

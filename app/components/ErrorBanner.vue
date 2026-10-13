@@ -1,10 +1,16 @@
 <script setup lang="ts">
-defineProps<{ message?: string }>()
-const { t } = useLocale()
+const props = defineProps<{ message?: string }>()
+const { t, path } = useLocale()
+const ws = useWorkspace()
+// A refusal because the week's allowance or a file's edits ran out offers the next plan.
+const offerPlans = computed(() => !!props.message && props.message === ws.limitMessage.value)
 </script>
 <template>
   <div class="error-banner" role="alert">
     <AppIcon name="alert" :size="20" /><span>{{ message || t('apiError') }}</span
+    ><NuxtLink v-if="offerPlans" :to="path('/app/billing')" class="text-link" data-testid="limit-plans">{{
+      t('studioSeePlans')
+    }}</NuxtLink
     ><slot />
   </div>
 </template>

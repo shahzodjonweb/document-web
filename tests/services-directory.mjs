@@ -85,7 +85,8 @@ await page.route('**/*', async (route) => {
   }
   if (endpoint === '/plans') return json({ plans: [], checkout_enabled: false })
   if (endpoint === '/usage')
-    return json({ meters: { file_tasks: { remaining: 40, limit: 90 } }, daily: {}, resets_at: null })
+    return json({ plan: 'free', week: { starts_at: '2026-10-11T19:00:00Z', resets_at: '2026-10-18T19:00:00Z', time_zone: 'Asia/Tashkent' }, resets_at: '2026-10-18T19:00:00Z',
+      ai_documents: { limit: 5, used: 0, remaining: 5 }, file_jobs: { limit: 15, used: 5, remaining: 10 }, edits_per_file: 3 })
   if (endpoint === '/jobs') return json({ results: [], count: 0 })
   if (endpoint === '/channels') return json({ required: false, joined: true, channels: [] })
   // Opening the studio from a card loads its own side lists.

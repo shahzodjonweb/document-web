@@ -12,10 +12,15 @@ export function useLocale() {
   const locale = computed<Locale>(() =>
     ['en', 'uz', 'ru'].includes(String(route.params.locale)) ? (route.params.locale as Locale) : 'en',
   )
-  const t = (key: string, values: Record<string, string | number> = {}) =>
-    (dictionaries[locale.value][key] || dictionaries.en[key] || key).replace(/\{(\w+)\}/g, (_match, name) =>
-      String(values[name] ?? `{${name}}`),
+  // Keys often come straight from API data (a plan, a status, a warning code). A
+  // missing one renders as nothing instead of taking the whole section down.
+  const t = (key: string | null | undefined, values: Record<string, string | number> = {}) => {
+    const name = String(key ?? '')
+    return (dictionaries[locale.value][name] || dictionaries.en[name] || name).replace(
+      /\{(\w+)\}/g,
+      (_match, field) => String(values[field] ?? `{${field}}`),
     )
+  }
   const count = (key: string, amount: number) =>
     t(`${key}_${new Intl.PluralRules(locale.value).select(amount)}`, { count: amount })
   const path = (value = '') => `/${locale.value}${value}`
