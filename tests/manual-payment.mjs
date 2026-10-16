@@ -25,10 +25,12 @@ const account = {
   id: '00000000-0000-4000-8000-999999999999', display_name: 'Card payer', locale: 'en', time_zone: 'UTC',
   mode: 'general', plan: 'free', preferences: {}, login_methods: { email: false, google: false, telegram: true },
 }
-// Weekly limits as the plan seed sets them; null is unlimited.
+// Limits as the plan seed sets them; null is unlimited. Only the three weekly
+// ones differ by plan: every other limit is the same on all of them.
 const limits = (price, documents, files, edits) => ({
-  weekly_ai_documents: documents, weekly_file_jobs: files, edits_per_file: edits, max_file_mib: 25,
-  max_pages_per_job: 100, max_generated_pdf_pages: 7, max_generated_slides: 12, max_deck_images: 4, price_uzs: price,
+  weekly_ai_documents: documents, weekly_file_jobs: files, edits_per_file: edits, max_file_mib: 200,
+  max_pages_per_job: 1000, batch_files: 25, max_generated_pdf_pages: 35, max_generated_slides: 60,
+  max_deck_images: 12, saved_workflows: 20, price_uzs: price,
 })
 const plans = [
   { id: 'free', name: 'Free', price_xtr: 0, limits: limits(null, 5, 15, 3) },
@@ -95,7 +97,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
     payment = { ...payment, status: 'cancelled' }
     return json(payment)
   }
-  if (endpoint === '/studio/config') return json({ provider: { mode: 'openai', configured: true }, features: [], default_pages: 5 })
+  if (endpoint === '/studio/config') return json({ provider: { mode: 'openai', configured: true }, features: [], default_pages: 10 })
   if (endpoint === '/jobs') return json({ results: [], count: 0 })
   if (endpoint === '/referrals') return json({ code: 'x', url: null, rewards_count: 0, pending_count: 0, monthly_cap: 5, expires_in_days: 7, qualification: '', sandbox: false })
   unexpected.push(`${method} ${endpoint}`)
@@ -126,16 +128,22 @@ try {
   assert.match(await page.getByTestId('pay-premium').innerText(), /Pay 60 000 so'm/)
   const features = (index) => page.locator('.plan-card').nth(index).locator('.plan-features li').allInnerTexts()
   const [free, plus, premium] = [await features(0), await features(1), await features(2)]
-  assert.deepEqual(free.slice(0, 3), ['5 AI documents a week', '15 file tasks a week', '3 AI edits per file'])
-  assert.deepEqual(plus.slice(0, 3), ['20 AI documents a week', 'Unlimited file tasks', '10 AI edits per file'])
-  assert.deepEqual(premium.slice(0, 4),
+  // The weekly limits and Premium's channels are the whole list: size, pages,
+  // slides and photos are the same on every plan, so no card shows them.
+  assert.deepEqual(free, ['5 AI documents a week', '15 file tasks a week', '3 AI edits per file'])
+  assert.deepEqual(plus, ['20 AI documents a week', 'Unlimited file tasks', '10 AI edits per file'])
+  assert.deepEqual(premium,
     ['Unlimited AI documents', 'Unlimited file tasks', 'Unlimited AI edits', 'No channel subscription needed'])
+  assert.ok(!cards.join(' ').match(/MB|per task|per AI|photos/), 'no per-plan size, page or photo lines')
   assert.ok(!free.concat(plus).some((row) => row.includes('channel')), 'only Premium skips the channels')
   assert.ok(!cards.join(' ').match(/credit|a day/i), 'no credits or daily caps left on the cards')
+  // The subtitles speak of weekly volume, never of more tools or bigger files.
+  assert.deepEqual(await page.locator('.plan-card .plan-card-body').allInnerTexts(),
+    ['Every tool, with a weekly allowance', 'More each week for regular work', 'For people who work with lots of documents'])
   assert.deepEqual(await page.getByTestId('current-plan').locator('.plan-meter-label').allInnerTexts(),
     ['AI documents this week', 'File tasks this week', 'AI edits per file'])
   assert.match(await page.getByTestId('week-reset').innerText(), /^Limits renew .+ · \S+/)
-  checks.push("Plan cards show so'm prices, the weekly limits, Premium without channels, and a Pay button")
+  checks.push("Plan cards show so'm prices, only the weekly limits, volume-only subtitles, Premium without channels, and a Pay button")
 
   await page.getByTestId('pay-premium').click()
   const panel = page.getByTestId('manual-payment')

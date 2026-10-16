@@ -2,17 +2,18 @@
 /**
  * Tool selection, history and zoom.
  *
- * Tools the account's plan excludes stay visible and focusable with a lock
- * chip rather than being `disabled`, so the reason is discoverable. When the
- * catalog could not be read we assume everything is allowed and let the
- * server's 403 be the authority.
+ * Every plan has every tool, so a tool the catalog marks ineligible is one
+ * switched off for everyone. It stays visible and focusable with a lock chip
+ * rather than being `disabled`, so the reason is discoverable, and no plan is
+ * offered because none would unlock it. When the catalog could not be read we
+ * assume everything is allowed and let the server's 403 be the authority.
  */
 import { CANVAS_TOOLS, COMMAND_FEATURE, COMMAND_SHAPE, type CommandType } from '~/composables/useEditorCommands'
 import type { EditorMode } from '~/composables/useEditorSession'
 
 const emit = defineEmits<{ togglePages: [] }>()
 
-const { t, path } = useLocale()
+const { t } = useLocale()
 const ws = useWorkspace()
 const session = useEditorSession()
 
@@ -183,12 +184,10 @@ function zoomBy(factor: number) {
     <p v-if="lockedTool" class="editor-lock" role="status">
       <AppIcon name="lock" :size="15" />
       <span>{{ t('editorLockedTool', { tool: t(COMMAND_SHAPE[lockedTool].labelKey) }) }}</span>
-      <NuxtLink :to="path('/app/billing')" class="text-link">{{ t('editorSeePlans') }}</NuxtLink>
     </p>
     <p v-else-if="modeBlocked" class="editor-lock" role="status" data-testid="editor-mode-blocked">
       <AppIcon name="lock" :size="15" />
       <span>{{ modeBlocked }}</span>
-      <NuxtLink v-if="!canRedact" :to="path('/app/billing')" class="text-link">{{ t('editorSeePlans') }}</NuxtLink>
     </p>
     <p v-else-if="session.mode.value === 'redact'" class="editor-tool-hint" role="status">
       {{ t('editorRedactIntro') }}

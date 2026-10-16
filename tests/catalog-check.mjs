@@ -10,6 +10,22 @@ for(const locale of ['uz','ru']){
 }
 assert.match(dictionaries.uz['pdf.merge.description'],/[‘’]/)
 assert.match(dictionaries.ru['pdf.merge.name'],/[А-Яа-я]/)
+// Russian says ИИ, never the Latin AI (the landing headline once did).
+for(const [key,value] of Object.entries(dictionaries.ru))assert.doesNotMatch(value,/\bAI\b/,`ru ${key} says ИИ, not AI`)
+// Plans differ only in the weekly limits, the prices and Premium's channels.
+// A plan's subtitle speaks of weekly volume: nothing that reads as more tools,
+// more capability or bigger documents.
+const planBodies=['planFreeBody','planPlusBody','planPremiumBody']
+const featureWords={en:/essential|room|feature|capabilit|larger|bigger|size|basic/i,uz:/imkoniyat|hajm|katta|muhim|asosiy/i,ru:/возможност|объём|объем|больш(их|ие) (файл|документ)|основн|базов/i}
+for(const locale of ['en','uz','ru'])for(const key of planBodies)
+ assert.doesNotMatch(dictionaries[locale][key],featureWords[locale],`${locale} ${key} speaks of weekly volume only`)
+const weekWord={en:/week/i,uz:/hafta/i,ru:/недел/i}
+for(const locale of ['en','uz','ru'])for(const key of ['planFreeBody','planPlusBody'])
+ assert.match(dictionaries[locale][key],weekWord[locale],`${locale} ${key} names the week`)
+// The help answer lists everything that differs, Premium's channels included.
+const channelWord={en:/channel subscription/i,uz:/kanallarga obuna/i,ru:/подписка на каналы/i}
+for(const locale of ['en','uz','ru'])
+ assert.match(dictionaries[locale].helpBillingBody,channelWord[locale],`${locale} helpBillingBody says Premium needs no channels`)
 const schemaBytes=await fs.readFile(new URL('../generated/api/public.openapi.json',import.meta.url))
 const expected=(await fs.readFile(new URL('../generated/api/public.openapi.json.sha256',import.meta.url),'utf8')).trim().split(/\s/)[0]
 assert.equal(createHash('sha256').update(schemaBytes).digest('hex'),expected,'Pinned public API checksum')

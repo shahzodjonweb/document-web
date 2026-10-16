@@ -6,7 +6,8 @@ export interface PlanPhrase {
 /**
  * Plan features as phrases: "5 AI documents a week", "Unlimited file tasks".
  * `{count}` in the copy marks where the number goes, so each language puts it
- * where it belongs and a plan card can set it in bold.
+ * where it belongs and a plan card can set it in bold. These three weekly
+ * allowances are all that differ between plans; every other limit is shared.
  */
 export function usePlanPhrases() {
   const { t, locale } = useLocale()
@@ -33,5 +34,5 @@ export function usePlanPhrases() {
       weekly(plan, 'weekly_file_jobs', 'planFilesWeek'),
       weekly(plan, 'edits_per_file', 'planEdits'),
     ].filter((row): row is PlanPhrase => !!row)
-  return { number, phrase, allowances }
+  return { allowances }
 }

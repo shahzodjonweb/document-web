@@ -24,12 +24,14 @@ const account = {
   id: '00000000-0000-4000-8000-777777777777', display_name: 'Dilnoza Karimova', locale: 'en', time_zone: 'UTC',
   mode: 'general', plan: 'free', preferences: {}, login_methods: { email: false, google: false, telegram: true },
 }
-const limits = (workflows, documents, files, edits) =>
-  ({ weekly_ai_documents: documents, weekly_file_jobs: files, edits_per_file: edits, saved_workflows: workflows })
+// Only the three weekly limits differ by plan; saved workflows, like every
+// other limit, are the same on all of them.
+const limits = (documents, files, edits) =>
+  ({ weekly_ai_documents: documents, weekly_file_jobs: files, edits_per_file: edits, saved_workflows: 20 })
 const plans = [
-  { id: 'free', name: 'Free', price_xtr: 0, limits: limits(0, 5, 15, 3) },
-  { id: 'plus', name: 'Plus', price_xtr: null, limits: limits(5, 20, null, 10) },
-  { id: 'premium', name: 'Premium', price_xtr: null, limits: limits(20, null, null, null) },
+  { id: 'free', name: 'Free', price_xtr: 0, limits: limits(5, 15, 3) },
+  { id: 'plus', name: 'Plus', price_xtr: null, limits: limits(20, null, 10) },
+  { id: 'premium', name: 'Premium', price_xtr: null, limits: limits(null, null, null) },
 ]
 // This week, as /usage reports it: a null limit is unlimited.
 const allowance = (limit, used) => ({ limit, used, remaining: limit === null ? null : limit - used })
@@ -69,7 +71,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   }
   if (endpoint === '/channels') return json({ required: false, joined: true, channels: [] })
   if (endpoint === '/studio/config')
-    return json({ provider: { mode: 'openai', configured: true }, features: [], default_pages: 5 })
+    return json({ provider: { mode: 'openai', configured: true }, features: [], default_pages: 10 })
   if (endpoint === '/jobs') return json({ results: [], count: 0 })
   if (endpoint === '/billing/manual')
     return json({ enabled: true, currency: 'UZS', period_days: 30, automatic: { available: false }, plans: [], payment: null })
@@ -114,8 +116,9 @@ try {
   const sidebar = page.locator('.sidebar')
   await sidebar.locator('.side-nav a').first().waitFor()
   assert.deepEqual(await names(sidebar.locator('.nav-group')), ['Work', 'Account'])
+  // Free has saved workflows too, now that every plan has every tool.
   assert.deepEqual(await names(sidebar.locator('.side-nav a')), [
-    'Home', 'Create with AI', 'Tools', 'PDF editor', 'Tasks',
+    'Home', 'Create with AI', 'Tools', 'PDF editor', 'Tasks', 'Saved workflows',
     'Plan & billing', 'Settings', 'Help', 'Prompt guide',
   ])
   assert.equal(await page.getByText('Local bot').count(), 0, 'the development bot is not in the customer menu')
@@ -123,7 +126,7 @@ try {
   const chip = page.locator('.plan-chip')
   assert.equal(await chip.innerText().then((text) => text.replace(/\s+/g, ' ')), 'Free 12 tasks left')
   assert.equal(await chip.getAttribute('href'), '/en/app/billing')
-  checks.push('Sidebar has Work and Account groups; no Local bot; the top bar shows the page and tasks left')
+  checks.push('Sidebar has Work and Account groups, saved workflows on Free; no Local bot; the top bar shows the page and tasks left')
 
   await page.locator('.side-nav a', { hasText: 'Tools' }).click()
   await page.waitForURL('**/en/app/tools')
@@ -157,15 +160,21 @@ try {
   await shot('billing-bottom-1440')
   checks.push('On a long page the sidebar spans the full height and its menu stays in view')
 
-  // Paid plans with saved workflows get the menu item.
+  // Plus has the same menu; its unlimited file tasks show no count.
   account.plan = 'plus'
   await go('/en/app')
   await sidebar.locator('.side-nav a').first().waitFor()
   assert.ok((await names(sidebar.locator('.side-nav a'))).includes('Saved workflows'))
   assert.equal(await page.locator('.plan-chip').innerText().then((text) => text.trim()), 'Plus',
     'unlimited file tasks show no count')
+  // A cap set to zero still hides the page, since it could save nothing.
+  plans[1].limits.saved_workflows = 0
+  await go('/en/app')
+  await sidebar.locator('.side-nav a').first().waitFor()
+  assert.ok(!(await names(sidebar.locator('.side-nav a'))).includes('Saved workflows'))
+  plans[1].limits.saved_workflows = 20
   account.plan = 'free'
-  checks.push('Saved workflows appears only on a plan that includes them; unlimited file tasks show no count')
+  checks.push('Saved workflows is on every plan unless its cap is zero; unlimited file tasks show no count')
 
   // Skip link: hidden until focused, then visible and it moves focus to the page.
   await go('/en/app')
@@ -206,7 +215,7 @@ try {
     const sheet = page.locator('.more-sheet')
     await sheet.waitFor()
     assert.deepEqual(await names(sheet.locator('.sheet-nav a')), [
-      'PDF editor', 'Plan & billing', 'Settings', 'Help', 'Prompt guide',
+      'PDF editor', 'Saved workflows', 'Plan & billing', 'Settings', 'Help', 'Prompt guide',
     ])
     assert.equal(
       await sheet.locator('.sheet-prefs .button').innerText(),

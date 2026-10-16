@@ -28,7 +28,7 @@ const draft = ref<any>(null)
 const categories = ref<DeckCategory[]>([])
 const category = ref('')
 const design = ref('auto')
-const pages = ref(7)
+const pages = ref(10)
 const loading = ref(true)
 // A thumbnail that fails to load falls back to the drawn swatch.
 const broken = reactive<Record<string, boolean>>({})
@@ -71,7 +71,8 @@ async function load() {
     draft.value = opened
     categories.value = listed.categories
     const options = opened.options || {}
-    pages.value = Math.min(options.pages ?? listed.default_pages ?? 7, ceiling.value)
+    // The server's starting count, or its own default of 10 if an older one sent none.
+    pages.value = Math.min(options.pages ?? listed.default_pages ?? 10, ceiling.value)
     design.value = options.deck_design || 'auto'
     category.value =
       listed.categories.find((group: DeckCategory) => group.designs.some((entry) => entry.id === design.value))

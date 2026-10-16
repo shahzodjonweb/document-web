@@ -73,7 +73,9 @@ const account = {
 }
 const config = {
   provider: { mode: 'openai', configured: true },
-  default_pages: 5,
+  // As the server sends them: 10 when the description names no count, and one
+  // ceiling per service that every plan shares.
+  default_pages: 10,
   features: featureIds.map((feature) => ({
     id: feature,
     name: feature,
@@ -84,7 +86,7 @@ const config = {
       output_locale: { enum: ['en', 'uz', 'ru'] },
       output_format: { enum: feature === 'ai.pptx' ? ['pptx'] : ['pdf'] },
     },
-    max_pages: 10,
+    max_pages: feature === 'ai.pptx' ? 60 : 35,
     locales: ['en', 'uz', 'ru'],
   })),
   limits: { sections: 10, slides: 20, questions: 5, source_chars: 12000 },
@@ -247,7 +249,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
       )
     }
     // The server reads the page count out of the description and clamps it to
-    // the plan; the fixture does the same so the form sees a real answer.
+    // the service's ceiling; the fixture does the same so the form sees a real answer.
     const named = /(\d{1,3})\s*(?:-|\s)?\s*(?:pages?|slides?)/i.exec(
       `${body.prompt || ''}\n${body.source_text || ''}`,
     )
@@ -498,6 +500,21 @@ try {
   await confirm()
   checks.push('One description → one review → explicit confirmation, with no other field to fill')
 
+  // 1b. The hint under the description states the server's default and the
+  // ceiling, and neither depends on the plan.
+  await open('ai.pdf_topic')
+  const describeHint = () => page.getByTestId('studio-describe-hint').innerText()
+  assert.match(await describeHint(), /No page count means 10; the most is 35\./)
+  assert.doesNotMatch(await describeHint(), /plan/i, 'the ceiling is the same on every plan')
+  config.default_pages = 7
+  await open('ai.pdf_topic')
+  assert.match(await describeHint(), /No page count means 7;/, 'the default is read from the config')
+  delete config.default_pages
+  await open('ai.pdf_topic')
+  assert.match(await describeHint(), /No page count means 10;/, 'a config without a default still says 10')
+  config.default_pages = 10
+  checks.push('The description hint says 10 pages by default and the shared ceiling, read from the config')
+
   // 2. The resolved page count is shown back, and a clamp is said out loud.
   await open('ai.pdf_topic')
   await primary().fill('A guide to tide tables in 4 pages.')
@@ -513,13 +530,14 @@ try {
   await quotePanel().waitFor()
   await page.getByTestId('studio-pages-clamped').waitFor()
   assert.match(await page.getByTestId('studio-pages-clamped').innerText(), /20/)
+  assert.match(await page.getByTestId('studio-pages-clamped').innerText(), /You asked for 20; the most is 2\./)
   assert.equal(
     await page.getByTestId('studio-pages-clamped').getByRole('link').count(),
-    1,
-    'A clamp offers the way to more pages',
+    0,
+    'every plan has the same ceiling, so a clamp offers no plan',
   )
   clampPages = 0
-  checks.push('The pages resolved from the description are shown back, and a clamp is explained')
+  checks.push('The pages resolved from the description are shown back, and a clamp is explained without offering a plan')
 
   // 2b. A count read wrong is put right on the review rail, and quoted again.
   await open('ai.pdf_topic')
@@ -696,17 +714,18 @@ try {
     'Slides asked of the PDF service (or a paper of Slides) are offered the other service, text kept; a topic is not',
   )
 
-  // A service the plan cannot use is never offered, by the suggestion or the refusal.
+  // A service switched off (every plan has both, so off means off for everyone)
+  // is never offered, by the suggestion or the refusal.
   const slidesFeature = config.features.find((feature) => feature.id === 'ai.pptx')
   slidesFeature.eligible = false
   await open('ai.pdf_topic')
-  assert.equal(await suggestion(slidesBrief), '', 'No way across to a service outside the plan')
+  assert.equal(await suggestion(slidesBrief), '', 'No way across to a service that is switched off')
   await primary().fill('Make bright slides.')
   await review().click()
   await page.getByTestId('studio-prompt-error').waitFor()
   assert.equal(await page.getByTestId('studio-prompt-switch').count(), 0, 'Nor from the refusal')
   slidesFeature.eligible = true
-  checks.push('A service outside the plan is never offered')
+  checks.push('A service that is switched off is never offered')
 
   // 4c. A description that names no topic is refused under the field, where
   // the fix is typed, and is never quoted.

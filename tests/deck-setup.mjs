@@ -46,7 +46,9 @@ const design = (id, name, theme, accent, fill, ink, extra = {}) => ({
 })
 // Long enough that the category row has to scroll on a phone.
 const fixture = {
-  default_pages: 7,
+  // The server starts the setup screen at 10 slides, as it does a deck whose
+  // description names no count.
+  default_pages: 10,
   categories: [
     { id: 'classic', name: 'Classic', designs: [design('forest', 'Forest', 'light', '#1E6B45', '#F4F1E8', '#1A2B22'), design('boardroom', 'Boardroom', 'bold', '#1F3A68', '#1F3A68', '#FFFFFF')] },
     { id: 'business', name: 'Business', designs: [design('ledger', 'Ledger', 'light', '#14532D', '#F5F7F2', '#16201A', { pattern: 'grid' })] },
@@ -121,7 +123,7 @@ async function open(width, theme, insideTelegram) {
       return json({ plan: 'premium', week: { starts_at: '2026-10-11T19:00:00Z', resets_at: '2026-10-18T19:00:00Z', time_zone: 'Asia/Tashkent' }, resets_at: '2026-10-18T19:00:00Z',
       ai_documents: { limit: null, used: 0, remaining: null }, file_jobs: { limit: null, used: 0, remaining: null }, edits_per_file: null })
     if (endpoint === '/studio/config')
-      return json({ provider: { mode: 'openai', configured: true }, default_pages: 5, features: [{ id: 'ai.pptx', name: 'Slides', surface: 'generate', eligible: true, max_pages: 15 }] })
+      return json({ provider: { mode: 'openai', configured: true }, default_pages: 10, features: [{ id: 'ai.pptx', name: 'Slides', surface: 'generate', eligible: true, max_pages: 15 }] })
     if (endpoint === '/studio/deck-designs') return json(fixture)
     // A design's cover thumbnail: any small PNG will do.
     if (/^\/studio\/deck-designs\/[\w-]+\.png$/.test(endpoint)) {
@@ -148,12 +150,12 @@ for (const [width, theme] of [[390, 'light'], [1440, 'dark']]) {
   const { context, page } = await open(width, theme, width === 390)
   const stepper = page.getByTestId('deck-setup-pages')
   await page.screenshot({ path: path.join(output, `deck-setup-${width}-${theme}-opened.png`) })
-  // The setup screen starts at seven, whatever the description asked for, and says so.
-  assert.equal((await stepper.locator('strong').textContent()).trim(), '7')
+  // The setup screen starts at ten, whatever the description asked for, and says so.
+  assert.equal((await stepper.locator('strong').textContent()).trim(), '10')
   assert.match(await page.getByTestId('deck-setup-asked').textContent(), /asked for 12/)
   assert.equal(await page.getByTestId('deck-design-auto').getAttribute('aria-checked'), 'true')
   await page.getByTestId('deck-setup-more').click()
-  assert.equal((await stepper.locator('strong').textContent()).trim(), '8')
+  assert.equal((await stepper.locator('strong').textContent()).trim(), '11')
   // Each design shows its real rendered cover, not a drawn swatch.
   await page.locator('[data-design="forest"] img.deck-thumb').waitFor()
   assert.ok(await page.locator('[data-design="forest"] img.deck-thumb').evaluate((img) => img.naturalWidth > 0))
@@ -168,7 +170,7 @@ for (const [width, theme] of [[390, 'light'], [1440, 'dark']]) {
   await page.getByTestId('deck-setup-save').click()
   await page.getByTestId('deck-setup-saved').waitFor()
   const sent = requests.filter((request) => request.path.endsWith('/setup'))
-  assert.deepEqual(sent.at(-1).body, { pages: 8, deck_design: picked() })
+  assert.deepEqual(sent.at(-1).body, { pages: 11, deck_design: picked() })
   assert.ok(requests.some((request) => request.path === '/studio/deck-designs' && request.query === '?locale=en'))
   if (width === 390) {
     await page.waitForFunction(() => window.__closed === true)
@@ -176,6 +178,13 @@ for (const [width, theme] of [[390, 'light'], [1440, 'dark']]) {
     await page.waitForTimeout(900)
     assert.equal(await page.evaluate(() => window.__closed), false, 'outside Telegram the page stays open')
   }
+  await context.close()
+}
+// A server that sends no starting count still starts at ten, not the old seven.
+delete fixture.default_pages
+{
+  const { context, page } = await open(1440, 'light', false)
+  assert.equal((await page.getByTestId('deck-setup-pages').locator('strong').textContent()).trim(), '10')
   await context.close()
 }
 assert.deepEqual(errors, [])

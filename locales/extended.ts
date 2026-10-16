@@ -152,10 +152,10 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'AI vositalari hozircha mavjud emas. Keyinroq qayta urinib ko‘ring.',
     'ИИ-инструменты сейчас недоступны. Попробуйте позже.',
   ],
-  studioPlanUnavailable: [
-    'This tool isn’t available on your current plan.',
-    'Bu vosita joriy tarifingizga kiritilmagan.',
-    'Этот инструмент недоступен на вашем тарифе.',
+  studioToolUnavailable: [
+    'This service isn’t available right now. Please try again later.',
+    'Bu xizmat hozircha mavjud emas. Keyinroq qayta urinib ko‘ring.',
+    'Этот сервис сейчас недоступен. Попробуйте позже.',
   ],
 
   transcriptionReviewNote: [
@@ -799,9 +799,8 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Qiymatlar maydon ramkasiga chiziladi. Juda uzun qiymatlar eksportda rad etiladi.',
     'Значения вписываются в рамку поля. Слишком длинные значения будут отклонены при экспорте.',
   ],
-  editorLocked: ['Not in your plan', 'Tarifingizda yo‘q', 'Нет в вашем тарифе'],
-  editorLockedTool: ['{tool} is included with a paid plan.', '{tool} pullik tarifga kiradi.', '{tool} доступен в платном тарифе.'],
-  editorSeePlans: ['See plans', 'Tariflarni ko‘rish', 'Посмотреть тарифы'],
+  editorLocked: ['Not available', 'Mavjud emas', 'Недоступно'],
+  editorLockedTool: ['Not available right now: {tool}.', '{tool} hozircha mavjud emas.', 'Сейчас недоступно: {tool}.'],
   editorRedactIntro: [
     'Draw over anything that must be removed. Export rewrites every page as an image at 144 DPI, so selectable text, forms and annotations are gone from the result.',
     'Olib tashlanishi kerak bo‘lgan joylarni belgilang. Eksportda har bir sahifa 144 DPI rasmga aylantiriladi, shuning uchun natijada tanlanadigan matn, shakllar va izohlar qolmaydi.',
@@ -902,11 +901,11 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   editorPageMoveEarlier: ['Move page earlier', 'Sahifani oldinga surish', 'Переместить страницу выше'],
   editorPageMoveLater: ['Move page later', 'Sahifani keyinga surish', 'Переместить страницу ниже'],
 
-  // Plan downgrades
+  // A draft holding changes made with a tool that has since been switched off
   editorLockedCommands: [
-    '{count} changes here need a different plan. Remove them or upgrade to keep saving.',
-    'Bu yerdagi {count} ta o‘zgarish uchun boshqa tarif kerak. Saqlashni davom ettirish uchun ularni olib tashlang yoki tarifni oshiring.',
-    'Для {count} изменений нужен другой тариф. Удалите их или смените тариф, чтобы продолжить сохранение.',
+    'Changes made with a tool that isn’t available right now: {count}. Remove them to keep saving.',
+    'Bu yerdagi {count} ta o‘zgarish hozir mavjud bo‘lmagan vosita bilan qilingan. Saqlashni davom ettirish uchun ularni olib tashlang.',
+    'Изменений, сделанных инструментом, который сейчас недоступен: {count}. Удалите их, чтобы продолжить сохранение.',
   ],
   editorRemoveLocked: ['Remove these changes', 'Bu o‘zgarishlarni olib tashlash', 'Удалить эти изменения'],
 
@@ -936,7 +935,6 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   // Document shape: how long it is and how tightly the page is set
   studioPageCount: ['Pages', 'Sahifalar', 'Страницы'],
   studioSlideCount: ['Slides', 'Slaydlar', 'Слайды'],
-  studioPageCountHint: ['Up to {max} on your plan', 'Tarifingizda {max} tagacha', 'До {max} на вашем тарифе'],
   studioDensity: ['Text density', 'Matn zichligi', 'Плотность текста'],
   studioDensity_rich: ['Text-rich', 'Matnga boy', 'Много текста'],
   studioDensity_balanced: ['Balanced', 'Muvozanatli', 'Сбалансированно'],
@@ -962,12 +960,12 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   'ai.pdf_topic': ['PDF Document', 'PDF hujjat', 'PDF документ'],
   'ai.pptx': ['PowerPoint Slides', 'PowerPoint slaydlar', 'PowerPoint слайды'],
   studioDescribe: ['Describe what you want', 'Nima kerakligini yozing', 'Опишите, что нужно'],
-  studioDescribeHint: ['Everything in one description: the subject, who it is for, the tone, and how many pages. No page count means {pages}; this plan allows up to {max}.', 'Hammasi bitta tavsifda: mavzu, kim uchun, uslub va necha sahifa. Sahifa soni ko‘rsatilmasa — {pages} ta; bu tarifda {max} tagacha.', 'Всё в одном описании: тема, для кого, тон и сколько страниц. Без указания — {pages}; на этом тарифе до {max}.'],
+  studioDescribeHint: ['Everything in one description: the subject, who it is for, the tone, and how many pages. No page count means {pages}; the most is {max}.', 'Hammasi bitta tavsifda: mavzu, kim uchun, uslub va necha sahifa. Sahifa soni ko‘rsatilmasa — {pages} ta; eng ko‘pi {max} ta.', 'Всё в одном описании: тема, для кого, тон и сколько страниц. Без указания — {pages}; максимум {max}.'],
   studioDescribePlaceholder: ['A 6 page introduction to tide tables for secondary school students, plain language, with a worked example on each page.', 'O‘rta maktab o‘quvchilari uchun 6 sahifalik kirish, sodda tilda, har sahifada misol bilan.', 'Введение на 6 страниц для старшеклассников, простым языком, с примером на каждой странице.'],
   studioTryOne: ['Start from an example', 'Namunadan boshlang', 'Начните с примера'],
   studioGuideLink: ['How to describe it', 'Qanday yozish kerak', 'Как описать'],
   studioPagesReading: ['{count} pages', '{count} sahifa', '{count} страниц'],
-  studioPagesClamped: ['You asked for {asked}; this plan allows {given}.', 'Siz {asked} so‘radingiz; bu tarifda {given} ta mumkin.', 'Вы запросили {asked}; тариф допускает {given}.'],
+  studioPagesClamped: ['You asked for {asked}; the most is {given}.', 'Siz {asked} ta so‘radingiz; eng ko‘pi {given} ta.', 'Вы запросили {asked}; максимум — {given}.'],
   studioFewer: ['One fewer', 'Bittaga kamroq', 'На одну меньше'],
   studioMore: ['One more', 'Bittaga ko‘proq', 'На одну больше'],
   studioSeePlans: ['See plans', 'Tariflarni ko‘rish', 'Посмотреть тарифы'],
@@ -1157,11 +1155,10 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   photoSubjectExample: ['city skyline at night', 'city skyline at night', 'city skyline at night'],
   photoSubjectHint: ['A few plain words, no names of people or brands. The photo is a free stock image from Pixabay.', 'Bir necha oddiy so‘z, odam yoki brend nomisiz. Rasm Pixabay’dan olingan bepul stok surat.', 'Несколько простых слов, без имён людей и брендов. Фото — бесплатный стоковый снимок с Pixabay.'],
   photosOff: ['Photos are not available right now, so this slide will be set as text.', 'Hozir rasmlar mavjud emas, shuning uchun bu slayd matn sifatida tayyorlanadi.', 'Фото сейчас недоступны, поэтому этот слайд будет оформлен текстом.'],
-  photosPerDeck: ['photos per AI deck', 'AI taqdimotida rasm', 'фото в ИИ-презентации'],
   guideRowLayouts: ['Slide layouts', 'Slayd ko‘rinishlari', 'Макеты слайдов'],
   guideRowLayoutsBody: ['Each slide gets the layout that fits it — key figures, a timeline, steps, a comparison, a chart, a table, cards. Ask for one if you want it: “show the sales as a chart”. For charts and figures, give the numbers in the description or your files. You can change any slide’s layout before it is made.', 'Har bir slaydga mos ko‘rinish tanlanadi — asosiy raqamlar, vaqt chizig‘i, bosqichlar, taqqoslash, diagramma, jadval, kartalar. Xohlasangiz so‘rang: «sotuvni diagramma qilib ko‘rsat». Diagramma va raqamlar uchun sonlarni tavsifda yoki fayllaringizda bering. Tayyorlashdan oldin istalgan slayd ko‘rinishini o‘zgartirish mumkin.', 'Каждый слайд получает подходящий макет — ключевые цифры, хронологию, шаги, сравнение, диаграмму, таблицу, карточки. Можно попросить: «покажи продажи диаграммой». Для диаграмм и цифр укажите числа в описании или в файлах. Макет любого слайда можно изменить до создания.'],
   guideRowPhotos: ['Photos in slides', 'Slayddagi rasmlar', 'Фото в слайдах'],
-  guideRowPhotosBody: ['Where a photo helps, a slide gets a free stock photo, up to your plan’s number per deck, at no extra cost. Say “no photos” if you would rather have none. Photos come from Pixabay.', 'Rasm foydali bo‘lgan joyda slaydga bepul stok rasm qo‘shiladi — tarifingizdagi songacha, qo‘shimcha to‘lovsiz. Rasm kerak bo‘lmasa, «rasmsiz» deb yozing. Rasmlar Pixabay’dan olinadi.', 'Там, где фото уместно, слайд получает бесплатное стоковое фото — до лимита вашего тарифа, без доплаты. Напишите «без фото», если они не нужны. Фото берутся с Pixabay.'],
+  guideRowPhotosBody: ['Where a photo helps, a slide gets a stock photo at no extra cost. Say “no photos” if you would rather have none. Photos come from Pixabay.', 'Rasm foydali bo‘lgan joyda slaydga qo‘shimcha to‘lovsiz stok rasm qo‘shiladi. Rasm kerak bo‘lmasa, «rasmsiz» deb yozing. Rasmlar Pixabay’dan olinadi.', 'Там, где фото уместно, слайд получает стоковое фото без доплаты. Напишите «без фото», если они не нужны. Фото берутся с Pixabay.'],
   // Paying by card transfer: the customer sends the price to the owner's card,
   // uploads the receipt, and the owner switches the plan on after checking.
   payByCard: ['Card transfer', 'Karta orqali to‘lov', 'Перевод на карту'],
@@ -1240,7 +1237,7 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Rasm qo‘shib bo‘lmadi, shuning uchun o‘sha slayd matn sifatida tayyorlandi.',
     'Фото добавить не удалось, поэтому слайд оформлен текстом.',
   ],
-  images_limited: ['Your plan includes a set number of photos per deck; the other photo slides were set as text.', 'Tarifingizda bir taqdimot uchun rasmlar soni cheklangan; qolgan rasmli slaydlar matn sifatida tayyorlandi.', 'В вашем тарифе ограничено число фото на презентацию; остальные слайды с фото оформлены текстом.'],
+  images_limited: ['A deck holds a set number of photos; the other photo slides were set as text.', 'Bitta taqdimotdagi rasmlar soni cheklangan; qolgan rasmli slaydlar matn sifatida tayyorlandi.', 'Число фото в одной презентации ограничено; остальные слайды с фото оформлены текстом.'],
   local_fixture_not_ai_generated: ['Written locally for testing, without the AI model.', 'Sinov uchun AI modelidan foydalanmasdan mahalliy tarzda yozildi.', 'Создано локально для теста, без модели ИИ.'],
 }
 /**

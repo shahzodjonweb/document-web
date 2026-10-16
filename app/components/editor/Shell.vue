@@ -91,9 +91,10 @@ watch(
 )
 
 /**
- * A draft made on a richer plan can be opened on a cheaper one. The server
- * refuses the whole array, so say which changes are the problem instead of
- * letting every autosave fail.
+ * A draft can hold changes made with a tool that has since been switched off.
+ * The server refuses the whole array, so say which changes are the problem
+ * instead of letting every autosave fail. Every plan has the same tools, so
+ * removing them is the only way on; no plan would bring the tool back.
  */
 const lockedCommands = computed(() => {
   const features = ws.features.value
@@ -203,7 +204,6 @@ onBeforeRouteLeave(async () => {
         <strong>{{ t('editorLockedCommands', { count: lockedCommands.length }) }}</strong>
       </div>
       <span>
-        <NuxtLink :to="path('/app/billing')" class="button secondary small">{{ t('editorSeePlans') }}</NuxtLink>
         <button type="button" class="button primary small" @click="removeLocked">
           {{ t('editorRemoveLocked') }}
         </button>

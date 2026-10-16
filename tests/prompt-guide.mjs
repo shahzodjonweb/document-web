@@ -78,7 +78,7 @@ await page.route('**/*', async (route) => {
   if (endpoint === '/studio/config')
     return json({
       provider: { mode: 'openai', configured: true },
-      default_pages: 5,
+      default_pages: 10,
       features: SERVICES.map((id) => ({
         id,
         name: id,
@@ -117,8 +117,11 @@ try {
       assert.ok(text.trim(), `${locale}: an empty row teaches nothing`)
       assert.ok(!/^guideRow/.test(text), `${locale}: untranslated key "${text}"`)
     }
-    // The default page count is stated, not left to be discovered.
-    assert.match(bodies[terms.indexOf(requiredTopics[locale][0])], /5/)
+    // The default page count is stated, not left to be discovered: the
+    // server's, which is 10 on every plan.
+    assert.match(bodies[terms.indexOf(requiredTopics[locale][0])], /\b10\b/)
+    // Nothing in the guide depends on the plan any more, photos per deck included.
+    assert.ok(!bodies.some((text) => /\bplan|\btarif|тариф/i.test(text)), `${locale}: no plan-dependent limits in the guide`)
   }
   checks.push('The reference table is complete and translated in all three languages')
 

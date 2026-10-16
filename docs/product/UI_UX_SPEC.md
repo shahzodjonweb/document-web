@@ -111,7 +111,7 @@ Bot input behavior:
 
 Special states:
 
-- Too large: state actual size/pages and current limit; offer a smaller file, applicable plan, or supported upload path. Avoid an upgrade if the task exceeds every plan's limit.
+- Too large: state actual size/pages and current limit; offer a smaller file or a supported upload path. File size, pages, batches and tools are the same on every plan, so never offer an upgrade for them; only the weekly allowances and AI edits differ by plan.
 - Corrupt/unsupported file: explain what failed and suggest a supported input. Keep unaffected files in a multi-file draft.
 - Password required: ask for the supplied password only for that processing attempt, mask it in the UI, never put it in chat-history summaries or telemetry. Offer browser entry when appropriate.
 - No meaningful compression: retain the original and state that further reduction would reduce quality. A no-op compression is not charged; show that no allowance was consumed.

@@ -26,9 +26,11 @@ const account = {
   id: '00000000-0000-4000-8000-999999999999', display_name: 'Card payer', locale: 'en', time_zone: 'UTC',
   mode: 'general', plan: 'free', preferences: {}, login_methods: { email: false, google: false, telegram: true },
 }
+// Only the three weekly limits differ by plan; every other limit is shared.
 const limits = (price, documents, files, edits) => ({
-  weekly_ai_documents: documents, weekly_file_jobs: files, edits_per_file: edits, max_file_mib: 25,
-  max_pages_per_job: 100, max_generated_pdf_pages: 7, max_generated_slides: 12, max_deck_images: 4, price_uzs: price,
+  weekly_ai_documents: documents, weekly_file_jobs: files, edits_per_file: edits, max_file_mib: 200,
+  max_pages_per_job: 1000, batch_files: 25, max_generated_pdf_pages: 35, max_generated_slides: 60,
+  max_deck_images: 12, saved_workflows: 20, price_uzs: price,
 })
 const plans = [
   { id: 'free', name: 'Free', price_xtr: 0, limits: limits(null, 5, 15, 3) },
@@ -106,7 +108,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
     payment = { ...payment, status: 'cancelled' }
     return json(payment)
   }
-  if (endpoint === '/studio/config') return json({ provider: { mode: 'openai', configured: true }, features: [], default_pages: 5 })
+  if (endpoint === '/studio/config') return json({ provider: { mode: 'openai', configured: true }, features: [], default_pages: 10 })
   if (endpoint === '/jobs') return json({ results: [], count: 0 })
   if (endpoint === '/referrals') return json({ code: 'x', url: null, rewards_count: 0, pending_count: 0, monthly_cap: 5, expires_in_days: 7, qualification: '', sandbox: false })
   unexpected.push(`${method} ${endpoint}`)
