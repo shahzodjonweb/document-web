@@ -132,16 +132,103 @@ function draftFields() {
 }
 
 const requestError = (e: any) => e.data?.error?.message || e.data?.message || t('genericError')
+/**
+ * A new description that names no topic is refused before anything is made or
+ * counted. The refusal is said under the description, where the fix is typed,
+ * rather than in the banner at the top of the page.
+ */
+const promptError = ref('')
+/** The other service, when the refused description asked for it ("make slides" in the PDF service). */
+const promptSwitch = ref('')
+/** The description asked only for a file in another format: the file tools do that. */
+const promptConvert = ref(false)
+/** Set by "Continue anyway": the customer says the description does name its topic. */
+const topicGiven = ref(false)
+/** The action the refusal stopped, run again by "Continue anyway". */
+let refusedRun: (() => Promise<void>) | null = null
+const promptInput = ref<HTMLTextAreaElement>()
+/** A service is only offered when it is another one and this plan can use it. */
+const offered = (id: string) =>
+  !!id && id !== form.feature_id && studio.features.value.some((f) => f.id === id && f.eligible !== false)
+function promptRefused(e: any) {
+  const refusal = e?.data?.error
+  if (refusal?.code !== 'topic_required' && refusal?.code !== 'convert_requested') return false
+  promptError.value = refusal.message || t('genericError')
+  const other = String(refusal.message_params?.service || '')
+  promptSwitch.value = offered(other) ? other : ''
+  promptConvert.value = refusal.code === 'convert_requested'
+  step.value = 0
+  return true
+}
+// Typing (or taking an example) is the fix, and so is a title, which the
+// server reads with the description; the refusal goes with either.
+watch([() => form.prompt, () => form.title], () => {
+  promptError.value = ''
+  promptSwitch.value = ''
+  promptConvert.value = false
+  topicGiven.value = false
+})
+/** The customer insists the description has its topic: the same action, sent as it is. */
+function continueAnyway() {
+  topicGiven.value = true
+  refusedRun?.()
+}
+/**
+ * A refusal outlives a change of service, because the description still needs
+ * its topic, but the server's words were about the service it was refused in
+ * ("what the document should be about", pages). It is said again in words
+ * that suit either, and the way to the other service has gone: it is the one
+ * now chosen.
+ */
+watch(
+  () => form.feature_id,
+  () => {
+    promptSwitch.value = ''
+    if (promptError.value) promptError.value = t('studioTopicStill')
+  },
+)
+/**
+ * Slides asked of the PDF service, or a written paper of the Slides service.
+ * Only ever a suggestion beside the description; the customer's choice stands.
+ */
+const suggestedService = computed(() => {
+  if (draft.value || promptError.value) return ''
+  const other = serviceHint(form.prompt, form.feature_id, files.value.length > 0)
+  return offered(other) ? other : ''
+})
+const purposeSelect = ref<HTMLSelectElement>()
+/**
+ * Moves the description to the other service. The text stays in the form and
+ * never travels in the address, where it would sit in the browser's history.
+ */
+function switchService(featureId: string) {
+  if (draft.value || !offered(featureId)) return
+  form.feature_id = featureId
+  // The button that was pressed goes away; the select shows what changed.
+  nextTick(() => purposeSelect.value?.focus())
+}
 async function run(task: string, fn: () => Promise<void>) {
   busy.value = task
   error.value = ''
+  promptError.value = ''
+  promptSwitch.value = ''
+  promptConvert.value = false
   notice.value = ''
+  let refused = false
   try {
     await fn()
   } catch (e) {
-    error.value = requestError(e)
+    refused = promptRefused(e)
+    refusedRun = refused ? () => run(task, fn) : null
+    if (!refused) error.value = requestError(e)
   } finally {
     busy.value = ''
+  }
+  // The fix is typed in the description, so focus goes there once the form is
+  // enabled again; the field's own description reads the refusal out.
+  if (refused) {
+    await nextTick()
+    promptInput.value?.focus()
   }
 }
 function acceptDraft(value: any) {
@@ -255,17 +342,23 @@ async function upload(list: FileList | null) {
   })
 }
 async function createDraft() {
+  const fields = draftFields()
   acceptDraft(
     await ws.api('/generation/drafts', {
       method: 'POST',
       body: {
-        ...draftFields(),
+        ...fields,
+        // "Continue anyway" after a refusal: the check reads words, and a topic
+        // it does not know must not block the customer. Only a new draft is
+        // checked, so only this request carries it, never a later save.
+        options: topicGiven.value ? { ...fields.options, topic_given: true } : fields.options,
         // Only a new draft needs this fallback. Changing an existing prompt,
         // even from empty to a service name, rebuilds its authored content.
         prompt: form.prompt.trim() || name(form.feature_id, selected.value?.name),
       },
     }),
   )
+  topicGiven.value = false
 }
 async function saveDraft() {
   if (!draft.value) return
@@ -499,7 +592,12 @@ watch(files, invalidateQuote, { deep: true, flush: 'sync' })
               <p class="studio-intro">{{ t('studioQuickHint') }}</p>
               <label class="form-field"
                 ><span>{{ t('purpose') }}</span
-                ><select v-model="form.feature_id" :disabled="!!draft" data-testid="studio-purpose">
+                ><select
+                  ref="purposeSelect"
+                  v-model="form.feature_id"
+                  :disabled="!!draft"
+                  data-testid="studio-purpose"
+                >
                   <option v-for="feature in studio.features.value" :key="feature.id" :value="feature.id">
                     {{ name(feature.id, feature.name) }}
                   </option>
@@ -508,17 +606,78 @@ watch(files, invalidateQuote, { deep: true, flush: 'sync' })
               <label class="form-field studio-primary-field">
                 <span>{{ t(revising ? 'reviseLabel' : 'studioDescribe') }}</span>
                 <textarea
+                  ref="promptInput"
                   v-model="form.prompt"
                   data-testid="studio-primary-input"
                   @input="delete form.options.pages"
                   rows="7"
                   :maxlength="studio.config.value?.limits?.source_chars || 12000"
                   :placeholder="t('studioDescribePlaceholder')"
+                  :aria-invalid="promptError ? 'true' : undefined"
+                  :aria-describedby="
+                    promptError ? 'studio-prompt-error' : suggestedService ? 'studio-service-hint' : undefined
+                  "
                 />
                 <small>{{
                   revising ? t('reviseExamples') : t('studioDescribeHint', { pages: defaultPages, max: maxPages })
                 }}</small>
               </label>
+              <!-- Outside the label: a button inside one would be part of its name. -->
+              <div v-if="promptError" class="field-error" data-testid="studio-prompt-error">
+                <AppIcon name="alert" :size="17" /><span id="studio-prompt-error">{{ promptError }}</span>
+                <button
+                  v-if="promptSwitch && offered(promptSwitch)"
+                  type="button"
+                  class="button secondary small"
+                  data-testid="studio-prompt-switch"
+                  @click="switchService(promptSwitch)"
+                >
+                  {{ t(promptSwitch === 'ai.pptx' ? 'studioMakeSlidesInstead' : 'studioMakePdfInstead') }}
+                </button>
+                <NuxtLink
+                  v-if="promptConvert"
+                  class="button secondary small"
+                  data-testid="studio-prompt-tools"
+                  :to="path('/app/tools')"
+                  >{{ t('studioOpenFileTools') }}</NuxtLink
+                >
+                <button
+                  type="button"
+                  class="button quiet small"
+                  data-testid="studio-prompt-anyway"
+                  :disabled="!!busy"
+                  @click="continueAnyway"
+                >
+                  {{ t('studioContinueAnyway') }}
+                </button>
+              </div>
+              <!-- Always in the page, so the suggestion is announced when it appears while typing. -->
+              <div
+                class="studio-service-hint"
+                :class="{ shown: !!suggestedService }"
+                data-testid="studio-service-hint"
+              >
+                <AppIcon v-if="suggestedService" name="sparkle" :size="17" /><span
+                  id="studio-service-hint"
+                  role="status"
+                  aria-live="polite"
+                  data-testid="studio-service-hint-text"
+                  >{{
+                    suggestedService
+                      ? t(suggestedService === 'ai.pptx' ? 'studioSlidesHint' : 'studioPdfHint')
+                      : ''
+                  }}</span
+                >
+                <button
+                  v-if="suggestedService"
+                  type="button"
+                  class="button secondary small"
+                  data-testid="studio-service-switch"
+                  @click="switchService(suggestedService)"
+                >
+                  {{ t(suggestedService === 'ai.pptx' ? 'studioSwitchToSlides' : 'studioSwitchToPdf') }}
+                </button>
+              </div>
               <div v-if="!revising" class="studio-examples">
                 <span>{{ t('studioTryOne') }}</span>
                 <button
