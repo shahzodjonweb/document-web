@@ -14,8 +14,8 @@ const isEditor = computed(() => /\/app\/editor(\/|$)/.test(route.path))
 const theme = ref('light')
 type NavItem = { key: string; label: string; url: string; icon: string }
 const plan = computed(() => ws.plans.value.find((item: any) => item.id === (user.value?.plan || 'free')) as any)
-// Saved workflows are a paid feature (free plans keep none), so the menu only
-// offers them on a plan that includes some.
+// Every plan keeps the same number of saved workflows. The menu still reads it
+// from the plan, so a cap set to zero hides a page that could save nothing.
 const hasWorkflows = computed(() => Number(plan.value?.limits?.saved_workflows || 0) > 0)
 const workNav = computed<NavItem[]>(() => [
   { key: 'home', label: 'navHome', url: '/app', icon: 'home' },

@@ -69,7 +69,9 @@ const editorFeatures = [
   'editor.replace_images',
   'editor.redact',
 ]
-const paidOnly = new Set(['editor.existing_text', 'editor.insert_images', 'editor.replace_images', 'editor.redact'])
+// Every plan has every tool. A tool can still be switched off for everyone,
+// which the catalog says with `eligible: false`; the test switches some off.
+const switchedOff = new Set()
 
 function documentPayload() {
   return {
@@ -137,7 +139,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
         id: feature,
         name: feature,
         category: 'editor',
-        eligible: plan === 'premium' ? true : !paidOnly.has(feature),
+        eligible: !switchedOff.has(feature),
       })),
       draft: true,
     })
@@ -147,7 +149,9 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
       ai_documents: { limit: 5, used: 0, remaining: 5 }, file_jobs: { limit: 15, used: 4, remaining: 11 }, edits_per_file: 3 })
   if (endpoint === '/jobs' && method === 'GET') return json({ results: [...jobs.values()], count: jobs.size })
   if (endpoint === '/studio/config') return json({ features: [], limits: {}, provider: {} })
-  if (endpoint === '/editor/form-templates') return json({ results: [], limit: plan === 'premium' ? 30 : 0 })
+  // Every plan keeps 30 form templates; a cap of zero means saving them is off for everyone.
+  if (endpoint === '/editor/form-templates')
+    return json({ results: [], limit: switchedOff.has('editor.form_templates') ? 0 : 30 })
 
   if (endpoint === '/editor/documents' && method === 'GET') return json({ results: [documentPayload()] })
   if (endpoint === '/editor/documents' && method === 'POST') return json({ id: editor.id }, 201)
@@ -338,30 +342,60 @@ try {
   await page.getByRole('button', { name: 'Use the other version', exact: true }).waitFor()
   checks.push('A version conflict stops autosave and asks which version to keep')
 
-  // 8. Plan gating renders locked controls without disabling them.
+  // 8. Free has every tool: nothing in the editor is locked by the plan.
   plan = 'free'
   editor.commands = []
   await open()
+  assert.equal(await page.locator('.editor-toolstrip [data-locked]').count(), 0, 'no tool is locked on Free')
+  await page.locator('.form-templates small', { hasText: '0 / 30' }).waitFor({ state: 'attached' })
+  assert.equal(await page.getByTestId('form-templates-locked').count(), 0, 'Free can save form templates')
+  checks.push('Every editor tool, redaction and form templates included, is open on the Free plan')
+
+  // 8b. A tool switched off for everyone stays visible and explains itself,
+  // without offering a plan that would not bring it back.
+  for (const feature of ['editor.redact', 'editor.insert_images', 'editor.form_templates']) switchedOff.add(feature)
+  await open()
   const redactMode = page.getByTestId('editor-mode-redact')
-  assert.equal(await redactMode.getAttribute('data-locked'), 'true', 'redaction is marked as outside the plan')
+  assert.equal(await redactMode.getAttribute('data-locked'), 'true', 'a switched-off mode is marked')
   assert.match(
     (await redactMode.innerText()).replace(/\s+/g, ' '),
-    /Not in your plan/,
+    /Not available/,
     'the lock is part of the accessible name, not a disabled state',
   )
   await redactMode.click()
   await page.getByTestId('editor-mode-blocked').waitFor()
+  assert.match(await page.getByTestId('editor-mode-blocked').innerText(), /Not available right now/)
+  assert.equal(await page.getByTestId('editor-mode-blocked').getByRole('link').count(), 0, 'no plan is offered')
   assert.equal(await page.getByTestId('editor-pages-board').count(), 0, 'a locked mode does not open')
   const lockedTool = page.getByTestId('editor-tool-insert_image')
-  assert.equal(await lockedTool.getAttribute('data-locked'), 'true', 'paid tools are locked on the free plan')
+  assert.equal(await lockedTool.getAttribute('data-locked'), 'true', 'a switched-off tool is locked')
   await lockedTool.click()
-  await page.locator('.editor-toolstrip .editor-lock').waitFor()
+  const lock = page.locator('.editor-toolstrip .editor-lock')
+  await lock.waitFor()
+  assert.match(await lock.innerText(), /Not available right now/)
+  assert.equal(await lock.getByRole('link').count(), 0, 'no plan is offered')
   assert.equal(
     await page.locator('[data-testid="editor-command-list"] li').count(),
     0,
     'a locked tool adds no change',
   )
-  checks.push('Controls outside the plan stay visible and explain themselves instead of failing late')
+  const templatesLock = page.getByTestId('form-templates-locked')
+  await templatesLock.waitFor({ state: 'attached' })
+  assert.match(await templatesLock.textContent(), /Not available right now/)
+  assert.equal(await templatesLock.locator('a').count(), 0, 'no plan is offered for form templates either')
+  // A draft already holding a change made with a switched-off tool says so, and
+  // offers only to remove it: no plan would bring the tool back.
+  editor.commands = [{ type: 'highlight', page: 1, x: 40, y: 40, width: 80, height: 20, color: '#FFFF00' }]
+  switchedOff.add('editor.highlight')
+  await open()
+  const stranded = page.locator('.editor-conflict')
+  await stranded.waitFor()
+  assert.match(await stranded.innerText(), /tool that isn’t available right now: 1\./)
+  assert.equal(await stranded.locator('a').count(), 0, 'no plan is offered to keep them')
+  await stranded.getByRole('button', { name: 'Remove these changes', exact: true }).waitFor()
+  editor.commands = []
+  switchedOff.clear()
+  checks.push('A switched-off tool stays visible and explains itself, with no plan offered')
   plan = 'premium'
 
   // 9. Redaction is a mode of its own: the server cannot even save a mixed draft.

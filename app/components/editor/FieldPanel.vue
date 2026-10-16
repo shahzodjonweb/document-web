@@ -5,7 +5,7 @@
  */
 import { COMMAND_FEATURE, LIMITS } from '~/composables/useEditorCommands'
 
-const { t, path } = useLocale()
+const { t } = useLocale()
 const ws = useWorkspace()
 const session = useEditorSession()
 
@@ -123,7 +123,6 @@ function applyTemplate(commands: any[]) {
       <p v-else class="editor-lock">
         <AppIcon name="lock" :size="15" />
         <span>{{ t('editorLockedTool', { tool: t('replaceText') }) }}</span>
-        <NuxtLink :to="path('/app/billing')" class="text-link">{{ t('editorSeePlans') }}</NuxtLink>
       </p>
     </section>
 

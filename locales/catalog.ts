@@ -148,7 +148,7 @@ const entries: Record<string, [string, string, string]> = {
     'Ничего не найдено. Напишите нам ниже, и мы поможем.',
   ],
   // Landing.
-  heroTitle: ['PDF tools and AI documents, in one place.', 'PDF vositalari va AI hujjatlar — bir joyda.', 'Инструменты PDF и AI-документы — в одном месте.'],
+  heroTitle: ['PDF tools and AI documents, in one place.', 'PDF vositalari va AI hujjatlar — bir joyda.', 'Инструменты PDF и ИИ-документы — в одном месте.'],
   heroBody: [
     'Merge, compress and convert files, or describe what you need and get a finished PDF or slide deck. On the web and in Telegram.',
     'Fayllarni birlashtiring, siqing va aylantiring yoki kerakli narsani yozing — tayyor PDF yoki taqdimot oling. Veb-saytda va Telegram’da.',
@@ -183,9 +183,9 @@ const entries: Record<string, [string, string, string]> = {
   faqTitle: ['Questions', 'Savollar', 'Вопросы'],
   faqFreeQ: ['Is it free?', 'Bu bepulmi?', 'Это бесплатно?'],
   faqFreeA: [
-    'Yes. The Free plan includes AI documents and file tasks every week, renewed each Monday. Plus gives you more, and Premium has no weekly limits.',
-    'Ha. Bepul tarifda har hafta AI hujjatlar va fayl vazifalari bor, ular har dushanba yangilanadi. Plus ko‘proq beradi, Premium’da esa haftalik cheklov yo‘q.',
-    'Да. На бесплатном тарифе каждую неделю доступны ИИ-документы и задачи с файлами, лимит обновляется по понедельникам. Plus даёт больше, а у Premium недельных ограничений нет.',
+    'Yes. The Free plan has every tool, and AI documents and file tasks every week, renewed each Monday. Plus gives you more each week, and Premium has no weekly limits.',
+    'Ha. Bepul tarifda barcha vositalar bor, har hafta AI hujjatlar va fayl vazifalari beriladi, ular har dushanba yangilanadi. Plus har hafta ko‘proq beradi, Premium’da esa haftalik cheklov yo‘q.',
+    'Да. На бесплатном тарифе есть все инструменты, а каждую неделю доступны ИИ-документы и задачи с файлами, лимит обновляется по понедельникам. Plus даёт больше в неделю, а у Premium недельных ограничений нет.',
   ],
   faqPayQ: ['How do I pay?', 'Qanday to‘lanadi?', 'Как оплатить?'],
   faqPayA: [
@@ -454,8 +454,6 @@ const entries: Record<string, [string, string, string]> = {
   unavailablePrice: ['Price to be announced', 'Narx keyin e’lon qilinadi', 'Цена будет объявлена'],
   fileLimit: ['per file', 'har bir fayl', 'на файл'],
   jobLimit: ['pages per task', 'har vazifaga sahifa', 'страниц на задачу'],
-  generatedPagesLimit: ['pages per AI document', 'AI hujjatida sahifa', 'страниц в ИИ-документе'],
-  generatedSlidesLimit: ['slides per AI deck', 'AI taqdimotida slayd', 'слайдов в ИИ-презентации'],
   planAiWeek_one: [
     '{count} AI document a week',
     'Haftasiga {count} ta AI hujjat',
@@ -528,16 +526,22 @@ const entries: Record<string, [string, string, string]> = {
   free: ['Free', 'Free', 'Free'],
   plus: ['Plus', 'Plus', 'Plus'],
   premium: ['Premium', 'Premium', 'Premium'],
-  planFreeBody: ['For everyday essentials', 'Kundalik muhim ishlar uchun', 'Для повседневных задач'],
+  // A plan's subtitle speaks of how much it gives each week and nothing else:
+  // every plan has every tool and the same file size, pages and batches.
+  planFreeBody: [
+    'Every tool, with a weekly allowance',
+    'Barcha vositalar, haftalik limit bilan',
+    'Все инструменты с недельным лимитом',
+  ],
   planPlusBody: [
-    'More room for regular work',
-    'Muntazam ishlar uchun ko‘proq imkoniyat',
-    'Больше возможностей для работы',
+    'More each week for regular work',
+    'Muntazam ishlar uchun haftasiga ko‘proq',
+    'Больше в неделю для регулярной работы',
   ],
   planPremiumBody: [
-    'For larger document workloads',
-    'Katta hajmdagi hujjatlar uchun',
-    'Для больших объёмов документов',
+    'For people who work with lots of documents',
+    'Ko‘p hujjat bilan ishlaydiganlar uchun',
+    'Для тех, кто работает с большим числом документов',
   ],
   notAvailable: ['Not available yet', 'Hozircha mavjud emas', 'Пока недоступно'],
   profile: ['Your profile', 'Profilingiz', 'Ваш профиль'],
@@ -616,9 +620,9 @@ const entries: Record<string, [string, string, string]> = {
   ],
   helpBilling: ['Usage & payments', 'Foydalanish va to‘lovlar', 'Лимиты и платежи'],
   helpBillingBody: [
-    'Each plan has a weekly allowance of AI documents and file tasks, renewed every Monday, and a number of AI edits for each generated file. A task counts once you start it; one that fails, or a compression that changes nothing, does not count. Plus and Premium are paid by card transfer: choose a plan in Plan & billing, transfer the amount and send the receipt, and we switch the plan on after checking it.',
-    'Har bir tarifda haftalik AI hujjatlar va fayl vazifalari limiti bor, u har dushanba yangilanadi, shuningdek har bir yaratilgan fayl uchun AI tahrirlar soni belgilangan. Vazifa boshlanganda hisoblanadi; xato bilan tugagan vazifa yoki hech narsani o‘zgartirmagan siqish hisoblanmaydi. Plus va Premium karta orqali to‘lanadi: Tarif va to‘lov bo‘limida tarifni tanlang, summani o‘tkazing va kvitansiyani yuboring — tekshirgach tarifni yoqamiz.',
-    'В каждом тарифе есть недельный лимит ИИ-документов и задач с файлами, он обновляется по понедельникам, а для каждого созданного файла — своё число ИИ-правок. Задача засчитывается при запуске; задача с ошибкой или сжатие без изменений не считаются. Plus и Premium оплачиваются переводом на карту: выберите тариф в разделе «Тариф и оплата», переведите сумму и отправьте квитанцию — после проверки мы включим тариф.',
+    'Every plan has every tool and the same file size and page limits. What differs is the weekly allowance of AI documents and file tasks, renewed every Monday, and the number of AI edits for each generated file. Premium also needs no channel subscription. A task counts once you start it; one that fails, or a compression that changes nothing, does not count. Plus and Premium are paid by card transfer: choose a plan in Plan & billing, transfer the amount and send the receipt, and we switch the plan on after checking it.',
+    'Har bir tarifda barcha vositalar bor, fayl hajmi va sahifalar chegarasi ham bir xil. Farqi — haftalik AI hujjatlar va fayl vazifalari limitida (u har dushanba yangilanadi) hamda har bir yaratilgan fayl uchun AI tahrirlar sonida. Bundan tashqari, Premium’da kanallarga obuna bo‘lish shart emas. Vazifa boshlanganda hisoblanadi; xato bilan tugagan vazifa yoki hech narsani o‘zgartirmagan siqish hisoblanmaydi. Plus va Premium karta orqali to‘lanadi: Tarif va to‘lov bo‘limida tarifni tanlang, summani o‘tkazing va kvitansiyani yuboring — tekshirgach tarifni yoqamiz.',
+    'В каждом тарифе есть все инструменты, а ограничения на размер файла и число страниц одинаковы. Тарифы различаются недельным лимитом ИИ-документов и задач с файлами, который обновляется по понедельникам, и числом ИИ-правок для каждого созданного файла. Кроме того, для Premium не нужна подписка на каналы. Задача засчитывается при запуске; задача с ошибкой или сжатие без изменений не считаются. Plus и Premium оплачиваются переводом на карту: выберите тариф в разделе «Тариф и оплата», переведите сумму и отправьте квитанцию — после проверки мы включим тариф.',
   ],
   legalDraft: [
     'Local development information — public terms require review before launch.',

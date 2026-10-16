@@ -7,9 +7,9 @@ export interface StudioFeature {
   parameter_schema?: Record<string, any>
   parameters?: Record<string, any>
   locales?: string[]
-  /** Most pages this account can be given in one document of this kind. */
+  /** Most pages one document of this kind can have, the same on every plan. */
   max_pages?: number
-  /** Stock photos one deck can carry on this plan; 0 when photos are off. */
+  /** Stock photos one deck can carry; 0 when photos are off. */
   max_images?: number
 }
 export interface StudioConfig {

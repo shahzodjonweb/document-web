@@ -52,7 +52,9 @@ const revisionPageNumbers = computed(() =>
     .filter(Boolean)
     .join(', '),
 )
-const defaultPages = computed(() => studio.config.value?.default_pages ?? 5)
+// The server says how many pages a description with no count gets; 10 is its
+// own default, kept here for the moment before the config has loaded.
+const defaultPages = computed(() => studio.config.value?.default_pages ?? 10)
 const maxPages = computed(() => selected.value?.max_pages ?? defaultPages.value)
 /**
  * The page count is read from the description by the server, so the form does
@@ -63,8 +65,8 @@ const readingPages = computed(() => draft.value?.options?.length ?? defaultPages
 /** A deck is counted in slides; only a document is counted in pages. */
 const isDeck = computed(() => form.feature_id === 'ai.pptx')
 /**
- * Photo layouts need the service to be able to fetch a photo for this plan.
- * Without one they would only ever be drawn as text, so they are not offered.
+ * Photo layouts need the service to be able to fetch a photo. Without one they
+ * would only ever be drawn as text, so they are not offered.
  */
 const photosAvailable = computed(() => (selected.value?.max_images ?? 0) > 0)
 const readingLabel = computed(() =>
@@ -74,7 +76,7 @@ const clampedFrom = computed(() => {
   const asked = draft.value?.options?.requested_pages
   return asked && asked > readingPages.value ? asked : 0
 })
-/** The most pages (or slides) this plan allows for the chosen service. */
+/** The most pages (or slides) the chosen service makes, the same on every plan. */
 const pageCeiling = computed(() => selected.value?.max_pages ?? readingPages.value)
 /**
  * A count read wrong from the description is put right here, before paying:
@@ -565,7 +567,7 @@ watch(files, invalidateQuote, { deep: true, flush: 'sync' })
     <template v-else>
       <div v-if="!canUseTool" class="info-banner" role="status">
         <AppIcon name="sparkle" :size="18" />{{
-          t(providerReady ? 'studioPlanUnavailable' : 'studioUnavailable')
+          t(providerReady ? 'studioToolUnavailable' : 'studioUnavailable')
         }}
       </div>
       <nav class="studio-steps" :aria-label="t('create')">
@@ -618,7 +620,7 @@ watch(files, invalidateQuote, { deep: true, flush: 'sync' })
                     promptError ? 'studio-prompt-error' : suggestedService ? 'studio-service-hint' : undefined
                   "
                 />
-                <small>{{
+                <small data-testid="studio-describe-hint">{{
                   revising ? t('reviseExamples') : t('studioDescribeHint', { pages: defaultPages, max: maxPages })
                 }}</small>
               </label>
@@ -1032,10 +1034,10 @@ watch(files, invalidateQuote, { deep: true, flush: 'sync' })
                 </button>
               </span>
             </div>
-            <!-- A clamped request is said out loud, with the way to more. -->
+            <!-- A clamped request is said out loud. Every plan has the same ceiling,
+                 so there is no plan to offer for more. -->
             <p v-if="clampedFrom" class="field-hint" data-testid="studio-pages-clamped">
               {{ t('studioPagesClamped', { asked: clampedFrom, given: readingPages }) }}
-              <NuxtLink :to="path('/app/billing')" class="text-link">{{ t('studioSeePlans') }}</NuxtLink>
             </p>
             <!-- An edit counts against the file's own edits, not the week's documents. -->
             <WeeklyLine v-if="!revising" kind="ai" :usage="quote.usage" />

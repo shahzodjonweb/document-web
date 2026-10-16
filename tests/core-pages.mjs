@@ -37,7 +37,8 @@ const features = [
     properties: { language: { type: 'string', enum: ['eng', 'rus', 'uzb'], default: 'eng' } },
   }),
 ]
-const limits = (price, documents, files, edits) => ({ max_file_mib: 25, max_pages_per_job: 100, saved_workflows: 0,
+// Only the three weekly limits differ by plan; every other limit is shared.
+const limits = (price, documents, files, edits) => ({ max_file_mib: 200, max_pages_per_job: 1000, saved_workflows: 20,
   price_uzs: price, weekly_ai_documents: documents, weekly_file_jobs: files, edits_per_file: edits })
 const plans = [
   { id: 'free', name: 'Free', price_xtr: 0, limits: limits(null, 5, 15, 3) },
@@ -82,7 +83,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
         { id: 'ai.pdf_topic', name: 'PDF Document', eligible: true },
         { id: 'ai.pptx', name: 'PowerPoint Slides', eligible: true },
       ],
-      default_pages: 5,
+      default_pages: 10,
     })
   if (endpoint === '/jobs' && method === 'GET') return json({ results: [...jobs.values()], count: jobs.size })
   if (endpoint === '/files/uploads' && method === 'POST') {
@@ -278,13 +279,18 @@ try {
   await page.getByPlaceholder('Search help…').fill('24 hours')
   assert.ok((await page.locator('section.help-card').count()) < articles, 'search narrows the articles')
   await page.getByPlaceholder('Search help…').fill('')
+  // What sets the plans apart is listed in full: the week's limits, the edits
+  // per file, and that Premium needs no channel subscription.
+  const billingHelp = await page.locator('section.help-card', { hasText: 'Usage & payments' }).innerText()
+  assert.match(billingHelp, /Every plan has every tool/)
+  assert.match(billingHelp, /Premium also needs no channel subscription\./)
   for (const mode of ['light', 'dark']) {
     await theme(mode)
     await axe(`help 1440 ${mode}`)
   }
   await theme('light')
   await shot('help-1440', true)
-  checks.push('Help: the support and advertising Telegram contacts, searchable articles and the guide; no form')
+  checks.push('Help: the support and advertising Telegram contacts, searchable articles and the guide; no form; the plans answer names Premium’s channels')
 
   // The public front page: what it does, the AI services, tools, plans and questions.
   await go('/en')
@@ -297,6 +303,9 @@ try {
     ['5 AI documents a week', '15 file tasks a week'])
   assert.deepEqual(await texts(page.locator('.pricing-teaser .panel').last().locator('.teaser-week')),
     ['Unlimited AI documents', 'Unlimited file tasks'])
+  // Subtitles speak of weekly volume only: no tool set, capability or size.
+  assert.deepEqual(await texts(page.locator('.pricing-teaser .panel small')),
+    ['Every tool, with a weekly allowance', 'More each week for regular work', 'For people who work with lots of documents'])
   await page.locator('.faq summary').first().click()
   assert.ok(await page.locator('.faq details').first().getAttribute('open') !== null)
   for (const mode of ['light', 'dark']) {
@@ -306,6 +315,12 @@ try {
   }
   await theme('light')
   await shot('landing-1440', true)
+  // Russian says ИИ, the landing headline included.
+  await go('/ru')
+  await page.locator('.landing-hero h1').waitFor()
+  assert.equal(await page.locator('.landing-hero h1').innerText(), 'Инструменты PDF и ИИ-документы — в одном месте.')
+  assert.deepEqual(await texts(page.locator('.pricing-teaser .panel small')),
+    ['Все инструменты с недельным лимитом', 'Больше в неделю для регулярной работы', 'Для тех, кто работает с большим числом документов'])
 
   // Referrals: the link with a copy button, and two numbers.
   await go('/en/app/referrals')
@@ -315,7 +330,7 @@ try {
   assert.equal(await page.getByTestId('referral-rewards').innerText(), 'Rewards for invitations are coming soon.')
   await axe('referrals 1440')
   await shot('referrals-1440', true)
-  checks.push('Landing: what it does, AI services, tools, plans with their weeks and questions; referrals: link, copy and two numbers')
+  checks.push('Landing: what it does, AI services, tools, plans with their weeks and volume-only subtitles, questions, Russian ИИ; referrals: link, copy and two numbers')
 
   // Phone: one column, and the next step stays in reach above the phone bar.
   await page.setViewportSize({ width: 390, height: 844 })

@@ -12,20 +12,15 @@ const money = (amount: number) => `${amount.toLocaleString('ru-RU').replace(/\u0
 const currentPlan = computed(() => ws.user.value?.plan || 'free')
 /** Once plans are priced in so'm, Free reads as 0 so'm rather than 0 Stars. */
 const pricedInSom = computed(() => (ws.plans.value || []).some((plan: any) => priceOf(plan)))
-const { number, phrase, allowances } = usePlanPhrases()
-const sized = (key: string, label: string, plan: any, unit = '') =>
-  limit(plan, key) != null ? phrase(t(label), `${number(limit(plan, key))}${unit}`) : null
-// What sets the plans apart, in the order people compare them.
+const { allowances } = usePlanPhrases()
+// What sets the plans apart, and nothing else: the week's allowances and the
+// channels. File size, pages, batches and tools are the same on every plan, so
+// listing them on each card would only suggest a difference that isn't there.
 const features = (plan: any) =>
   [
     ...allowances(plan),
     // Only Free and Plus are asked to join the Telegram channels.
     plan.id === 'premium' ? { pre: t('planNoChannels'), value: '', post: '' } : null,
-    sized('max_file_mib', 'fileLimit', plan, ' MB'),
-    sized('max_pages_per_job', 'jobLimit', plan),
-    sized('max_generated_pdf_pages', 'generatedPagesLimit', plan),
-    sized('max_generated_slides', 'generatedSlidesLimit', plan),
-    sized('max_deck_images', 'photosPerDeck', plan),
   ].filter((row): row is PlanPhrase => !!row)
 const chosen = ref('')
 async function pay(plan: string) {

@@ -21,7 +21,8 @@ const rows = [
   'Sources',
   'Skip',
 ] as const
-const defaultPages = computed(() => studio.config.value?.default_pages ?? 5)
+// What a description with no count gets; the server's own default until the config loads.
+const defaultPages = computed(() => studio.config.value?.default_pages ?? 10)
 const services = computed(() =>
   studio.features.value.length
     ? studio.features.value

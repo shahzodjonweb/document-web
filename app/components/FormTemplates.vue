@@ -133,12 +133,12 @@ async function remove(id: string) {
     <h2>{{ t('formTemplates') }}</h2>
     <p class="field-hint">{{ t('formTemplateHint') }}</p>
     <ErrorBanner v-if="error" :message="error" />
-    <!-- The server caps saved form templates at zero below premium, so saving
-         would always 403. Say so instead of offering a form that cannot work. -->
+    <!-- Every plan keeps the same number of form templates. A cap of zero means
+         saving is switched off for everyone and would always 403, so say so
+         instead of offering a form that cannot work, and offer no plan. -->
     <p v-if="limit === 0" class="editor-lock" data-testid="form-templates-locked">
       <AppIcon name="lock" :size="15" />
       <span>{{ t('editorLockedTool', { tool: t('formTemplates') }) }}</span>
-      <NuxtLink :to="path('/app/billing')" class="text-link">{{ t('editorSeePlans') }}</NuxtLink>
     </p>
     <template v-else>
     <div v-for="item in items" :key="item.id" class="form-template-row">

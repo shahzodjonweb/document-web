@@ -3,6 +3,7 @@ const props = defineProps<{ message?: string }>()
 const { t, path } = useLocale()
 const ws = useWorkspace()
 // A refusal because the week's allowance or a file's edits ran out offers the next plan.
+// Those are the only limits that differ by plan, so no other refusal offers one.
 const offerPlans = computed(() => !!props.message && props.message === ws.limitMessage.value)
 </script>
 <template>
