@@ -971,6 +971,37 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   studioFewer: ['One fewer', 'Bittaga kamroq', 'На одну меньше'],
   studioMore: ['One more', 'Bittaga ko‘proq', 'На одну больше'],
   studioSeePlans: ['See plans', 'Tariflarni ko‘rish', 'Посмотреть тарифы'],
+  // Under a refused description that asked for the other service. The refusal
+  // itself is the server's text (`topic_required`).
+  studioMakeSlidesInstead: [
+    'Make slides instead',
+    'PDF o‘rniga slayd tayyorlash',
+    'Сделать слайды вместо PDF',
+  ],
+  studioMakePdfInstead: ['Make a PDF instead', 'Slayd o‘rniga PDF tayyorlash', 'Сделать PDF вместо слайдов'],
+  // The refusal again once the service has changed: the server's words were
+  // about the service it was refused in, so these suit either.
+  // Beside a refused description: the customer may know better than the check.
+  studioContinueAnyway: ['Continue anyway', 'Baribir davom ettirish', 'Всё равно продолжить'],
+  studioOpenFileTools: ['Open file tools', 'Fayl vositalarini ochish', 'Открыть инструменты для файлов'],
+  studioTopicStill: [
+    'Now add the topic — for example: “The water cycle for 6th grade”.',
+    'Endi mavzuni yozing — masalan: «Tabiatda suvning aylanishi, 6-sinf uchun».',
+    'Теперь добавьте тему — например: «Круговорот воды в природе для 6 класса».',
+  ],
+  // A suggestion while typing; the customer's chosen service stands until they switch.
+  studioSlidesHint: [
+    'Your description mentions slides. This service makes a PDF document.',
+    'Tavsifingizda slayd tilga olingan. Bu xizmat PDF hujjat tayyorlaydi.',
+    'В описании упоминаются слайды. Этот сервис делает PDF-документ.',
+  ],
+  studioSwitchToSlides: ['Switch to Slides', 'Slaydlarga o‘tish', 'Перейти к слайдам'],
+  studioPdfHint: [
+    'Your description mentions a written paper. This service makes slides.',
+    'Tavsifingizda yozma ish tilga olingan. Bu xizmat slayd tayyorlaydi.',
+    'В описании упоминается письменная работа. Этот сервис делает слайды.',
+  ],
+  studioSwitchToPdf: ['Switch to PDF', 'PDF’ga o‘tish', 'Перейти к PDF'],
   // Deck setup, opened from the bot's review as a Mini App.
   deckSetupTitle: ['Design and slides', 'Dizayn va slaydlar', 'Дизайн и слайды'],
   deckSetupLead: [
@@ -1051,6 +1082,13 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'So‘rovda hech narsa o‘zgarmagan bo‘lsa, tayyor AI natijalari qayta ishlatiladi. Muvaffaqiyatsiz tahrir bu faylning AI tahrirlariga hisoblanmaydi.',
     'Если в запросе ничего не изменилось, готовые результаты ИИ используются повторно. Неудачная правка не засчитывается в ИИ-правки этого файла.',
   ],
+  // A new document or deck the AI could not finish: often a description too thin to write from.
+  jobRetryAdvice: [
+    'If it fails again, make the request more specific: the topic, who it is for and the length.',
+    'Yana muvaffaqiyatsiz bo‘lsa, so‘rovni aniqroq yozing: mavzu, kim uchun va qancha hajmda.',
+    'Если снова не получится, уточните запрос: тема, для кого и объём.',
+  ],
+  jobChangeRequest: ['Change the request', 'So‘rovni o‘zgartirish', 'Изменить запрос'],
   generationRetryReview: ['Review & retry', 'Ko‘rib chiqish va qayta urinish', 'Проверить и повторить'],
   generationRetryConfirm: ['Confirm & continue', 'Tasdiqlash va davom etish', 'Подтвердить и продолжить'],
   reviseLabel: ['What should change?', 'Nimani o‘zgartiramiz?', 'Что изменить?'],

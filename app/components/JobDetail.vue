@@ -61,6 +61,28 @@ const retryQuote = ref<any>(null)
 const retryIsEdit = computed(
   () => !!(retryQuote.value?.normalized_parameters?.revision || (job.value as any)?.parameters?.revision),
 )
+/**
+ * A new AI document or deck the AI could not finish. Many of these came from a
+ * description too thin to write from, so the retry also says how to make it
+ * clearer. Good descriptions often succeed when simply sent again, so the
+ * retry itself stays. An outline keeps the plain retry, as it does in the bot:
+ * the advice is about describing a new document, and the outline's own draft
+ * is already a link away.
+ */
+const retryIsOutline = computed(
+  () =>
+    (job.value as any)?.parameters?.stage === 'outline' ||
+    retryQuote.value?.normalized_parameters?.stage === 'outline',
+)
+const retryAdviceDraft = computed(() =>
+  retryAvailable.value &&
+  !retryIsEdit.value &&
+  !retryIsOutline.value &&
+  ['ai.pdf_topic', 'ai.pptx'].includes(job.value?.feature_id || '') &&
+  (job.value?.error as any)?.code === 'provider_failed'
+    ? String((job.value as any)?.parameters?.generation_draft_id || '')
+    : '',
+)
 const retryBusy = ref(false)
 const retryPending = ref(false)
 const retryKey = ref('')
@@ -292,6 +314,12 @@ function downloadUrl(url: string | undefined, id: string) {
       <section v-if="retryAvailable" class="panel revise-panel" data-testid="job-retry">
         <h3>{{ t('generationRetryTitle') }}</h3>
         <p data-testid="job-retry-body">{{ t(retryIsEdit ? 'editRetryBody' : 'generationRetryBody') }}</p>
+        <p v-if="retryAdviceDraft" class="retry-advice" data-testid="job-retry-advice">
+          {{ t('jobRetryAdvice') }}
+          <NuxtLink :to="path(`/app/create/${retryAdviceDraft}`)" class="text-link">{{
+            t('jobChangeRequest')
+          }}</NuxtLink>
+        </p>
         <button
           v-if="!retryQuote"
           class="button primary"

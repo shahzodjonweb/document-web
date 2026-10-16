@@ -45,6 +45,19 @@ let visualChecks = 0
 let failJobOnce = false
 let expireJobOnce = false
 let clampPages = 0
+// A new description that names no topic is refused by the server, which says
+// which other service it asked for, if any. Synthetic prompts only.
+const topicless = new Map([
+  ['Make bright slides.', 'ai.pptx'],
+  ['Make it 12 pages long.', ''],
+  ['Convert this to PDF.', 'convert'],
+])
+const convertRefusal = 'To convert a file, open All tools and choose a converter.'
+const topicRefusal = {
+  en: 'Write what the document should be about.',
+  uz: 'Hujjat nima haqida bo‘lishini yozing.',
+  ru: 'Напишите, о чём должен быть документ.',
+}
 const id = () => `00000000-0000-4000-8000-${String(++sequence).padStart(12, '0')}`
 const future = () => new Date(Date.now() + 300000).toISOString()
 const featureIds = ['ai.pdf_topic', 'ai.pptx']
@@ -201,6 +214,38 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
     })
   if (endpoint === '/generation/drafts' && method === 'GET') return json({ results: [...drafts.values()] })
   if (endpoint === '/generation/drafts' && method === 'POST') {
+    // Only a new draft from a bare description is checked: never a change, a
+    // file or pasted text. Nothing is created and nothing is counted.
+    if (
+      topicless.has(body.prompt) &&
+      body.options?.topic_given !== true &&
+      !body.options?.revise_draft_id &&
+      !body.source_ids?.length &&
+      !body.source_text
+    ) {
+      const asked = topicless.get(body.prompt)
+      if (asked === 'convert')
+        return json(
+          {
+            error: {
+              code: 'convert_requested',
+              message: convertRefusal,
+              message_params: { service: '', convert: true },
+            },
+          },
+          400,
+        )
+      return json(
+        {
+          error: {
+            code: 'topic_required',
+            message: topicRefusal[account.locale] || topicRefusal.en,
+            message_params: { service: asked === body.feature_id ? '' : asked },
+          },
+        },
+        400,
+      )
+    }
     // The server reads the page count out of the description and clamps it to
     // the plan; the fixture does the same so the form sees a real answer.
     const named = /(\d{1,3})\s*(?:-|\s)?\s*(?:pages?|slides?)/i.exec(
@@ -392,6 +437,36 @@ async function reviewSaved() {
   return patched.body
 }
 
+/** WCAG A/AA on the brief in both themes, for a state the locale loop never opens. */
+async function auditBrief(label) {
+  const original = await page.evaluate(() => document.documentElement.dataset.theme || '')
+  for (const theme of ['light', 'dark']) {
+    await page.evaluate((value) => (document.documentElement.dataset.theme = value), theme)
+    await page.evaluate(
+      () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+    )
+    const result = await new AxeBuilder({ page })
+      .include('.studio-form')
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
+      .analyze()
+    assert.deepEqual(
+      result.violations.map((violation) => ({
+        id: violation.id,
+        nodes: violation.nodes.map((node) => ({ target: node.target, failure: node.failureSummary })),
+      })),
+      [],
+      `${label}/${theme}: accessibility violations`,
+    )
+    await page
+      .getByTestId('studio-brief')
+      .screenshot({ path: path.join(output, `${label.replaceAll(' ', '-')}-${theme}.png`) })
+  }
+  await page.evaluate((value) => {
+    if (value) document.documentElement.dataset.theme = value
+    else delete document.documentElement.dataset.theme
+  }, original)
+}
+
 async function confirm() {
   const beforeJobs = countJobs()
   await generate().click()
@@ -493,6 +568,292 @@ try {
   await open('ai.pdf_topic')
   assert.equal(await page.getByTestId('studio-format').count(), 0, 'A document is always a PDF')
   checks.push('Neither service asks for a format: a document is a PDF, a deck is a PowerPoint')
+
+  // 4b. Slides asked of the PDF service are offered the Slides service, as a
+  // suggestion that keeps the text; a plain PDF brief is left alone.
+  const hint = () => page.getByTestId('studio-service-hint')
+  const hintText = () => page.getByTestId('studio-service-hint-text')
+  const hintSwitch = () => page.getByTestId('studio-service-switch')
+  const settled = () =>
+    page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+  /** The service a description is offered while typing, or '' when it is left alone. */
+  async function suggestion(prompt) {
+    await primary().fill(prompt)
+    await settled()
+    if (!(await hintSwitch().count())) {
+      assert.equal((await hintText().textContent()).trim(), '', `${prompt}: a suggestion with no way across`)
+      return ''
+    }
+    return (await hintSwitch().innerText()).includes('Slides') ? 'ai.pptx' : 'ai.pdf_topic'
+  }
+  await open('ai.pdf_topic')
+  // The live region is in the page before there is anything to say, so the
+  // suggestion is announced when it appears; the button is not part of it.
+  const liveRegion = hintText()
+  assert.equal(await liveRegion.getAttribute('role'), 'status')
+  assert.equal(await liveRegion.getAttribute('aria-live'), 'polite')
+  assert.equal((await liveRegion.textContent()).trim(), '')
+  await liveRegion.evaluate((node) => (node.dataset.fixtureMark = 'before'))
+  assert.equal(
+    await suggestion('A 4 page guide to composting at home.'),
+    '',
+    'A plain PDF brief gets no suggestion',
+  )
+  assert.equal(
+    await suggestion('A 4 page PDF handout to go with my slides on composting.'),
+    '',
+    'A PDF named as the thing to make stays a PDF',
+  )
+  const slidesBrief = 'Make 8 slides about composting for a school club.'
+  await primary().fill(slidesBrief)
+  await hintSwitch().waitFor()
+  assert.match(await hint().innerText(), /mentions slides[\s\S]*Switch to Slides/)
+  assert.equal(
+    await liveRegion.getAttribute('data-fixture-mark'),
+    'before',
+    'The suggestion fills the region that was already there',
+  )
+  assert.match(
+    await liveRegion.innerText(),
+    /^Your description mentions slides\. This service makes a PDF document\.$/,
+  )
+  assert.equal(
+    await liveRegion.locator('button').count(),
+    0,
+    'The button is not read as part of the suggestion',
+  )
+  assert.equal(await primary().getAttribute('aria-describedby'), 'studio-service-hint')
+  await auditBrief('slides hint')
+  const draftsBeforeSwitch = calls('/generation/drafts').length
+  await hintSwitch().click()
+  assert.equal(await page.getByTestId('studio-purpose').inputValue(), 'ai.pptx')
+  assert.equal(await primary().inputValue(), slidesBrief, 'Switching keeps the typed description')
+  assert.equal(await hintSwitch().count(), 0)
+  assert.match(await page.locator('.studio-defaults').innerText(), /PPTX[\s\S]*slides/)
+  assert.ok(
+    !decodeURIComponent(page.url()).includes('composting'),
+    'The description never travels in the address',
+  )
+  assert.equal(calls('/generation/drafts').length, draftsBeforeSwitch, 'Switching creates nothing')
+  assert.equal(
+    await page.evaluate(() => document.activeElement?.getAttribute('data-testid')),
+    'studio-purpose',
+    'Focus lands on the service that changed, not on the page',
+  )
+  assert.equal((await reviewNew()).feature_id, 'ai.pptx')
+
+  // A slide word is as often the topic as the request: it counts only when it
+  // is asked for (a count, or a make/need verb beside it), never when a
+  // written paper is named as the thing to make. A PDF the slides are made
+  // from is not a PDF asked for. Synthetic descriptions only.
+  await open('ai.pdf_topic')
+  const pdfService = [
+    ['How to give a good presentation, 5 pages for first-year students', ''],
+    ['Clinical presentation of pneumonia in children, 6 pages', ''],
+    ['IAS 1 Presentation of Financial Statements: a summary', ''],
+    ['How to prepare microscope slides for a biology lab', ''],
+    ['Taqdimot tayyorlash bo‘yicha qo‘llanma, 5 bet', ''],
+    ['Ilmiy taqdimot tuzilishi va qoidalari', ''],
+    ['PowerPoint dasturi haqida referat, 5 bet', ''],
+    ['Как сделать хорошую презентацию: советы студентам', ''],
+    ['Реферат на тему: Программа PowerPoint и её возможности', ''],
+    ['Ekologiya haqida slayd yasab bering', 'ai.pptx'],
+    ['Biologiyadan 15 ta slayd kerak: suv resurslari', 'ai.pptx'],
+    ['Сделай презентацию про Байкал на 10 слайдов', 'ai.pptx'],
+    ['A presentation on volcanoes for year 5', 'ai.pptx'],
+    ['Kurs ishi himoyasi uchun 10 ta slayd kerak', 'ai.pptx'],
+    ['Bu pdfni slayd qilib ber', 'ai.pptx'],
+    ['pdfni 10 ta slaydga aylantir', 'ai.pptx'],
+    ['Turn this PDF into 10 slides', 'ai.pptx'],
+    ['Convert the attached PDF into a presentation', 'ai.pptx'],
+    ['этот pdf переделай в презентацию', 'ai.pptx'],
+    ['Make the slides as a PDF', ''],
+  ]
+  for (const [prompt, expected] of pdfService)
+    assert.equal(await suggestion(prompt), expected, `PDF service: ${prompt}`)
+
+  // The other way round only on a written paper asked for: a PDF in the Slides
+  // service is nearly always the file the deck is made from, and a paper's
+  // defence is made with slides.
+  await open('ai.pptx')
+  const slidesService = [
+    ['Summarise the attached PDF on the Silk Road.', ''],
+    ['Referat yozish qoidalari', ''],
+    ['Kurs ishi himoyasi uchun', ''],
+    ['Защита реферата по истории', ''],
+    ['How to write a term paper: a lesson for year 10', ''],
+    ['Tarixdan 10 sahifali referat kerak', 'ai.pdf_topic'],
+    ['Напиши реферат про Шёлковый путь', 'ai.pdf_topic'],
+  ]
+  for (const [prompt, expected] of slidesService)
+    assert.equal(await suggestion(prompt), expected, `Slides service: ${prompt}`)
+  await primary().fill('A referat on the Silk Road for history class.')
+  await hintSwitch().waitFor()
+  await hintSwitch().click()
+  assert.equal(await page.getByTestId('studio-purpose').inputValue(), 'ai.pdf_topic')
+  assert.equal(await primary().inputValue(), 'A referat on the Silk Road for history class.')
+  checks.push(
+    'Slides asked of the PDF service (or a paper of Slides) are offered the other service, text kept; a topic is not',
+  )
+
+  // A service the plan cannot use is never offered, by the suggestion or the refusal.
+  const slidesFeature = config.features.find((feature) => feature.id === 'ai.pptx')
+  slidesFeature.eligible = false
+  await open('ai.pdf_topic')
+  assert.equal(await suggestion(slidesBrief), '', 'No way across to a service outside the plan')
+  await primary().fill('Make bright slides.')
+  await review().click()
+  await page.getByTestId('studio-prompt-error').waitFor()
+  assert.equal(await page.getByTestId('studio-prompt-switch').count(), 0, 'Nor from the refusal')
+  slidesFeature.eligible = true
+  checks.push('A service outside the plan is never offered')
+
+  // 4c. A description that names no topic is refused under the field, where
+  // the fix is typed, and is never quoted.
+  const refusal = () => page.getByTestId('studio-prompt-error')
+  const promptSwitch = () => page.getByTestId('studio-prompt-switch')
+  const activeTestId = () =>
+    page.evaluate(
+      () => document.activeElement?.getAttribute('data-testid') || document.activeElement?.tagName,
+    )
+  await open('ai.pdf_topic')
+  await primary().fill('Make bright slides.')
+  const beforeRefusal = requests.length
+  // From the keyboard: focus goes to the field to fix, not back to the page.
+  await review().focus()
+  await page.keyboard.press('Enter')
+  await refusal().waitFor()
+  await settled()
+  assert.match(await refusal().locator('#studio-prompt-error').innerText(), /Write what the document should be about/)
+  assert.equal(await activeTestId(), 'studio-primary-input', 'Focus moves to the description to fix')
+  assert.equal(
+    await refusal().locator('[role="alert"], [aria-live]').count(),
+    0,
+    'Read once, as the focused field’s description, not again as an alert',
+  )
+  assert.equal(
+    await page.locator('.error-banner').count(),
+    0,
+    'The refusal is beside the field, not in the banner',
+  )
+  assert.equal(await primary().getAttribute('aria-invalid'), 'true')
+  assert.equal(await primary().getAttribute('aria-describedby'), 'studio-prompt-error')
+  assert.equal(await hintSwitch().count(), 0, 'One message under the field at a time')
+  assert.deepEqual(
+    requests
+      .slice(beforeRefusal)
+      .filter((request) => request.method !== 'GET')
+      .map((request) => [request.method, request.path]),
+    [['POST', '/generation/drafts']],
+    'A refused description is never quoted',
+  )
+  assert.equal(
+    await page.getByTestId('studio-purpose').isDisabled(),
+    false,
+    'No draft exists, so the service can change',
+  )
+  assert.equal(await promptSwitch().innerText(), 'Make slides instead')
+  await auditBrief('topic refusal')
+  await page.setViewportSize({ width: 390, height: 1000 })
+  assert.equal(
+    await page.evaluate(() => document.documentElement.scrollWidth > innerWidth),
+    false,
+    'topic refusal/390: horizontal overflow',
+  )
+  await page.getByTestId('studio-brief').screenshot({ path: path.join(output, 'topic-required-390.png') })
+  await page.setViewportSize({ width: 1440, height: 1000 })
+  await promptSwitch().click()
+  assert.equal(await page.getByTestId('studio-purpose').inputValue(), 'ai.pptx')
+  assert.equal(await primary().inputValue(), 'Make bright slides.', 'Switching keeps the typed description')
+  assert.equal(await promptSwitch().count(), 0)
+  // The description still needs its topic, said now in words that suit slides too.
+  const topicStill = 'Now add the topic — for example: “The water cycle for 6th grade”.'
+  assert.equal(
+    await refusal().locator('#studio-prompt-error').innerText(),
+    topicStill,
+    'The refusal no longer speaks of a document and pages',
+  )
+  assert.equal(await primary().getAttribute('aria-invalid'), 'true')
+  await auditBrief('topic still')
+  await primary().fill('Make bright slides about the water cycle for year 6.')
+  assert.equal(await refusal().count(), 0, 'Typing clears the refusal')
+  assert.equal(await primary().getAttribute('aria-invalid'), null)
+  assert.equal((await reviewNew()).feature_id, 'ai.pptx')
+
+  // Changing the service any other way takes the stale way across with it.
+  await open('ai.pdf_topic')
+  await primary().fill('Make bright slides.')
+  await review().click()
+  await promptSwitch().waitFor()
+  await page.getByTestId('studio-purpose').selectOption('ai.pptx')
+  await settled()
+  assert.equal(await promptSwitch().count(), 0, 'No button back to the service already chosen')
+  assert.equal(await refusal().locator('#studio-prompt-error').innerText(), topicStill)
+  await open('ai.pdf_topic')
+  await primary().fill('Make bright slides.')
+  await review().click()
+  await promptSwitch().waitFor()
+  await page.evaluate(() =>
+    document
+      .querySelector('#__nuxt')
+      .__vue_app__.config.globalProperties.$router.push('/en/app/create?feature=ai.pptx'),
+  )
+  await page.waitForFunction(
+    () => document.querySelector('[data-testid="studio-purpose"]')?.value === 'ai.pptx',
+  )
+  await settled()
+  assert.equal(await promptSwitch().count(), 0, 'Nor after following a link to the other service')
+
+  // With no other service named, there is nothing to switch to.
+  await open('ai.pdf_topic')
+  await primary().fill('Make it 12 pages long.')
+  await review().click()
+  await refusal().waitFor()
+  assert.equal(await promptSwitch().count(), 0)
+  await page.getByTestId('studio-example-0').click()
+  assert.equal(await refusal().count(), 0, 'Taking an example clears the refusal too')
+  // A title is read with the description, so giving one is a fix as well.
+  await primary().fill('Make it 12 pages long.')
+  await review().click()
+  await refusal().waitFor()
+  await more().locator('summary').click()
+  await page.getByTestId('studio-title').fill('The water cycle')
+  await settled()
+  assert.equal(await refusal().count(), 0, 'A title clears the refusal')
+  assert.equal(await primary().getAttribute('aria-invalid'), null)
+
+  // The customer may know better than the check: "Continue anyway" sends the
+  // same description again, marked as theirs to decide, and the review follows.
+  await open('ai.pdf_topic')
+  await primary().fill('Make it 12 pages long.')
+  await review().click()
+  await refusal().waitFor()
+  const beforeAnyway = calls('/generation/drafts').length
+  await page.getByTestId('studio-prompt-anyway').click()
+  await quotePanel().waitFor()
+  const insisted = calls('/generation/drafts').slice(beforeAnyway)
+  assert.equal(insisted.length, 1, 'One draft, sent once')
+  assert.equal(insisted[0].body.options?.topic_given, true)
+  assert.equal(insisted[0].body.prompt, 'Make it 12 pages long.', 'Sent as it was written')
+  assert.equal(await refusal().count(), 0)
+
+  // A conversion asked of an AI service points to the file tools, beside the field.
+  await open('ai.pdf_topic')
+  await primary().fill('Convert this to PDF.')
+  await review().click()
+  await refusal().waitFor()
+  assert.equal(await refusal().locator('#studio-prompt-error').innerText(), convertRefusal)
+  assert.equal(await page.locator('.error-banner').count(), 0)
+  assert.match(
+    (await page.getByTestId('studio-prompt-tools').getAttribute('href')) || '',
+    /\/app\/tools$/,
+  )
+  assert.equal(await promptSwitch().count(), 0)
+  await primary().fill('Convert this to PDF, please.')
+  assert.equal(await page.getByTestId('studio-prompt-tools').count(), 0, 'Typing clears it')
+  checks.push(
+    'A description with no topic is refused under the field, focused, with the way to the service it asked for',
+  )
 
   // 5. A document is read when attached and never demanded.
   await open('ai.pdf_topic')
@@ -731,15 +1092,48 @@ try {
   assert.match(await page.getByTestId('studio-revising').innerText(), /only page\/slide 2/)
   checks.push('Optional page selection sends explicit identity and the source version')
 
+  // The AI could not finish a new document: the retry stays, and says how to
+  // make the description clearer if it fails again.
+  const providerFailed = { code: 'provider_failed', message: 'The AI couldn’t finish this.' }
   const failedId = id()
   jobs.set(failedId, {
     ...structuredClone([...jobs.values()][0]),
     id: failedId,
     status: 'failed',
     stage: 'failed',
+    error: providerFailed,
   })
   await page.goto(`${origin}/en/app/jobs/${failedId}`, { waitUntil: 'domcontentloaded' })
   assert.match(await page.getByTestId('job-retry-body').innerText(), /doesn’t count against your week/)
+  const advice = page.getByTestId('job-retry-advice')
+  assert.match(
+    await advice.innerText(),
+    /fails again, make the request more specific: the topic, who it is for and the length/,
+  )
+  assert.equal(
+    await advice.getByRole('link', { name: 'Change the request' }).getAttribute('href'),
+    `/en/app/create/${jobs.get(failedId).parameters.generation_draft_id}`,
+    'The advice opens the draft behind the job, where the description is changed',
+  )
+  assert.equal(
+    await page.getByTestId('job-retry-review').isVisible(),
+    true,
+    'The retry stays beside the advice',
+  )
+  for (const theme of ['light', 'dark']) {
+    await page.evaluate((value) => (document.documentElement.dataset.theme = value), theme)
+    const audit = await new AxeBuilder({ page })
+      .include('[data-testid="job-retry"]')
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
+      .analyze()
+    assert.deepEqual(
+      audit.violations.map((violation) => violation.id),
+      [],
+      `failed job advice/${theme}: accessibility`,
+    )
+  }
+  await page.evaluate(() => (document.documentElement.dataset.theme = 'light'))
+  await page.getByTestId('job-retry').screenshot({ path: path.join(output, 'job-retry-advice.png') })
   const beforeRetry = countJobs()
   await page.getByTestId('job-retry-review').click()
   await page.getByTestId('job-retry-quote').waitFor()
@@ -758,6 +1152,29 @@ try {
   checks.push(
     'A failed generation retries only after confirmation and preserves its key on an ambiguous response',
   )
+  checks.push(
+    'A new AI document the AI could not finish advises a clearer description and links to change it',
+  )
+
+  // An outline the AI could not finish keeps the plain retry, as in the bot:
+  // the advice is about describing a new document.
+  const failedOutlineId = id()
+  const outlineSource = jobs.get(failedId)
+  jobs.set(failedOutlineId, {
+    ...structuredClone(outlineSource),
+    id: failedOutlineId,
+    parameters: { ...outlineSource.parameters, stage: 'outline' },
+    error: providerFailed,
+  })
+  await page.goto(`${origin}/en/app/jobs/${failedOutlineId}`, { waitUntil: 'domcontentloaded' })
+  await page.getByTestId('job-retry-body').waitFor()
+  assert.equal(
+    await page.getByTestId('job-retry-advice').count(),
+    0,
+    'No description advice for a failed outline',
+  )
+  assert.equal(await page.getByTestId('job-retry-review').isVisible(), true, 'An outline is still retried')
+  checks.push('A failed outline is retried without the advice on describing a new document')
 
   // A failed AI edit is retried the same way, but it counts against the file's
   // own edits: the week's AI documents are neither shown nor blamed.
@@ -773,9 +1190,16 @@ try {
       revision: true,
       root_draft_id: editSource.parameters.generation_draft_id,
     },
+    error: providerFailed,
   })
   await page.goto(`${origin}/en/app/jobs/${failedEditId}`, { waitUntil: 'domcontentloaded' })
   const editRetryBody = await page.getByTestId('job-retry-body').innerText()
+  // An edit changes what is already there; advice on describing a new one does not apply.
+  assert.equal(
+    await page.getByTestId('job-retry-advice').count(),
+    0,
+    'No description advice for a failed edit',
+  )
   assert.match(editRetryBody, /doesn’t count against this file’s AI edits/)
   assert.doesNotMatch(editRetryBody, /week/)
   await page.getByTestId('job-retry-review').click()
@@ -793,7 +1217,9 @@ try {
   assert.equal(await page.getByTestId('job-retry-confirm').isDisabled(), true)
   await page.getByTestId('job-retry').screenshot({ path: path.join(output, 'job-retry-edit-refused.png') })
   affordable = true
-  checks.push('Retrying a failed AI edit speaks of the file’s edits, never the week’s AI documents')
+  checks.push(
+    'Retrying a failed AI edit speaks of the file’s edits, never the week’s AI documents, nor gives description advice',
+  )
 
   // 9. A description can also arrive pre-filled, which is how the guide works.
   const brief = 'A 3 page briefing on tide tables for a general audience.'

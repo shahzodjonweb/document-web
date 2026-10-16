@@ -620,6 +620,35 @@
   min-height: 168px;
   resize: vertical;
 }
+/* Slides asked of the PDF service (or a paper of the Slides one): a way across.
+   The box is always in the page, empty and without size until there is a
+   suggestion, so that its text is announced when it appears. */
+.studio-service-hint:not(.shown) {
+  display: block;
+  height: 0;
+  overflow: hidden;
+}
+.studio-service-hint.shown {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin: calc(-1 * var(--space-3)) 0 var(--space-5);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  border: 1px solid var(--info-border);
+  border-radius: var(--radius-md);
+  background: var(--info-tint);
+  color: var(--info-ink);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+.studio-service-hint.shown > svg {
+  flex-shrink: 0;
+}
+.studio-service-hint.shown > span {
+  flex: 1 1 16rem;
+  min-width: 0;
+}
 .studio-examples {
   display: flex;
   flex-wrap: wrap;
@@ -1445,6 +1474,10 @@
   margin-bottom: var(--space-4);
   color: var(--muted);
   font-size: 14px;
+}
+/* What to change if a retry fails too: read, not skimmed past like the notes. */
+.revise-panel > .retry-advice {
+  color: var(--text);
 }
 .result-actions {
   display: flex;
