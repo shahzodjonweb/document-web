@@ -375,55 +375,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/billing/invoices": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getInvoices"];
-        put?: never;
-        post: operations["createInvoice"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/billing/invoices/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getInvoice"];
-        put?: never;
-        post?: never;
-        delete: operations["cancelInvoice"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/billing/invoices/{id}/sandbox-pay": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @description Local payment simulator restricted to test accounts and explicit sandbox enablement. */
-        post: operations["sandboxPayInvoice"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/billing/manual": {
         parameters: {
             query?: never;
@@ -474,38 +425,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/billing/offers": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["getBillingOffers"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/billing/payments/{id}/sandbox-refund": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["sandboxRefundPayment"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/billing/subscription": {
         parameters: {
             query?: never;
@@ -516,70 +435,6 @@ export interface paths {
         get: operations["getSubscription"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/billing/subscription/cancel-renewal": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["cancelRenewal"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/billing/subscription/resume-renewal": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["resumeRenewal"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/billing/subscription/sandbox-renew": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["sandboxRenewSubscription"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/billing/subscription/schedule-plan-change": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["schedulePlanChange"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1433,18 +1288,6 @@ export interface components {
             quote_id: string;
             status: string;
         };
-        BillingOffer: {
-            checkout_enabled: boolean;
-            currency: string;
-            id: string;
-            kind: string;
-            name: string;
-            period_seconds?: number | null;
-            plan?: string | null;
-            price_xtr: number;
-            sandbox: boolean;
-            version: string;
-        };
         BotDelivery: {
             attempts: number;
             /** Format: uuid */
@@ -1671,24 +1514,6 @@ export interface components {
             layout?: "auto" | "cover" | "agenda" | "section" | "bullets" | "two_column" | "statement" | "quote" | "big_number" | "stats" | "timeline" | "process" | "comparison" | "pros_cons" | "cards" | "matrix" | "chart" | "table" | "image_split" | "image_full" | "closing";
             notes?: string;
         };
-        Invoice: {
-            amount_xtr: number;
-            /** Format: date-time */
-            created_at?: string;
-            currency: string;
-            /** Format: date-time */
-            expires_at: string;
-            /** Format: uuid */
-            id: string;
-            invoice_url?: string | null;
-            kind: string;
-            offer_id: string;
-            /** Format: date-time */
-            paid_at?: string | null;
-            plan?: string | null;
-            sandbox: boolean;
-            status: string;
-        };
         Job: {
             artifacts: components["schemas"]["Artifact"][];
             /** Format: date-time */
@@ -1750,13 +1575,15 @@ export interface components {
             payment: components["schemas"]["ManualPayment"] | null;
             period_days: number;
             plans: {
+                discount: components["schemas"]["PlanDiscount"] | null;
                 /** @enum {unknown} */
                 plan: "plus" | "premium";
                 price: number;
+                regular_price: number;
             }[];
         };
         Payment: {
-            amount_xtr: number;
+            amount: number;
             currency: string;
             /** Format: uuid */
             id: string;
@@ -1769,17 +1596,24 @@ export interface components {
             plan?: string | null;
             provider?: string;
             refund_status?: string | null;
-            refunded_xtr: number;
+            refunded: number;
             sandbox: boolean;
             status: string;
         };
         Plan: {
-            checkout_enabled: boolean;
-            features?: string[];
+            discount: components["schemas"]["PlanDiscount"] | null;
+            features: string[];
             id: string;
             limits: Record<string, never>;
             name: string;
-            price_xtr: number | null;
+            price_uzs: number | null;
+        };
+        PlanDiscount: {
+            percent: number;
+            price: number;
+            regular: number;
+            /** Format: date */
+            until: string;
         };
         PracticeResult: {
             grading: string;
@@ -1822,17 +1656,6 @@ export interface components {
                 /** Format: date-time */
                 resets_at?: string;
             };
-        };
-        Refund: {
-            amount_xtr: number;
-            /** Format: date-time */
-            confirmed_at?: string | null;
-            error_code?: string | null;
-            /** Format: uuid */
-            id: string;
-            /** Format: uuid */
-            payment_id: string;
-            status: string;
         };
         SavedDefinition: {
             content?: Record<string, never>;
@@ -1879,7 +1702,6 @@ export interface components {
             status: string;
         };
         SubscriptionState: {
-            checkout_enabled: boolean;
             plan: string;
             sandbox: boolean;
             subscription: components["schemas"]["Subscription"] | null;
@@ -3622,298 +3444,6 @@ export interface operations {
             };
         };
     };
-    getInvoices: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        results: components["schemas"]["Invoice"][];
-                    };
-                };
-            };
-            /** @description Invalid request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error?: components["schemas"]["Error"];
-                    };
-                };
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Permission or CSRF validation failed */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description State conflict or quota unavailable */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    createInvoice: {
-        parameters: {
-            query?: never;
-            header: {
-                "X-CSRFToken": string;
-                "Idempotency-Key": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    offer_id: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Success */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Invoice"];
-                };
-            };
-            /** @description Invalid request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error?: components["schemas"]["Error"];
-                    };
-                };
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Permission or CSRF validation failed */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description State conflict or quota unavailable */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    getInvoice: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Invoice"];
-                };
-            };
-            /** @description Invalid request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error?: components["schemas"]["Error"];
-                    };
-                };
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Permission or CSRF validation failed */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description State conflict or quota unavailable */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    cancelInvoice: {
-        parameters: {
-            query?: never;
-            header: {
-                "X-CSRFToken": string;
-            };
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Invoice"];
-                };
-            };
-            /** @description Invalid request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error?: components["schemas"]["Error"];
-                    };
-                };
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Permission or CSRF validation failed */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description State conflict or quota unavailable */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    sandboxPayInvoice: {
-        parameters: {
-            query?: never;
-            header: {
-                "X-CSRFToken": string;
-            };
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": Record<string, never>;
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        created?: boolean;
-                        invoice?: components["schemas"]["Invoice"];
-                        payment?: components["schemas"]["Payment"];
-                        plan?: string;
-                        sandbox?: boolean;
-                        subscription?: components["schemas"]["Subscription"] | null;
-                    };
-                };
-            };
-            /** @description Invalid request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error?: components["schemas"]["Error"];
-                    };
-                };
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Permission or CSRF validation failed */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description State conflict or quota unavailable */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     getManualPayment: {
         parameters: {
             query?: never;
@@ -4201,127 +3731,6 @@ export interface operations {
             };
         };
     };
-    getBillingOffers: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @enum {unknown} */
-                        billing_mode: "sandbox" | "live" | "disabled";
-                        checkout_enabled: boolean;
-                        currency: string;
-                        offers: components["schemas"]["BillingOffer"][];
-                        sandbox: boolean;
-                    };
-                };
-            };
-            /** @description Invalid request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error?: components["schemas"]["Error"];
-                    };
-                };
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Permission or CSRF validation failed */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description State conflict or quota unavailable */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    sandboxRefundPayment: {
-        parameters: {
-            query?: never;
-            header: {
-                "X-CSRFToken": string;
-            };
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    reason?: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["Refund"];
-                };
-            };
-            /** @description Invalid request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error?: components["schemas"]["Error"];
-                    };
-                };
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Permission or CSRF validation failed */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description State conflict or quota unavailable */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
     getSubscription: {
         parameters: {
             query?: never;
@@ -4330,247 +3739,6 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SubscriptionState"];
-                };
-            };
-            /** @description Invalid request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error?: components["schemas"]["Error"];
-                    };
-                };
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Permission or CSRF validation failed */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description State conflict or quota unavailable */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    cancelRenewal: {
-        parameters: {
-            query?: never;
-            header: {
-                "X-CSRFToken": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": Record<string, never>;
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SubscriptionState"];
-                };
-            };
-            /** @description Invalid request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error?: components["schemas"]["Error"];
-                    };
-                };
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Permission or CSRF validation failed */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description State conflict or quota unavailable */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    resumeRenewal: {
-        parameters: {
-            query?: never;
-            header: {
-                "X-CSRFToken": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": Record<string, never>;
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SubscriptionState"];
-                };
-            };
-            /** @description Invalid request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error?: components["schemas"]["Error"];
-                    };
-                };
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Permission or CSRF validation failed */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description State conflict or quota unavailable */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    sandboxRenewSubscription: {
-        parameters: {
-            query?: never;
-            header: {
-                "X-CSRFToken": string;
-                "Idempotency-Key": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": Record<string, never>;
-            };
-        };
-        responses: {
-            /** @description Success */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        created?: boolean;
-                        payment?: components["schemas"]["Payment"];
-                        sandbox?: boolean;
-                        subscription?: components["schemas"]["Subscription"];
-                    };
-                };
-            };
-            /** @description Invalid request */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        error?: components["schemas"]["Error"];
-                    };
-                };
-            };
-            /** @description Authentication required */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Permission or CSRF validation failed */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description State conflict or quota unavailable */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    schedulePlanChange: {
-        parameters: {
-            query?: never;
-            header: {
-                "X-CSRFToken": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /** @enum {unknown} */
-                    plan: "free" | "plus" | "premium";
-                };
-            };
-        };
         responses: {
             /** @description Success */
             200: {
@@ -7326,10 +6494,10 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        checkout_enabled: boolean;
-                        currency?: string;
+                        /** @constant */
+                        currency: "UZS";
                         draft: boolean;
-                        period_seconds?: number;
+                        period_seconds: number;
                         plans: components["schemas"]["Plan"][];
                     };
                 };
