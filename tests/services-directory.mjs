@@ -83,7 +83,7 @@ await page.route('**/*', async (route) => {
       limits: {},
     })
   }
-  if (endpoint === '/plans') return json({ plans: [], checkout_enabled: false })
+  if (endpoint === '/plans') return json({ plans: [], draft: false })
   if (endpoint === '/usage')
     return json({ plan: 'free', week: { starts_at: '2026-10-11T19:00:00Z', resets_at: '2026-10-18T19:00:00Z', time_zone: 'Asia/Tashkent' }, resets_at: '2026-10-18T19:00:00Z',
       ai_documents: { limit: 5, used: 0, remaining: 5 }, file_jobs: { limit: 15, used: 5, remaining: 10 }, edits_per_file: 3 })

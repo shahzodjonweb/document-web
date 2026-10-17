@@ -26,6 +26,13 @@ for(const locale of ['en','uz','ru'])for(const key of ['planFreeBody','planPlusB
 const channelWord={en:/channel subscription/i,uz:/kanallarga obuna/i,ru:/подписка на каналы/i}
 for(const locale of ['en','uz','ru'])
  assert.match(dictionaries[locale].helpBillingBody,channelWord[locale],`${locale} helpBillingBody says Premium needs no channels`)
+// The discount copy keeps its placeholders in every language. Uzbek says
+// "-gacha" after the day, joined to it as the affix is written after a word
+// ("31-oktabrgacha"), not a word before it.
+for(const [key,fields] of [['discountUntil',['date']],['discountBannerLead',['plan']],['regularPrice',[]]])
+ for(const locale of ['en','uz','ru'])
+  for(const field of fields)assert.ok(dictionaries[locale][key].includes(`{${field}}`),`${locale} ${key} keeps {${field}}`)
+assert.equal(dictionaries.uz.discountUntil,'{date}gacha')
 const schemaBytes=await fs.readFile(new URL('../generated/api/public.openapi.json',import.meta.url))
 const expected=(await fs.readFile(new URL('../generated/api/public.openapi.json.sha256',import.meta.url),'utf8')).trim().split(/\s/)[0]
 assert.equal(createHash('sha256').update(schemaBytes).digest('hex'),expected,'Pinned public API checksum')

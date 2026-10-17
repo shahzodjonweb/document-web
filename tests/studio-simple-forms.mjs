@@ -189,7 +189,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
     return json(account)
   }
   if (endpoint === '/catalog') return json({ features: [], draft: false })
-  if (endpoint === '/plans') return json({ plans: [], checkout_enabled: false })
+  if (endpoint === '/plans') return json({ plans: [], draft: false })
   if (endpoint === '/usage') return json({ plan: 'free', week, ...weekUsage() })
   if (endpoint === '/studio/config') return json(config)
   if (endpoint === '/files/uploads')

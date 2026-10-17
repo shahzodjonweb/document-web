@@ -21,9 +21,22 @@ const copied = ref('')
 let timer: ReturnType<typeof setInterval> | undefined
 
 const open = computed(() => ['awaiting', 'submitted'].includes(payment.value?.status))
-const price = (amount: number) => `${amount.toLocaleString('ru-RU').replace(/ /g, ' ')} so'm`
+const { money: price, discount, untilLabel } = usePricing()
 const planName = (plan: string) => t(plan)
-const chosenPrice = computed(() => options.value?.plans?.find((p: any) => p.plan === props.plan)?.price)
+const option = (plan: string) => options.value?.plans?.find((p: any) => p.plan === plan)
+// The server's price for the chosen plan today: discounted while a discount is on.
+const chosenPrice = computed(() => Number(option(props.plan || '')?.price) || 0)
+/**
+ * The discount to name beside an amount: only while the plan's discount is
+ * live and the amount is the discounted price. A request opened before the
+ * discount, or at the regular price, is shown plainly.
+ */
+const saving = (plan: string, amount: number) => {
+  const deal = discount(option(plan))
+  return deal && deal.price === Number(amount) ? deal : null
+}
+const chosenSaving = computed(() => (props.plan ? saving(props.plan, chosenPrice.value) : null))
+const openSaving = computed(() => (payment.value ? saving(payment.value.plan, payment.value.amount) : null))
 const cardNumber = computed(() => (payment.value?.card?.number || '').replace(/(\d{4})(?=\d)/g, '$1 '))
 // A decision is shown until the customer moves on; an old one is not news.
 const recent = computed(
@@ -134,6 +147,13 @@ function pick(event: Event) {
         <div>
           <span class="eyebrow">{{ t('payByCard') }} · {{ payment.reference }}</span>
           <h2>{{ planName(payment.plan) }} · {{ price(payment.amount) }}</h2>
+          <p v-if="openSaving" class="discount-note" data-testid="manual-discount">
+            <s class="plan-price-regular"
+              ><span class="visually-hidden">{{ t('regularPrice') + ' ' }}</span>{{ price(openSaving.regular) }}</s
+            >
+            <span class="discount-badge">−{{ openSaving.percent }}%</span>
+            <span class="discount-until">{{ untilLabel(openSaving) }}</span>
+          </p>
         </div>
         <span v-if="payment.status === 'submitted'" class="status-badge" data-testid="manual-waiting"
           ><AppIcon name="clock" :size="15" />{{ t('paymentWaiting') }}</span
@@ -209,6 +229,13 @@ function pick(event: Event) {
           <h2>
             {{ planName(plan) }}<template v-if="chosenPrice"> · {{ price(chosenPrice) }}</template>
           </h2>
+          <p v-if="chosenSaving" class="discount-note" data-testid="manual-discount">
+            <s class="plan-price-regular"
+              ><span class="visually-hidden">{{ t('regularPrice') + ' ' }}</span>{{ price(chosenSaving.regular) }}</s
+            >
+            <span class="discount-badge">−{{ chosenSaving.percent }}%</span>
+            <span class="discount-until">{{ untilLabel(chosenSaving) }}</span>
+          </p>
         </div>
         <button class="icon-button" type="button" :aria-label="t('closePanel')" @click="emit('close')">
           <AppIcon name="x" :size="17" />

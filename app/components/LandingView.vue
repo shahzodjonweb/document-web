@@ -6,10 +6,11 @@ const { sorted, name, description } = useTools()
 // AI services have their own section.
 const tools = computed(() => sorted.value.filter((f) => !isGenerationFeature(f.id)).slice(0, 5))
 const services = ['ai.pdf_topic', 'ai.pptx']
-const price = (plan: any) => {
-  const value = Number(plan.limits?.price_uzs ?? 0)
-  return `${value.toLocaleString('ru-RU').replace(/ /g, ' ')} so'm`
-}
+// Each plan's price in so'm, with its discount when one is on.
+const { money, discount, price, untilLabel } = usePricing()
+const priced = computed(() =>
+  ws.plans.value.map((plan: any) => ({ plan, deal: discount(plan), today: price(plan) })),
+)
 // Each card says what a week holds: its AI documents and file tasks.
 const { allowances } = usePlanPhrases()
 const faq = ['faqFree', 'faqPay', 'faqFiles', 'faqTelegram']
@@ -51,6 +52,7 @@ const faq = ['faqFree', 'faqPay', 'faqFiles', 'faqTelegram']
       </div>
     </div>
   </section>
+  <DiscountBanner compare />
 
   <section class="landing-benefits">
     <div>
@@ -115,8 +117,13 @@ const faq = ['faqFree', 'faqPay', 'faqFiles', 'faqTelegram']
       /></NuxtLink>
     </div>
     <div class="pricing-teaser">
-      <NuxtLink v-for="plan in ws.plans.value" :key="plan.id" :to="path('/pricing')" class="panel"
-        ><strong>{{ t(plan.id) }}</strong><span class="teaser-price">{{ price(plan) }}</span
+      <NuxtLink v-for="{ plan, deal, today } in priced" :key="plan.id" :to="path('/pricing')" class="panel"
+        ><strong>{{ t(plan.id) }}</strong
+        ><s v-if="deal" class="teaser-regular"
+          ><span class="visually-hidden">{{ t('regularPrice') + ' ' }}</span>{{ money(deal.regular) }}</s
+        ><span class="teaser-price"
+          >{{ money(today) }} <span v-if="deal" class="discount-badge">−{{ deal.percent }}%</span></span
+        ><span v-if="deal" class="discount-until">{{ untilLabel(deal) }}</span
         ><span v-for="(row, index) in allowances(plan).slice(0, 2)" :key="index" class="teaser-week"
           >{{ row.pre }}{{ row.value }}{{ row.post }}</span
         ><small>{{

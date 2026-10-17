@@ -1043,6 +1043,92 @@
   color: var(--muted);
   font-size: var(--text-sm);
 }
+/* A discount: the regular price struck through above today's price, a pill
+   with the percentage, and the last day on the "per 30 days" line. The pill
+   uses the success tokens — the brand red is kept for the logo and for danger. */
+.plan-price-regular,
+.teaser-regular,
+.discount-banner s {
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+.plan-price-regular,
+.teaser-regular {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+.plan-price .plan-price-regular {
+  flex-basis: 100%;
+}
+.discount-badge {
+  display: inline-block;
+  padding: 2px var(--space-2);
+  border: 1px solid var(--success-border);
+  border-radius: var(--radius-pill);
+  background: var(--success-tint);
+  color: var(--success-ink);
+  font: 700 var(--text-xs) / 1.5 var(--font-body);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.plan-price .discount-badge {
+  align-self: center;
+}
+.discount-until {
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+/* On the card-transfer panel, under the plan and amount. */
+.discount-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+.discount-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin: 0 0 var(--space-6);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--info-border);
+  border-radius: var(--radius-md);
+  background: var(--info-tint);
+  color: var(--info-ink);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.discount-banner > svg {
+  flex-shrink: 0;
+}
+.discount-banner-lines {
+  flex: 1 1 320px;
+  display: grid;
+  gap: var(--space-1);
+}
+.discount-banner p {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 0.3em;
+  margin: 0;
+}
+.discount-banner b {
+  font-weight: 700;
+}
+.discount-banner .text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  white-space: nowrap;
+}
+.landing-hero + .discount-banner {
+  margin-top: var(--space-8);
+}
 .plan-card > .button {
   width: 100%;
 }
@@ -1208,91 +1294,6 @@
 .manual-receipt .button {
   justify-self: start;
 }
-/* Payment history: one quiet row per payment. */
-.transactions-panel {
-  margin-top: var(--space-6);
-  padding: var(--space-5) var(--space-6);
-}
-.transactions-panel .panel-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--space-2);
-}
-.transactions-panel .panel-heading h2 {
-  font-size: var(--text-lg);
-}
-.transaction-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-.transaction-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  align-items: center;
-  gap: var(--space-4);
-  padding: var(--space-3) 0;
-  border-top: 1px solid var(--hairline);
-}
-.transaction-row div {
-  display: flex;
-  flex-direction: column;
-}
-.transaction-row strong,
-.transaction-row b {
-  color: var(--ink);
-}
-.transaction-row small {
-  color: var(--muted);
-  font-size: var(--text-xs);
-}
-/* Telegram Stars checkout, shown only while it is on. */
-.subscription-panel,
-.invoice-panel {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-4);
-  margin-top: var(--space-6);
-  padding: var(--space-5) var(--space-6);
-}
-.subscription-controls {
-  display: grid;
-  gap: var(--space-3);
-}
-.commerce-offers {
-  margin-top: var(--space-6);
-}
-.offer-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: var(--space-4);
-}
-.offer-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-5);
-}
-.offer-price {
-  color: var(--ink);
-  font: 800 var(--text-2xl) var(--font-display);
-}
-.invoice-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-.pending-invoices {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-  margin-top: var(--space-4);
-  padding: var(--space-4) var(--space-5);
-}
-
 @media (max-width: 760px) {
   .current-plan-head {
     flex-direction: column;
@@ -1306,15 +1307,6 @@
     flex-direction: column;
     align-items: flex-start;
     font-size: var(--text-xs);
-  }
-  .transactions-panel {
-    padding: var(--space-4);
-  }
-  .transaction-row {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-  .transaction-row .text-link {
-    grid-column: 1 / -1;
   }
 }
 
@@ -1936,6 +1928,10 @@
   color: var(--ink);
   font: 800 var(--text-2xl) var(--font-display);
   letter-spacing: -0.02em;
+}
+.teaser-price .discount-badge {
+  margin-left: var(--space-2);
+  letter-spacing: 0.01em;
 }
 .pricing-teaser small {
   color: var(--muted);

@@ -40,10 +40,14 @@ const features = [
 // Only the three weekly limits differ by plan; every other limit is shared.
 const limits = (price, documents, files, edits) => ({ max_file_mib: 200, max_pages_per_job: 1000, saved_workflows: 20,
   price_uzs: price, weekly_ai_documents: documents, weekly_file_jobs: files, edits_per_file: edits })
+// Plus is on discount for two more weeks, as the server reports it.
+const until = new Date(Date.now() + 14 * 86400000)
+const untilDay = [until.getFullYear(), until.getMonth() + 1, until.getDate()].map((n) => String(n).padStart(2, '0')).join('-')
+const discount = { price: 15000, regular: 20000, percent: 25, until: untilDay }
 const plans = [
-  { id: 'free', name: 'Free', price_xtr: 0, limits: limits(null, 5, 15, 3) },
-  { id: 'plus', name: 'Plus', price_xtr: null, limits: limits(20000, 20, null, 10) },
-  { id: 'premium', name: 'Premium', price_xtr: null, limits: limits(60000, null, null, null) },
+  { id: 'free', name: 'Free', price_uzs: null, discount: null, limits: limits(null, 5, 15, 3) },
+  { id: 'plus', name: 'Plus', price_uzs: 20000, discount, limits: limits(20000, 20, null, 10) },
+  { id: 'premium', name: 'Premium', price_uzs: 60000, discount: null, limits: limits(60000, null, null, null) },
 ]
 // This week's allowance, as /usage and a quote report it.
 const week = { starts_at: '2026-10-11T19:00:00Z', resets_at: '2026-10-18T19:00:00Z', time_zone: 'Asia/Tashkent' }
@@ -73,7 +77,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
     return json({ user: account, development_login_enabled: false, csrf_token: 'fixture' })
   if (endpoint === '/me') return json(account)
   if (endpoint === '/catalog') return json({ features, draft: false })
-  if (endpoint === '/plans') return json({ plans, checkout_enabled: false })
+  if (endpoint === '/plans') return json({ plans, currency: 'UZS', period_seconds: 2592000, draft: false })
   if (endpoint === '/usage') return json(usage)
   if (endpoint === '/channels') return json({ required: false, joined: true, channels: [] })
   if (endpoint === '/studio/config')
@@ -306,6 +310,17 @@ try {
   // Subtitles speak of weekly volume only: no tool set, capability or size.
   assert.deepEqual(await texts(page.locator('.pricing-teaser .panel small')),
     ['Every tool, with a weekly allowance', 'More each week for regular work', 'For people who work with lots of documents'])
+  // Plus on discount: the regular price struck through, today's price, the
+  // percentage and the last day; Free and Premium are priced plainly.
+  const teasers = page.locator('.pricing-teaser .panel')
+  // The struck price is named for screen readers, which do not read strikethrough.
+  assert.deepEqual(await texts(teasers.locator('.teaser-regular')), ["Regular price 20 000 so'm"])
+  assert.match(await teasers.nth(1).locator('.teaser-price').innerText(), /^15 000 so'm\s*−25%$/)
+  assert.match(await teasers.nth(1).locator('.discount-until').innerText(), /^until /)
+  assert.equal(await teasers.nth(2).locator('.discount-badge').count(), 0)
+  assert.match(await page.getByTestId('discount-banner').innerText(),
+    /Plus on discount:\s+Regular price\s+20 000 so'm\s+15 000 so'm\s+−25%\s+· until /)
+  assert.equal(await page.getByTestId('discount-banner').getByRole('link').innerText(), 'Compare plans')
   await page.locator('.faq summary').first().click()
   assert.ok(await page.locator('.faq details').first().getAttribute('open') !== null)
   for (const mode of ['light', 'dark']) {
@@ -321,6 +336,8 @@ try {
   assert.equal(await page.locator('.landing-hero h1').innerText(), 'Инструменты PDF и ИИ-документы — в одном месте.')
   assert.deepEqual(await texts(page.locator('.pricing-teaser .panel small')),
     ['Все инструменты с недельным лимитом', 'Больше в неделю для регулярной работы', 'Для тех, кто работает с большим числом документов'])
+  assert.match(await page.getByTestId('discount-banner').innerText(),
+    /Скидка на Plus:\s+Обычная цена\s+20 000 so'm\s+15 000 so'm\s+−25%\s+· до \d+ [а-я]+/)
 
   // Referrals: the link with a copy button, and two numbers.
   await go('/en/app/referrals')
@@ -330,7 +347,7 @@ try {
   assert.equal(await page.getByTestId('referral-rewards').innerText(), 'Rewards for invitations are coming soon.')
   await axe('referrals 1440')
   await shot('referrals-1440', true)
-  checks.push('Landing: what it does, AI services, tools, plans with their weeks and volume-only subtitles, questions, Russian ИИ; referrals: link, copy and two numbers')
+  checks.push('Landing: what it does, AI services, tools, plans with their weeks and volume-only subtitles, the Plus discount on the teaser and the banner (Russian too), questions, Russian ИИ; referrals: link, copy and two numbers')
 
   // Phone: one column, and the next step stays in reach above the phone bar.
   await page.setViewportSize({ width: 390, height: 844 })

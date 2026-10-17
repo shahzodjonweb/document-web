@@ -20,6 +20,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check:catalog
+      - run: npm run check:pricing
       - run: npm run check:fonts
       - run: npm run typecheck
       - run: npm run build

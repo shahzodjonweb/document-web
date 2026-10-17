@@ -11,6 +11,7 @@
     "postinstall": "nuxt prepare",
     "test:browser": "node tests/browser-smoke.mjs",
     "check:catalog": "node --experimental-strip-types tests/catalog-check.mjs",
+    "check:pricing": "node --experimental-strip-types tests/pricing-labels.mjs",
     "check:fonts": "node --experimental-strip-types tests/font-metrics-check.mjs",
     "generate:api": "openapi-typescript generated/api/public.openapi.json -o generated/api/schema.d.ts",
     "format": "prettier --write app locales generated/api/client.ts generated/api/types.ts nuxt.config.ts",

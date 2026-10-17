@@ -33,9 +33,9 @@ const limits = (price, documents, files, edits) => ({
   max_deck_images: 12, saved_workflows: 20, price_uzs: price,
 })
 const plans = [
-  { id: 'free', name: 'Free', price_xtr: 0, limits: limits(null, 5, 15, 3) },
-  { id: 'plus', name: 'Plus', price_xtr: null, limits: limits(20000, 20, null, 10) },
-  { id: 'premium', name: 'Premium', price_xtr: null, limits: limits(60000, null, null, null) },
+  { id: 'free', name: 'Free', price_uzs: null, discount: null, limits: limits(null, 5, 15, 3) },
+  { id: 'plus', name: 'Plus', price_uzs: 20000, discount: null, limits: limits(20000, 20, null, 10) },
+  { id: 'premium', name: 'Premium', price_uzs: 60000, discount: null, limits: limits(60000, null, null, null) },
 ]
 let payment = null
 let joinedAll = false
@@ -46,7 +46,8 @@ const channelState = () => ({ required: true, joined: joinedAll, channels: [
   { title: 'PDF Tips', url: 'https://t.me/pdfmaster_tips', joined: true }] })
 const options = () => ({
   enabled: true, currency: 'UZS', period_days: 30, automatic: { available: false },
-  plans: [{ plan: 'plus', price: 20000 }, { plan: 'premium', price: 60000 }], payment,
+  plans: [{ plan: 'plus', price: 20000, regular_price: 20000, discount: null },
+    { plan: 'premium', price: 60000, regular_price: 60000, discount: null }], payment,
 })
 
 await context.route('**/*', (route) => {
@@ -72,15 +73,11 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
       telegram: { enabled: true, configured: true }, antibot: { enabled: false, configured: false, site_key: '', binding: '' } })
   if (endpoint === '/me') return json(account)
   if (endpoint === '/catalog') return json({ features: [], draft: false })
-  if (endpoint === '/plans') return json({ plans, checkout_enabled: false, currency: 'XTR', draft: true })
+  if (endpoint === '/plans') return json({ plans, currency: 'UZS', period_seconds: 2592000, draft: true })
   if (endpoint === '/usage')
     return json({ plan: 'free', week: { starts_at: '2026-10-11T19:00:00Z', resets_at: '2026-10-18T19:00:00Z', time_zone: 'Asia/Tashkent' },
       ai_documents: { limit: 5, used: 0, remaining: 5 }, file_jobs: { limit: 15, used: 0, remaining: 15 }, edits_per_file: 3,
       resets_at: '2026-10-18T19:00:00Z' })
-  if (endpoint === '/billing/offers')
-    return json({ offers: [], sandbox: false, checkout_enabled: false, currency: 'XTR', billing_mode: 'disabled' })
-  if (endpoint === '/billing/subscription') return json({ plan: 'free', subscription: null, sandbox: false, checkout_enabled: false })
-  if (endpoint === '/billing/transactions' || endpoint === '/billing/invoices') return json({ results: [] })
   if (endpoint === '/channels') return json(channelState())
   if (endpoint === '/channels/check') {
     checks_made += 1
