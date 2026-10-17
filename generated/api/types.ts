@@ -100,11 +100,20 @@ export interface Usage {
   resets_at?: string
   [key: string]: unknown
 }
+/** A time-limited price cut on a plan; `price` is what the buyer pays, `regular` the undiscounted price, `until` the last day (ISO date). */
+export interface PlanDiscount {
+  price: number
+  regular: number
+  percent: number
+  until: string
+}
+/** Prices are in UZS; a null price is a free plan. `discount` is null when no promotion is running. */
 export interface Plan {
   id: string
   name?: string
-  price_xtr: number | null
-  /** Plan limits by key (weekly_ai_documents, weekly_file_jobs, edits_per_file, price_uzs, …); null is unlimited. */
+  price_uzs: number | null
+  discount: PlanDiscount | null
+  /** Plan limits by key (weekly_ai_documents, weekly_file_jobs, edits_per_file, …); null is unlimited. */
   limits?: Record<string, number | null>
   [key: string]: unknown
 }
