@@ -115,7 +115,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   if (['/auth/email/register', '/auth/email/reset', '/auth/email/link'].includes(path))
     return json({ challenge_id: 'email-check' })
   if (path === '/catalog') return json({ features: [], draft: false })
-  if (path === '/plans') return json({ plans: [], checkout_enabled: false })
+  if (path === '/plans') return json({ plans: [], draft: false })
   if (path === '/usage') return json({ plan: 'free', remaining: {} })
   if (path === '/jobs') return json({ results: [] })
   if (path === '/studio/config') return json({ features: [], providers: [], templates: [] })

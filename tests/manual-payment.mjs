@@ -32,18 +32,42 @@ const limits = (price, documents, files, edits) => ({
   max_pages_per_job: 1000, batch_files: 25, max_generated_pdf_pages: 35, max_generated_slides: 60,
   max_deck_images: 12, saved_workflows: 20, price_uzs: price,
 })
+// Plus is on discount for two more weeks: 15 000 instead of 20 000, as the
+// server reports it (the last day as a Tashkent date, the percent rounded down).
+const until = new Date(Date.now() + 14 * 86400000)
+const untilDay = [until.getFullYear(), until.getMonth() + 1, until.getDate()].map((n) => String(n).padStart(2, '0')).join('-')
+const discount = { price: 15000, regular: 20000, percent: 25, until: untilDay }
+// The last day as each language writes it, spelt as the bot spells it, with
+// the year only when it is not the current Tashkent (UTC+5) year.
+const MONTHS = {
+  en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  uz: ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'],
+  ru: ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'],
+}
+const [untilYear, untilMonth, untilDate] = untilDay.split('-').map(Number)
+const dated = untilYear !== new Date(Date.now() + 5 * 3600000).getUTCFullYear()
+const untilLabel = {
+  en: `until ${untilDate} ${MONTHS.en[untilMonth - 1]}${dated ? ` ${untilYear}` : ''}`,
+  uz: `${dated ? `${untilYear}-yil ` : ''}${untilDate}-${MONTHS.uz[untilMonth - 1]}gacha`,
+  ru: `до ${untilDate} ${MONTHS.ru[untilMonth - 1]}${dated ? ` ${untilYear}` : ''}`,
+}
+const perThirtyDays = { en: 'per 30 days', uz: '30 kun uchun', ru: 'за 30 дней' }
+const regularPrice = { en: 'Regular price', uz: 'Odatdagi narx', ru: 'Обычная цена' }
 const plans = [
-  { id: 'free', name: 'Free', price_xtr: 0, limits: limits(null, 5, 15, 3) },
-  { id: 'plus', name: 'Plus', price_xtr: null, limits: limits(20000, 20, null, 10) },
-  { id: 'premium', name: 'Premium', price_xtr: null, limits: limits(60000, null, null, null) },
+  { id: 'free', name: 'Free', price_uzs: null, discount: null, limits: limits(null, 5, 15, 3) },
+  { id: 'plus', name: 'Plus', price_uzs: 20000, discount, limits: limits(20000, 20, null, 10) },
+  { id: 'premium', name: 'Premium', price_uzs: 60000, discount: null, limits: limits(60000, null, null, null) },
 ]
+// What /plans serves; swapped for an older platform's shape below.
+let served = plans
 let payment = null
-// Stars offers, empty by default as in production; a platform still on credits
-// also returns packs, which have no plan.
-let offers = []
 const options = () => ({
   enabled: true, currency: 'UZS', period_days: 30, automatic: { available: false },
-  plans: [{ plan: 'plus', price: 20000 }, { plan: 'premium', price: 60000 }], payment,
+  plans: [
+    { plan: 'plus', price: 15000, regular_price: 20000, discount },
+    { plan: 'premium', price: 60000, regular_price: 60000, discount: null },
+  ],
+  payment,
 })
 
 await context.route('**/*', (route) => {
@@ -69,20 +93,16 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
       telegram: { enabled: true, configured: true }, antibot: { enabled: false, configured: false, site_key: '', binding: '' } })
   if (endpoint === '/me') return json(account)
   if (endpoint === '/catalog') return json({ features: [], draft: false })
-  if (endpoint === '/plans') return json({ plans, checkout_enabled: false, currency: 'XTR', draft: true })
+  if (endpoint === '/plans') return json({ plans: served, currency: 'UZS', period_seconds: 2592000, draft: true })
   if (endpoint === '/usage')
     return json({ plan: 'free', week: { starts_at: '2026-10-11T19:00:00Z', resets_at: '2026-10-18T19:00:00Z', time_zone: 'Asia/Tashkent' },
       ai_documents: { limit: 5, used: 0, remaining: 5 }, file_jobs: { limit: 15, used: 0, remaining: 15 }, edits_per_file: 3,
       resets_at: '2026-10-18T19:00:00Z' })
-  if (endpoint === '/billing/offers')
-    return json({ offers, sandbox: offers.length > 0, checkout_enabled: offers.length > 0, currency: 'XTR',
-      billing_mode: offers.length ? 'sandbox' : 'disabled' })
-  if (endpoint === '/billing/subscription') return json({ plan: 'free', subscription: null, sandbox: false, checkout_enabled: false })
-  if (endpoint === '/billing/transactions' || endpoint === '/billing/invoices') return json({ results: [] })
+  // The old checkout endpoints are not mocked on purpose: a call to one is unexpected.
   if (endpoint === '/billing/manual' && method === 'GET') return json(options())
   if (endpoint === '/billing/manual' && method === 'POST') {
     const { plan } = request.postDataJSON()
-    payment = { id: '00000000-0000-4000-8000-000000000101', reference: 'PM-7K3QX', plan, amount: plan === 'plus' ? 20000 : 60000,
+    payment = { id: '00000000-0000-4000-8000-000000000101', reference: 'PM-7K3QX', plan, amount: plan === 'plus' ? 15000 : 60000,
       currency: 'UZS', status: 'awaiting', channel: 'web', card: { number: CARD, last4: '9012', holder: 'Shakhzod Uralov', label: 'Uzcard' },
       receipt_received: false, payer_note: '', created_at: new Date().toISOString(), expires_at: new Date(Date.now() + 172800000).toISOString(),
       submitted_at: null, decided_at: null, rejection_reason: null, starts_at: null, active_until: null }
@@ -126,6 +146,19 @@ try {
   const cards = await page.locator('.plan-card').allInnerTexts()
   assert.ok(cards[1].includes('20 000') && cards[1].includes("so'm") && cards[2].includes('60 000'), 'prices in so\'m on the cards')
   assert.match(await page.getByTestId('pay-premium').innerText(), /Pay 60 000 so'm/)
+  // Plus on discount: the regular price struck through, today's price, the
+  // percentage and the last day; the button asks for today's price.
+  assert.ok(cards[1].includes('15 000') && cards[1].includes('−25%') && cards[1].includes('until'), 'the Plus card shows the discount')
+  assert.match(await page.getByTestId('pay-plus').innerText(), /Pay 15 000 so'm/)
+  assert.equal(await page.getByTestId('regular-plus').evaluate((node) => getComputedStyle(node).textDecorationLine), 'line-through')
+  assert.equal(await page.getByTestId('discount-premium').count(), 0, 'Premium is at its regular price')
+  // The last day shares the "per 30 days" line after a dot; it never starts a line with one.
+  assert.ok(cards[1].includes(`per 30 days · ${untilLabel.en}`), `one "per 30 days · until" line: ${JSON.stringify(cards[1])}`)
+  // Screen readers do not read strikethrough, so the struck price is named wherever it appears.
+  assert.match(await page.getByTestId('regular-plus').innerText(), /^Regular price\s+20 000 so'm$/)
+  assert.match(await page.getByTestId('discount-banner').innerText(),
+    new RegExp(`Plus on discount:\\s+Regular price\\s+20 000 so'm\\s+15 000 so'm\\s+−25%\\s+· ${untilLabel.en}`))
+  assert.ok(!cards.join(' ').match(/−0%|NaN/), 'nothing half-rendered')
   const features = (index) => page.locator('.plan-card').nth(index).locator('.plan-features li').allInnerTexts()
   const [free, plus, premium] = [await features(0), await features(1), await features(2)]
   // The weekly limits and Premium's channels are the whole list: size, pages,
@@ -144,10 +177,30 @@ try {
     ['AI documents this week', 'File tasks this week', 'AI edits per file'])
   assert.match(await page.getByTestId('week-reset').innerText(), /^Limits renew .+ · \S+/)
   checks.push("Plan cards show so'm prices, only the weekly limits, volume-only subtitles, Premium without channels, and a Pay button")
+  checks.push('Plus on discount: regular price struck through, 15 000 so\'m, −25%, the last day, a banner, and Pay 15 000')
+
+  // Paying for the discounted plan: the chooser and the card screen both ask
+  // for the discounted amount and name the regular price it replaces.
+  const panel = page.getByTestId('manual-payment')
+  await page.getByTestId('pay-plus').click()
+  await panel.waitFor()
+  assert.match(await panel.innerText(), /Plus · 15 000 so'm/)
+  assert.match(await panel.getByTestId('manual-discount').innerText(),
+    new RegExp(`^Regular price\\s+20 000 so'm\\s+−25%\\s+${untilLabel.en}$`))
+  await page.getByTestId('manual-start').click()
+  await page.getByTestId('manual-card-number').waitFor()
+  const plusText = await panel.innerText()
+  assert.ok(plusText.includes("Send exactly 15 000 so'm") && plusText.includes("20 000 so'm") && plusText.includes('−25%'))
+  assert.match(await panel.getByTestId('manual-discount').innerText(),
+    new RegExp(`^Regular price\\s+20 000 so'm\\s+−25%\\s+${untilLabel.en}$`), 'the open payment names the struck price too')
+  await audit('card-discount')
+  await panel.getByRole('button', { name: 'Cancel this payment' }).click()
+  await panel.waitFor({ state: 'detached' })
+  checks.push('Paying for Plus asks for exactly 15 000 so\'m and shows the 20 000 it replaces')
 
   await page.getByTestId('pay-premium').click()
-  const panel = page.getByTestId('manual-payment')
   await panel.waitFor()
+  assert.equal(await panel.getByTestId('manual-discount').count(), 0, 'Premium is paid at its regular price')
   assert.equal(await panel.getByRole('radio', { name: /Automatic payment/ }).isDisabled(), true, 'automatic is not offered yet')
   assert.equal(await panel.getByRole('radio', { name: /Card transfer/ }).isChecked(), true)
   await audit('method')
@@ -172,26 +225,38 @@ try {
   await audit('waiting')
   checks.push('Sending the receipt shows the payment waiting for review')
 
-  // Web ships before the platform: an older platform still lists a credit pack
-  // (plan null) beside the plan. Only the plan is offered, and nothing breaks.
-  offers = [
-    { id: 'sandbox-plus', kind: 'subscription', plan: 'plus', price_xtr: 250, currency: 'XTR', checkout_enabled: true },
-    { id: 'sandbox-ai-pack', kind: 'ai_pack', plan: null, price_xtr: 100, currency: 'XTR', checkout_enabled: true,
-      quantities: { ai_credits: 50 } },
-  ]
+  // Web ships before the platform: an older platform prices a plan only under
+  // its limits and sends no discount. The cards still show the prices, plainly.
+  served = plans.map(({ price_uzs, discount, ...plan }) => plan)
   await page.goto(`${origin}/en/app/billing`, { waitUntil: 'domcontentloaded' })
-  await page.getByTestId('commerce-offers').waitFor()
-  assert.deepEqual(await page.getByTestId('commerce-offers').locator('.offer-card h3').allInnerTexts(), ['Plus'])
-  assert.equal(await page.getByTestId('payment-history').count(), 1, 'the panel below the offers still renders')
-  assert.deepEqual(errors, [], 'an offer without a plan breaks nothing')
-  offers = []
-  checks.push('Stars offers list plans only; a pack from an older platform is left out without an error')
+  await page.getByTestId('pay-premium').waitFor()
+  assert.match(await page.getByTestId('pay-plus').innerText(), /Pay 20 000 so'm/)
+  assert.equal(await page.getByTestId('discount-banner').count(), 0, 'no banner without a discount')
+  assert.equal(await page.locator('.discount-badge').count(), 0)
+  served = plans
+  checks.push('An older platform without top-level prices or discounts still prices the cards')
 
   signedIn = false
   await page.goto(`${origin}/en/pricing`, { waitUntil: 'domcontentloaded' })
   await page.getByRole('link', { name: 'Sign in to pay' }).first().waitFor()
   assert.equal(await page.getByTestId('manual-payment').count(), 0, 'no card shown to someone signed out')
-  checks.push('Signed out: prices, and a sign-in link instead of the card')
+  assert.match(await page.getByTestId('discount-banner').innerText(), /Plus on discount/)
+  await audit('pricing')
+  checks.push('Signed out: prices, the discount banner, and a sign-in link instead of the card')
+
+  // Uzbek and Russian write the last day as the bot does: "31-oktabrgacha"
+  // (the affix joined to the day), "до 31 октября"; the struck price is named
+  // in each language.
+  for (const locale of ['uz', 'ru']) {
+    await page.goto(`${origin}/${locale}/pricing`, { waitUntil: 'domcontentloaded' })
+    await page.locator('.plan-card').nth(2).waitFor()
+    const card = await page.locator('.plan-card').nth(1).innerText()
+    assert.ok(card.includes(`${perThirtyDays[locale]} · ${untilLabel[locale]}`), `${locale} card: ${JSON.stringify(card)}`)
+    assert.match(await page.getByTestId('regular-plus').innerText(), new RegExp(`^${regularPrice[locale]}\\s+20 000 so'm$`))
+    assert.match(await page.getByTestId('discount-banner').innerText(),
+      new RegExp(`${regularPrice[locale]}\\s+20 000 so'm\\s+15 000 so'm\\s+−25%\\s+· ${untilLabel[locale]}`))
+  }
+  checks.push('Uzbek and Russian write the last day as the bot does (31-oktabrgacha, до 31 октября) and name the struck price')
 
   assert.deepEqual(errors, [])
   assert.deepEqual(unexpected, [], 'every API call is covered by the fixture')

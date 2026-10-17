@@ -4,7 +4,7 @@ A Nuxt 4 / Vue 3 / TypeScript workspace in English, Uzbek Latin and Russian. Thi
 
 Private GitHub repositories: [document-web](https://github.com/shahzodjonweb/document-web) and [document-platform](https://github.com/shahzodjonweb/document-platform).
 
-The complete local workspace uses real server accounts, quotes, jobs, output files and transactions. The local authoring provider is explicitly labeled: it renders supplied and reviewed content deterministically and does not pretend to return live AI output. Live generation and Telegram transport depend on credentials configured through the staff interface. Local sandbox invoices do not charge real Telegram Stars.
+The complete local workspace uses real server accounts, quotes, jobs, output files and transactions. The local authoring provider is explicitly labeled: it renders supplied and reviewed content deterministically and does not pretend to return live AI output. Live generation and Telegram transport depend on credentials configured through the staff interface. Plans are paid by card transfer in so'm, checked by the owner; nothing is charged automatically.
 
 ## Run
 
@@ -28,7 +28,7 @@ Open `http://127.0.0.1:3000/en/app`. `/uz` and `/ru` select the other languages.
 - `/app/projects`: explicit 90-day encrypted-content consent, private saved material, real exact-match practice results, weak topics and deletion. Practice feedback is not presented as a final academic grade.
 - `/app/editor`: authenticated page previews, point-based positioning, actual text/highlight/note/form/image/signature/replacement/redaction commands, saved form-value templates, batch form filling and quoted PDF export. The pending overlay is distinguished from the actual exported file. Redaction requires explicit rasterization consent.
 - `/app/workflows`, `/app/templates`: owner-scoped versioned definitions. Workflows submit the server's bound confirmation token and show real child results; failed steps stop subsequent work.
-- `/app/billing`, `/app/referrals`: server balances, invoices, explicit sandbox payment confirmation, subscription renewal controls, next-period plan scheduling, transaction/refund requests, invitation codes and actual reward counts.
+- `/app/billing`, `/app/referrals`: the week's allowances, the plan cards in so'm with any discount the owner has set (regular price struck through, the percentage and its last day), paying by card transfer with a receipt the owner reviews, invitation codes and actual reward counts.
 - `/app/bot`: the actual aiogram handlers through a clearly labeled local transport. Text, callback buttons, file uploads and artifact delivery are persisted by the platform; the local conversation does not send to external Telegram.
 - `/app/support`: tickets, owner-only conversation history and replies. Settings persist language, output preferences and light/dark theme. Every date and time is shown in the device's own timezone, which is also kept on the account for the bot.
 - `/app/jobs`: real job progress, positive settled usage, private downloads, idempotent bot delivery and expiring/revocable learner-only share links. Teacher answer keys have no public sharing control.
@@ -41,6 +41,7 @@ The server remains authoritative for eligibility, limits, prices, ownership, ret
 npm run typecheck
 npm run build
 npm run check:catalog
+npm run check:pricing
 SKIP_JOURNEY=1 npm run test:browser
 npm run test:preview
 node tests/extended-smoke.mjs
@@ -51,7 +52,7 @@ node tests/final-provider-stages.mjs
 node tests/extended-accessibility.mjs
 ```
 
-Browser scripts use system Google Chrome via Playwright `channel: 'chrome'`. The extended scripts create real local test records and perform explicit sandbox transactions or consume granted test allowances. They must run against the configured local test account. Fixture PDFs contain no user documents. `docs/design/QA.md` and JSON reports record the checks and their limits.
+Browser scripts use system Google Chrome via Playwright `channel: 'chrome'`. The extended scripts create real local test records and consume granted test allowances. They must run against the configured local test account. Fixture PDFs contain no user documents. `docs/design/QA.md` and JSON reports record the checks and their limits.
 
 `tests/extended-accessibility.mjs` uses the pinned axe-core Playwright dependency. It scans representative extended routes in both themes at 390px.
 

@@ -75,6 +75,7 @@ import {
   Replace,
   AlignLeft,
   Minus,
+  BadgePercent,
 } from 'lucide-vue-next'
 const props = withDefaults(defineProps<{ name: string; size?: number }>(), { size: 20 })
 const icons: Record<string, any> = {
@@ -154,6 +155,7 @@ const icons: Record<string, any> = {
   replace: Replace,
   alignLeft: AlignLeft,
   minus: Minus,
+  percent: BadgePercent,
 }
 </script>
 <template>

@@ -99,7 +99,7 @@ try {
       if (endpoint === '/plans')
         return json({
           plans: [{ id: 'free', limits: { max_file_mib: 25, max_pages_per_job: 100 } }],
-          checkout_enabled: false,
+          draft: false,
         })
       if (endpoint === '/usage')
         return json({ plan: 'free', week: { starts_at: '2026-10-11T19:00:00Z', resets_at: '2026-10-18T19:00:00Z', time_zone: 'Asia/Tashkent' }, resets_at: '2026-10-18T19:00:00Z',

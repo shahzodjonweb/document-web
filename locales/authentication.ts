@@ -38,9 +38,9 @@ export const authenticationEntries: Record<string, [string, string, string]> = {
     'Сначала завершите открытую проверку безопасности.',
   ],
   authTelegramRequired: [
-    'Connect Telegram in Settings to use Telegram delivery and Stars payments.',
-    'Telegramga yuborish va Stars orqali to‘lovlar uchun Sozlamalarda Telegramni ulang.',
-    'Подключите Telegram в настройках для отправки файлов в Telegram и оплаты Stars.',
+    'Connect Telegram in Settings to have files sent to you in Telegram.',
+    'Fayllarni Telegram’da olish uchun Sozlamalarda Telegramni ulang.',
+    'Подключите Telegram в настройках, чтобы получать файлы в Telegram.',
   ],
   authContinueGoogle: ['Continue with Google', 'Google orqali davom etish', 'Продолжить через Google'],
   authOrEmail: ['or use email', 'yoki email orqali', 'или по электронной почте'],

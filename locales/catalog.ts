@@ -110,8 +110,11 @@ const entries: Record<string, [string, string, string]> = {
   ],
   plansTitle: ['Plans', 'Tariflar', 'Тарифы'],
   yourPlanBadge: ['Your plan', 'Sizning tarifingiz', 'Ваш тариф'],
-  paymentHistory: ['Payment history', 'To‘lovlar tarixi', 'История платежей'],
-  askAboutPayment: ['Ask about this payment', 'Bu to‘lov haqida so‘rash', 'Спросить об этом платеже'],
+  // A discount: the regular price struck through, today's price, "−25%" and its
+  // last day — no countdowns, no "last chance".
+  discountUntil: ['until {date}', '{date}gacha', 'до {date}'],
+  discountBannerLead: ['{plan} on discount', '{plan} tarifiga chegirma', 'Скидка на {plan}'],
+  regularPrice: ['Regular price', 'Odatdagi narx', 'Обычная цена'],
   stepHowToPay: ['How to pay', 'To‘lov usuli', 'Способ оплаты'],
   stepTransfer: ['Transfer and receipt', 'O‘tkazma va kvitansiya', 'Перевод и квитанция'],
   stepWeCheck: ['We check it', 'Biz tekshiramiz', 'Мы проверяем'],

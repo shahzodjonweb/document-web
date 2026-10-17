@@ -104,7 +104,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
     return json({ user: account })
   }
   if (path === '/catalog') return json({ features: [], draft: false })
-  if (path === '/plans') return json({ plans: [], draft: false, checkout_enabled: false })
+  if (path === '/plans') return json({ plans: [], draft: false })
   if (path === '/usage') return json({ plan: 'free', remaining: {} })
   if (path === '/jobs') return json({ results: [], count: 0 })
   if (path === '/studio/config') return json({ features: [], providers: [], templates: [] })

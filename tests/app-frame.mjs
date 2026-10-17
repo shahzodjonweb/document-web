@@ -29,9 +29,9 @@ const account = {
 const limits = (documents, files, edits) =>
   ({ weekly_ai_documents: documents, weekly_file_jobs: files, edits_per_file: edits, saved_workflows: 20 })
 const plans = [
-  { id: 'free', name: 'Free', price_xtr: 0, limits: limits(5, 15, 3) },
-  { id: 'plus', name: 'Plus', price_xtr: null, limits: limits(20, null, 10) },
-  { id: 'premium', name: 'Premium', price_xtr: null, limits: limits(null, null, null) },
+  { id: 'free', name: 'Free', price_uzs: null, discount: null, limits: limits(5, 15, 3) },
+  { id: 'plus', name: 'Plus', price_uzs: 20000, discount: null, limits: limits(20, null, 10) },
+  { id: 'premium', name: 'Premium', price_uzs: 60000, discount: null, limits: limits(null, null, null) },
 ]
 // This week, as /usage reports it: a null limit is unlimited.
 const allowance = (limit, used) => ({ limit, used, remaining: limit === null ? null : limit - used })
@@ -60,7 +60,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
     })
   if (endpoint === '/me') return json(account)
   if (endpoint === '/catalog') return json({ features: [], draft: false })
-  if (endpoint === '/plans') return json({ plans, checkout_enabled: false, currency: 'XTR', draft: true })
+  if (endpoint === '/plans') return json({ plans, currency: 'UZS', period_seconds: 2592000, draft: true })
   if (endpoint === '/usage') {
     const plan = plans.find((row) => row.id === account.plan).limits
     return json({
@@ -75,7 +75,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   if (endpoint === '/jobs') return json({ results: [], count: 0 })
   if (endpoint === '/billing/manual')
     return json({ enabled: true, currency: 'UZS', period_days: 30, automatic: { available: false }, plans: [], payment: null })
-  if (endpoint.startsWith('/billing/')) return json({ results: [], offers: [], plan: account.plan, subscription: null })
+  if (endpoint.startsWith('/billing/')) return json({ results: [], plan: account.plan, subscription: null })
   return json({})
 })
 

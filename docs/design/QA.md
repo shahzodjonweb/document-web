@@ -7,7 +7,7 @@ Updated 2026-09-23 (Asia/Tashkent). This report supersedes the initial 13-tool c
 The following run against the real localhost API and canonical test account, using Playwright with system Google Chrome:
 
 - Upload/reorder/locale-switch/reload → quoted merge → downloaded three-page PDF. The recorded receipt settled one standard task and three processed pages.
-- Explicit local sandbox Premium invoice → confirmation → real account plan/allowance update. No real Telegram Stars transaction is represented. Renewal off/on keeps current paid access.
+- Plan cards in so'm → card transfer: the method, the owner's card with the exact amount and the payment code, the receipt upload, waiting for review (`tests/manual-payment.mjs`, mocked API). A discount set by the owner shows the regular price struck through, the percentage and its last day on the cards, the payment panel and the banner. No payment is charged automatically.
 - Supplied source content → draft → edited outline → server quote → actual PDF. Russian output preferences also produced a downloadable editable PPTX archive.
 - PDF editor preview → positioned text → versioned command save → actual exported PDF. Text overlays are explicitly described as pending previews.
 - Authored teacher question → explicit 90-day project save → exact-match practice result 1/1. A practice grade is labeled as revision feedback.

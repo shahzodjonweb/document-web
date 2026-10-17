@@ -118,7 +118,7 @@ async function open(width, theme, insideTelegram) {
       return json({ email: { enabled: false }, google: { enabled: false }, telegram: { enabled: true }, antibot: { enabled: false } })
     if (endpoint === '/me') return json(account)
     if (endpoint === '/catalog') return json({ features: [], draft: false })
-    if (endpoint === '/plans') return json({ plans: [], checkout_enabled: false })
+    if (endpoint === '/plans') return json({ plans: [], draft: false })
     if (endpoint === '/usage')
       return json({ plan: 'premium', week: { starts_at: '2026-10-11T19:00:00Z', resets_at: '2026-10-18T19:00:00Z', time_zone: 'Asia/Tashkent' }, resets_at: '2026-10-18T19:00:00Z',
       ai_documents: { limit: null, used: 0, remaining: null }, file_jobs: { limit: null, used: 0, remaining: null }, edits_per_file: null })
