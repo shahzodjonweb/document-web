@@ -9,6 +9,6 @@ export function createPublicApi(request: PublicRequest) {
     usage: () => request<Schemas['Usage']>('/usage'),
     jobs: () => request<{ results: Schemas['Job'][]; count: number }>('/jobs'),
     job: (id: string) => request<Schemas['Job']>(`/jobs/${encodeURIComponent(id)}`),
-    plans: () => request<{ plans: Schemas['Plan'][]; draft: boolean; checkout_enabled: boolean }>('/plans'),
+    plans: () => request<{ plans: Schemas['Plan'][]; draft: boolean; currency: string; period_seconds?: number }>('/plans'),
   }
 }
