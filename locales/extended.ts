@@ -1333,9 +1333,14 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Фото не удалось прочитать, поэтому резюме сделано без него.',
   ],
   cv_photo_gone: [
-    'The photo is no longer stored, so the change is made without it.',
-    'Foto endi saqlanmagan, shuning uchun o‘zgartirish fotosiz bajariladi.',
-    'Фото больше не хранится, поэтому изменение будет без него.',
+    'The photo is no longer stored, so this version of the CV is without it.',
+    'Rasmning saqlanish muddati tugagani uchun rezyumening bu nusxasi rasmsiz tayyorlandi.',
+    'Срок хранения фото истёк, поэтому эта версия резюме — без него.',
+  ],
+  cv_photo_no_slot: [
+    'This template has no place for a photo, so the CV was made without it.',
+    'Bu shablonda rasm uchun joy yo‘q, shuning uchun rezyume rasmsiz tayyorlandi.',
+    'В этом шаблоне нет места для фото, поэтому резюме сделано без него.',
   ],
 }
 /**
