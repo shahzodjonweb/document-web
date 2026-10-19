@@ -15,6 +15,11 @@ const props = defineProps<{
   defaultId?: string
   /** Smaller cards, for the picker inside the Create with AI form. */
   compact?: boolean
+  /**
+   * No Auto: a change to a CV keeps its template unless another is picked, so
+   * the picker shows that one chosen rather than an Auto that would keep it.
+   */
+  noAuto?: boolean
 }>()
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 const { t } = useLocale()
@@ -67,6 +72,7 @@ const drawStyle = (entry: CvTemplate) => {
 <template>
   <div class="cv-picker" :class="{ compact }">
     <button
+      v-if="!noAuto"
       type="button"
       class="deck-auto cv-auto"
       role="radio"
@@ -123,8 +129,12 @@ const drawStyle = (entry: CvTemplate) => {
             <i v-if="entry.photo" class="cv-draw-photo" />
           </span>
         </span>
+        <!-- The mark the photo hints point to, on a phone as well: a word, read out too. -->
         <span class="cv-name"
-          >{{ entry.name }} <small v-if="entry.photo">{{ t('cvSetupPhoto') }}</small></span
+          >{{ entry.name }}
+          <small v-if="entry.photo" class="cv-photo-mark" data-testid="cv-photo-mark"
+            ><AppIcon name="image" :size="12" />{{ t('cvSetupPhoto') }}</small
+          ></span
         >
         <AppIcon v-if="modelValue === entry.id" name="check" :size="16" class="deck-check" />
       </button>

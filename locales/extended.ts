@@ -1060,17 +1060,37 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   ],
   studioCvTemplate: ['Template', 'Shablon', 'Шаблон'],
   studioCvPhoto: ['Photo (optional)', 'Foto (ixtiyoriy)', 'Фото (необязательно)'],
+  // A phone's photo is made smaller in the browser before it is sent, so the
+  // original may be larger than the 5 MB and 6 megapixels the server takes.
   studioCvPhotoHint: [
-    'A JPG or PNG portrait, up to 5 MB. It goes on the templates marked “Photo”.',
-    'JPG yoki PNG portret, eng ko‘pi 5 MB. U «Foto» belgisi bor shablonlarga qo‘yiladi.',
-    'Портрет в JPG или PNG, до 5 МБ. Он появится на шаблонах с пометкой «Фото».',
+    'A JPG or PNG portrait, up to 20 MB. It goes on the templates marked “Photo”.',
+    'JPG yoki PNG portret, eng ko‘pi 20 MB. U «Foto» belgisi bor shablonlarga qo‘yiladi.',
+    'Портрет в JPG или PNG, до 20 МБ. Он появится на шаблонах с пометкой «Фото».',
   ],
   studioCvPhotoAdd: ['Add a photo', 'Foto qo‘shish', 'Добавить фото'],
   studioCvPhotoReplace: ['Replace the photo', 'Fotoni almashtirish', 'Заменить фото'],
   studioCvPhotoWrong: [
-    'Choose a JPG or PNG photo of up to 5 MB.',
-    'JPG yoki PNG formatidagi, eng ko‘pi 5 MB bo‘lgan fotoni tanlang.',
-    'Выберите фото в формате JPG или PNG размером до 5 МБ.',
+    'Choose a JPG or PNG photo of up to 20 MB.',
+    'JPG yoki PNG formatidagi, eng ko‘pi 20 MB bo‘lgan fotoni tanlang.',
+    'Выберите фото в формате JPG или PNG размером до 20 МБ.',
+  ],
+  // A photo this browser could not make smaller, or one the server refused.
+  studioCvPhotoUnusable: [
+    'This photo cannot be used. Choose a JPG or PNG of up to 5 MB and 6 megapixels, or create the CV without a photo.',
+    'Bu fotodan foydalanib bo‘lmaydi. Eng ko‘pi 5 MB va 6 megapiksel bo‘lgan JPG yoki PNG faylni tanlang yoki rezyumeni fotosiz yarating.',
+    'Это фото не подходит. Выберите JPG или PNG до 5 МБ и 6 мегапикселей или создайте резюме без фото.',
+  ],
+  studioCvPhotoGone: [
+    'The photo is no longer stored. Add it again, or create the CV without a photo.',
+    'Foto endi saqlanmagan. Uni qaytadan qo‘shing yoki rezyumeni fotosiz yarating.',
+    'Фото больше не хранится. Добавьте его снова или создайте резюме без фото.',
+  ],
+  // A change to a CV keeps its photo unless the request takes it away; the
+  // quoted words are ones the server reads as that (apps/studio/edits.py).
+  studioCvPhotoKept: [
+    'A change keeps this photo. To make the CV without it, write “without a photo” in your request.',
+    'O‘zgartirishda bu foto saqlanadi. Rezyumeni fotosiz qilish uchun so‘rovingizga «fotosiz» deb yozing.',
+    'При изменении это фото сохранится. Чтобы сделать резюме без него, напишите в запросе «без фото».',
   ],
   studioCvPhotoAttached: ['Attached', 'Biriktirilgan', 'Прикреплено'],
   studioCvPhotoNone: ['None', 'Yo‘q', 'Нет'],

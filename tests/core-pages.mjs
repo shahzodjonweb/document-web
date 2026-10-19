@@ -185,7 +185,7 @@ try {
   for (const gone of ['.privacy-card', '.help-strip', '.usage-card']) {
     assert.equal(await page.locator(gone).count(), 0, `${gone} is gone from Home`)
   }
-  checks.push('Home: greeting, drop zone, the two AI shortcuts, the week in two meters with its reset, five file tools, recent tasks')
+  checks.push('Home: greeting, drop zone, the three AI shortcuts, the week in two meters with its reset, five file tools, recent tasks')
 
   // Tools: categories that have tools, real descriptions.
   await go('/en/app/tools')
@@ -349,6 +349,38 @@ try {
   await axe('referrals 1440')
   await shot('referrals-1440', true)
   checks.push('Landing: what it does, AI services, tools, plans with their weeks and volume-only subtitles, the Plus discount on the teaser and the banner (Russian too), questions, Russian ИИ; referrals: link, copy and two numbers')
+
+  // The AI shortcuts, as many to a row as their words fit, in every language:
+  // from a tablet up, nothing runs out of its card or under its arrow or button.
+  const crowded = () =>
+    page.$$eval('.ai-shortcut', (cards) =>
+      cards.flatMap((card) => {
+        const copy = card.querySelector('.ai-shortcut-copy')
+        const end = card.querySelector('.tool-arrow, .button')
+        const clipped = [...copy.children].some((line) => line.scrollWidth > line.clientWidth + 1)
+        const under = end && copy.getBoundingClientRect().right > end.getBoundingClientRect().left + 1
+        const box = card.getBoundingClientRect()
+        return card.scrollWidth > card.clientWidth + 1 || clipped || under
+          ? [`${card.getAttribute('href')} ${Math.round(box.width)}px`]
+          : []
+      }),
+    )
+  for (const width of [768, 820, 900, 1024, 1180, 1280]) {
+    await page.setViewportSize({ width, height: 900 })
+    for (const locale of ['en', 'ru', 'uz']) {
+      for (const where of ['/app', '']) {
+        await go(`/${locale}${where}`)
+        await page.locator('.ai-shortcut').first().waitFor()
+        assert.equal(await page.locator('.ai-shortcut').count(), 3)
+        assert.deepEqual(await crowded(), [], `${where ? 'home' : 'landing'} ${locale} ${width}: AI shortcuts crowded`)
+      }
+    }
+  }
+  await page.setViewportSize({ width: 768, height: 900 })
+  await go('/ru/app')
+  await page.locator('.ai-shortcut').first().waitFor()
+  await shot('home-ru-768', true)
+  checks.push('Home and landing: the three AI shortcuts fit their words from 768 to 1280 px in EN/RU/UZ')
 
   // Phone: one column, and the next step stays in reach above the phone bar.
   await page.setViewportSize({ width: 390, height: 844 })
