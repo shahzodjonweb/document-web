@@ -807,7 +807,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description A deck's slide count and design chosen over what its description says (`deck_design` is a design id or `auto`). Returns the new quote; the review in the Telegram chat is redrawn with it. */
+        /** @description A deck's slide count and design, or a CV's template, chosen over what its description says. A deck (`ai.pptx`) takes `pages` and `deck_design` (a design id or `auto`); a CV (`ai.cv`) takes `cv_template` (a template id or `auto`); anything else is refused. Returns the new quote; the review in the Telegram chat is redrawn with it. */
         post: operations["setupGenerationDraft"];
         delete?: never;
         options?: never;
@@ -1034,6 +1034,40 @@ export interface paths {
             cookie?: never;
         };
         get: operations["getStudioConfig"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/studio/cv-templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Every template a CV can wear, grouped by category, in the colours each renders in. `locale` (en, uz, ru) names the categories; `default` is the template Auto starts from. */
+        get: operations["listCvTemplates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/studio/cv-templates/{template}.png": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description A template's page 1 with a fictional sample CV in `locale`, 480 px wide. Public and immutable: the catalogue's `preview` URL carries the catalogue's version. */
+        get: operations["getCvTemplatePreview"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1293,6 +1327,30 @@ export interface components {
             /** Format: uuid */
             id: string;
             status: string;
+        };
+        CvTemplate: {
+            category: string;
+            colours: {
+                accent: string;
+                fill: string;
+                ink: string;
+                secondary: string;
+                tint: string;
+            };
+            /** @enum {unknown} */
+            drawer: "column" | "sidebar_left" | "sidebar_right" | "band" | "centered" | "timeline" | "compact" | "executive";
+            fonts: {
+                /** @enum {unknown} */
+                body: "serif" | "sans";
+                /** @enum {unknown} */
+                heading: "serif" | "sans";
+            };
+            id: string;
+            name: string;
+            photo: boolean;
+            preview: string;
+            /** @enum {unknown} */
+            tone: "light" | "dark" | "paper";
         };
         /** @description PDF points from displayed top-left, pages start at 1, image indices start at 0. Image input indices reference extra uploaded assets. Redaction requires explicit rasterization acknowledgement and a separate export. */
         EditorCommand: {
@@ -5908,6 +5966,7 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
+                    cv_template?: string;
                     deck_design?: string;
                     pages?: number;
                 };
@@ -7120,6 +7179,124 @@ export interface operations {
                             style?: Record<string, never>;
                         }[];
                     };
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    listCvTemplates: {
+        parameters: {
+            query?: {
+                locale?: "en" | "uz" | "ru";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        categories: {
+                            id: string;
+                            name: string;
+                            templates: components["schemas"]["CvTemplate"][];
+                        }[];
+                        default: string;
+                    };
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getCvTemplatePreview: {
+        parameters: {
+            query?: {
+                locale?: "en" | "uz" | "ru";
+                v?: string;
+            };
+            header?: never;
+            path: {
+                template: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description PNG page thumbnail */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/png": string;
                 };
             };
             /** @description Invalid request */
