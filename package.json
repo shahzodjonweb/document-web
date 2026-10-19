@@ -21,6 +21,7 @@
     "test:auth:antibot": "node tests/antibot-ui.mjs",
     "test:studio": "node tests/studio-simple-forms.mjs",
     "test:deck-setup": "node tests/deck-setup.mjs",
+    "test:cv-setup": "node tests/cv-setup.mjs",
     "test:services": "node tests/services-directory.mjs",
     "test:guide": "node tests/prompt-guide.mjs",
     "test:editor": "node tests/editor-workspace.mjs",

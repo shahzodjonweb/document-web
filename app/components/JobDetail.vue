@@ -31,6 +31,11 @@ const reviseDraftId = computed(() =>
     ? (job.value as any)?.parameters?.generation_draft_id || ''
     : '',
 )
+/**
+ * A CV is changed as a whole: its sections are not pages, and most have no
+ * heading to pick them by, so it has no page to choose and its own examples.
+ */
+const isCv = computed(() => job.value?.feature_id === 'ai.cv')
 const change = ref('')
 const revising = ref(false)
 const revisionSource = ref<any>(null)
@@ -78,7 +83,7 @@ const retryAdviceDraft = computed(() =>
   retryAvailable.value &&
   !retryIsEdit.value &&
   !retryIsOutline.value &&
-  ['ai.pdf_topic', 'ai.pptx'].includes(job.value?.feature_id || '') &&
+  ['ai.pdf_topic', 'ai.pptx', 'ai.cv'].includes(job.value?.feature_id || '') &&
   (job.value?.error as any)?.code === 'provider_failed'
     ? String((job.value as any)?.parameters?.generation_draft_id || '')
     : '',
@@ -270,7 +275,7 @@ function downloadUrl(url: string | undefined, id: string) {
       <section v-if="reviseDraftId" class="panel revise-panel" data-testid="job-revise">
         <h3><AppIcon name="edit" :size="18" />{{ t('reviseTitle') }}</h3>
         <p>{{ t('reviseBody') }}</p>
-        <label v-if="revisionSource?.content?.sections?.length" class="form-field">
+        <label v-if="revisionSource?.content?.sections?.length && !isCv" class="form-field">
           <span>{{ t('reviseScope') }}</span>
           <select v-model="revisionSection" data-testid="job-revise-scope">
             <option value="">{{ t('reviseWhole') }}</option>
@@ -290,9 +295,9 @@ function downloadUrl(url: string | undefined, id: string) {
             v-model="change"
             data-testid="job-revise-input"
             rows="3"
-            :placeholder="t('revisePlaceholder')"
+            :placeholder="t(isCv ? 'revisePlaceholderCv' : 'revisePlaceholder')"
           />
-          <small>{{ t('reviseExamples') }}</small>
+          <small>{{ t(isCv ? 'reviseExamplesCv' : 'reviseExamples') }}</small>
         </label>
         <button
           class="button primary"
@@ -315,7 +320,7 @@ function downloadUrl(url: string | undefined, id: string) {
         <h3>{{ t('generationRetryTitle') }}</h3>
         <p data-testid="job-retry-body">{{ t(retryIsEdit ? 'editRetryBody' : 'generationRetryBody') }}</p>
         <p v-if="retryAdviceDraft" class="retry-advice" data-testid="job-retry-advice">
-          {{ t('jobRetryAdvice') }}
+          {{ t(isCv ? 'jobRetryAdviceCv' : 'jobRetryAdvice') }}
           <NuxtLink :to="path(`/app/create/${retryAdviceDraft}`)" class="text-link">{{
             t('jobChangeRequest')
           }}</NuxtLink>

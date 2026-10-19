@@ -5,7 +5,7 @@ const { sorted, name, description } = useTools()
 // The public page offers the file tools a visitor can use straight away; the
 // AI services have their own section.
 const tools = computed(() => sorted.value.filter((f) => !isGenerationFeature(f.id)).slice(0, 5))
-const services = ['ai.pdf_topic', 'ai.pptx']
+const services = ['ai.pdf_topic', 'ai.pptx', 'ai.cv']
 // Each plan's price in so'm, with its discount when one is on.
 const { money, discount, price, untilLabel } = usePricing()
 const priced = computed(() =>

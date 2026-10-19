@@ -86,6 +86,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
       features: [
         { id: 'ai.pdf_topic', name: 'PDF Document', eligible: true },
         { id: 'ai.pptx', name: 'PowerPoint Slides', eligible: true },
+        { id: 'ai.cv', name: 'CV', eligible: true },
       ],
       default_pages: 10,
     })
@@ -173,7 +174,7 @@ try {
   await page.locator('.quick-tools .tool-card').first().waitFor()
   assert.equal(await page.locator('h1').innerText(), 'Hello, Malika')
   assert.equal(await page.locator('.eyebrow').count(), 0, 'no eyebrow over the greeting')
-  assert.deepEqual(await ids('.ai-shortcut'), ['ai.pdf_topic', 'ai.pptx'])
+  assert.deepEqual(await ids('.ai-shortcut'), ['ai.pdf_topic', 'ai.pptx', 'ai.cv'])
   assert.deepEqual(await texts(page.locator('.plan-meter-label')), ['AI documents this week', 'File tasks this week'])
   assert.match(await page.locator('.plan-meter').first().innerText(), /2\s+of 5 used/)
   assert.match(await page.locator('.plan-meter').nth(1).innerText(), /3\s+of 15 used/)
@@ -301,7 +302,7 @@ try {
   await page.locator('.landing-hero h1').waitFor()
   assert.equal(await page.locator('.landing-hero h1').innerText(), 'PDF tools and AI documents, in one place.')
   assert.equal(await page.getByText(/paperwork/i).count(), 0, 'no old taglines')
-  assert.equal(await page.locator('.landing-section .ai-shortcut').count(), 2)
+  assert.equal(await page.locator('.landing-section .ai-shortcut').count(), 3)
   assert.equal(await page.locator('.faq details').count(), 4)
   assert.deepEqual(await texts(page.locator('.pricing-teaser .panel').first().locator('.teaser-week')),
     ['5 AI documents a week', '15 file tasks a week'])
