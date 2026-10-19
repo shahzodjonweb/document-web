@@ -61,6 +61,8 @@ const topicRefusal = {
 const id = () => `00000000-0000-4000-8000-${String(++sequence).padStart(12, '0')}`
 const future = () => new Date(Date.now() + 300000).toISOString()
 const featureIds = ['ai.pdf_topic', 'ai.pptx']
+// Every service the Studio offers: the two above, and a CV.
+const serviceIds = [...featureIds, 'ai.cv']
 const account = {
   id: '00000000-0000-4000-8000-999999999999',
   display_name: 'Fixture Reader',
@@ -76,7 +78,7 @@ const config = {
   // As the server sends them: 10 when the description names no count, and one
   // ceiling per service that every plan shares.
   default_pages: 10,
-  features: featureIds.map((feature) => ({
+  features: serviceIds.map((feature) => ({
     id: feature,
     name: feature,
     surface: 'generate',
@@ -86,7 +88,9 @@ const config = {
       output_locale: { enum: ['en', 'uz', 'ru'] },
       output_format: { enum: feature === 'ai.pptx' ? ['pptx'] : ['pdf'] },
     },
-    max_pages: feature === 'ai.pptx' ? 60 : 35,
+    // A CV is one or two pages, and never has stock photos.
+    max_pages: feature === 'ai.pptx' ? 60 : feature === 'ai.cv' ? 2 : 35,
+    ...(feature === 'ai.cv' ? { max_images: 0 } : {}),
     locales: ['en', 'uz', 'ru'],
   })),
   limits: { sections: 10, slides: 20, questions: 5, source_chars: 12000 },
@@ -141,6 +145,97 @@ const seededDrafts = authoredDrafts.map((draft) => {
 })
 for (const draft of seededDrafts) drafts.set(draft.id, draft)
 
+// The CV templates, as GET studio/cv-templates lists them (fictional sample).
+const cvTemplate = (id, name, category, drawer, accent, extra = {}) => ({
+  id,
+  name,
+  category,
+  drawer,
+  photo: false,
+  tone: 'light',
+  preview: `/api/v1/studio/cv-templates/${id}.png?locale=en&v=fixture`,
+  fonts: { heading: 'serif', body: 'sans' },
+  colours: { accent, secondary: '#B08D57', tint: '#FFFFFF', ink: '#1A1A1A', fill: accent },
+  ...extra,
+})
+const cvCatalogue = {
+  default: 'classic_navy',
+  categories: [
+    { id: 'classic', name: 'Classic', templates: [cvTemplate('classic_navy', 'Classic Navy', 'classic', 'column', '#1F3A68'), cvTemplate('charter', 'Charter', 'classic', 'column', '#14284B'), cvTemplate('oxford', 'Oxford', 'classic', 'timeline', '#0B3954')] },
+    { id: 'modern', name: 'Modern', templates: [cvTemplate('azure_side', 'Azure Side', 'modern', 'sidebar_left', '#0F4C81', { photo: true })] },
+    { id: 'academic', name: 'Academic & technical', templates: [cvTemplate('lab', 'Lab', 'academic', 'sidebar_left', '#01579B'), cvTemplate('syntax', 'Syntax', 'academic', 'compact', '#1F2937')] },
+  ],
+}
+// A small A4-shaped PNG: a template's cover, and the portrait the CV pass uploads.
+const PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAABUAAAAeCAIAAABMssICAAAAN0lEQVR42mOUt8pgoAAwMVAGRrp+xv///w9l97PAWSfPXSdem7mR5uDw/6j7R90/6v5R9w+U+wFRIC3rnHdRvQAAAABJRU5ErkJggg==',
+  'base64',
+)
+const CV_SECTIONS = ['profile', 'experience', 'education', 'skills', 'languages', 'projects', 'certificates', 'extra']
+const cvNameRefusal = 'Write your full name — the CV is made for you, so it has to say who you are.'
+// Uploaded files by id, so an uploaded portrait reads back as itself.
+const uploads = new Map()
+// What the last uploaded image was, as the server would read it: its type,
+// name, size in pixels and whether it still carried EXIF.
+let uploadedImage = null
+// A portrait the server refuses on the next draft write, by its error code.
+let refusePortrait = ''
+/** The uploaded file of a multipart body: its name, type and bytes. */
+function multipartFile(buffer) {
+  const text = buffer.toString('latin1')
+  const head = /filename="([^"]*)"\r\nContent-Type: ([^\r]+)\r\n\r\n/i.exec(text)
+  if (!head) return null
+  const start = head.index + head[0].length
+  const boundary = text.slice(0, text.indexOf('\r\n'))
+  const end = text.indexOf(`\r\n${boundary}`, start)
+  return { name: head[1], type: head[2], bytes: buffer.subarray(start, end) }
+}
+/** Width and height of a PNG or JPEG, and whether a JPEG has an EXIF block. */
+function imageFacts(bytes) {
+  if (bytes.subarray(1, 4).toString('latin1') === 'PNG')
+    return { width: bytes.readUInt32BE(16), height: bytes.readUInt32BE(20), exif: false }
+  let exif = false
+  for (let at = 2; at + 9 < bytes.length; ) {
+    if (bytes[at] !== 0xff) return null
+    const marker = bytes[at + 1]
+    const length = bytes.readUInt16BE(at + 2)
+    if (marker === 0xe1 && bytes.subarray(at + 4, at + 8).toString('latin1') === 'Exif') exif = true
+    if (marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker))
+      return { width: bytes.readUInt16BE(at + 7), height: bytes.readUInt16BE(at + 5), exif }
+    at += 2 + length
+  }
+  return null
+}
+/** A JPEG with an EXIF block saying it is to be turned a quarter clockwise, as a phone stores a portrait. */
+function withOrientation(jpeg, orientation) {
+  const exif = Buffer.from([
+    0xff, 0xe1, 0x00, 0x22, ...Buffer.from('Exif\0\0', 'latin1'),
+    0x4d, 0x4d, 0x00, 0x2a, 0x00, 0x00, 0x00, 0x08,
+    0x00, 0x01, 0x01, 0x12, 0x00, 0x03, 0x00, 0x00, 0x00, 0x01, 0x00, orientation, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
+  ])
+  // After the JFIF block, which comes first.
+  const after = 4 + jpeg.readUInt16BE(4)
+  return Buffer.concat([jpeg.subarray(0, after), exif, jpeg.subarray(after)])
+}
+/**
+ * A CV's options as the server keeps them: the template picked is in its style
+ * (Auto has none until the CV is made), and a change keeps the CV's own style
+ * and portrait unless another is picked or sent. The server takes the CV's
+ * portrait back whenever a change sends none (apps/studio/cv/portrait.py).
+ */
+function cvOptions(options, source) {
+  const picked = options?.cv_template && options.cv_template !== 'auto' ? options.cv_template : ''
+  const kept = source?.options || {}
+  const portrait = options?.portrait_asset_id || kept.portrait_asset_id
+  const { portrait_asset_id, portrait_sha256, template_style, ...rest } = structuredClone(options || {})
+  return {
+    ...rest,
+    length: CV_SECTIONS.length,
+    template_style: picked ? { cv_template: picked } : structuredClone(kept.template_style || {}),
+    ...(portrait ? { portrait_asset_id: portrait, portrait_sha256: `fixture-${portrait}` } : {}),
+  }
+}
 const sourceContent = (fields, length) => ({
   title: fields.title,
   sections: Array.from({ length }, (_, index) => ({
@@ -192,18 +287,21 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   if (endpoint === '/plans') return json({ plans: [], draft: false })
   if (endpoint === '/usage') return json({ plan: 'free', week, ...weekUsage() })
   if (endpoint === '/studio/config') return json(config)
-  if (endpoint === '/files/uploads')
-    return json(
-      {
-        id: id(),
-        name: 'research-notes.pdf',
-        size_bytes: 4096,
-        page_count: 2,
-        mime_type: 'application/pdf',
-        state: 'ready',
-      },
-      201,
-    )
+  if (endpoint === '/studio/cv-templates') return json(cvCatalogue)
+  if (/^\/studio\/cv-templates\/[\w-]+\.png$/.test(endpoint))
+    return route.fulfill({ status: 200, contentType: 'image/png', body: PNG })
+  if (endpoint === '/files/uploads') {
+    // The multipart body names the file's type: a portrait for a CV, else a PDF.
+    const file = multipartFile(request.postDataBuffer() || Buffer.alloc(0))
+    const image = /^image\/(png|jpeg)$/i.exec(file?.type || '')
+    if (image) uploadedImage = { name: file.name, type: file.type, bytes: file.bytes.length, ...imageFacts(file.bytes) }
+    const asset = image
+      ? { id: id(), name: file.name, size_bytes: file.bytes.length, mime_type: `image/${image[1]}`, state: 'ready' }
+      : { id: id(), name: 'research-notes.pdf', size_bytes: 4096, page_count: 2, mime_type: 'application/pdf', state: 'ready' }
+    uploads.set(asset.id, asset)
+    return json(asset, 201)
+  }
+  if (uploads.has(endpoint.split('/')[2])) return json(uploads.get(endpoint.split('/')[2]))
   if (endpoint.startsWith('/files/'))
     return json({
       id: endpoint.split('/')[2],
@@ -248,6 +346,30 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
         400,
       )
     }
+    // A CV is written for the person it names, and is always its eight sections:
+    // no page count is read, and the title is the name.
+    if (body.feature_id === 'ai.cv') {
+      // The server looks for the name in the title too (apps/studio/cv/content.py).
+      const person = /^\p{Lu}\p{L}+ \p{Lu}\p{L}+$/mu
+      const named = person.exec(body.prompt || '') || person.exec(body.title || '')
+      if (!named && body.options?.topic_given !== true)
+        return json({ error: { code: 'cv_name_required', message: cvNameRefusal } }, 400)
+      if (refusePortrait && body.options?.portrait_asset_id)
+        return json({ error: { code: refusePortrait, message: 'Check the request and try again.' } }, 400)
+      const title = named ? named[0] : body.title
+      const draft = {
+        id: id(),
+        version: 1,
+        provider_mode: config.provider.mode,
+        expires_at: future(),
+        ...structuredClone(body),
+        title,
+        options: cvOptions(body.options),
+        content: { title, sections: CV_SECTIONS.map((section) => ({ id: section, heading: '', body: '', notes: '' })), questions: [], citations: [] },
+      }
+      drafts.set(draft.id, draft)
+      return json(draft, 201)
+    }
     // The server reads the page count out of the description and clamps it to
     // the service's ceiling; the fixture does the same so the form sees a real answer.
     const named = /(\d{1,3})\s*(?:-|\s)?\s*(?:pages?|slides?)/i.exec(
@@ -266,7 +388,10 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
       provider_mode: config.provider.mode,
       expires_at: future(),
       ...structuredClone(body),
-      options: { ...structuredClone(body.options || {}), length, requested_pages: asked },
+      options:
+        source?.feature_id === 'ai.cv'
+          ? cvOptions(body.options, source)
+          : { ...structuredClone(body.options || {}), length, requested_pages: asked },
       ...(source
         ? {
             feature_id: source.feature_id,
@@ -309,12 +434,16 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
       return json(quote, 201)
     }
     if (method === 'PATCH') {
+      if (draft.feature_id === 'ai.cv' && refusePortrait && body.options?.portrait_asset_id)
+        return json({ error: { code: refusePortrait, message: 'Check the request and try again.' } }, 400)
       // Match the backend's rebuild trigger: a changed brief/source/format
       // regenerates content unless the user explicitly supplies edited content.
       const rebuild = ['prompt', 'source_text', 'source_ids', 'output_format'].some(
         (key) => Object.hasOwn(body, key) && !isDeepStrictEqual(body[key], draft[key]),
       )
       const updated = { ...draft, ...structuredClone(body), version: draft.version + 1 }
+      if (draft.feature_id === 'ai.cv')
+        updated.options = cvOptions(body.options, drafts.get(draft.revision?.source_draft_id))
       // A count chosen on the review rail beats the description, clamped like any other.
       if (Number.isInteger(updated.options?.pages)) {
         const pages = updated.options.pages
@@ -1261,13 +1390,263 @@ try {
   affordable = true
   checks.push('A quote past the week’s limit cannot submit generation, and offers the plans')
 
+  // 10. A CV: no page count to read or set, a portrait instead of a PDF, and a
+  // template picked from the catalogue or left on Auto.
+  await open('ai.cv')
+  const photoInput = () => page.getByTestId('studio-cv-photo')
+  assert.equal(await photoInput().getAttribute('accept'), 'image/png,image/jpeg', 'the portrait is a JPG or PNG')
+  assert.equal(await upload().count(), 0, 'a CV reads no PDF')
+  assert.equal(await page.getByTestId('studio-title').count(), 0, 'a CV is named after the person')
+  assert.match(await page.getByTestId('studio-describe-hint').innerText(), /your full name, email or phone/)
+  assert.match(await page.locator('.studio-defaults').innerText(), /PDF[\s\S]*1–2 pages/)
+  assert.doesNotMatch(await page.locator('.studio-defaults').innerText(), /\b10 pages/)
+  const cvAuto = page.getByTestId('cv-template-auto')
+  await cvAuto.waitFor()
+  assert.equal(await cvAuto.getAttribute('aria-checked'), 'true', 'a CV starts on Auto')
+  await page.locator('[data-template="classic_navy"] img.cv-thumb').waitFor()
+  // A wrong file is refused beside the button, before anything is uploaded.
+  const uploadsBefore = calls('/files/uploads').length
+  const photoError = () => page.getByTestId('studio-cv-photo-error')
+  await photoInput().setInputFiles({ name: 'portrait.webp', mimeType: 'image/webp', buffer: PNG })
+  await photoError().waitFor()
+  assert.match(await photoError().innerText(), /JPG or PNG photo of up to 20 MB/)
+  assert.equal(calls('/files/uploads').length, uploadsBefore, 'a WebP is never uploaded')
+  await photoInput().setInputFiles({ name: 'huge.jpg', mimeType: 'image/jpeg', buffer: Buffer.alloc(21 * 1024 * 1024, 1) })
+  await page.getByText(/JPG or PNG photo of up to 20 MB/).waitFor()
+  assert.equal(calls('/files/uploads').length, uploadsBefore, 'an original over 20 MB is never read')
+  // A picture this browser cannot draw goes as it is only when the server would take it.
+  await photoInput().setInputFiles({ name: 'broken.jpg', mimeType: 'image/jpeg', buffer: Buffer.alloc(6 * 1024 * 1024, 7) })
+  await page.getByText(/This photo cannot be used\. Choose a JPG or PNG of up to 5 MB and 6 megapixels/).waitFor()
+  assert.equal(calls('/files/uploads').length, uploadsBefore, 'an unreadable 6 MB file is not uploaded')
+  assert.equal(await page.getByTestId('studio-cv-photo-chip').count(), 0)
+  // A phone's 12 MP original, stored on its side with an EXIF turn as phones do,
+  // is sent upright, at most 2000 px long, as a JPEG with nothing of the original's EXIF.
+  const landscape = Buffer.from(
+    await page.evaluate(() => {
+      const canvas = document.createElement('canvas')
+      canvas.width = 4032
+      canvas.height = 3024
+      const context = canvas.getContext('2d')
+      context.fillStyle = '#7a9cc6'
+      context.fillRect(0, 0, 4032, 3024)
+      context.fillStyle = '#20314d'
+      context.fillRect(1200, 600, 1600, 1800)
+      return canvas.toDataURL('image/jpeg', 0.8).split(',')[1]
+    }),
+    'base64',
+  )
+  const phonePhoto = withOrientation(landscape, 6)
+  assert.deepEqual(imageFacts(phonePhoto), { width: 4032, height: 3024, exif: true })
+  await photoInput().setInputFiles({ name: 'IMG_2041.jpeg', mimeType: 'image/jpeg', buffer: phonePhoto })
+  await page.getByTestId('studio-cv-photo-chip').waitFor()
+  assert.equal(await photoError().count(), 0, 'a phone photo is taken')
+  assert.deepEqual(
+    uploadedImage,
+    { name: 'IMG_2041.jpg', type: 'image/jpeg', bytes: uploadedImage.bytes, width: 1500, height: 2000, exif: false },
+    'the photo is sent upright, 2000 px long, without EXIF',
+  )
+  assert.ok(uploadedImage.bytes < 5 * 1024 * 1024)
+  await photoInput().setInputFiles({ name: 'portrait.png', mimeType: 'image/png', buffer: PNG })
+  await page.getByText('portrait.jpg', { exact: true }).waitFor()
+  // A PNG is drawn on white and sent as a JPEG of its own size.
+  assert.deepEqual(
+    [uploadedImage.type, uploadedImage.width, uploadedImage.height, uploadedImage.exif],
+    ['image/jpeg', 21, 30, false],
+  )
+  assert.equal(await photoError().count(), 0)
+  assert.match(await page.getByTestId('studio-cv-photo-button').innerText(), /Replace the photo/)
+  let portraitId = [...uploads.values()].at(-1).id
+  await page.getByRole('button', { name: 'Academic & technical', exact: true }).click()
+  await page.locator('[data-template="lab"]').click()
+  assert.equal(await page.locator('[data-template="lab"]').getAttribute('aria-checked'), 'true')
+  assert.equal(await cvAuto.getAttribute('aria-checked'), 'false')
+  // A description that names nobody is refused under the field, as a topic is.
+  await primary().fill('I am an accountant with five years of experience in a bank.')
+  await review().click()
+  await page.getByTestId('studio-prompt-error').waitFor()
+  assert.equal(await page.locator('#studio-prompt-error').innerText(), cvNameRefusal)
+  assert.equal(await page.getByTestId('studio-prompt-switch').count(), 0)
+  // Every example names its person on the first line, and needs nothing else.
+  for (const index of [0, 1, 2]) assert.match(await page.getByTestId(`studio-example-${index}`).innerText(), /^\p{Lu}\p{L}+ \p{Lu}\p{L}+ /u)
+  await page.getByTestId('studio-example-0').click()
+  assert.equal(await page.getByTestId('studio-prompt-error').count(), 0, 'the example clears the refusal')
+  await auditBrief('cv brief')
+  // A photo the server refuses is said under the photo and taken off, never in
+  // the banner at the top; the next review makes the CV without it.
+  refusePortrait = 'image_pixel_limit'
+  const refusedDrafts = calls('/generation/drafts').length
+  await review().click()
+  await photoError().waitFor()
+  refusePortrait = ''
+  assert.equal(calls('/generation/drafts').length, refusedDrafts + 1)
+  assert.match(await photoError().innerText(), /This photo cannot be used/)
+  assert.equal(await page.getByTestId('studio-cv-photo-chip').count(), 0, 'the refused photo is taken off')
+  assert.equal(await page.locator('.error-banner').count(), 0, 'not in the banner at the top')
+  assert.equal(await page.getByTestId('studio-prompt-error').count(), 0)
+  // Focus goes to the photo's button, which the refusal describes.
+  await page.waitForFunction(() => document.activeElement?.getAttribute('data-testid') === 'studio-cv-photo-button')
+  assert.equal(await page.getByTestId('studio-cv-photo-button').getAttribute('aria-describedby'), 'studio-cv-photo-error')
+  // On a phone the refusal is in view where the photo is, not at the top of the page.
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.getByTestId('studio-cv-photo-button').scrollIntoViewIfNeeded()
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false)
+  await page.screenshot({ path: path.join(output, 'cv-photo-refused-390.png') })
+  await page.setViewportSize({ width: 1440, height: 1000 })
+  await photoInput().setInputFiles({ name: 'portrait.png', mimeType: 'image/png', buffer: PNG })
+  await page.getByTestId('studio-cv-photo-chip').waitFor()
+  assert.equal(await photoError().count(), 0)
+  portraitId = [...uploads.values()].at(-1).id
+  const cv = await reviewNew()
+  assert.equal(cv.feature_id, 'ai.cv')
+  assert.equal(cv.output_format, 'pdf')
+  assert.deepEqual(cv.source_ids, [], 'a CV sends no source files')
+  assert.equal(cv.options.cv_template, 'lab', 'the picked template is sent')
+  assert.equal(cv.options.portrait_asset_id, portraitId, 'the portrait is sent as its asset')
+  assert.equal(cv.options.pages, undefined)
+  assert.ok(!/\d+\s*(pages?|slides?)/i.test(cv.prompt), 'a CV example names no page count')
+  // The review rail says the length, the template and the photo; nothing to step.
+  assert.equal(await page.getByTestId('studio-pages').count(), 0, 'no page stepper for a CV')
+  assert.equal(await page.getByTestId('studio-pages-more').count(), 0)
+  assert.match(await page.getByTestId('studio-cv-length').innerText(), /Length\s+1–2 pages/)
+  assert.match(await page.getByTestId('studio-cv-template-row').innerText(), /Template\s+Lab/)
+  assert.match(await page.getByTestId('studio-cv-photo-row').innerText(), /Photo\s+Attached/)
+  assert.equal(await page.getByTestId('studio-edit-outline').count(), 0, 'a CV has no outline to edit')
+  assert.equal(await page.locator('.outline-summary').count(), 0)
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 1000 })
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `cv review/${width}: horizontal overflow`)
+    const audit = await new AxeBuilder({ page }).include('.studio-layout').withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()
+    assert.deepEqual(audit.violations.map((violation) => violation.id), [], `cv review/${width}: accessibility`)
+    await page.screenshot({ path: path.join(output, `cv-review-${width}.png`), fullPage: true })
+  }
+  await page.setViewportSize({ width: 1440, height: 1000 })
+  // Back on the brief, the portrait can be taken off again before creating.
+  await page.locator('.studio-steps button').first().click()
+  await page.getByTestId('studio-cv-photo-chip').getByRole('button', { name: 'Remove' }).click()
+  assert.equal(await page.getByTestId('studio-cv-photo-chip').count(), 0)
+  const removed = await reviewSaved()
+  assert.equal(removed.options.portrait_asset_id, undefined, 'a removed portrait is not sent')
+  assert.equal(removed.options.cv_template, 'lab', 'the template stays picked')
+  assert.match(await page.getByTestId('studio-cv-photo-row').innerText(), /Photo\s+None/)
+  // A photo gone from storage by the time the draft is saved is said the same way.
+  await page.locator('.studio-steps button').first().click()
+  await photoInput().setInputFiles({ name: 'portrait.png', mimeType: 'image/png', buffer: PNG })
+  await page.getByTestId('studio-cv-photo-chip').waitFor()
+  refusePortrait = 'file_unavailable'
+  await review().click()
+  await photoError().waitFor()
+  refusePortrait = ''
+  assert.match(await photoError().innerText(), /The photo is no longer stored\. Add it again, or create the CV without a photo\./)
+  assert.equal(await page.getByTestId('studio-cv-photo-chip').count(), 0)
+  assert.equal(await page.locator('.error-banner').count(), 0)
+  await photoInput().setInputFiles({ name: 'portrait.png', mimeType: 'image/png', buffer: PNG })
+  await page.getByTestId('studio-cv-photo-chip').waitFor()
+  const madePortrait = [...uploads.values()].at(-1).id
+  assert.equal((await reviewSaved()).options.portrait_asset_id, madePortrait)
+  assert.match(await page.getByTestId('studio-cv-photo-row').innerText(), /Photo\s+Attached/)
+  await confirm()
+  // A CV is changed as a whole: no page to choose, and examples about a CV.
+  await page.getByTestId('job-revise').waitFor()
+  assert.equal(await page.getByTestId('job-revise-scope').count(), 0, 'no page to choose in a CV')
+  assert.match(await page.getByTestId('job-revise').innerText(), /Make the profile shorter/)
+  // A change keeps the CV's photo and template. The server takes the photo back
+  // whenever none is sent, so there is no remove button that would do nothing,
+  // and the words that do leave it out are given; the picker shows the template
+  // the change keeps, not an Auto that would keep it too.
+  await page.getByTestId('job-revise-input').fill('Make the profile shorter.')
+  await page.getByTestId('job-revise-submit').click()
+  await page.waitForURL('**/app/create/*')
+  await page.getByTestId('studio-revising').waitFor()
+  await page.getByTestId('studio-cv-photo-chip').waitFor()
+  assert.equal(await page.getByTestId('studio-cv-photo-chip').getByRole('button', { name: 'Remove' }).count(), 0)
+  assert.equal(
+    await page.getByTestId('studio-cv-photo-kept').innerText(),
+    'A change keeps this photo. To make the CV without it, write “without a photo” in your request.',
+  )
+  assert.match(await page.getByTestId('studio-cv-photo-button').innerText(), /Replace the photo/)
+  await page.locator('[data-template="lab"]').waitFor()
+  assert.equal(await page.getByTestId('cv-template-auto').count(), 0, 'no Auto in a change')
+  assert.equal(await page.locator('[data-template="lab"]').getAttribute('aria-checked'), 'true')
+  assert.equal(await page.locator('.cv-card[aria-checked="true"]').count(), 1)
+  const kept = await reviewSaved()
+  assert.equal(kept.options.portrait_asset_id, madePortrait, 'the kept photo is sent back')
+  assert.equal(kept.options.cv_template, undefined, 'keeping the template picks none')
+  assert.match(await page.getByTestId('studio-cv-template-row').innerText(), /Template\s+Lab/)
+  assert.match(await page.getByTestId('studio-cv-photo-row').innerText(), /Photo\s+Attached/)
+  await page.locator('.studio-steps button').first().click()
+  await page.locator('[data-template="syntax"]').click()
+  assert.equal(await page.locator('[data-template="lab"]').getAttribute('aria-checked'), 'false')
+  assert.equal((await reviewSaved()).options.cv_template, 'syntax', 'another template is picked for the change')
+  assert.match(await page.getByTestId('studio-cv-template-row').innerText(), /Template\s+Syntax/)
+  await page.locator('.studio-steps button').first().click()
+  assert.equal(await page.locator('[data-template="syntax"]').getAttribute('aria-checked'), 'true')
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 1000 })
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `cv change/${width}: horizontal overflow`)
+    await page.getByTestId('studio-brief').screenshot({ path: path.join(output, `cv-change-${width}.png`) })
+  }
+  await page.setViewportSize({ width: 1440, height: 1000 })
+  await auditBrief('cv change')
+  // A CV made with another service's PDF and title first sends neither. The
+  // title's field is hidden for a CV, and the server reads a title for the
+  // person's name: a school topic such as "Amir Temur" must not pass for one.
+  await open('ai.pdf_topic')
+  await upload().setInputFiles('tests/fixtures/research-notes.pdf')
+  await page.locator('.source-chip').waitFor()
+  await more().locator('summary').click()
+  await page.getByTestId('studio-title').fill('Amir Temur')
+  await page.getByTestId('studio-purpose').selectOption('ai.cv')
+  assert.equal(await page.getByTestId('studio-title').count(), 0)
+  await primary().fill('Marketing manager in Tashkent, five years at a food company.')
+  await review().click()
+  await page.getByTestId('studio-prompt-error').waitFor()
+  assert.equal(lastDraftRequest().body.title, 'Marketing manager in Tashkent, five years at a food company.')
+  await page.getByTestId('studio-prompt-anyway').click()
+  await quotePanel().waitFor()
+  assert.equal(lastDraftRequest().body.title, 'Marketing manager in Tashkent, five years at a food company.')
+  assert.equal(lastDraftRequest().body.options.topic_given, true)
+  await open('ai.pdf_topic')
+  await upload().setInputFiles('tests/fixtures/research-notes.pdf')
+  await page.locator('.source-chip').waitFor()
+  await more().locator('summary').click()
+  await page.getByTestId('studio-title').fill('Tarix fanidan referat')
+  await page.getByTestId('studio-purpose').selectOption('ai.cv')
+  await page.getByTestId('studio-example-1').click()
+  const switched = await reviewNew()
+  assert.equal(switched.title, 'Jasur Toshmatov', 'a new CV is named from its description')
+  assert.deepEqual(switched.source_ids, [], 'the PDF stays with the PDF service')
+  assert.equal(switched.options.cv_template, undefined, 'Auto is the server’s default, so nothing is sent')
+  assert.match(await page.getByTestId('studio-cv-template-row').innerText(), /Template\s+Auto/)
+  checks.push('A CV takes one description, a JPG/PNG portrait and a template; it has no page stepper or outline, and quotes as 1–2 pages')
+
   for (const locale of ['en', 'uz', 'ru']) {
     for (const width of [1440, 390]) {
       await page.setViewportSize({ width, height: 1000 })
-      for (const feature of featureIds) {
+      for (const feature of serviceIds) {
         await open(feature, locale)
         assert.equal(await more().getAttribute('open'), null)
         assert.equal(await page.locator('html').getAttribute('lang'), locale)
+        if (feature === 'ai.cv') {
+          // The photo hint points to a "Photo" mark: it is there at every width,
+          // and read out, on the templates that take a photo.
+          await page.getByRole('button', { name: 'Modern', exact: true }).click()
+          const mark = page.locator('[data-template="azure_side"] [data-testid="cv-photo-mark"]')
+          assert.equal(await mark.isVisible(), true, `cv/${locale}/${width}: the photo mark is shown`)
+          assert.equal(await mark.innerText(), { en: 'Photo', uz: 'Foto', ru: 'Фото' }[locale])
+          assert.match(await page.locator('[data-template="azure_side"]').evaluate((node) => node.textContent), /Azure Side\s+(Photo|Foto|Фото)/)
+          assert.ok(
+            await mark.evaluate((node) => {
+              const card = node.closest('.cv-card').getBoundingClientRect()
+              const box = node.getBoundingClientRect()
+              return box.left >= card.left && box.right <= card.right
+            }),
+            `cv/${locale}/${width}: the photo mark stays in its card`,
+          )
+          assert.match(
+            await page.locator('.studio-cv-template').evaluate((node) => node.closest('.studio-form').textContent),
+            { en: /marked “Photo”/, uz: /«Foto» belgisi/, ru: /пометкой «Фото»/ }[locale],
+          )
+        }
         for (const theme of ['light', 'dark']) {
           await page.evaluate((value) => (document.documentElement.dataset.theme = value), theme)
           await page.evaluate(
@@ -1300,7 +1679,7 @@ try {
     }
   }
   checks.push(
-    'Both services pass EN/UZ/RU desktop/mobile checks in both themes with no overflow or WCAG A/AA findings',
+    'Every service passes EN/UZ/RU desktop/mobile checks in both themes with no overflow or WCAG A/AA findings',
   )
   assert.deepEqual(errors, [])
   assert.deepEqual(unexpected, [], 'Every API call is explicitly covered by the offline fixture')

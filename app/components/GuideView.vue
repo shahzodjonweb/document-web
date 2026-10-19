@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /**
- * What to write in the description. The two services take one free-text brief
+ * What to write in the description. The AI services take one free-text brief
  * and read everything out of it, so this is the whole manual — and every
  * example here is a complete description that can be used as it stands.
  */
@@ -29,6 +29,7 @@ const services = computed(() =>
     : [
         { id: 'ai.pdf_topic', name: 'PDF Document' },
         { id: 'ai.pptx', name: 'PowerPoint Slides' },
+        { id: 'ai.cv', name: 'CV' },
       ],
 )
 const useExample = (featureId: string, text: string) =>

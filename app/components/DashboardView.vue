@@ -11,11 +11,11 @@ const officeAvailable = computed(() => ws.features.value.some((f) => f.id === 'c
 const firstName = computed(() => (ws.user.value?.display_name || '').trim().split(/\s+/)[0] || '')
 // The week's limits reset on Monday 00:00 in Tashkent, shown in this device's zone.
 const resetsAt = computed(() => ws.usage.value?.week?.resets_at ?? ws.usage.value?.resets_at)
-// The two AI services get their own shortcuts, so the file tools below them
-// are the familiar ones.
+// The AI services get their own shortcuts, so the file tools below them are
+// the familiar ones. Only the services the server lists are shown.
 const aiShortcuts = computed(() =>
   studio.config.value
-    ? studio.features.value.filter((f) => ['ai.pdf_topic', 'ai.pptx'].includes(f.id)).slice(0, 2)
+    ? studio.features.value.filter((f) => ['ai.pdf_topic', 'ai.pptx', 'ai.cv'].includes(f.id)).slice(0, 3)
     : [],
 )
 const popular = computed(() => sorted.value.filter((f) => !isGenerationFeature(f.id)).slice(0, 5))

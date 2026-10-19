@@ -19,6 +19,7 @@ const reviewHandoff = useState<any>('studio-review-handoff', () => null)
 const quoteStage = ref<'document' | 'outline'>('document')
 const files = ref<any[]>([])
 const promptExamples = usePromptExamples()
+const cvTemplates = useCvTemplates()
 
 const form = reactive({
   feature_id: String(route.query.feature || 'ai.pdf_topic'),
@@ -65,12 +66,21 @@ const readingPages = computed(() => draft.value?.options?.length ?? defaultPages
 /** A deck is counted in slides; only a document is counted in pages. */
 const isDeck = computed(() => form.feature_id === 'ai.pptx')
 /**
+ * A CV is written from the description alone, with an optional portrait and a
+ * template. It is one or two pages, whatever its content needs in the
+ * template, so it has no count to read or set, and no outline to plan: its
+ * eight sections are always the same ones.
+ */
+const isCv = computed(() => form.feature_id === 'ai.cv')
+/**
  * Photo layouts need the service to be able to fetch a photo. Without one they
  * would only ever be drawn as text, so they are not offered.
  */
 const photosAvailable = computed(() => (selected.value?.max_images ?? 0) > 0)
 const readingLabel = computed(() =>
-  t(isDeck.value ? 'studioSlidesReading' : 'studioPagesReading', { count: readingPages.value }),
+  isCv.value
+    ? t('studioCvLength')
+    : t(isDeck.value ? 'studioSlidesReading' : 'studioPagesReading', { count: readingPages.value }),
 )
 const clampedFrom = computed(() => {
   const asked = draft.value?.options?.requested_pages
@@ -83,7 +93,7 @@ const pageCeiling = computed(() => selected.value?.max_pages ?? readingPages.val
  * the chosen count wins over the description and the cost is quoted again.
  */
 async function setPages(count: number) {
-  if (busy.value || submissionPending.value || count < 1 || count > pageCeiling.value) return
+  if (isCv.value || busy.value || submissionPending.value || count < 1 || count > pageCeiling.value) return
   form.options.pages = count
   quote.value = null
   await review()
@@ -96,42 +106,229 @@ const canUseTool = computed(
 const hasEssentialInput = computed(
   () =>
     !!form.prompt.trim() ||
-    files.value.length > 0 ||
+    // A CV reads no PDF, so one left attached from another service is no input.
+    (!isCv.value && files.value.length > 0) ||
     !!form.source_text.trim() ||
     // A draft opened from the list already has its content; it does not need
     // the description typed out again.
     sectionList.value.some(sectionHasContent),
 )
 /** The first line of the description names the document unless a title is set. */
-const effectiveTitle = computed(() =>
+const titleFrom = (title: string) =>
   (
-    form.title.trim() ||
+    title.trim() ||
     form.prompt.trim() ||
     form.source_text.trim() ||
-    files.value[0]?.name?.replace(/\.[^.]+$/, '') ||
+    (!isCv.value && files.value[0]?.name?.replace(/\.[^.]+$/, '')) ||
     name(form.feature_id, selected.value?.name)
   )
     .split(/\r?\n/, 1)[0]
-    .slice(0, 160),
-)
+    .slice(0, 160)
+const effectiveTitle = computed(() => titleFrom(form.title))
 // Slides default to a PDF; only the slides service offers the editable deck.
 watch([() => form.feature_id, formats], () => {
   if (!draft.value && !formats.value.includes(form.output_format))
     form.output_format = formats.value[0] || 'pdf'
 })
 
+/** Options only a CV takes; the server refuses them on the other services. */
+const CV_OPTIONS = ['cv_template', 'portrait_asset_id', 'portrait_sha256']
 function draftFields() {
   const options = Object.fromEntries(
-    Object.entries(form.options).filter(([, value]) => value !== '' && value !== undefined),
+    Object.entries(form.options).filter(
+      ([key, value]) => value !== '' && value !== undefined && (isCv.value || !CV_OPTIONS.includes(key)),
+    ),
   )
   return {
     ...form,
-    title: effectiveTitle.value,
+    // A new CV is named after the person, from the description. Its Title field
+    // is hidden, so a title typed while another service was chosen must not
+    // name it, nor stand in for the name the server looks for. A CV draft's
+    // title is the server's, read back into the form, so a save keeps it.
+    title: isCv.value && !draft.value ? titleFrom('') : effectiveTitle.value,
     source_text: form.source_text,
     options,
-    source_ids: files.value.map((file) => file.id),
+    // A CV is written from the description; its only file is the portrait.
+    source_ids: isCv.value ? [] : files.value.map((file) => file.id),
   }
 }
+
+/**
+ * The CV's portrait: the uploaded image, whose id is the draft's option, and a
+ * preview of a file chosen on this page. The server checks it again (owned,
+ * JPG or PNG, at most 5 MB and 6 megapixels); this saves a round trip for the
+ * obvious mistakes, and makes a phone's photo small enough to be taken.
+ */
+const portrait = ref<{ id: string; name: string } | null>(null)
+const portraitPreview = ref('')
+const portraitInput = ref<HTMLInputElement>()
+const portraitButton = ref<HTMLButtonElement>()
+const photoError = ref('')
+const PORTRAIT_TYPES = ['image/jpeg', 'image/png']
+/** The largest original taken: a phone's full-size photo, before it is made smaller here. */
+const PORTRAIT_SOURCE_BYTES = 20 * 1024 * 1024
+/** What the server takes for a portrait (apps/studio/cv/portrait.py). */
+const PORTRAIT_BYTES = 5 * 1024 * 1024
+const PORTRAIT_PIXELS = 6_000_000
+/** The long side a portrait is sent at: about 3 MP at 4:3, ample for a CV's 600 px photo. */
+const PORTRAIT_EDGE = 2000
+function showPreview(url = '') {
+  if (portraitPreview.value) URL.revokeObjectURL(portraitPreview.value)
+  portraitPreview.value = url
+}
+/** The picture decoded upright (by its EXIF orientation), or null when this browser cannot read it. */
+async function decodePortrait(file: File) {
+  if (typeof createImageBitmap === 'function') {
+    // A browser that does not know `from-image` refuses the option; its default
+    // is the same orientation.
+    for (const options of [{ imageOrientation: 'from-image' } as ImageBitmapOptions, undefined]) {
+      try {
+        const bitmap = await createImageBitmap(file, options)
+        return {
+          source: bitmap as CanvasImageSource,
+          width: bitmap.width,
+          height: bitmap.height,
+          close: () => bitmap.close(),
+        }
+      } catch {
+        // Tried again without the option, then as an <img>.
+      }
+    }
+  }
+  const url = URL.createObjectURL(file)
+  try {
+    const image = new Image()
+    image.src = url
+    await image.decode()
+    return {
+      source: image as CanvasImageSource,
+      width: image.naturalWidth,
+      height: image.naturalHeight,
+      close: () => {},
+    }
+  } catch {
+    return null
+  } finally {
+    URL.revokeObjectURL(url)
+  }
+}
+/**
+ * The photo as it is sent. A phone's original is 12 MP or more, twice what the
+ * server takes, so every picture is drawn again here at most PORTRAIT_EDGE px
+ * on its long side, upright, on white (a transparent PNG), as a JPEG of the
+ * pixels only: no EXIF, so no location either. A picture that cannot be drawn
+ * here goes as it is only when the server would take it; null when it would not.
+ */
+async function shrinkPortrait(file: File): Promise<File | null> {
+  const image = await decodePortrait(file)
+  if (!image) return file.size <= PORTRAIT_BYTES ? file : null
+  try {
+    const scale = Math.min(1, PORTRAIT_EDGE / Math.max(image.width, image.height))
+    const canvas = document.createElement('canvas')
+    canvas.width = Math.max(1, Math.round(image.width * scale))
+    canvas.height = Math.max(1, Math.round(image.height * scale))
+    const context = canvas.getContext('2d')
+    if (context) {
+      context.fillStyle = '#ffffff'
+      context.fillRect(0, 0, canvas.width, canvas.height)
+      context.imageSmoothingQuality = 'high'
+      context.drawImage(image.source, 0, 0, canvas.width, canvas.height)
+      const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', 0.9))
+      if (blob && blob.size <= PORTRAIT_BYTES)
+        return new File([blob], `${file.name.replace(/\.[^.]*$/, '') || 'photo'}.jpg`, { type: 'image/jpeg' })
+    }
+  } catch {
+    // Not drawn: the original is weighed as it is, below.
+  } finally {
+    image.close()
+  }
+  return file.size <= PORTRAIT_BYTES && image.width * image.height <= PORTRAIT_PIXELS ? file : null
+}
+async function uploadPortrait(file?: File | null) {
+  // Cleared so that choosing the same file again still reaches here.
+  if (portraitInput.value) portraitInput.value.value = ''
+  if (!file) return
+  photoError.value = ''
+  if (!PORTRAIT_TYPES.includes(file.type) || file.size > PORTRAIT_SOURCE_BYTES) {
+    photoError.value = t('studioCvPhotoWrong')
+    return
+  }
+  await run('upload', async () => {
+    const photo = await shrinkPortrait(file)
+    if (!photo) {
+      photoError.value = t('studioCvPhotoUnusable')
+      return
+    }
+    const body = new FormData()
+    body.append('file', photo)
+    let asset: any
+    try {
+      asset = await ws.api('/files/uploads', { method: 'POST', body })
+    } catch (e) {
+      // Said beside the photo, where it is put right, not at the top of the page.
+      photoError.value = requestError(e)
+      return
+    }
+    portrait.value = { id: asset.id, name: asset.name || photo.name }
+    showPreview(URL.createObjectURL(photo))
+    form.options.portrait_asset_id = asset.id
+    // The server pins the photo it was given; a new one is pinned afresh.
+    delete form.options.portrait_sha256
+  })
+}
+function removePortrait() {
+  portrait.value = null
+  photoError.value = ''
+  showPreview()
+  delete form.options.portrait_asset_id
+  delete form.options.portrait_sha256
+}
+onBeforeUnmount(() => showPreview())
+/**
+ * A portrait the server will not take (over its size, unreadable, no longer
+ * stored) is said under the photo field and taken off, so the next review
+ * makes the CV without it, instead of failing again behind a banner at the
+ * top of the page. The same codes are a brand logo's, so a draft with a logo
+ * leaves them to the banner.
+ */
+const PHOTO_REFUSALS: Record<string, string> = {
+  image_pixel_limit: 'studioCvPhotoUnusable',
+  invalid_image: 'studioCvPhotoUnusable',
+  file_unavailable: 'studioCvPhotoGone',
+}
+function photoRefused(e: any) {
+  const message = PHOTO_REFUSALS[e?.data?.error?.code]
+  if (!message || !isCv.value || !form.options.portrait_asset_id || form.options.branding?.logo_asset_id)
+    return false
+  removePortrait()
+  photoError.value = t(message)
+  step.value = 0
+  return true
+}
+/**
+ * The template a change keeps: the CV's own, unless another is picked. Auto
+ * would keep it too, so the picker shows it chosen instead of offering Auto.
+ * A change that asks for a new look has none, and its template is Auto's.
+ */
+const keptTemplate = computed(() => {
+  const id = revising.value ? form.options.template_style?.cv_template : ''
+  return id && cvTemplates.find(id) ? String(id) : ''
+})
+const cvPicked = computed(() => {
+  const picked = form.options.cv_template
+  return picked && picked !== 'auto' ? String(picked) : keptTemplate.value || 'auto'
+})
+/** The template the review names: the one picked, else the one a change keeps, else Auto. */
+const cvTemplateLabel = computed(() => {
+  const picked = form.options.cv_template
+  const id = picked && picked !== 'auto' ? picked : form.options.template_style?.cv_template
+  return id ? cvTemplates.find(id)?.name || String(id) : t('cvSetupAuto')
+})
+// The picker's templates, in the page's language, read when the CV is chosen.
+function loadCvTemplates() {
+  if (isCv.value) cvTemplates.load().catch(() => {})
+}
+watch([isCv, locale], loadCvTemplates)
 
 const requestError = (e: any) => e.data?.error?.message || e.data?.message || t('genericError')
 /**
@@ -154,7 +351,8 @@ const offered = (id: string) =>
   !!id && id !== form.feature_id && studio.features.value.some((f) => f.id === id && f.eligible !== false)
 function promptRefused(e: any) {
   const refusal = e?.data?.error
-  if (refusal?.code !== 'topic_required' && refusal?.code !== 'convert_requested') return false
+  // A CV is refused for want of the person's name, as the others are for a topic.
+  if (!['topic_required', 'convert_requested', 'cv_name_required'].includes(refusal?.code)) return false
   promptError.value = refusal.message || t('genericError')
   const other = String(refusal.message_params?.service || '')
   promptSwitch.value = offered(other) ? other : ''
@@ -184,9 +382,14 @@ function continueAnyway() {
  */
 watch(
   () => form.feature_id,
-  () => {
+  (now, before) => {
     promptSwitch.value = ''
-    if (promptError.value) promptError.value = t('studioTopicStill')
+    // A CV needs a name, not a topic, so a refusal does not carry across to or
+    // from it: the server says what the new service needs when it is reviewed.
+    if (promptError.value && (now === 'ai.cv' || before === 'ai.cv')) {
+      promptError.value = ''
+      promptConvert.value = false
+    } else if (promptError.value) promptError.value = t('studioTopicStill')
   },
 )
 /**
@@ -217,12 +420,14 @@ async function run(task: string, fn: () => Promise<void>) {
   promptConvert.value = false
   notice.value = ''
   let refused = false
+  let photo = false
   try {
     await fn()
   } catch (e) {
-    refused = promptRefused(e)
+    photo = photoRefused(e)
+    refused = !photo && promptRefused(e)
     refusedRun = refused ? () => run(task, fn) : null
-    if (!refused) error.value = requestError(e)
+    if (!refused && !photo) error.value = requestError(e)
   } finally {
     busy.value = ''
   }
@@ -231,6 +436,10 @@ async function run(task: string, fn: () => Promise<void>) {
   if (refused) {
     await nextTick()
     promptInput.value?.focus()
+  } else if (photo) {
+    // The photo's button, whose description is the refusal, beside the field.
+    await nextTick()
+    portraitButton.value?.focus()
   }
 }
 function acceptDraft(value: any) {
@@ -242,6 +451,15 @@ function acceptDraft(value: any) {
   form.output_locale = value.output_locale || form.output_locale
   form.output_format = value.output_format || form.output_format
   form.options = { ...value.options, length: value.options?.length || value.content?.sections?.length || 2 }
+  // The portrait is the draft's: gone when the server dropped it, its name read on load.
+  const photo = form.options.portrait_asset_id
+  if (!photo) {
+    portrait.value = null
+    showPreview()
+  } else if (portrait.value?.id !== photo) {
+    portrait.value = { id: String(photo), name: '' }
+    showPreview()
+  }
   const next = structuredClone(
     value.content || {
       title: form.title,
@@ -258,12 +476,21 @@ function acceptDraft(value: any) {
 }
 async function load() {
   await studio.load()
+  loadCvTemplates()
   if (props.draftId)
     await run('load', async () => {
       acceptDraft(await ws.api(`/generation/drafts/${props.draftId}`))
       files.value = await Promise.all(
         (draft.value.source_ids || []).map((id: string) => ws.api(`/files/${id}`)),
       )
+      const photo = portrait.value
+      if (photo && !photo.name)
+        ws.api(`/files/${photo.id}`)
+          .then((asset: any) => {
+            if (portrait.value?.id === photo.id) portrait.value = { id: photo.id, name: asset.name || '' }
+          })
+          // Expired or gone: the chip still says a photo is attached, and the server decides.
+          .catch(() => {})
       step.value = 0
       const pending = reviewHandoff.value
       if (
@@ -313,6 +540,7 @@ watch(
       draft.value = null
       quote.value = null
       files.value = []
+      removePortrait()
       step.value = 0
       form.feature_id = String(route.query.feature || 'ai.pdf_topic')
       form.title = ''
@@ -614,14 +842,18 @@ watch(files, invalidateQuote, { deep: true, flush: 'sync' })
                   @input="delete form.options.pages"
                   rows="7"
                   :maxlength="studio.config.value?.limits?.source_chars || 12000"
-                  :placeholder="t('studioDescribePlaceholder')"
+                  :placeholder="t(isCv ? 'studioCvPlaceholder' : 'studioDescribePlaceholder')"
                   :aria-invalid="promptError ? 'true' : undefined"
                   :aria-describedby="
                     promptError ? 'studio-prompt-error' : suggestedService ? 'studio-service-hint' : undefined
                   "
                 />
                 <small data-testid="studio-describe-hint">{{
-                  revising ? t('reviseExamples') : t('studioDescribeHint', { pages: defaultPages, max: maxPages })
+                  revising
+                    ? t(isCv ? 'reviseExamplesCv' : 'reviseExamples')
+                    : isCv
+                      ? t('studioCvDescribeHint')
+                      : t('studioDescribeHint', { pages: defaultPages, max: maxPages })
                 }}</small>
               </label>
               <!-- Outside the label: a button inside one would be part of its name. -->
@@ -696,7 +928,7 @@ watch(files, invalidateQuote, { deep: true, flush: 'sync' })
                   >{{ t('studioGuideLink') }}<AppIcon name="right" :size="15"
                 /></NuxtLink>
               </div>
-              <div class="studio-source">
+              <div v-if="!isCv" class="studio-source">
                 <div>
                   <h3>{{ t('studioAttach') }}</h3>
                   <p>{{ t('studioAttachHint') }}</p>
@@ -717,16 +949,82 @@ watch(files, invalidateQuote, { deep: true, flush: 'sync' })
                   :aria-label="t('sourceFiles')"
                 />
               </div>
-              <div v-for="file in files" :key="file.id" class="source-chip">
-                <AppIcon name="file" :size="17" /><span>{{ file.name }}</span
-                ><button
-                  class="icon-button"
-                  @click="files = files.filter((f) => f.id !== file.id)"
-                  :aria-label="t('remove')"
-                >
-                  <AppIcon name="x" :size="15" />
-                </button>
-              </div>
+              <template v-if="!isCv">
+                <div v-for="file in files" :key="file.id" class="source-chip">
+                  <AppIcon name="file" :size="17" /><span>{{ file.name }}</span
+                  ><button
+                    class="icon-button"
+                    @click="files = files.filter((f) => f.id !== file.id)"
+                    :aria-label="t('remove')"
+                  >
+                    <AppIcon name="x" :size="15" />
+                  </button>
+                </div>
+              </template>
+              <!-- A CV takes a portrait instead of a PDF, then its template. -->
+              <template v-else>
+                <div class="studio-source">
+                  <div>
+                    <h3>{{ t('studioCvPhoto') }}</h3>
+                    <p>{{ t('studioCvPhotoHint') }}</p>
+                  </div>
+                  <button
+                    ref="portraitButton"
+                    type="button"
+                    class="button secondary"
+                    data-testid="studio-cv-photo-button"
+                    :disabled="!!busy || submissionPending"
+                    :aria-describedby="photoError ? 'studio-cv-photo-error' : undefined"
+                    @click="portraitInput?.click()"
+                  >
+                    <AppIcon name="image" :size="17" />{{
+                      t(portrait ? 'studioCvPhotoReplace' : 'studioCvPhotoAdd')
+                    }}</button
+                  ><input
+                    ref="portraitInput"
+                    type="file"
+                    class="visually-hidden"
+                    accept="image/png,image/jpeg"
+                    data-testid="studio-cv-photo"
+                    :aria-label="t('studioCvPhoto')"
+                    @change="uploadPortrait(($event.target as HTMLInputElement).files?.[0])"
+                  />
+                </div>
+                <div v-if="photoError" class="field-error" data-testid="studio-cv-photo-error">
+                  <AppIcon name="alert" :size="17" /><span id="studio-cv-photo-error">{{ photoError }}</span>
+                </div>
+                <div v-if="portrait" class="source-chip cv-photo-chip" data-testid="studio-cv-photo-chip">
+                  <img v-if="portraitPreview" class="cv-photo-preview" :src="portraitPreview" alt="" /><AppIcon
+                    v-else
+                    name="image"
+                    :size="17"
+                  /><span>{{ portrait.name || t('studioCvPhotoAttached') }}</span
+                  ><!-- A change takes the CV's photo back whenever none is sent, so it is
+                       left out in words, below, not with a button that would do nothing. --><button
+                    v-if="!revising"
+                    type="button"
+                    class="icon-button"
+                    :aria-label="t('remove')"
+                    @click="removePortrait"
+                  >
+                    <AppIcon name="x" :size="15" />
+                  </button>
+                </div>
+                <p v-if="revising && portrait" class="field-hint" data-testid="studio-cv-photo-kept">
+                  {{ t('studioCvPhotoKept') }}
+                </p>
+                <section class="studio-cv-template" data-testid="studio-cv-template">
+                  <h3>{{ t('studioCvTemplate') }}</h3>
+                  <CvTemplatePicker
+                    :model-value="cvPicked"
+                    :categories="cvTemplates.categories.value"
+                    :default-id="cvTemplates.defaultId.value"
+                    :no-auto="!!keptTemplate"
+                    compact
+                    @update:model-value="form.options.cv_template = $event"
+                  />
+                </section>
+              </template>
               <details class="studio-more-options" data-testid="studio-more-options">
                 <summary>{{ t('studioMoreOptions') }}</summary>
                 <div class="studio-settings-body">
@@ -754,7 +1052,8 @@ watch(files, invalidateQuote, { deep: true, flush: 'sync' })
                       </option>
                     </select></label
                   >
-                  <label class="form-field"
+                  <!-- A CV is named after the person, as the description gives it. -->
+                  <label v-if="!isCv" class="form-field"
                     ><span>{{ t('studioTitleOptional') }}</span
                     ><input v-model="form.title" maxlength="160" data-testid="studio-title"
                   /></label>
@@ -768,7 +1067,7 @@ watch(files, invalidateQuote, { deep: true, flush: 'sync' })
               </div>
               <div class="studio-form-actions">
                 <button
-                  v-if="draft"
+                  v-if="draft && !isCv"
                   class="button secondary"
                   :disabled="!!busy || submissionPending"
                   data-testid="studio-edit-outline"
@@ -923,7 +1222,7 @@ watch(files, invalidateQuote, { deep: true, flush: 'sync' })
                 <AppIcon name="plus" :size="17" />{{ t('addSection') }}
               </button>
               <button
-                v-if="!revising"
+                v-if="!revising && !isCv"
                 class="button secondary full outline-generation"
                 :disabled="!!busy || submissionPending"
                 @click="reviewOutline"
@@ -983,8 +1282,9 @@ watch(files, invalidateQuote, { deep: true, flush: 'sync' })
               {{ name(form.feature_id, selected?.name) }} · {{ form.output_format.toUpperCase() }} ·
               {{ form.output_locale.toUpperCase() }}
             </p>
-            <p class="field-hint">{{ t('studioReviewHint') }}</p>
+            <p class="field-hint">{{ t(isCv ? 'studioCvReviewHint' : 'studioReviewHint') }}</p>
             <button
+              v-if="!isCv"
               class="button secondary small"
               :disabled="!!busy || submissionPending"
               data-testid="studio-edit-outline"
@@ -992,7 +1292,7 @@ watch(files, invalidateQuote, { deep: true, flush: 'sync' })
             >
               {{ t('studioEditOutline') }}
             </button>
-            <div class="outline-summary">
+            <div v-if="!isCv" class="outline-summary">
               <div v-for="(section, index) in sectionList" :key="index">
                 <b>{{ Number(index) + 1 }}</b
                 ><span>{{ section.heading }}</span>
@@ -1009,7 +1309,20 @@ watch(files, invalidateQuote, { deep: true, flush: 'sync' })
         <aside v-if="quote" class="studio-rail">
           <section class="panel studio-quote">
             <h2>{{ t('reviewTitle') }}</h2>
-            <div class="meter-row" data-testid="studio-pages">
+            <!-- A CV's length is the template's to fit: said, not set. -->
+            <template v-if="isCv">
+              <div class="meter-row studio-cv-row" data-testid="studio-cv-length">
+                <span>{{ t('guideRowPages') }}</span><strong>{{ t('studioCvLength') }}</strong>
+              </div>
+              <div class="meter-row studio-cv-row" data-testid="studio-cv-template-row">
+                <span>{{ t('studioCvTemplate') }}</span><strong>{{ cvTemplateLabel }}</strong>
+              </div>
+              <div class="meter-row studio-cv-row" data-testid="studio-cv-photo-row">
+                <span>{{ t('cvSetupPhoto') }}</span
+                ><strong>{{ t(portrait ? 'studioCvPhotoAttached' : 'studioCvPhotoNone') }}</strong>
+              </div>
+            </template>
+            <div v-else class="meter-row" data-testid="studio-pages">
               <span>{{ t('guideRowPages') }}</span
               ><span class="page-stepper">
                 <button
@@ -1036,7 +1349,7 @@ watch(files, invalidateQuote, { deep: true, flush: 'sync' })
             </div>
             <!-- A clamped request is said out loud. Every plan has the same ceiling,
                  so there is no plan to offer for more. -->
-            <p v-if="clampedFrom" class="field-hint" data-testid="studio-pages-clamped">
+            <p v-if="clampedFrom && !isCv" class="field-hint" data-testid="studio-pages-clamped">
               {{ t('studioPagesClamped', { asked: clampedFrom, given: readingPages }) }}
             </p>
             <!-- An edit counts against the file's own edits, not the week's documents. -->

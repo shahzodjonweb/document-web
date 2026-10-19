@@ -1726,10 +1726,12 @@
   gap: 12px;
   justify-content: space-between;
 }
+/* A CV example puts the name on a line of its own, as it is typed. */
 .guide-examples p {
   font-size: 14px;
   line-height: 1.6;
   margin: 0;
+  white-space: pre-line;
 }
 /* The number sits outside the paragraph: "Use this" copies the paragraph
    verbatim into the form, so it must stay exactly the description. */

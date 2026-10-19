@@ -928,6 +928,7 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   studioTone_simple: ['Plain language', 'Sodda til', 'Простой язык'],
   'ai.pdf_topic': ['PDF Document', 'PDF hujjat', 'PDF документ'],
   'ai.pptx': ['PowerPoint Slides', 'PowerPoint slaydlar', 'PowerPoint слайды'],
+  'ai.cv': ['CV (résumé)', 'CV (rezyume)', 'Резюме (CV)'],
   studioDescribe: ['Describe what you want', 'Nima kerakligini yozing', 'Опишите, что нужно'],
   studioDescribeHint: ['Everything in one description: the subject, who it is for, the tone, and how many pages. No page count means {pages}; the most is {max}.', 'Hammasi bitta tavsifda: mavzu, kim uchun, uslub va necha sahifa. Sahifa soni ko‘rsatilmasa — {pages} ta; eng ko‘pi {max} ta.', 'Всё в одном описании: тема, для кого, тон и сколько страниц. Без указания — {pages}; максимум {max}.'],
   studioDescribePlaceholder: ['A 6 page introduction to tide tables for secondary school students, plain language, with a worked example on each page.', 'O‘rta maktab o‘quvchilari uchun 6 sahifalik kirish, sodda tilda, har sahifada misol bilan.', 'Введение на 6 страниц для старшеклассников, простым языком, с примером на каждой странице.'],
@@ -1003,6 +1004,113 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Эта презентация больше не открыта. Опишите её в боте заново.',
   ],
   deckSetupNotDeck: ['Only slides have a design to choose.', 'Dizayn faqat slaydlar uchun tanlanadi.', 'Дизайн выбирается только для слайдов.'],
+  // CV setup, opened from the bot's review as a Mini App: the template only.
+  // A CV's length is the template's to fit, so there is no count to choose.
+  cvSetupTitle: ['CV template', 'Rezyume shabloni', 'Шаблон резюме'],
+  cvSetupLead: [
+    'Choose how your CV looks. On Auto, the AI picks a template that suits your work.',
+    'Rezyumengiz qanday ko‘rinishda bo‘lishini tanlang. «Avto» rejimida AI kasbingizga mos shablonni o‘zi tanlaydi.',
+    'Выберите, как будет выглядеть резюме. В режиме «Авто» ИИ подберёт шаблон под вашу профессию.',
+  ],
+  cvSetupTemplate: ['Template', 'Shablon', 'Шаблон'],
+  cvSetupAuto: ['Auto', 'Avto', 'Авто'],
+  // {template} is the default template's own name, as the catalogue gives it.
+  cvSetupAutoHint: [
+    '{template}, unless your description suits another one better.',
+    'Tavsifingizga boshqasi mosroq kelmasa — {template}.',
+    '{template}, если по описанию не подойдёт другой.',
+  ],
+  cvSetupCategories: ['Template categories', 'Shablon turkumlari', 'Категории шаблонов'],
+  cvSetupPhoto: ['Photo', 'Foto', 'Фото'],
+  cvSetupPhotoOn: [
+    'Your photo goes on the templates marked “Photo”.',
+    'Fotongiz «Foto» belgisi bor shablonlarga qo‘yiladi.',
+    'Ваше фото появится на шаблонах с пометкой «Фото».',
+  ],
+  cvSetupSave: ['Save: {template}', 'Saqlash: {template}', 'Сохранить: {template}'],
+  cvSetupSaved: [
+    'Saved. The review in the chat shows the new template.',
+    'Saqlandi. Chatdagi ko‘rib chiqishda yangi shablon ko‘rsatilgan.',
+    'Сохранено. В чате показан новый шаблон.',
+  ],
+  cvSetupExpired: [
+    'This CV is no longer open. Tell the bot about yourself again.',
+    'Bu rezyume endi ochiq emas. Botga o‘zingiz haqingizda qaytadan yozing.',
+    'Это резюме больше не открыто. Напишите боту о себе заново.',
+  ],
+  cvSetupNotCv: ['Only a CV has a template to choose.', 'Shablon faqat rezyume uchun tanlanadi.', 'Шаблон выбирается только для резюме.'],
+  // The CV service in Create with AI: one message about the person, an
+  // optional portrait and a template. Nothing here is counted in pages.
+  studioCvDescribeHint: [
+    'Everything in one message: your full name, email or phone, city, the job you want, where and when you worked, your education, skills and languages. Only what you write goes on the CV.',
+    'Hammasi bitta xabarda: to‘liq ismingiz, email yoki telefon, shahar, qanday ish izlayotganingiz, qayerda va qachon ishlaganingiz, taʼlim, ko‘nikmalar va tillar. Rezyumega faqat siz yozgan maʼlumotlar kiradi.',
+    'Всё в одном сообщении: полное имя, почта или телефон, город, какую работу ищете, где и когда работали, образование, навыки и языки. В резюме попадёт только то, что вы написали.',
+  ],
+  studioCvPlaceholder: [
+    'Sardor Aliyev, Tashkent, sardor.aliyev@example.com. Looking for a job as an accountant. Since 2021 accountant at a trading company: payroll, VAT returns, 1C. Bachelor’s in finance, 2017–2021. Uzbek, Russian, English B1.',
+    'Sardor Aliyev, Toshkent, sardor.aliyev@example.com. Buxgalter lavozimiga ish izlayapman. 2021-yildan savdo kompaniyasida buxgalterman: ish haqi, QQS hisobotlari, 1C. Moliya bo‘yicha bakalavr, 2017–2021. O‘zbek, rus, ingliz (B1) tillari.',
+    'Сардор Алиев, Ташкент, sardor.aliyev@example.com. Ищу работу бухгалтером. С 2021 года бухгалтер в торговой компании: зарплата, отчёты по НДС, 1С. Бакалавр финансов, 2017–2021. Узбекский, русский, английский B1.',
+  ],
+  studioCvLength: ['1–2 pages', '1–2 sahifa', '1–2 страницы'],
+  // The review step of a CV: there is no outline, so its settings are changed on the first step.
+  studioCvReviewHint: [
+    'Ready to create. To change the template or the photo, go back to “Your idea”.',
+    'Yaratishga tayyor. Shablon yoki fotoni o‘zgartirish uchun «G‘oyangiz» bosqichiga qayting.',
+    'Всё готово. Чтобы сменить шаблон или фото, вернитесь к шагу «Ваша идея».',
+  ],
+  studioCvTemplate: ['Template', 'Shablon', 'Шаблон'],
+  studioCvPhoto: ['Photo (optional)', 'Foto (ixtiyoriy)', 'Фото (необязательно)'],
+  // A phone's photo is made smaller in the browser before it is sent, so the
+  // original may be larger than the 5 MB and 6 megapixels the server takes.
+  studioCvPhotoHint: [
+    'A JPG or PNG portrait, up to 20 MB. It goes on the templates marked “Photo”.',
+    'JPG yoki PNG portret, eng ko‘pi 20 MB. U «Foto» belgisi bor shablonlarga qo‘yiladi.',
+    'Портрет в JPG или PNG, до 20 МБ. Он появится на шаблонах с пометкой «Фото».',
+  ],
+  studioCvPhotoAdd: ['Add a photo', 'Foto qo‘shish', 'Добавить фото'],
+  studioCvPhotoReplace: ['Replace the photo', 'Fotoni almashtirish', 'Заменить фото'],
+  studioCvPhotoWrong: [
+    'Choose a JPG or PNG photo of up to 20 MB.',
+    'JPG yoki PNG formatidagi, eng ko‘pi 20 MB bo‘lgan fotoni tanlang.',
+    'Выберите фото в формате JPG или PNG размером до 20 МБ.',
+  ],
+  // A photo this browser could not make smaller, or one the server refused.
+  studioCvPhotoUnusable: [
+    'This photo cannot be used. Choose a JPG or PNG of up to 5 MB and 6 megapixels, or create the CV without a photo.',
+    'Bu fotodan foydalanib bo‘lmaydi. Eng ko‘pi 5 MB va 6 megapiksel bo‘lgan JPG yoki PNG faylni tanlang yoki rezyumeni fotosiz yarating.',
+    'Это фото не подходит. Выберите JPG или PNG до 5 МБ и 6 мегапикселей или создайте резюме без фото.',
+  ],
+  studioCvPhotoGone: [
+    'The photo is no longer stored. Add it again, or create the CV without a photo.',
+    'Foto endi saqlanmagan. Uni qaytadan qo‘shing yoki rezyumeni fotosiz yarating.',
+    'Фото больше не хранится. Добавьте его снова или создайте резюме без фото.',
+  ],
+  // A change to a CV keeps its photo unless the request takes it away; the
+  // quoted words are ones the server reads as that (apps/studio/edits.py).
+  studioCvPhotoKept: [
+    'A change keeps this photo. To make the CV without it, write “without a photo” in your request.',
+    'O‘zgartirishda bu foto saqlanadi. Rezyumeni fotosiz qilish uchun so‘rovingizga «fotosiz» deb yozing.',
+    'При изменении это фото сохранится. Чтобы сделать резюме без него, напишите в запросе «без фото».',
+  ],
+  studioCvPhotoAttached: ['Attached', 'Biriktirilgan', 'Прикреплено'],
+  studioCvPhotoNone: ['None', 'Yo‘q', 'Нет'],
+  // A change to a CV is about its content; its pages are the template's to fit.
+  revisePlaceholderCv: [
+    'Add my Python course certificate from 2024 and make the profile shorter.',
+    '2024-yilgi Python kursi sertifikatimni qo‘shing va profilni qisqartiring.',
+    'Добавьте мой сертификат курса Python 2024 года и сократите профиль.',
+  ],
+  reviseExamplesCv: [
+    'Add my IELTS 7.0 from 2024 · Make the profile shorter · A different design',
+    '2024-yilgi IELTS 7.0 natijamni qo‘shing · Profilni qisqartiring · Boshqa dizayn',
+    'Добавьте мой IELTS 7.0 2024 года · Сократите профиль · Другой дизайн',
+  ],
+  // A CV the AI could not finish: usually a description with too little about the person.
+  jobRetryAdviceCv: [
+    'If it fails again, check that the description says who you are and what you have done: your name, jobs with dates, education and skills.',
+    'Yana muvaffaqiyatsiz bo‘lsa, tavsifda kimligingiz va nima ish qilganingiz yozilganini tekshiring: ismingiz, ish joylari va sanalari, taʼlim va ko‘nikmalar.',
+    'Если снова не получится, проверьте, что в описании есть, кто вы и чем занимались: имя, места работы с датами, образование и навыки.',
+  ],
   guideTitle: ['How to describe what you want', 'Nimani xohlashingizni qanday yozish kerak', 'Как описать, что вам нужно'],
   guideSub: ['One description is the whole brief. Here is what it understands.', 'Bitta tavsif — butun topshiriq. U nimani tushunishini ko‘ring.', 'Одно описание — всё задание. Вот что оно понимает.'],
   guideLead: ['Write it as you would explain it to a colleague. Say what the document is about, who will read it, how it should sound, and how long it should be. There is nothing else to fill in.', 'Hamkasbingizga tushuntirgandek yozing. Hujjat nima haqida, kim o‘qiydi, qanday ohangda va qancha hajmda bo‘lishini ayting. Boshqa hech narsa to‘ldirilmaydi.', 'Пишите так, как объяснили бы коллеге. О чём документ, кто его прочитает, каким тоном и какого объёма. Больше ничего заполнять не нужно.'],
@@ -1207,6 +1315,33 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   ],
   images_limited: ['A deck holds a set number of photos; the other photo slides were set as text.', 'Bitta taqdimotdagi rasmlar soni cheklangan; qolgan rasmli slaydlar matn sifatida tayyorlandi.', 'Число фото в одной презентации ограничено; остальные слайды с фото оформлены текстом.'],
   local_fixture_not_ai_generated: ['Written locally for testing, without the AI model.', 'Sinov uchun AI modelidan foydalanmasdan mahalliy tarzda yozildi.', 'Создано локально для теста, без модели ИИ.'],
+  // What a CV job can say it adjusted. The CV never goes past two pages and
+  // never shows a contact the customer did not write.
+  cv_trimmed: [
+    'The CV was trimmed to two pages: the oldest jobs keep fewer lines.',
+    'Rezyume ikki sahifaga qisqartirildi: eng eski ish joylari qisqaroq yozildi.',
+    'Резюме сокращено до двух страниц: о самых давних местах работы написано короче.',
+  ],
+  cv_contact_dropped: [
+    'A contact detail that was not in your description was left out.',
+    'Tavsifingizda bo‘lmagan aloqa maʼlumoti qo‘shilmadi.',
+    'Контакт, которого не было в вашем описании, не добавлен.',
+  ],
+  cv_photo_unusable: [
+    'The photo could not be read, so the CV was made without it.',
+    'Fotoni o‘qib bo‘lmadi, shuning uchun rezyume fotosiz tayyorlandi.',
+    'Фото не удалось прочитать, поэтому резюме сделано без него.',
+  ],
+  cv_photo_gone: [
+    'The photo is no longer stored, so this version of the CV is without it.',
+    'Rasmning saqlanish muddati tugagani uchun rezyumening bu nusxasi rasmsiz tayyorlandi.',
+    'Срок хранения фото истёк, поэтому эта версия резюме — без него.',
+  ],
+  cv_photo_no_slot: [
+    'This template has no place for a photo, so the CV was made without it.',
+    'Bu shablonda rasm uchun joy yo‘q, shuning uchun rezyume rasmsiz tayyorlandi.',
+    'В этом шаблоне нет места для фото, поэтому резюме сделано без него.',
+  ],
 }
 /**
  * One line of plain description per generation feature. `extendedToolNames`
@@ -1215,9 +1350,13 @@ export const extendedEntries: Record<string, [string, string, string]> = {
  */
 /**
  * Complete descriptions a customer can use as-is. The same set the bot
- * offers, so both surfaces teach the same thing. Every one names a page
- * count in its own language, because that is the one thing the generator
- * cannot infer.
+ * offers, so both surfaces teach the same thing. Every document and deck
+ * example names a page count in its own language, because that is the one
+ * thing the generator cannot infer. A CV names none: its length is the
+ * template's to fit. Its examples are fictional people, each with the name on
+ * a line of its own, then everything a CV is written from — contacts, the job
+ * wanted, work with dates, education, skills and languages — since the AI
+ * may use nothing that is not written there.
  */
 export const promptExamples: Record<string, [string, string, string][]> = {
   'ai.pdf_topic': [
@@ -1254,6 +1393,23 @@ export const promptExamples: Record<string, [string, string, string][]> = {
       '7 слайдов для месячного собрания: цифры продаж, что получилось, что нет, план на следующий месяц. Продажи покажите диаграммой.',
     ],
   ],
+  'ai.cv': [
+    [
+      'Kamila Yusupova\nMarketing manager in Tashkent, looking for a head of marketing role. Email kamila.yusupova@example.com. Since 03.2021 marketing manager at Bahor Foods: launched the online shop and grew online sales by 40% in two years; I lead a team of five. 2018–2021 SMM specialist at the Bright Media agency, running campaigns for 12 brands. Bachelor’s in marketing, Tashkent State University of Economics, 2014–2018. Skills: brand strategy, Google Ads, Meta Ads, Google Analytics, copywriting. Languages: Uzbek (native), Russian (fluent), English (IELTS 7.0).',
+      'Kamila Yusupova\nToshkentda marketing menejeriman, marketing bo‘limi rahbari lavozimiga ish izlayapman. Email: kamila.yusupova@example.com. 2021-yil martdan beri Bahor Foods kompaniyasida marketing menejeri: onlayn do‘konni ishga tushirdim, ikki yilda onlayn savdoni 40% ga oshirdim, besh kishilik jamoaga rahbarlik qilaman. 2018–2021-yillarda Bright Media agentligida SMM mutaxassisi bo‘lib, 12 ta brendning reklama kampaniyalarini olib borganman. Toshkent davlat iqtisodiyot universiteti, marketing yo‘nalishi bo‘yicha bakalavr, 2014–2018. Ko‘nikmalar: brend strategiyasi, Google Ads, Meta Ads, Google Analytics, kopirayting. Tillar: o‘zbek (ona tili), rus (erkin), ingliz (IELTS 7.0).',
+      'Камила Юсупова\nМаркетолог из Ташкента, ищу должность руководителя отдела маркетинга. Почта: kamila.yusupova@example.com. С марта 2021 года — менеджер по маркетингу в Bahor Foods: запустила интернет-магазин, за два года увеличила онлайн-продажи на 40%, руковожу командой из пяти человек. 2018–2021 — SMM-специалист в агентстве Bright Media, вела рекламные кампании 12 брендов. Ташкентский государственный экономический университет, бакалавр по маркетингу, 2014–2018. Навыки: стратегия бренда, Google Ads, Meta Ads, Google Analytics, копирайтинг. Языки: узбекский (родной), русский (свободно), английский (IELTS 7.0).',
+    ],
+    [
+      'Jasur Toshmatov\nJunior backend developer from Samarkand, open to remote work. Email jasur.toshmatov@example.com. BSc in Computer Science, Samarkand State University, 2021–2025; final project: a booking system for guesthouses, built with Django. Internship at a software studio in summer 2024: wrote REST endpoints and unit tests, fixed bugs in a payments service. Skills: Python, Django, PostgreSQL, Docker, Git, Linux. Certificate: CS50x, Harvard, 2023. Languages: Uzbek, Russian, English (B2).',
+      'Jasur Toshmatov\nSamarqandlik yosh backend dasturchiman, masofaviy ishga ham tayyorman. Email: jasur.toshmatov@example.com. Samarqand davlat universiteti, kompyuter ilmlari bo‘yicha bakalavr, 2021–2025; bitiruv ishim — mehmon uylari uchun bron qilish tizimi (Django). 2024-yil yozida dasturlash studiyasida amaliyot o‘taganman: REST endpointlar va unit testlar yozdim, to‘lov xizmatidagi xatolarni tuzatdim. Ko‘nikmalar: Python, Django, PostgreSQL, Docker, Git, Linux. Sertifikat: CS50x, Harvard, 2023. Tillar: o‘zbek, rus, ingliz (B2).',
+      'Жасур Тошматов\nНачинающий backend-разработчик из Самарканда, готов к удалённой работе. Почта: jasur.toshmatov@example.com. Самаркандский государственный университет, бакалавр по информатике, 2021–2025; дипломный проект — система бронирования для гостевых домов на Django. Летом 2024 года стажировался в студии разработки: писал REST-эндпоинты и юнит-тесты, исправлял ошибки в платёжном сервисе. Навыки: Python, Django, PostgreSQL, Docker, Git, Linux. Сертификат: CS50x, Harvard, 2023. Языки: узбекский, русский, английский (B2).',
+    ],
+    [
+      'Malika Ergasheva\nNurse in Bukhara, looking for a ward nurse job in a private clinic. Email malika.ergasheva@example.com. Since 09.2019 nurse in the cardiology ward of the Bukhara regional hospital: patient care, injections and IV drips, ECGs, training new nurses. 2017–2019 nurse at a family clinic. Diploma in nursing, Bukhara Medical College, 2014–2017. Certificates: Basic Life Support (2023), an infection control course (2022). Languages: Uzbek, Russian, English (A2).',
+      'Malika Ergasheva\nBuxorodagi hamshiraman, xususiy klinikada palata hamshirasi bo‘lib ishlamoqchiman. Email: malika.ergasheva@example.com. 2019-yil sentabrdan Buxoro viloyat shifoxonasining kardiologiya bo‘limida hamshiraman: bemorlarni parvarish qilish, ukol va tomchi dori qo‘yish, EKG olish, yangi hamshiralarni o‘rgatish. 2017–2019-yillarda oilaviy poliklinikada hamshira bo‘lib ishlaganman. Buxoro tibbiyot kolleji, hamshiralik ishi, 2014–2017. Sertifikatlar: Basic Life Support (2023), infeksiya nazorati kursi (2022). Tillar: o‘zbek, rus, ingliz (A2).',
+      'Малика Эргашева\nМедсестра из Бухары, ищу работу палатной медсестрой в частной клинике. Почта: malika.ergasheva@example.com. С сентября 2019 года — медсестра кардиологического отделения Бухарской областной больницы: уход за пациентами, уколы и капельницы, снятие ЭКГ, обучение новых медсестёр. 2017–2019 — медсестра в семейной поликлинике. Бухарский медицинский колледж, сестринское дело, 2014–2017. Сертификаты: Basic Life Support (2023), курс по инфекционному контролю (2022). Языки: узбекский, русский, английский (A2).',
+    ],
+  ],
 }
 
 export const extendedToolDescriptions: Record<string, [string, string, string]> = {
@@ -1266,6 +1422,11 @@ export const extendedToolDescriptions: Record<string, [string, string, string]> 
     'Describe it and get an editable PowerPoint deck.',
     'Yozib bering — tahrirlanadigan PowerPoint taqdimot oling.',
     'Опишите — получите редактируемую презентацию PowerPoint.',
+  ],
+  'ai.cv': [
+    'Tell us about yourself and get a polished one- or two-page CV.',
+    'O‘zingiz haqingizda yozing — 1–2 sahifalik chiroyli rezyume oling.',
+    'Расскажите о себе — получите аккуратное резюме на 1–2 страницы.',
   ],
   'convert.pdf_to_docx': [
     'Turn a PDF into a Word file you can edit.',
@@ -1379,6 +1540,7 @@ export const extendedToolNames: Record<string, [string, string, string]> = {
   'batch.image_sets': ['Image sets to PDFs', 'Rasm to‘plamlaridan PDF', 'Наборы изображений в PDF'],
   'ai.pdf_topic': ['PDF Document', 'PDF hujjat', 'PDF документ'],
   'ai.pptx': ['PowerPoint Slides', 'PowerPoint slaydlar', 'PowerPoint слайды'],
+  'ai.cv': ['CV (résumé)', 'CV (rezyume)', 'Резюме (CV)'],
   'editor.visual': ['Visual PDF editor', 'Vizual PDF muharriri', 'Визуальный редактор PDF'],
   'editor.add_text': ['Add text', 'Matn qo‘shish', 'Добавить текст'],
   'editor.highlight': ['Highlight PDF', 'PDF belgilash', 'Выделить в PDF'],

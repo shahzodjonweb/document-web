@@ -5,10 +5,11 @@ const GENERATION = /^(ai|study|school|teacher)\./
 export const isGenerationFeature = (id: string) => GENERATION.test(id)
 
 /**
- * What a first-time visitor should see first: the two AI services, then the
- * familiar file tools, then everything else in catalogue order.
+ * What a first-time visitor should see first: the AI services (a document,
+ * slides, a CV), then the familiar file tools, then everything else in
+ * catalogue order.
  */
-const FEATURED = ['ai.pdf_topic', 'ai.pptx']
+const FEATURED = ['ai.pdf_topic', 'ai.pptx', 'ai.cv']
 const STAPLES = ['pdf.merge', 'pdf.compress', 'pdf.split', 'pdf.images_to_pdf', 'convert.word_to_pdf']
 
 export function useTools() {
@@ -46,7 +47,7 @@ export function useTools() {
     'pdf.unlock_known': 'unlock',
   }
   // The sparkle is what marks a service as the AI feature rather than another
-  // file tool, so both generation services carry it. They stay apart by their
+  // file tool, so every generation service carries it. They stay apart by their
   // name and their tile colour, which is how the file tools differ from each
   // other too.
   const icon = (id: string) => icons[id] || (GENERATION.test(id) ? 'sparkle' : 'file')
@@ -62,6 +63,7 @@ export function useTools() {
     'pdf.unlock_known': 'rose',
     'ai.pdf_topic': 'purple',
     'ai.pptx': 'sky',
+    'ai.cv': 'green',
   }
   const { features } = useWorkspace()
   const studio = useStudio()

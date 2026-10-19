@@ -55,7 +55,7 @@ const title = computed(() => {
   if (item) return t(item.label)
   if (route.path.includes('/referrals')) return t('referrals')
   if (route.path.includes('/bot')) return t('bot')
-  if (route.path.includes('/deck-setup')) return t('navCreate')
+  if (route.path.includes('/deck-setup') || route.path.includes('/cv-setup')) return t('navCreate')
   return t('navHome')
 })
 // File tasks left this week; an unlimited plan (null) shows no count.
