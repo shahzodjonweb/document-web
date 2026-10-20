@@ -103,6 +103,8 @@ const cvKinds = computed<string[]>(() => {
   return Array.isArray(listed) && listed.length ? listed : CV_SOURCE_KINDS[mode]
 })
 const cvMaxFiles = computed(() => selected.value?.max_source_files || CV_SOURCE_FILES)
+/** Most pages the files may have in all: the server's when it says, else its usual cap. */
+const cvMaxPages = computed(() => selected.value?.max_source_pages || CV_SOURCE_PAGES)
 const CV_SOURCE_ICONS: Record<CvSource, string> = { text: 'edit', linkedin: 'globe', file: 'file' }
 /** Each choice's name and the line under it. */
 const CV_SOURCE_CHOICES: Record<CvSource, [string, string]> = {
@@ -219,16 +221,34 @@ function draftFields() {
  */
 const cvSourceInput = ref<HTMLInputElement>()
 const cvSourceButton = ref<HTMLButtonElement>()
+const cvSourceList = ref<HTMLUListElement>()
 const sourceError = ref('')
 const kindRefusal = (mode: CvSource) => (mode === 'linkedin' ? 'studioCvKindLinkedin' : 'studioCvKindFile')
 const missingRefusal = (mode: CvSource) => (mode === 'linkedin' ? 'studioCvNeedLinkedin' : 'studioCvNeedFile')
+/**
+ * An upload refused for a password: the CV's upload area has no password
+ * field, and a protected PDF is never read for a CV (the bot says the same).
+ */
+const PASSWORD_REFUSALS = ['password_required', 'password_invalid', 'secure_password_entry_required']
+const uploadRefusal = (e: any) =>
+  PASSWORD_REFUSALS.includes(e?.data?.error?.code) ? t('studioCvProtected') : requestError(e)
+/** The upload button, or the last file's remove button once the files are as many as they can be. */
+function focusCvSources() {
+  const button = cvSourceButton.value
+  if (button && !button.disabled) button.focus()
+  else cvSourceList.value?.querySelector<HTMLButtonElement>('li:last-child button')?.focus()
+}
 async function uploadCvSources(list: FileList | null) {
   const picked = Array.from(list || [])
   // Cleared so that choosing the same file again still reaches here.
   if (cvSourceInput.value) cvSourceInput.value.value = ''
   if (!picked.length || cvMode.value === 'text') return
   const mode = cvMode.value as CvFileSource
-  sourceError.value = ''
+  // Taken away for a moment, so that the same refusal made again is read out again.
+  if (sourceError.value) {
+    sourceError.value = ''
+    await nextTick()
+  }
   if (picked.some((file) => !cvKinds.value.includes(cvFileKind(file)))) {
     sourceError.value = t(kindRefusal(mode))
     return
@@ -238,20 +258,26 @@ async function uploadCvSources(list: FileList | null) {
     return
   }
   await run('upload', async () => {
+    // A file the server refuses is named with why, beside the upload area,
+    // where it is put right; the files before and after it are still taken.
+    const refused = new Map<string, string[]>()
     for (const file of picked) {
       const body = new FormData()
       body.append('file', withExtension(file))
-      let asset: any
       try {
-        asset = await ws.api('/files/uploads', { method: 'POST', body })
+        const asset = await ws.api('/files/uploads', { method: 'POST', body })
+        cvFiles[mode] = [...cvFiles[mode], asset]
       } catch (e) {
-        // Said beside the upload area, where it is put right; the files already taken stay.
-        sourceError.value = requestError(e)
-        return
+        const reason = uploadRefusal(e)
+        refused.set(reason, [...(refused.get(reason) || []), file.name])
       }
-      cvFiles[mode] = [...cvFiles[mode], asset]
     }
+    sourceError.value = [...refused].map(([reason, names]) => `${names.join(', ')}: ${reason}`).join(' ')
   })
+  // The form was disabled while the files went up, which took the focus away
+  // from the upload button: it goes back there, whose description is any refusal.
+  await nextTick()
+  if (!document.activeElement || document.activeElement === document.body) focusCvSources()
 }
 function removeCvSource(id: string) {
   if (cvMode.value === 'text') return
@@ -268,11 +294,18 @@ const promptPlaceholder = computed(() =>
 /** What the review rail says the CV is made from, above the files' names. */
 const cvSourceLabel = computed(() => t(CV_SOURCE_LABELS[cvMode.value]))
 /**
- * A description that is only a LinkedIn link is not sent: the server cannot
- * open the profile. The way to send it is said under the field, steps and all.
+ * A description that is a LinkedIn link and no fact about the person is not
+ * sent: the server cannot open the profile. The way to send it is said under
+ * the field, steps and all.
  */
 const cvLinkError = ref('')
 const LINKEDIN_STEPS = ['studioCvLinkedinStepComputer', 'studioCvLinkedinStepPhone', 'studioCvLinkedinStepScreenshots']
+const cvSourceChoice = ref<HTMLFieldSetElement>()
+/** The steps' way to From LinkedIn. The button that was pressed goes away; the checked choice says what changed. */
+function chooseLinkedin() {
+  cvSource.value = 'linkedin'
+  nextTick(() => cvSourceChoice.value?.querySelector<HTMLInputElement>('input:checked')?.focus())
+}
 /** What stops a new CV before it is sent: a bare LinkedIn link, or a file mode with no file. */
 function cvStopsBeforeSending() {
   if (!isCv.value || revising.value) return false
@@ -300,6 +333,26 @@ const CV_FILE_REFUSALS: Record<string, (mode: CvSource) => string> = {
   cv_file_required: missingRefusal,
   cv_file_unreadable: () => 'studioCvUnreadable',
   cv_file_kind: kindRefusal,
+  // More pages in all than one CV is made from (or more text than it reads).
+  generation_limit: () => 'studioCvFilesTooLong',
+  // A file kept past its hours, on a CV opened again whose files changed.
+  file_unavailable: () => 'studioCvFileGone',
+}
+/** Refusals said in this page's words: the server's are about any document, not a CV's files. */
+const OWN_REFUSALS = ['generation_limit', 'file_unavailable']
+/** A source file the server no longer keeps, as it said when the file was read back. */
+const sourceGone = (file: any) =>
+  (!!file?.state && file.state !== 'ready') || (!!file?.expires_at && Date.parse(file.expires_at) <= Date.now())
+/**
+ * Whether a `file_unavailable` is the CV's files', not its portrait's or a
+ * logo's: one of its files is known to be gone, or it has no other file.
+ */
+function cvFilesGone(e: any) {
+  if (e?.data?.error?.code !== 'file_unavailable' || !isCv.value || !cvFileForm.value) return false
+  return (
+    cvSourceFiles.value.some(sourceGone) ||
+    (!!cvSourceFiles.value.length && !form.options.portrait_asset_id && !form.options.branding?.logo_asset_id)
+  )
 }
 function cvRefused(e: any): '' | 'source' | 'link' {
   const refusal = e?.data?.error
@@ -312,7 +365,14 @@ function cvRefused(e: any): '' | 'source' | 'link' {
   const local = CV_FILE_REFUSALS[refusal.code]
   // Without an upload area in view (a description, a change), the banner says it.
   if (!local || !cvFileForm.value) return ''
-  sourceError.value = refusal.message || t(local(cvMode.value))
+  if (refusal.code === 'file_unavailable') {
+    if (!cvFilesGone(e)) return ''
+    // Named when it is known which: the chips keep every file's name.
+    const gone = cvSourceFiles.value.filter(sourceGone).map((file) => file.name)
+    sourceError.value = `${gone.length ? `${gone.join(', ')}: ` : ''}${t('studioCvFileGone')}`
+  } else
+    sourceError.value =
+      (!OWN_REFUSALS.includes(refusal.code) && refusal.message) || t(local(cvMode.value), { pages: cvMaxPages.value })
   step.value = 0
   return 'source'
 }
@@ -464,6 +524,8 @@ function photoRefused(e: any) {
   const message = PHOTO_REFUSALS[e?.data?.error?.code]
   if (!message || !isCv.value || !form.options.portrait_asset_id || form.options.branding?.logo_asset_id)
     return false
+  // A source file known to be gone is what the server could not find: the photo stays.
+  if (cvFilesGone(e)) return false
   removePortrait()
   photoError.value = t(message)
   step.value = 0
@@ -1038,6 +1100,7 @@ watch([cvSource, () => cvFiles.linkedin, () => cvFiles.file], invalidateQuote, {
               <!-- A CV starts with where it is made from: native radios, so arrows move between them. -->
               <fieldset
                 v-if="isCv && !revising && cvModes.length > 1"
+                ref="cvSourceChoice"
                 class="cv-source-choice"
                 data-testid="studio-cv-source"
               >
@@ -1080,6 +1143,7 @@ watch([cvSource, () => cvFiles.linkedin, () => cvFiles.file], invalidateQuote, {
                         {{
                           t(cvMode === 'linkedin' ? 'studioCvLinkedinFilesHint' : 'studioCvOldFilesHint', {
                             max: cvMaxFiles,
+                            pages: cvMaxPages,
                           })
                         }}
                       </p>
@@ -1105,10 +1169,21 @@ watch([cvSource, () => cvFiles.linkedin, () => cvFiles.file], invalidateQuote, {
                       @change="uploadCvSources(($event.target as HTMLInputElement).files)"
                     />
                   </div>
-                  <div v-if="sourceError" class="field-error cv-source-error" data-testid="studio-cv-source-error">
+                  <!-- An alert: a refusal made before anything is sent, or of one file in a batch, leaves the focus where it was. -->
+                  <div
+                    v-if="sourceError"
+                    class="field-error cv-source-error"
+                    role="alert"
+                    data-testid="studio-cv-source-error"
+                  >
                     <AppIcon name="alert" :size="17" /><span id="studio-cv-source-error">{{ sourceError }}</span>
                   </div>
-                  <ul v-if="cvSourceFiles.length" class="cv-source-list" data-testid="studio-cv-source-files">
+                  <ul
+                    v-if="cvSourceFiles.length"
+                    ref="cvSourceList"
+                    class="cv-source-list"
+                    data-testid="studio-cv-source-files"
+                  >
                     <li v-for="file in cvSourceFiles" :key="file.id" class="source-chip">
                       <AppIcon :name="sourceIcon(file)" :size="17" /><span>{{ file.name }}</span
                       ><button
@@ -1163,7 +1238,7 @@ watch([cvSource, () => cvFiles.linkedin, () => cvFiles.file], invalidateQuote, {
                   type="button"
                   class="button secondary small"
                   data-testid="studio-cv-use-linkedin"
-                  @click="cvSource = 'linkedin'"
+                  @click="chooseLinkedin"
                 >
                   {{ t('studioCvUseLinkedin') }}
                 </button>

@@ -196,28 +196,72 @@ const cvFilePerson = 'Malika Karimova'
 let refuseCvKind = false
 const assetKind = (asset) =>
   ({ 'application/pdf': 'pdf', [DOCX]: 'docx', 'image/png': 'image', 'image/jpeg': 'image' })[asset?.mime_type] || ''
-/** A CV's source refusal, as apps/studio/domain.py decides it, or null. */
-function cvSourceRefusal(body, prompt) {
+// apps/studio/cv/sources.py: a LinkedIn profile's link, and the words people
+// ask with around one, none of them a fact about the person.
+const LINKEDIN_PROFILE = /(?:https?:\/\/)?(?:[\w-]+\.)?(?:linkedin\.com\/(?:in|pub|profile)\/|lnkd\.in\/)[^\s<>]*/giu
+const ASKING = new Set(
+  (
+    'hello hi here is my the a an at from for me it please make create professional good cv resume profile link page ' +
+    'thank thanks you very much this assalomu alaykum salom mana mening shu shundan menga yaxshi rezyume profil ' +
+    'profilim havola qilib bering iltimos tayyorlab rahmat здравствуйте привет вот ссылка на мой моя мне профиль в из ' +
+    'него по моему сделайте сделать составьте пожалуйста резюме спасибо'
+  ).split(' '),
+)
+/**
+ * sources.linkedin_link_only: a profile's link and, once the person's name is
+ * taken out, no email, phone or year and only asking words. The name here is
+ * the first two capitalised words that are no asking words (content.name_in
+ * reads more ways of giving one).
+ */
+function linkedinLinkOnly(text) {
+  const value = String(text || '')
+  if (!value.match(LINKEDIN_PROFILE)) return false
+  let rest = value.replace(LINKEDIN_PROFILE, ' ')
+  const name = [...rest.matchAll(/(?<!\p{L})\p{Lu}\p{Ll}+ \p{Lu}\p{Ll}+(?!\p{L})/gu)].find(
+    (match) => !match[0].split(' ').some((word) => ASKING.has(word.toLowerCase())),
+  )
+  if (name) rest = rest.replace(name[0], ' ')
+  if (/@|(?<!\d)(?:19|20)\d{2}(?!\d)|\+?\d[\d \t().-]{5,}\d/u.test(rest)) return false
+  return (rest.match(/\p{L}+/gu) || [])
+    .map((word) => word.toLowerCase())
+    .every((word) => word === 'linkedin' || ASKING.has(word))
+}
+// sources.MAX_PAGES: the most pages a CV's files have in all.
+const CV_PAGES = 30
+/** A CV's source refusal, as apps/studio/domain.py decides it, or null. `previous` is the draft a write updates. */
+function cvSourceRefusal(body, prompt, previous = null) {
   const mode = body.options?.cv_source || 'text'
   const ids = body.source_ids || []
   const refuse = (code) => ({ error: { code, message: cvFileRefusal[code] } })
   if (!['text', 'linkedin', 'file'].includes(mode)) return { error: { code: 'invalid_parameters', message: 'invalid' } }
-  const linkOnly = /^\s*(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[\w-]+\/?\s*$/i.test(prompt || '')
-  const linkAsked = /linkedin\.com\/in\//i.test(prompt || '') && prompt.split(/\s+/).length < 16
+  const linkOnly = linkedinLinkOnly(prompt)
   if (mode === 'text') {
     if (ids.length) return { error: { code: 'invalid_parameters', message: 'A description takes no files.' } }
-    return linkOnly || linkAsked ? refuse('cv_linkedin_link') : null
+    return linkOnly ? refuse('cv_linkedin_link') : null
   }
-  if (!ids.length) return refuse(linkOnly || linkAsked ? 'cv_linkedin_link' : 'cv_file_required')
+  if (!ids.length) return refuse(linkOnly ? 'cv_linkedin_link' : 'cv_file_required')
+  // Unchanged files keep what was read from them, even once they are gone.
+  if (previous && isDeepStrictEqual(previous.source_ids, ids) && previous.options?.cv_source === mode) return null
   const assets = ids.map((asset) => uploads.get(asset))
+  if (assets.some((asset) => !asset || asset.state !== 'ready'))
+    return { error: { code: 'file_unavailable', message: 'The file is no longer available.' } }
   const kinds = mode === 'linkedin' ? ['pdf', 'image'] : ['pdf', 'docx', 'image']
   if (refuseCvKind || assets.some((asset) => !kinds.includes(assetKind(asset)))) {
     refuseCvKind = false
     return refuse('cv_file_kind')
   }
+  if (assets.reduce((pages, asset) => pages + (asset.page_count || 1), 0) > CV_PAGES)
+    return {
+      error: {
+        code: 'generation_limit',
+        message: 'The document exceeds your output or source limits. Reduce its length or content.',
+      },
+    }
   if (assets.every((asset) => /^blank/i.test(asset.name))) return refuse('cv_file_unreadable')
   return null
 }
+// Uploads the server refuses, by file name: [status, code, message].
+const refuseUpload = new Map()
 // Uploaded files by id, so an uploaded portrait reads back as itself.
 const uploads = new Map()
 // What the last uploaded image was, as the server would read it: its type,
@@ -340,12 +384,16 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
     const file = multipartFile(request.postDataBuffer() || Buffer.alloc(0))
     const image = /^image\/(png|jpeg)$/i.exec(file?.type || '')
     if (image) uploadedImage = { name: file.name, type: file.type, bytes: file.bytes.length, ...imageFacts(file.bytes) }
-    // Word files keep their name and type, as a CV's old file; anything else is a PDF.
+    const refused = refuseUpload.get(file?.name)
+    if (refused) return json({ error: { code: refused[1], message: refused[2] } }, refused[0])
+    // Word files keep their name and type, as a CV's old file; anything else is
+    // a PDF, of two pages unless its name says how many ("portfolio-12p.pdf").
+    const pages = Number(/-(\d+)p\.pdf$/i.exec(file?.name || '')?.[1] || 2)
     const asset = image
       ? { id: id(), name: file.name, size_bytes: file.bytes.length, mime_type: `image/${image[1]}`, state: 'ready' }
       : /\.docx$/i.test(file?.name || '')
         ? { id: id(), name: file.name, size_bytes: file.bytes.length, page_count: 1, mime_type: DOCX, state: 'ready' }
-        : { id: id(), name: file?.name || 'research-notes.pdf', size_bytes: 4096, page_count: 2, mime_type: 'application/pdf', state: 'ready' }
+        : { id: id(), name: file?.name || 'research-notes.pdf', size_bytes: 4096, page_count: pages, mime_type: 'application/pdf', state: 'ready' }
     uploads.set(asset.id, asset)
     return json(asset, 201)
   }
@@ -491,7 +539,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
         return json({ error: { code: refusePortrait, message: 'Check the request and try again.' } }, 400)
       // A change keeps its CV's files whatever is sent; a new CV is checked again.
       const cvRefusal =
-        draft.feature_id === 'ai.cv' && !draft.revision ? cvSourceRefusal(body, body.prompt ?? draft.prompt) : null
+        draft.feature_id === 'ai.cv' && !draft.revision ? cvSourceRefusal(body, body.prompt ?? draft.prompt, draft) : null
       if (cvRefusal) return json(cvRefusal, 400)
       // Match the backend's rebuild trigger: a changed brief/source/format
       // regenerates content unless the user explicitly supplies edited content.
@@ -1683,7 +1731,15 @@ try {
   const sourceInput = () => page.getByTestId('studio-cv-source-input')
   const sourceError = () => page.getByTestId('studio-cv-source-error')
   const sourceChips = () => page.getByTestId('studio-cv-source-files').locator('li')
-  const sourceNames = () => page.getByTestId('studio-cv-source-names').locator('li').allInnerTexts()
+  // Read once drawn: a new draft's review is drawn again at the draft's own
+  // address, and while that page loads the draft there are no names to read.
+  const sourceNames = async () =>
+    (
+      await page.waitForFunction(() => {
+        const names = [...document.querySelectorAll('[data-testid="studio-cv-source-names"] li')]
+        return names.length > 0 && names.map((name) => name.innerText)
+      })
+    ).jsonValue()
   const choice = (mode) => page.getByTestId(`studio-cv-source-${mode}`)
   const radio = (name) => page.getByRole('radio', { name })
   const linkError = () => page.getByTestId('studio-cv-link-error')
@@ -1895,18 +1951,157 @@ try {
   await review().click()
   await linkError().waitFor()
   assert.equal(cvDrafts(), draftsBefore, 'a bare link is not sent')
-  await page.getByTestId('studio-cv-use-linkedin').click()
+  // Pressed from the keyboard, the button goes away: the focus goes to the choice it made, which says what changed.
+  await page.getByTestId('studio-cv-use-linkedin').focus()
+  await page.keyboard.press('Enter')
+  await page.waitForFunction(() => {
+    const active = document.activeElement
+    return active?.getAttribute('name') === 'studio-cv-source' && active.value === 'linkedin' && active.checked
+  })
   assert.equal(await radio(/^From LinkedIn/).isChecked(), true)
   assert.equal(await linkError().count(), 0)
   await page.getByTestId('studio-cv-linkedin-steps').waitFor()
-  // A sentence round a link is the server's to read; it says the same.
+  // A request round a link, with no fact about the person in it, in each of
+  // the three languages: the same steps, never the name question, and nothing sent.
   await choice('text').click()
-  await primary().fill('Please make my CV from my profile at linkedin.com/in/fixture-person, thank you very much.')
+  for (const request of [
+    'Please make my CV from my profile at linkedin.com/in/fixture-person, thank you very much.',
+    'Hello, here is my LinkedIn profile, please make a professional CV for me from it: https://www.linkedin.com/in/fixture-person',
+    'Assalomu alaykum, mana mening LinkedIn profilim, shundan menga yaxshi rezyume qilib bering iltimos: https://www.linkedin.com/in/fixture-person',
+    'Здравствуйте, вот ссылка на мой профиль в LinkedIn, сделайте, пожалуйста, из него резюме: https://www.linkedin.com/in/fixture-person',
+  ]) {
+    await primary().fill(request)
+    await review().click()
+    await linkError().waitFor()
+    assert.equal(cvDrafts(), draftsBefore, `not sent: ${request}`)
+    assert.equal(await linkError().getByTestId('studio-cv-link-steps').locator('li').count(), 3)
+    assert.equal(await page.getByTestId('studio-prompt-error').count(), 0, `the steps, not the name question: ${request}`)
+  }
+  // A name and nothing else: the server takes the name out, and says the same.
+  await primary().fill('Ali Valiyev. Please make my CV from my profile at linkedin.com/in/fixture-person, thank you very much.')
   await review().click()
   await linkError().waitFor()
-  assert.equal(cvDrafts(), draftsBefore + 1)
+  assert.equal(cvDrafts(), draftsBefore + 1, 'a name is the server’s to read')
   assert.equal(await linkError().getByTestId('studio-cv-link-steps').locator('li').count(), 3)
+  assert.equal(await page.getByTestId('studio-prompt-error').count(), 0)
   assert.equal(await page.locator('.error-banner').count(), 0)
+  // A short description with facts in it is a CV's description, as it always
+  // was, however few its words: the link on it is a contact.
+  await primary().fill('Ali Valiyev\nSMM manager. linkedin.com/in/ali-valiyev')
+  const withLink = await reviewNew()
+  assert.equal(withLink.options.cv_source, 'text')
+  assert.equal(withLink.prompt, 'Ali Valiyev\nSMM manager. linkedin.com/in/ali-valiyev')
+  assert.equal(await linkError().count(), 0)
+
+  // A batch in which the server refuses one file: the files after it still go
+  // up, the one refused is named with why, and the refusal is read out where
+  // the focus goes back to.
+  await open('ai.cv')
+  await choice('file').click()
+  assert.match(await page.locator('.cv-source-upload p').innerText(), /Up to 10 files, 30 pages in all\.$/)
+  const sourceButton = () => page.getByTestId('studio-cv-source-button')
+  const scan = (name) => ({ name, mimeType: 'image/png', buffer: PNG })
+  refuseUpload.set('page-2.png', [413, 'file_too_large', 'This file is too large.'])
+  sourceUploads = calls('/files/uploads').length
+  await sourceButton().focus()
+  await sourceInput().setInputFiles([scan('page-1.png'), scan('page-2.png'), scan('page-3.png')])
+  await sourceError().waitFor()
+  await page.waitForFunction(() => document.querySelectorAll('[data-testid="studio-cv-source-files"] li').length === 2)
+  assert.equal(calls('/files/uploads').length, sourceUploads + 3, 'the file after the refused one is still sent')
+  assert.deepEqual(await sourceChips().allInnerTexts(), ['page-1.png', 'page-3.png'])
+  assert.equal(await sourceError().innerText(), 'page-2.png: This file is too large.')
+  assert.equal(await sourceError().getAttribute('role'), 'alert', 'read out when it appears')
+  await focused('studio-cv-source-button')
+  refuseUpload.delete('page-2.png')
+  // A refusal made before anything is sent is read out too, each time it is made.
+  sourceUploads = calls('/files/uploads').length
+  for (const name of ['resume.doc', 'IMG_0001.HEIC']) {
+    // Marked, so that a refusal drawn afresh, which is what is read out, can be told from the one before it.
+    await page.evaluate(() => document.querySelector('[data-testid="studio-cv-source-error"]')?.setAttribute('data-said', ''))
+    await sourceInput().setInputFiles({ name, mimeType: 'application/octet-stream', buffer: Buffer.from('fixture') })
+    await page.waitForFunction(() => {
+      const alert = document.querySelector('[role="alert"][data-testid="studio-cv-source-error"]')
+      return !!alert && !alert.hasAttribute('data-said') && alert.textContent.includes('An old CV can be')
+    })
+  }
+  assert.equal(calls('/files/uploads').length, sourceUploads)
+  // A PDF with a password: there is no password field here, and a CV never reads a protected PDF.
+  refuseUpload.set('locked-cv.pdf', [400, 'password_required', 'Enter the PDF password to continue.'])
+  await sourceButton().focus()
+  await sourceInput().setInputFiles({ name: 'locked-cv.pdf', mimeType: 'application/pdf', buffer: pdfBytes })
+  await page.getByText('locked-cv.pdf: This PDF is protected with a password. Save a copy without the password and add that.').waitFor()
+  assert.equal(await page.locator('input[type="password"]').count(), 0)
+  assert.deepEqual(await sourceChips().allInnerTexts(), ['page-1.png', 'page-3.png'])
+  await focused('studio-cv-source-button')
+  refuseUpload.delete('locked-cv.pdf')
+  await page.setViewportSize({ width: 390, height: 844 })
+  await noOverflow('cv upload refusal/390')
+  await sourceButton().scrollIntoViewIfNeeded()
+  await page.screenshot({ path: path.join(output, 'cv-source-upload-refusal-390.png') })
+  await page.setViewportSize({ width: 1440, height: 1000 })
+
+  // More pages in all than one CV is made from: said beside the files, with
+  // the cap, never as the banner's words about any document.
+  await open('ai.cv')
+  await choice('file').click()
+  await sourceInput().setInputFiles(
+    [1, 2, 3].map((index) => ({ name: `portfolio-${index}-12p.pdf`, mimeType: 'application/pdf', buffer: pdfBytes })),
+  )
+  await page.waitForFunction(() => document.querySelectorAll('[data-testid="studio-cv-source-files"] li').length === 3)
+  draftsBefore = cvDrafts()
+  await review().click()
+  await sourceError().waitFor()
+  assert.equal(cvDrafts(), draftsBefore + 1, 'the server counted the pages')
+  assert.equal(
+    await sourceError().innerText(),
+    'These files are too long for one CV: at most 30 pages in all. Remove some of them.',
+  )
+  assert.equal(await page.locator('.error-banner').count(), 0, 'not in the banner at the top')
+  await focused('studio-cv-source-button')
+  await page.setViewportSize({ width: 390, height: 844 })
+  await noOverflow('cv too long/390')
+  await page.evaluate(() =>
+    document.querySelector('[data-testid="studio-cv-source-error"]').scrollIntoView({ block: 'center' }),
+  )
+  await page.screenshot({ path: path.join(output, 'cv-source-too-long-390.png') })
+  await page.setViewportSize({ width: 1440, height: 1000 })
+  await sourceChips().nth(2).getByRole('button', { name: 'Remove file: portfolio-3-12p.pdf' }).click()
+  assert.equal(await sourceError().count(), 0)
+  assert.equal((await reviewNew()).source_ids.length, 2, 'two of them are within the cap')
+
+  // A CV opened again whose file has expired, and a file added to it: the
+  // server cannot find the old one, which is named beside the files. The
+  // photo was found, and stays.
+  await open('ai.cv')
+  await choice('file').click()
+  await sourceInput().setInputFiles({ name: 'Old-CV-2023.pdf', mimeType: 'application/pdf', buffer: pdfBytes })
+  await sourceChips().first().waitFor()
+  const expiringId = [...uploads.values()].at(-1).id
+  await page.getByTestId('studio-cv-photo').setInputFiles({ name: 'portrait.png', mimeType: 'image/png', buffer: PNG })
+  await page.getByText('portrait.jpg', { exact: true }).waitFor()
+  const portraitKept = [...uploads.values()].at(-1).id
+  await reviewNew()
+  const reopened = [...drafts.values()].at(-1)
+  Object.assign(uploads.get(expiringId), { state: 'expired', expires_at: new Date(Date.now() - 60_000).toISOString() })
+  await page.goto(`${origin}/en/app/create/${reopened.id}`, { waitUntil: 'domcontentloaded' })
+  await page.getByTestId('studio-cv-source-files').getByText('Old-CV-2023.pdf').waitFor()
+  await sourceInput().setInputFiles({ name: 'Certificate.pdf', mimeType: 'application/pdf', buffer: pdfBytes })
+  await page.getByTestId('studio-cv-source-files').getByText('Certificate.pdf').waitFor()
+  await review().click()
+  await sourceError().waitFor()
+  assert.equal(
+    await sourceError().innerText(),
+    'Old-CV-2023.pdf: This file is no longer stored. Remove it and add it again.',
+  )
+  assert.equal(await page.locator('.error-banner').count(), 0, 'not in the banner at the top')
+  assert.equal(await page.getByTestId('studio-cv-photo-error').count(), 0, 'the photo is not what was missing')
+  await page.getByText('portrait.jpg', { exact: true }).waitFor()
+  await focused('studio-cv-source-button')
+  await sourceChips().first().getByRole('button', { name: 'Remove file: Old-CV-2023.pdf' }).click()
+  const renewed = await reviewSaved()
+  assert.equal(renewed.source_ids.length, 1)
+  assert.notEqual(renewed.source_ids[0], expiringId)
+  assert.equal(renewed.options.portrait_asset_id, portraitKept, 'the photo is still sent')
 
   // The PDF and Slides services never get a CV's mode or files.
   for (const feature of featureIds) {

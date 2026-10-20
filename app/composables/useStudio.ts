@@ -17,6 +17,8 @@ export interface StudioFeature {
   source_kinds?: Record<string, string[]>
   /** Most files a CV can be made from. */
   max_source_files?: number
+  /** Most pages a CV's files can have in all. */
+  max_source_pages?: number
 }
 export interface StudioConfig {
   provider: { mode: string; label: string; configured: boolean; image_configured?: boolean }

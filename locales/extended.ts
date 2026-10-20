@@ -1147,15 +1147,15 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   ],
   studioCvLinkedinFiles: ['Your LinkedIn profile', 'LinkedIn profilingiz', 'Ваш профиль LinkedIn'],
   studioCvLinkedinFilesHint: [
-    'The PDF from Save to PDF, or JPG/PNG screenshots. Up to {max} files.',
-    '«Save to PDF» orqali olingan PDF yoki JPG/PNG skrinshotlar. Ko‘pi bilan {max} ta fayl.',
-    'PDF из «Сохранить в формате PDF» или скриншоты JPG/PNG. До {max} файлов.',
+    'The PDF from Save to PDF, or JPG/PNG screenshots. Up to {max} files, {pages} pages in all.',
+    '«Save to PDF» orqali olingan PDF yoki JPG/PNG skrinshotlar. Ko‘pi bilan {max} ta fayl, jami {pages} sahifa.',
+    'PDF из «Сохранить в формате PDF» или скриншоты JPG/PNG. До {max} файлов, всего до {pages} страниц.',
   ],
   studioCvOldFiles: ['Your old CV', 'Eski rezyumengiz', 'Ваше старое резюме'],
   studioCvOldFilesHint: [
-    'A PDF, Word (.docx), or JPG/PNG photos and scans. Up to {max} files, in any language.',
-    'PDF, Word (.docx) yoki JPG/PNG foto va skanlar. Ko‘pi bilan {max} ta fayl, istalgan tilda.',
-    'PDF, Word (.docx) или фото и сканы JPG/PNG. До {max} файлов, на любом языке.',
+    'A PDF, Word (.docx), or JPG/PNG photos and scans, in any language. Up to {max} files, {pages} pages in all.',
+    'PDF, Word (.docx) yoki JPG/PNG foto va skanlar, istalgan tilda. Ko‘pi bilan {max} ta fayl, jami {pages} sahifa.',
+    'PDF, Word (.docx) или фото и сканы JPG/PNG, на любом языке. До {max} файлов, всего до {pages} страниц.',
   ],
   // The description, in the two file modes: notes on top of the files.
   studioCvNotes: [
@@ -1209,6 +1209,24 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Up to {max} files. Remove some to add others.',
     'Ko‘pi bilan {max} ta fayl. Boshqasini qo‘shish uchun ortiqchasini olib tashlang.',
     'Не больше {max} файлов. Чтобы добавить другие, удалите лишние.',
+  ],
+  // More pages in all than one CV is made from (the server's generation_limit).
+  studioCvFilesTooLong: [
+    'These files are too long for one CV: at most {pages} pages in all. Remove some of them.',
+    'Bu fayllar bitta rezyume uchun juda uzun: hammasi bo‘lib ko‘pi bilan {pages} sahifa. Ularning baʼzilarini olib tashlang.',
+    'Эти файлы слишком длинные для одного резюме: всего не больше {pages} страниц. Удалите часть из них.',
+  ],
+  // A file of a CV opened again that is no longer kept; its name is put before this.
+  studioCvFileGone: [
+    'This file is no longer stored. Remove it and add it again.',
+    'Bu fayl endi saqlanmagan. Uni olib tashlab, qaytadan qo‘shing.',
+    'Этот файл больше не хранится. Удалите его и добавьте снова.',
+  ],
+  // A PDF with a password: a CV's upload area has none to ask, and a protected PDF is not read.
+  studioCvProtected: [
+    'This PDF is protected with a password. Save a copy without the password and add that.',
+    'Bu PDF parol bilan himoyalangan. Uning parolsiz nusxasini saqlab, o‘shani qo‘shing.',
+    'Этот PDF защищён паролем. Сохраните копию без пароля и добавьте её.',
   ],
   // A description that is only a LinkedIn link: the steps are shown instead of sending it.
   studioCvLinkRefused: [
