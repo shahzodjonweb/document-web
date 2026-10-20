@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { CvFileSource, CvSource } from '../composables/useCvSources'
 const props = defineProps<{ draftId?: string }>()
 const route = useRoute()
 const { t, path, locale, date } = useLocale()
@@ -66,12 +67,54 @@ const readingPages = computed(() => draft.value?.options?.length ?? defaultPages
 /** A deck is counted in slides; only a document is counted in pages. */
 const isDeck = computed(() => form.feature_id === 'ai.pptx')
 /**
- * A CV is written from the description alone, with an optional portrait and a
- * template. It is one or two pages, whatever its content needs in the
- * template, so it has no count to read or set, and no outline to plan: its
- * eight sections are always the same ones.
+ * A CV is written from a description, the customer's LinkedIn profile or an
+ * old CV, with an optional portrait and a template. It is one or two pages,
+ * whatever its content needs in the template, so it has no count to read or
+ * set, and no outline to plan: its eight sections are always the same ones.
  */
 const isCv = computed(() => form.feature_id === 'ai.cv')
+/**
+ * Where the CV starts from, chosen first. Only the modes the server lists are
+ * offered; one that lists none (an older server) takes the description alone,
+ * and the choice is not shown.
+ */
+const cvSource = ref<CvSource>('text')
+const cvModes = computed<CvSource[]>(() => {
+  const listed = selected.value?.source_modes
+  return Array.isArray(listed) ? CV_SOURCES.filter((mode) => mode === 'text' || listed.includes(mode)) : ['text']
+})
+const cvMode = computed<CvSource>(() =>
+  isCv.value && cvModes.value.includes(cvSource.value) ? cvSource.value : 'text',
+)
+/** The CV is made from files: the description is notes on top of them. */
+const cvFromFiles = computed(() => cvMode.value !== 'text')
+/** A new CV made from files shows their upload area; a change keeps its CV's files. */
+const cvFileForm = computed(() => cvFromFiles.value && !revising.value)
+/**
+ * Each mode keeps its own files while the page is open, so a click on another
+ * mode loses nothing; only the chosen mode's files are ever sent.
+ */
+const cvFiles = reactive<Record<CvFileSource, any[]>>({ linkedin: [], file: [] })
+const cvSourceFiles = computed<any[]>(() => (cvMode.value === 'text' ? [] : cvFiles[cvMode.value as CvFileSource]))
+const cvKinds = computed<string[]>(() => {
+  if (cvMode.value === 'text') return []
+  const mode = cvMode.value as CvFileSource
+  const listed = selected.value?.source_kinds?.[mode]
+  return Array.isArray(listed) && listed.length ? listed : CV_SOURCE_KINDS[mode]
+})
+const cvMaxFiles = computed(() => selected.value?.max_source_files || CV_SOURCE_FILES)
+const CV_SOURCE_ICONS: Record<CvSource, string> = { text: 'edit', linkedin: 'globe', file: 'file' }
+/** Each choice's name and the line under it. */
+const CV_SOURCE_CHOICES: Record<CvSource, [string, string]> = {
+  text: ['studioCvFromText', 'studioCvFromTextHint'],
+  linkedin: ['studioCvFromLinkedin', 'studioCvFromLinkedinHint'],
+  file: ['studioCvFromFile', 'studioCvFromFileHint'],
+}
+const CV_SOURCE_LABELS: Record<CvSource, string> = {
+  text: 'studioCvSourceText',
+  linkedin: 'studioCvSourceLinkedin',
+  file: 'studioCvSourceFile',
+}
 /**
  * Photo layouts need the service to be able to fetch a photo. Without one they
  * would only ever be drawn as text, so they are not offered.
@@ -106,8 +149,10 @@ const canUseTool = computed(
 const hasEssentialInput = computed(
   () =>
     !!form.prompt.trim() ||
-    // A CV reads no PDF, so one left attached from another service is no input.
+    // A CV reads only its own mode's files, so a PDF left attached from another
+    // service is no input.
     (!isCv.value && files.value.length > 0) ||
+    cvSourceFiles.value.length > 0 ||
     !!form.source_text.trim() ||
     // A draft opened from the list already has its content; it does not need
     // the description typed out again.
@@ -132,13 +177,26 @@ watch([() => form.feature_id, formats], () => {
 })
 
 /** Options only a CV takes; the server refuses them on the other services. */
-const CV_OPTIONS = ['cv_template', 'portrait_asset_id', 'portrait_sha256']
+const CV_OPTIONS = ['cv_template', 'portrait_asset_id', 'portrait_sha256', 'cv_source']
+/**
+ * A CV's own files: the chosen mode's, none for a description. A change keeps
+ * the files its CV was made from, as the server holds them, and has no mode
+ * to choose.
+ */
+function cvSourceIds(): string[] {
+  if (revising.value) return [...(draft.value?.source_ids || [])]
+  return cvSourceFiles.value.map((file) => file.id)
+}
 function draftFields() {
   const options = Object.fromEntries(
     Object.entries(form.options).filter(
       ([key, value]) => value !== '' && value !== undefined && (isCv.value || !CV_OPTIONS.includes(key)),
     ),
   )
+  // The mode is said only to a server that offers modes; to one that does not,
+  // a CV is its description, as it always was. A change keeps its CV's mode.
+  if (isCv.value && !revising.value && Array.isArray(selected.value?.source_modes))
+    options.cv_source = cvMode.value
   return {
     ...form,
     // A new CV is named after the person, from the description. Its Title field
@@ -148,9 +206,115 @@ function draftFields() {
     title: isCv.value && !draft.value ? titleFrom('') : effectiveTitle.value,
     source_text: form.source_text,
     options,
-    // A CV is written from the description; its only file is the portrait.
-    source_ids: isCv.value ? [] : files.value.map((file) => file.id),
+    // A CV's portrait is an option, never a source file.
+    source_ids: isCv.value ? cvSourceIds() : files.value.map((file) => file.id),
   }
+}
+
+/**
+ * The CV's source files: a LinkedIn profile's PDF or screenshots, or an old
+ * CV. A file of a kind the mode does not read, or one too many, is said beside
+ * the upload area before anything is uploaded; the server checks again, and
+ * reads them for their text when the draft is made.
+ */
+const cvSourceInput = ref<HTMLInputElement>()
+const cvSourceButton = ref<HTMLButtonElement>()
+const sourceError = ref('')
+const kindRefusal = (mode: CvSource) => (mode === 'linkedin' ? 'studioCvKindLinkedin' : 'studioCvKindFile')
+const missingRefusal = (mode: CvSource) => (mode === 'linkedin' ? 'studioCvNeedLinkedin' : 'studioCvNeedFile')
+async function uploadCvSources(list: FileList | null) {
+  const picked = Array.from(list || [])
+  // Cleared so that choosing the same file again still reaches here.
+  if (cvSourceInput.value) cvSourceInput.value.value = ''
+  if (!picked.length || cvMode.value === 'text') return
+  const mode = cvMode.value as CvFileSource
+  sourceError.value = ''
+  if (picked.some((file) => !cvKinds.value.includes(cvFileKind(file)))) {
+    sourceError.value = t(kindRefusal(mode))
+    return
+  }
+  if (cvFiles[mode].length + picked.length > cvMaxFiles.value) {
+    sourceError.value = t('studioCvFilesMax', { max: cvMaxFiles.value })
+    return
+  }
+  await run('upload', async () => {
+    for (const file of picked) {
+      const body = new FormData()
+      body.append('file', withExtension(file))
+      let asset: any
+      try {
+        asset = await ws.api('/files/uploads', { method: 'POST', body })
+      } catch (e) {
+        // Said beside the upload area, where it is put right; the files already taken stay.
+        sourceError.value = requestError(e)
+        return
+      }
+      cvFiles[mode] = [...cvFiles[mode], asset]
+    }
+  })
+}
+function removeCvSource(id: string) {
+  if (cvMode.value === 'text') return
+  const mode = cvMode.value as CvFileSource
+  cvFiles[mode] = cvFiles[mode].filter((file) => file.id !== id)
+  sourceError.value = ''
+}
+const SOURCE_ICONS: Record<string, string> = { image: 'image', docx: 'word' }
+const sourceIcon = (file: any) => SOURCE_ICONS[cvFileKind(file)] || 'file'
+/** A CV's description is about the person; made from files, it is notes on top of them. */
+const promptPlaceholder = computed(() =>
+  !isCv.value ? 'studioDescribePlaceholder' : cvFileForm.value ? 'studioCvNotesPlaceholder' : 'studioCvPlaceholder',
+)
+/** What the review rail says the CV is made from, above the files' names. */
+const cvSourceLabel = computed(() => t(CV_SOURCE_LABELS[cvMode.value]))
+/**
+ * A description that is only a LinkedIn link is not sent: the server cannot
+ * open the profile. The way to send it is said under the field, steps and all.
+ */
+const cvLinkError = ref('')
+const LINKEDIN_STEPS = ['studioCvLinkedinStepComputer', 'studioCvLinkedinStepPhone', 'studioCvLinkedinStepScreenshots']
+/** What stops a new CV before it is sent: a bare LinkedIn link, or a file mode with no file. */
+function cvStopsBeforeSending() {
+  if (!isCv.value || revising.value) return false
+  if (!cvSourceFiles.value.length && linkedinLinkOnly(form.prompt)) {
+    cvLinkError.value = t('studioCvLinkRefused')
+    step.value = 0
+    nextTick(() => promptInput.value?.focus())
+    return true
+  }
+  if (cvFromFiles.value && !cvSourceFiles.value.length) {
+    sourceError.value = t(missingRefusal(cvMode.value))
+    step.value = 0
+    nextTick(() => cvSourceButton.value?.focus())
+    return true
+  }
+  return false
+}
+/**
+ * A CV refused for its files is said beside the upload area, and one refused
+ * for a LinkedIn link under the description, with the steps; never in the
+ * banner at the top. The server's words are used when it gives them, except
+ * for the link, whose steps are drawn here.
+ */
+const CV_FILE_REFUSALS: Record<string, (mode: CvSource) => string> = {
+  cv_file_required: missingRefusal,
+  cv_file_unreadable: () => 'studioCvUnreadable',
+  cv_file_kind: kindRefusal,
+}
+function cvRefused(e: any): '' | 'source' | 'link' {
+  const refusal = e?.data?.error
+  if (!isCv.value || !refusal) return ''
+  if (refusal.code === 'cv_linkedin_link') {
+    cvLinkError.value = t('studioCvLinkRefused')
+    step.value = 0
+    return 'link'
+  }
+  const local = CV_FILE_REFUSALS[refusal.code]
+  // Without an upload area in view (a description, a change), the banner says it.
+  if (!local || !cvFileForm.value) return ''
+  sourceError.value = refusal.message || t(local(cvMode.value))
+  step.value = 0
+  return 'source'
 }
 
 /**
@@ -367,6 +531,20 @@ watch([() => form.prompt, () => form.title], () => {
   promptSwitch.value = ''
   promptConvert.value = false
   topicGiven.value = false
+  cvLinkError.value = ''
+})
+/**
+ * Another way to start is another CV: what was said about the last one's
+ * files, its link or its missing name is about that one. The quote is the
+ * last mode's too.
+ */
+watch(cvMode, () => {
+  sourceError.value = ''
+  cvLinkError.value = ''
+  if (isCv.value) {
+    promptError.value = ''
+    topicGiven.value = false
+  }
 })
 /** The customer insists the description has its topic: the same action, sent as it is. */
 function continueAnyway() {
@@ -421,21 +599,27 @@ async function run(task: string, fn: () => Promise<void>) {
   notice.value = ''
   let refused = false
   let photo = false
+  let cv: '' | 'source' | 'link' = ''
   try {
     await fn()
   } catch (e) {
     photo = photoRefused(e)
-    refused = !photo && promptRefused(e)
+    cv = photo ? '' : cvRefused(e)
+    refused = !photo && !cv && promptRefused(e)
     refusedRun = refused ? () => run(task, fn) : null
-    if (!refused && !photo) error.value = requestError(e)
+    if (!refused && !photo && !cv) error.value = requestError(e)
   } finally {
     busy.value = ''
   }
   // The fix is typed in the description, so focus goes there once the form is
   // enabled again; the field's own description reads the refusal out.
-  if (refused) {
+  if (refused || cv === 'link') {
     await nextTick()
     promptInput.value?.focus()
+  } else if (cv === 'source') {
+    // The upload button, whose description is the refusal, beside the files.
+    await nextTick()
+    cvSourceButton.value?.focus()
   } else if (photo) {
     // The photo's button, whose description is the refusal, beside the field.
     await nextTick()
@@ -480,9 +664,17 @@ async function load() {
   if (props.draftId)
     await run('load', async () => {
       acceptDraft(await ws.api(`/generation/drafts/${props.draftId}`))
-      files.value = await Promise.all(
+      const sources = await Promise.all(
         (draft.value.source_ids || []).map((id: string) => ws.api(`/files/${id}`)),
       )
+      // A CV's files are its mode's, shown under its choice; a document's are its sources.
+      if (isCv.value) {
+        const mode = draft.value.options?.cv_source
+        cvSource.value = CV_SOURCES.includes(mode) ? mode : 'text'
+        cvFiles.linkedin = cvSource.value === 'linkedin' ? sources : []
+        cvFiles.file = cvSource.value === 'file' ? sources : []
+        files.value = []
+      } else files.value = sources
       const photo = portrait.value
       if (photo && !photo.name)
         ws.api(`/files/${photo.id}`)
@@ -540,6 +732,11 @@ watch(
       draft.value = null
       quote.value = null
       files.value = []
+      cvSource.value = 'text'
+      cvFiles.linkedin = []
+      cvFiles.file = []
+      sourceError.value = ''
+      cvLinkError.value = ''
       removePortrait()
       step.value = 0
       form.feature_id = String(route.query.feature || 'ai.pdf_topic')
@@ -584,7 +781,8 @@ async function createDraft() {
         options: topicGiven.value ? { ...fields.options, topic_given: true } : fields.options,
         // Only a new draft needs this fallback. Changing an existing prompt,
         // even from empty to a service name, rebuilds its authored content.
-        prompt: form.prompt.trim() || name(form.feature_id, selected.value?.name),
+        // A CV made from files may have no notes, and a service's name is none.
+        prompt: form.prompt.trim() || (cvFromFiles.value ? '' : name(form.feature_id, selected.value?.name)),
       },
     }),
   )
@@ -659,6 +857,9 @@ function moveSection(index: number, direction: number) {
 }
 async function review() {
   if (busy.value || submissionPending.value || !canUseTool.value || !hasEssentialInput.value) return
+  sourceError.value = ''
+  cvLinkError.value = ''
+  if (cvStopsBeforeSending()) return
   await run('quote', async () => {
     if (!draft.value) await createDraft()
     else await saveDraft()
@@ -756,6 +957,7 @@ watch(
 )
 watch(form, invalidateQuote, { deep: true, flush: 'sync' })
 watch(files, invalidateQuote, { deep: true, flush: 'sync' })
+watch([cvSource, () => cvFiles.linkedin, () => cvFiles.file], invalidateQuote, { flush: 'sync' })
 </script>
 <template>
   <div class="studio-page">
@@ -833,29 +1035,139 @@ watch(files, invalidateQuote, { deep: true, flush: 'sync' })
                   </option>
                 </select></label
               >
-              <label class="form-field studio-primary-field">
-                <span>{{ t(revising ? 'reviseLabel' : 'studioDescribe') }}</span>
+              <!-- A CV starts with where it is made from: native radios, so arrows move between them. -->
+              <fieldset
+                v-if="isCv && !revising && cvModes.length > 1"
+                class="cv-source-choice"
+                data-testid="studio-cv-source"
+              >
+                <legend>{{ t('studioCvStartFrom') }}</legend>
+                <div class="cv-source-options">
+                  <label
+                    v-for="mode in cvModes"
+                    :key="mode"
+                    class="cv-source-option"
+                    :class="{ selected: cvMode === mode }"
+                    :data-testid="`studio-cv-source-${mode}`"
+                    ><input v-model="cvSource" type="radio" name="studio-cv-source" :value="mode" /><AppIcon
+                      :name="CV_SOURCE_ICONS[mode]"
+                      :size="20"
+                    /><span
+                      ><strong>{{ t(CV_SOURCE_CHOICES[mode][0]) }}</strong
+                      ><small>{{ t(CV_SOURCE_CHOICES[mode][1]) }}</small></span
+                    ><AppIcon v-if="cvMode === mode" name="check" :size="17" class="cv-source-check"
+                  /></label>
+                </div>
+              </fieldset>
+              <template v-if="cvFileForm">
+                <section
+                  v-if="cvMode === 'linkedin'"
+                  class="cv-linkedin-steps"
+                  aria-labelledby="studio-cv-linkedin-steps"
+                  data-testid="studio-cv-linkedin-steps"
+                >
+                  <h3 id="studio-cv-linkedin-steps">{{ t('studioCvLinkedinSteps') }}</h3>
+                  <ol>
+                    <li v-for="key in LINKEDIN_STEPS" :key="key">{{ t(key) }}</li>
+                  </ol>
+                  <p>{{ t('studioCvLinkedinNoLinks') }}</p>
+                </section>
+                <div class="cv-source-block">
+                  <div class="studio-source cv-source-upload">
+                    <div>
+                      <h3>{{ t(cvMode === 'linkedin' ? 'studioCvLinkedinFiles' : 'studioCvOldFiles') }}</h3>
+                      <p>
+                        {{
+                          t(cvMode === 'linkedin' ? 'studioCvLinkedinFilesHint' : 'studioCvOldFilesHint', {
+                            max: cvMaxFiles,
+                          })
+                        }}
+                      </p>
+                    </div>
+                    <button
+                      ref="cvSourceButton"
+                      type="button"
+                      class="button secondary"
+                      data-testid="studio-cv-source-button"
+                      :disabled="!!busy || submissionPending || cvSourceFiles.length >= cvMaxFiles"
+                      :aria-describedby="sourceError ? 'studio-cv-source-error' : undefined"
+                      @click="cvSourceInput?.click()"
+                    >
+                      <AppIcon name="upload" :size="17" />{{ t(cvSourceFiles.length ? 'addMore' : 'upload') }}</button
+                    ><input
+                      ref="cvSourceInput"
+                      type="file"
+                      multiple
+                      class="visually-hidden"
+                      :accept="cvAccept(cvKinds)"
+                      data-testid="studio-cv-source-input"
+                      :aria-label="t(cvMode === 'linkedin' ? 'studioCvLinkedinFiles' : 'studioCvOldFiles')"
+                      @change="uploadCvSources(($event.target as HTMLInputElement).files)"
+                    />
+                  </div>
+                  <div v-if="sourceError" class="field-error cv-source-error" data-testid="studio-cv-source-error">
+                    <AppIcon name="alert" :size="17" /><span id="studio-cv-source-error">{{ sourceError }}</span>
+                  </div>
+                  <ul v-if="cvSourceFiles.length" class="cv-source-list" data-testid="studio-cv-source-files">
+                    <li v-for="file in cvSourceFiles" :key="file.id" class="source-chip">
+                      <AppIcon :name="sourceIcon(file)" :size="17" /><span>{{ file.name }}</span
+                      ><button
+                        type="button"
+                        class="icon-button"
+                        :aria-label="`${t('remove')}: ${file.name}`"
+                        @click="removeCvSource(file.id)"
+                      >
+                        <AppIcon name="x" :size="15" />
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </template>
+              <label class="form-field studio-primary-field" :class="{ 'cv-notes-field': cvFileForm }">
+                <span>{{ t(revising ? 'reviseLabel' : cvFileForm ? 'studioCvNotes' : 'studioDescribe') }}</span>
                 <textarea
                   ref="promptInput"
                   v-model="form.prompt"
                   data-testid="studio-primary-input"
                   @input="delete form.options.pages"
-                  rows="7"
+                  :rows="cvFileForm ? 4 : 7"
                   :maxlength="studio.config.value?.limits?.source_chars || 12000"
-                  :placeholder="t(isCv ? 'studioCvPlaceholder' : 'studioDescribePlaceholder')"
-                  :aria-invalid="promptError ? 'true' : undefined"
+                  :placeholder="t(promptPlaceholder)"
+                  :aria-invalid="promptError || cvLinkError ? 'true' : undefined"
                   :aria-describedby="
-                    promptError ? 'studio-prompt-error' : suggestedService ? 'studio-service-hint' : undefined
+                    promptError
+                      ? 'studio-prompt-error'
+                      : cvLinkError
+                        ? 'studio-cv-link-error'
+                        : suggestedService
+                          ? 'studio-service-hint'
+                          : undefined
                   "
                 />
                 <small data-testid="studio-describe-hint">{{
                   revising
                     ? t(isCv ? 'reviseExamplesCv' : 'reviseExamples')
                     : isCv
-                      ? t('studioCvDescribeHint')
+                      ? t(cvFromFiles ? 'studioCvNotesHint' : 'studioCvDescribeHint')
                       : t('studioDescribeHint', { pages: defaultPages, max: maxPages })
                 }}</small>
               </label>
+              <!-- A bare LinkedIn link: the steps to send the profile, where the link was typed. -->
+              <div v-if="cvLinkError" class="field-error cv-link-error" data-testid="studio-cv-link-error">
+                <AppIcon name="alert" :size="17" /><span id="studio-cv-link-error">{{ cvLinkError }}</span>
+                <ol data-testid="studio-cv-link-steps">
+                  <li v-for="key in LINKEDIN_STEPS" :key="key">{{ t(key) }}</li>
+                </ol>
+                <button
+                  v-if="cvMode !== 'linkedin' && cvModes.includes('linkedin')"
+                  type="button"
+                  class="button secondary small"
+                  data-testid="studio-cv-use-linkedin"
+                  @click="cvSource = 'linkedin'"
+                >
+                  {{ t('studioCvUseLinkedin') }}
+                </button>
+              </div>
               <!-- Outside the label: a button inside one would be part of its name. -->
               <div v-if="promptError" class="field-error" data-testid="studio-prompt-error">
                 <AppIcon name="alert" :size="17" /><span id="studio-prompt-error">{{ promptError }}</span>
@@ -912,7 +1224,7 @@ watch(files, invalidateQuote, { deep: true, flush: 'sync' })
                   {{ t(suggestedService === 'ai.pptx' ? 'studioSwitchToSlides' : 'studioSwitchToPdf') }}
                 </button>
               </div>
-              <div v-if="!revising" class="studio-examples">
+              <div v-if="!revising && !cvFromFiles" class="studio-examples">
                 <span>{{ t('studioTryOne') }}</span>
                 <button
                   v-for="(example, index) in examples"
@@ -967,6 +1279,10 @@ watch(files, invalidateQuote, { deep: true, flush: 'sync' })
                   <div>
                     <h3>{{ t('studioCvPhoto') }}</h3>
                     <p>{{ t('studioCvPhotoHint') }}</p>
+                    <!-- The files above are read, never used as the portrait. -->
+                    <p v-if="cvFileForm" data-testid="studio-cv-photo-separate">
+                      {{ t('studioCvPhotoSeparate') }}
+                    </p>
                   </div>
                   <button
                     ref="portraitButton"
@@ -1311,6 +1627,15 @@ watch(files, invalidateQuote, { deep: true, flush: 'sync' })
             <h2>{{ t('reviewTitle') }}</h2>
             <!-- A CV's length is the template's to fit: said, not set. -->
             <template v-if="isCv">
+              <!-- What the CV is made from: the way it was started, and its files by name. -->
+              <div class="meter-row studio-cv-row" data-testid="studio-cv-source-row">
+                <span>{{ t('studioCvSource') }}</span><strong>{{ cvSourceLabel }}</strong>
+              </div>
+              <ul v-if="cvSourceFiles.length" class="studio-cv-files" data-testid="studio-cv-source-names">
+                <li v-for="file in cvSourceFiles" :key="file.id">
+                  <AppIcon :name="sourceIcon(file)" :size="15" /><span>{{ file.name }}</span>
+                </li>
+              </ul>
               <div class="meter-row studio-cv-row" data-testid="studio-cv-length">
                 <span>{{ t('guideRowPages') }}</span><strong>{{ t('studioCvLength') }}</strong>
               </div>

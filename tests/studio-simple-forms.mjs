@@ -88,9 +88,17 @@ const config = {
       output_locale: { enum: ['en', 'uz', 'ru'] },
       output_format: { enum: feature === 'ai.pptx' ? ['pptx'] : ['pdf'] },
     },
-    // A CV is one or two pages, and never has stock photos.
+    // A CV is one or two pages, and never has stock photos. It starts from a
+    // description, a LinkedIn profile's PDF or screenshots, or an old CV.
     max_pages: feature === 'ai.pptx' ? 60 : feature === 'ai.cv' ? 2 : 35,
-    ...(feature === 'ai.cv' ? { max_images: 0 } : {}),
+    ...(feature === 'ai.cv'
+      ? {
+          max_images: 0,
+          source_modes: ['text', 'linkedin', 'file'],
+          source_kinds: { linkedin: ['pdf', 'image'], file: ['pdf', 'docx', 'image'] },
+          max_source_files: 10,
+        }
+      : {}),
     locales: ['en', 'uz', 'ru'],
   })),
   limits: { sections: 10, slides: 20, questions: 5, source_chars: 12000 },
@@ -173,6 +181,43 @@ const PNG = Buffer.from(
 )
 const CV_SECTIONS = ['profile', 'experience', 'education', 'skills', 'languages', 'projects', 'certificates', 'extra']
 const cvNameRefusal = 'Write your full name — the CV is made for you, so it has to say who you are.'
+const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+// A CV made from files, as the server would answer for them (fictional people
+// and files only): the person is read from the file unless its name says it
+// names nobody, and a "blank" file has no text to read.
+const cvFileRefusal = {
+  cv_file_required: 'Add the file your CV is to be made from.',
+  cv_file_unreadable: 'No text could be read from these files. Send a clearer photo or scan.',
+  cv_file_kind: 'This kind of file cannot be used here.',
+  cv_linkedin_link: 'LinkedIn links cannot be opened. Save your profile as a PDF and send it.',
+}
+const cvFilePerson = 'Malika Karimova'
+// A kind refusal the server makes on the next CV draft write, as if it read the file differently.
+let refuseCvKind = false
+const assetKind = (asset) =>
+  ({ 'application/pdf': 'pdf', [DOCX]: 'docx', 'image/png': 'image', 'image/jpeg': 'image' })[asset?.mime_type] || ''
+/** A CV's source refusal, as apps/studio/domain.py decides it, or null. */
+function cvSourceRefusal(body, prompt) {
+  const mode = body.options?.cv_source || 'text'
+  const ids = body.source_ids || []
+  const refuse = (code) => ({ error: { code, message: cvFileRefusal[code] } })
+  if (!['text', 'linkedin', 'file'].includes(mode)) return { error: { code: 'invalid_parameters', message: 'invalid' } }
+  const linkOnly = /^\s*(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/[\w-]+\/?\s*$/i.test(prompt || '')
+  const linkAsked = /linkedin\.com\/in\//i.test(prompt || '') && prompt.split(/\s+/).length < 16
+  if (mode === 'text') {
+    if (ids.length) return { error: { code: 'invalid_parameters', message: 'A description takes no files.' } }
+    return linkOnly || linkAsked ? refuse('cv_linkedin_link') : null
+  }
+  if (!ids.length) return refuse(linkOnly || linkAsked ? 'cv_linkedin_link' : 'cv_file_required')
+  const assets = ids.map((asset) => uploads.get(asset))
+  const kinds = mode === 'linkedin' ? ['pdf', 'image'] : ['pdf', 'docx', 'image']
+  if (refuseCvKind || assets.some((asset) => !kinds.includes(assetKind(asset)))) {
+    refuseCvKind = false
+    return refuse('cv_file_kind')
+  }
+  if (assets.every((asset) => /^blank/i.test(asset.name))) return refuse('cv_file_unreadable')
+  return null
+}
 // Uploaded files by id, so an uploaded portrait reads back as itself.
 const uploads = new Map()
 // What the last uploaded image was, as the server would read it: its type,
@@ -295,9 +340,12 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
     const file = multipartFile(request.postDataBuffer() || Buffer.alloc(0))
     const image = /^image\/(png|jpeg)$/i.exec(file?.type || '')
     if (image) uploadedImage = { name: file.name, type: file.type, bytes: file.bytes.length, ...imageFacts(file.bytes) }
+    // Word files keep their name and type, as a CV's old file; anything else is a PDF.
     const asset = image
       ? { id: id(), name: file.name, size_bytes: file.bytes.length, mime_type: `image/${image[1]}`, state: 'ready' }
-      : { id: id(), name: 'research-notes.pdf', size_bytes: 4096, page_count: 2, mime_type: 'application/pdf', state: 'ready' }
+      : /\.docx$/i.test(file?.name || '')
+        ? { id: id(), name: file.name, size_bytes: file.bytes.length, page_count: 1, mime_type: DOCX, state: 'ready' }
+        : { id: id(), name: file?.name || 'research-notes.pdf', size_bytes: 4096, page_count: 2, mime_type: 'application/pdf', state: 'ready' }
     uploads.set(asset.id, asset)
     return json(asset, 201)
   }
@@ -349,9 +397,14 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
     // A CV is written for the person it names, and is always its eight sections:
     // no page count is read, and the title is the name.
     if (body.feature_id === 'ai.cv') {
-      // The server looks for the name in the title too (apps/studio/cv/content.py).
+      const sourceRefusal = cvSourceRefusal(body, body.prompt)
+      if (sourceRefusal) return json(sourceRefusal, 400)
+      // The server looks for the name in the title too (apps/studio/cv/content.py),
+      // and in the files a CV is made from.
       const person = /^\p{Lu}\p{L}+ \p{Lu}\p{L}+$/mu
-      const named = person.exec(body.prompt || '') || person.exec(body.title || '')
+      const fromFile =
+        body.source_ids?.length && !body.source_ids.every((asset) => /^nameless/i.test(uploads.get(asset)?.name || ''))
+      const named = person.exec(body.prompt || '') || person.exec(body.title || '') || (fromFile ? [cvFilePerson] : null)
       if (!named && body.options?.topic_given !== true)
         return json({ error: { code: 'cv_name_required', message: cvNameRefusal } }, 400)
       if (refusePortrait && body.options?.portrait_asset_id)
@@ -436,6 +489,10 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
     if (method === 'PATCH') {
       if (draft.feature_id === 'ai.cv' && refusePortrait && body.options?.portrait_asset_id)
         return json({ error: { code: refusePortrait, message: 'Check the request and try again.' } }, 400)
+      // A change keeps its CV's files whatever is sent; a new CV is checked again.
+      const cvRefusal =
+        draft.feature_id === 'ai.cv' && !draft.revision ? cvSourceRefusal(body, body.prompt ?? draft.prompt) : null
+      if (cvRefusal) return json(cvRefusal, 400)
       // Match the backend's rebuild trigger: a changed brief/source/format
       // regenerates content unless the user explicitly supplies edited content.
       const rebuild = ['prompt', 'source_text', 'source_ids', 'output_format'].some(
@@ -1619,6 +1676,257 @@ try {
   assert.match(await page.getByTestId('studio-cv-template-row').innerText(), /Template\s+Auto/)
   checks.push('A CV takes one description, a JPG/PNG portrait and a template; it has no page stepper or outline, and quotes as 1–2 pages')
 
+  // 11. A CV starts with where it is made from: a description, a LinkedIn
+  // profile (its Save to PDF, or screenshots) or an old CV. In the last two the
+  // text is notes on top of the files, which go to the draft as its sources.
+  const pdfBytes = await fs.readFile('tests/fixtures/research-notes.pdf')
+  const sourceInput = () => page.getByTestId('studio-cv-source-input')
+  const sourceError = () => page.getByTestId('studio-cv-source-error')
+  const sourceChips = () => page.getByTestId('studio-cv-source-files').locator('li')
+  const sourceNames = () => page.getByTestId('studio-cv-source-names').locator('li').allInnerTexts()
+  const choice = (mode) => page.getByTestId(`studio-cv-source-${mode}`)
+  const radio = (name) => page.getByRole('radio', { name })
+  const linkError = () => page.getByTestId('studio-cv-link-error')
+  const cvDrafts = () => calls('/generation/drafts').length
+  const noOverflow = async (label) =>
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${label}: horizontal overflow`)
+  const focused = (testId) =>
+    page.waitForFunction((value) => document.activeElement?.getAttribute('data-testid') === value, testId)
+  await open('ai.cv')
+  const sourceGroup = page.getByRole('group', { name: 'How do you want to make your CV?' })
+  await sourceGroup.waitFor()
+  assert.deepEqual(
+    await sourceGroup.getByRole('radio').evaluateAll((nodes) => nodes.map((node) => node.value)),
+    ['text', 'linkedin', 'file'],
+  )
+  assert.equal(await radio(/^Describe yourself/).isChecked(), true, 'a CV starts from a description')
+  assert.ok(
+    await page.evaluate(() => {
+      const [purpose, choices, field] = ['studio-purpose', 'studio-cv-source', 'studio-primary-input'].map((id) =>
+        document.querySelector(`[data-testid="${id}"]`),
+      )
+      const after = (first, second) => !!(first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING)
+      return after(purpose, choices) && after(choices, field)
+    }),
+    'the choice comes first, right after the service',
+  )
+  assert.equal(await sourceInput().count(), 0, 'a description takes no files')
+  await page.getByTestId('studio-example-0').waitFor()
+  // The arrows move between the choices, as in any radio group.
+  await radio(/^Describe yourself/).focus()
+  await page.keyboard.press('ArrowRight')
+  assert.equal(await radio(/^From LinkedIn/).isChecked(), true, 'the arrow keys choose')
+  assert.equal(await page.evaluate(() => document.activeElement?.value), 'linkedin')
+  // From LinkedIn: how to save the profile, then the files and the notes.
+  const linkedinSteps = page.getByTestId('studio-cv-linkedin-steps')
+  await linkedinSteps.waitFor()
+  assert.equal(await linkedinSteps.locator('li').count(), 3)
+  assert.match(await linkedinSteps.innerText(), /More[\s\S]*Save to PDF[\s\S]*desktop site[\s\S]*screenshots/)
+  assert.equal(await sourceInput().getAttribute('accept'), '.pdf,application/pdf,.jpg,.jpeg,.png,image/jpeg,image/png')
+  assert.equal(await page.getByTestId('studio-example-0').count(), 0, 'a whole description is no example of notes')
+  assert.match(await page.locator('.studio-primary-field > span').innerText(), /What job are you applying for, or what should change\? \(optional\)/)
+  assert.match(await page.getByTestId('studio-describe-hint').innerText(), /Everything in the files goes on the CV/)
+  // The portrait stays its own control, and says the files are not it.
+  await page.getByTestId('studio-cv-photo-button').waitFor()
+  assert.match(await page.getByTestId('studio-cv-photo-separate').innerText(), /not taken from the files above/)
+  assert.equal(await review().isDisabled(), true, 'nothing to make the CV from yet')
+  // A bare profile link is never sent: LinkedIn cannot be read, so the steps are said under the field.
+  let draftsBefore = cvDrafts()
+  await primary().fill('https://www.linkedin.com/in/fixture-person/')
+  await review().click()
+  await linkError().waitFor()
+  assert.equal(cvDrafts(), draftsBefore, 'a bare link is not sent')
+  assert.match(await page.locator('#studio-cv-link-error').innerText(), /We cannot open LinkedIn links/)
+  assert.equal(await linkError().getByTestId('studio-cv-link-steps').locator('li').count(), 3)
+  assert.equal(await primary().getAttribute('aria-describedby'), 'studio-cv-link-error')
+  assert.equal(await primary().getAttribute('aria-invalid'), 'true')
+  await focused('studio-primary-input')
+  assert.equal(await page.getByTestId('studio-cv-use-linkedin').count(), 0, 'already From LinkedIn')
+  assert.equal(await page.locator('.error-banner').count(), 0)
+  await page.setViewportSize({ width: 390, height: 844 })
+  await noOverflow('cv link steps/390')
+  await linkError().scrollIntoViewIfNeeded()
+  await page.screenshot({ path: path.join(output, 'cv-source-link-steps-390.png') })
+  await page.setViewportSize({ width: 1440, height: 1000 })
+  // Notes alone are not enough: the profile is what the CV is made from.
+  await primary().fill('Applying for a data analyst job at a bank.')
+  assert.equal(await linkError().count(), 0, 'typing takes the steps away')
+  await review().click()
+  await sourceError().waitFor()
+  assert.equal(cvDrafts(), draftsBefore, 'no file, no request')
+  assert.equal(await sourceError().innerText(), 'Add your LinkedIn profile: the PDF or the screenshots.')
+  await focused('studio-cv-source-button')
+  assert.equal(await page.getByTestId('studio-cv-source-button').getAttribute('aria-describedby'), 'studio-cv-source-error')
+  // A Word file is no LinkedIn export, and is never uploaded.
+  let sourceUploads = calls('/files/uploads').length
+  await sourceInput().setInputFiles({ name: 'profile.docx', mimeType: DOCX, buffer: Buffer.from('PK fixture') })
+  await page.getByText('From LinkedIn takes a PDF or JPG/PNG screenshots.').waitFor()
+  assert.equal(calls('/files/uploads').length, sourceUploads)
+  await sourceInput().setInputFiles({ name: 'Profile.pdf', mimeType: 'application/pdf', buffer: pdfBytes })
+  await sourceChips().first().waitFor()
+  assert.equal(await sourceError().count(), 0, 'a file taken clears the refusal')
+  assert.deepEqual(await sourceChips().allInnerTexts(), ['Profile.pdf'])
+  const profileId = [...uploads.values()].at(-1).id
+  await page.setViewportSize({ width: 390, height: 844 })
+  await noOverflow('cv linkedin brief/390')
+  await auditBrief('cv source linkedin 390')
+  await page.setViewportSize({ width: 1440, height: 1000 })
+  const fromLinkedin = await reviewNew()
+  assert.equal(fromLinkedin.feature_id, 'ai.cv')
+  assert.equal(fromLinkedin.options.cv_source, 'linkedin')
+  assert.deepEqual(fromLinkedin.source_ids, [profileId])
+  assert.equal(fromLinkedin.prompt, 'Applying for a data analyst job at a bank.')
+  assert.equal(fromLinkedin.options.portrait_asset_id, undefined, 'a source file is never the portrait')
+  // The rail says what the CV is made from, by name, read back with the draft.
+  assert.match(await page.getByTestId('studio-cv-source-row').innerText(), /Made from\s+LinkedIn profile/)
+  assert.deepEqual(await sourceNames(), ['Profile.pdf'])
+  assert.equal(await page.locator('.generation-summary h2').innerText(), cvFilePerson, 'named from the file')
+  await page.setViewportSize({ width: 390, height: 1000 })
+  await noOverflow('cv source review/390')
+  {
+    const audit = await new AxeBuilder({ page }).include('.studio-layout').withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()
+    assert.deepEqual(audit.violations.map((violation) => violation.id), [], 'cv source review/390: accessibility')
+  }
+  await page.screenshot({ path: path.join(output, 'cv-source-review-390.png'), fullPage: true })
+  await page.setViewportSize({ width: 1440, height: 1000 })
+  // The draft opened again keeps its mode and its files.
+  await page.locator('.studio-steps button').first().click()
+  assert.equal(await radio(/^From LinkedIn/).isChecked(), true)
+  assert.deepEqual(await sourceChips().allInnerTexts(), ['Profile.pdf'])
+
+  // Screenshots instead of the PDF: three at once, up to ten in all, and no notes.
+  await open('ai.cv')
+  await choice('linkedin').click()
+  const shot = (index) => ({ name: `profile-${index}.png`, mimeType: 'image/png', buffer: PNG })
+  await sourceInput().setInputFiles([shot(1), shot(2), shot(3)])
+  await page.waitForFunction(() => document.querySelectorAll('[data-testid="studio-cv-source-files"] li').length === 3)
+  await sourceChips().nth(2).getByRole('button', { name: 'Remove file: profile-3.png' }).click()
+  assert.deepEqual(await sourceChips().allInnerTexts(), ['profile-1.png', 'profile-2.png'])
+  await sourceInput().setInputFiles(shot(3))
+  await page.waitForFunction(() => document.querySelectorAll('[data-testid="studio-cv-source-files"] li').length === 3)
+  sourceUploads = calls('/files/uploads').length
+  await sourceInput().setInputFiles(Array.from({ length: 8 }, (_, index) => shot(index + 4)))
+  await page.getByText('Up to 10 files. Remove some to add others.').waitFor()
+  assert.equal(calls('/files/uploads').length, sourceUploads, 'an eleventh file is never uploaded')
+  assert.equal(await review().isDisabled(), false, 'the files alone are enough')
+  const fromShots = await reviewNew()
+  assert.equal(fromShots.options.cv_source, 'linkedin')
+  assert.equal(fromShots.source_ids.length, 3)
+  assert.equal(fromShots.prompt, '', 'no notes are sent as none, not as the service’s name')
+  assert.equal(fromShots.options.portrait_asset_id, undefined, 'a screenshot is a page to read, not the portrait')
+  assert.deepEqual(await sourceNames(), ['profile-1.png', 'profile-2.png', 'profile-3.png'])
+
+  // From an old CV: a PDF, a Word file or photos. What the server cannot read,
+  // or reads as another kind, is said beside the files, never in the banner.
+  await open('ai.cv')
+  await choice('file').click()
+  assert.equal(await radio(/^From an old CV/).isChecked(), true)
+  assert.equal(await page.getByTestId('studio-cv-linkedin-steps').count(), 0)
+  assert.equal(
+    await sourceInput().getAttribute('accept'),
+    `.pdf,application/pdf,.docx,${DOCX},.jpg,.jpeg,.png,image/jpeg,image/png`,
+  )
+  await sourceInput().setInputFiles({ name: 'blank-scan.pdf', mimeType: 'application/pdf', buffer: pdfBytes })
+  await sourceChips().first().waitFor()
+  draftsBefore = cvDrafts()
+  await review().click()
+  await sourceError().waitFor()
+  assert.equal(cvDrafts(), draftsBefore + 1, 'the server read this one')
+  assert.equal(await sourceError().innerText(), cvFileRefusal.cv_file_unreadable)
+  assert.equal(await page.locator('.error-banner').count(), 0, 'not in the banner at the top')
+  await focused('studio-cv-source-button')
+  await page.setViewportSize({ width: 390, height: 844 })
+  await noOverflow('cv unreadable/390')
+  await page.getByTestId('studio-cv-source-button').scrollIntoViewIfNeeded()
+  await page.screenshot({ path: path.join(output, 'cv-source-unreadable-390.png') })
+  await page.setViewportSize({ width: 1440, height: 1000 })
+  await sourceChips().first().getByRole('button', { name: 'Remove file: blank-scan.pdf' }).click()
+  assert.equal(await sourceError().count(), 0)
+  await sourceInput().setInputFiles({ name: 'Old-CV.docx', mimeType: DOCX, buffer: Buffer.from('PK fixture docx') })
+  await page.getByTestId('studio-cv-source-files').getByText('Old-CV.docx').waitFor()
+  const oldCvId = [...uploads.values()].at(-1).id
+  refuseCvKind = true
+  await review().click()
+  await sourceError().waitFor()
+  assert.equal(await sourceError().innerText(), cvFileRefusal.cv_file_kind)
+  assert.equal(await page.locator('.error-banner').count(), 0)
+  await primary().fill('Now applying for a project manager role. Add my 2024 PMP certificate.')
+  const fromOldCv = await reviewNew()
+  assert.equal(fromOldCv.options.cv_source, 'file')
+  assert.deepEqual(fromOldCv.source_ids, [oldCvId])
+  assert.match(await page.getByTestId('studio-cv-source-row').innerText(), /Made from\s+Old CV/)
+  assert.deepEqual(await sourceNames(), ['Old-CV.docx'])
+  await page.locator('.studio-steps button').first().click()
+  await page.getByTestId('studio-cv-source-files').getByText('Old-CV.docx').waitFor()
+  await page.setViewportSize({ width: 390, height: 844 })
+  await noOverflow('cv old cv brief/390')
+  await auditBrief('cv source file 390')
+  await page.setViewportSize({ width: 1440, height: 1000 })
+  // Back to Describe: the files stay with their mode and are not sent.
+  await choice('text').click()
+  assert.equal(await sourceInput().count(), 0)
+  assert.equal(await page.getByTestId('studio-cv-source-files').count(), 0)
+  await page.getByTestId('studio-example-0').click()
+  const described = await reviewSaved()
+  assert.equal(described.options.cv_source, 'text')
+  assert.deepEqual(described.source_ids, [], 'a description sends no files')
+  assert.match(await page.getByTestId('studio-cv-source-row').innerText(), /Made from\s+Your description/)
+  assert.equal(await page.getByTestId('studio-cv-source-names').count(), 0)
+  await page.locator('.studio-steps button').first().click()
+  await choice('file').click()
+  await page.getByTestId('studio-cv-source-files').getByText('Old-CV.docx').waitFor()
+
+  // No name in the notes nor in the file: asked for under the notes, as for a description.
+  await open('ai.cv')
+  await choice('file').click()
+  await sourceInput().setInputFiles({ name: 'nameless-scan.png', mimeType: 'image/png', buffer: PNG })
+  await sourceChips().first().waitFor()
+  await review().click()
+  await page.getByTestId('studio-prompt-error').waitFor()
+  assert.equal(await page.locator('#studio-prompt-error').innerText(), cvNameRefusal)
+  await focused('studio-primary-input')
+  await primary().fill('Dilnoza Rahimova\nApplying for a teacher job.')
+  assert.equal((await reviewNew()).title, 'Dilnoza Rahimova')
+
+  // A description that is a bare link shows the steps, and the way to From LinkedIn.
+  await open('ai.cv')
+  draftsBefore = cvDrafts()
+  await primary().fill('linkedin.com/in/fixture-person')
+  await review().click()
+  await linkError().waitFor()
+  assert.equal(cvDrafts(), draftsBefore, 'a bare link is not sent')
+  await page.getByTestId('studio-cv-use-linkedin').click()
+  assert.equal(await radio(/^From LinkedIn/).isChecked(), true)
+  assert.equal(await linkError().count(), 0)
+  await page.getByTestId('studio-cv-linkedin-steps').waitFor()
+  // A sentence round a link is the server's to read; it says the same.
+  await choice('text').click()
+  await primary().fill('Please make my CV from my profile at linkedin.com/in/fixture-person, thank you very much.')
+  await review().click()
+  await linkError().waitFor()
+  assert.equal(cvDrafts(), draftsBefore + 1)
+  assert.equal(await linkError().getByTestId('studio-cv-link-steps').locator('li').count(), 3)
+  assert.equal(await page.locator('.error-banner').count(), 0)
+
+  // The PDF and Slides services never get a CV's mode or files.
+  for (const feature of featureIds) {
+    await open('ai.cv')
+    await choice('linkedin').click()
+    await sourceInput().setInputFiles({ name: 'Profile.pdf', mimeType: 'application/pdf', buffer: pdfBytes })
+    await sourceChips().first().waitFor()
+    await page.getByTestId('studio-purpose').selectOption(feature)
+    assert.equal(await page.getByTestId('studio-cv-source').count(), 0)
+    assert.equal(await sourceInput().count(), 0)
+    await primary().fill('A report on solar power in Central Asia.')
+    const other = await reviewNew()
+    assert.equal(other.feature_id, feature)
+    assert.equal(other.options.cv_source, undefined, `${feature} gets no cv_source`)
+    assert.deepEqual(other.source_ids, [], `${feature} gets no CV files`)
+  }
+  checks.push(
+    'A CV starts from a description, LinkedIn (PDF or screenshots) or an old CV (PDF, Word, photos): the mode and files are sent, a bare link shows the steps, and refusals are said beside their control',
+  )
+
   for (const locale of ['en', 'uz', 'ru']) {
     for (const width of [1440, 390]) {
       await page.setViewportSize({ width, height: 1000 })
@@ -1675,6 +1983,41 @@ try {
           path: path.join(output, `${feature}-${locale}-${width}.png`),
           fullPage: true,
         })
+        // A CV's two file modes, in every language: the LinkedIn steps and the
+        // old CV's upload area fit, and pass, on a phone as on a desktop.
+        if (feature === 'ai.cv')
+          for (const mode of ['linkedin', 'file']) {
+            await page.getByTestId(`studio-cv-source-${mode}`).click()
+            await page.getByTestId('studio-cv-source-input').waitFor({ state: 'attached' })
+            for (const theme of ['light', 'dark']) {
+              await page.evaluate((value) => (document.documentElement.dataset.theme = value), theme)
+              await page.evaluate(
+                () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+              )
+              const label = `${feature}/${mode}/${locale}/${width}/${theme}`
+              assert.equal(
+                await page.evaluate(() => document.documentElement.scrollWidth > innerWidth),
+                false,
+                `${label}: horizontal overflow`,
+              )
+              visualChecks += 1
+              const result = await new AxeBuilder({ page })
+                .include('.studio-layout')
+                .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
+                .analyze()
+              assert.deepEqual(
+                result.violations.map((violation) => ({
+                  id: violation.id,
+                  nodes: violation.nodes.map((node) => ({ target: node.target, failure: node.failureSummary })),
+                })),
+                [],
+                `${label}: accessibility violations`,
+              )
+            }
+            await page.getByTestId('studio-brief').screenshot({
+              path: path.join(output, `${feature}-${mode}-${locale}-${width}.png`),
+            })
+          }
       }
     }
   }

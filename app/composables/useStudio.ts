@@ -11,6 +11,12 @@ export interface StudioFeature {
   max_pages?: number
   /** Stock photos one deck can carry; 0 when photos are off. */
   max_images?: number
+  /** A CV's ways to start: `text`, `linkedin` (its Save to PDF, or screenshots) and `file` (an old CV). */
+  source_modes?: string[]
+  /** The kinds of file each CV mode reads: `pdf`, `docx`, `image` (JPG or PNG). */
+  source_kinds?: Record<string, string[]>
+  /** Most files a CV can be made from. */
+  max_source_files?: number
 }
 export interface StudioConfig {
   provider: { mode: string; label: string; configured: boolean; image_configured?: boolean }

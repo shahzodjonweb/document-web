@@ -1094,6 +1094,134 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   ],
   studioCvPhotoAttached: ['Attached', 'Biriktirilgan', 'Прикреплено'],
   studioCvPhotoNone: ['None', 'Yo‘q', 'Нет'],
+  // Where a CV starts from, chosen first: a description, the LinkedIn profile
+  // (its Save to PDF, or screenshots) or an old CV. In the last two the text
+  // the customer types is notes on top of the files.
+  studioCvStartFrom: ['How do you want to make your CV?', 'Rezyumeni qanday tuzamiz?', 'Как составим резюме?'],
+  studioCvFromText: ['Describe yourself', 'O‘zingiz haqingizda yozing', 'Рассказать о себе'],
+  studioCvFromTextHint: [
+    'Write about yourself in one message.',
+    'Hammasini bitta xabarda yozasiz.',
+    'Всё о себе — в одном сообщении.',
+  ],
+  studioCvFromLinkedin: ['From LinkedIn', 'LinkedIn profilidan', 'Из LinkedIn'],
+  studioCvFromLinkedinHint: [
+    'Your profile saved as a PDF, or screenshots.',
+    'PDF qilib saqlangan profil yoki skrinshotlar.',
+    'Профиль, сохранённый в PDF, или скриншоты.',
+  ],
+  studioCvFromFile: ['From an old CV', 'Eski rezyumedan', 'Из старого резюме'],
+  studioCvFromFileHint: [
+    'A PDF, a Word file or photos of it.',
+    'PDF, Word fayl yoki uning fotosurati.',
+    'PDF, файл Word или его фото.',
+  ],
+  // LinkedIn shows profiles only to people signed in and forbids reading them
+  // by machine, so a profile comes as LinkedIn's own Save to PDF. Its menu is
+  // in English or Russian (LinkedIn has no Uzbek), so the Uzbek steps quote
+  // the English labels and the Russian ones give both.
+  studioCvLinkedinSteps: [
+    'Save your LinkedIn profile as a PDF',
+    'LinkedIn profilingizni PDF qilib saqlang',
+    'Сохраните профиль LinkedIn в PDF',
+  ],
+  studioCvLinkedinStepComputer: [
+    'On a computer: open your profile, click More (or …) and choose Save to PDF.',
+    'Kompyuterda: profilingizni oching, «More» (yoki «…») tugmasini bosing va «Save to PDF» bandini tanlang.',
+    'На компьютере: откройте свой профиль, нажмите «Ещё» (More или «…») и выберите «Сохранить в формате PDF» (Save to PDF).',
+  ],
+  studioCvLinkedinStepPhone: [
+    'On a phone: open linkedin.com in your browser, switch it to the desktop site and do the same.',
+    'Telefonda: brauzerda linkedin.com saytini oching, kompyuter versiyasini yoqing va xuddi shunday qiling.',
+    'На телефоне: откройте linkedin.com в браузере, включите версию для компьютера и сделайте то же самое.',
+  ],
+  studioCvLinkedinStepScreenshots: [
+    'Or take screenshots of your whole profile and add them all.',
+    'Yoki profilingizni boshidan oxirigacha skrinshot qilib, hammasini qo‘shing.',
+    'Или сделайте скриншоты всего профиля и добавьте их все.',
+  ],
+  studioCvLinkedinNoLinks: [
+    'A link to your profile is not enough: LinkedIn shows profiles only to people signed in to it.',
+    'Profilingizga havolaning o‘zi yetmaydi: LinkedIn profillarni faqat tizimga kirganlarga ko‘rsatadi.',
+    'Одной ссылки на профиль мало: LinkedIn показывает профили только тем, кто вошёл в аккаунт.',
+  ],
+  studioCvLinkedinFiles: ['Your LinkedIn profile', 'LinkedIn profilingiz', 'Ваш профиль LinkedIn'],
+  studioCvLinkedinFilesHint: [
+    'The PDF from Save to PDF, or JPG/PNG screenshots. Up to {max} files.',
+    '«Save to PDF» orqali olingan PDF yoki JPG/PNG skrinshotlar. Ko‘pi bilan {max} ta fayl.',
+    'PDF из «Сохранить в формате PDF» или скриншоты JPG/PNG. До {max} файлов.',
+  ],
+  studioCvOldFiles: ['Your old CV', 'Eski rezyumengiz', 'Ваше старое резюме'],
+  studioCvOldFilesHint: [
+    'A PDF, Word (.docx), or JPG/PNG photos and scans. Up to {max} files, in any language.',
+    'PDF, Word (.docx) yoki JPG/PNG foto va skanlar. Ko‘pi bilan {max} ta fayl, istalgan tilda.',
+    'PDF, Word (.docx) или фото и сканы JPG/PNG. До {max} файлов, на любом языке.',
+  ],
+  // The description, in the two file modes: notes on top of the files.
+  studioCvNotes: [
+    'What job are you applying for, or what should change? (optional)',
+    'Qaysi ishga hujjat topshiryapsiz yoki nimani o‘zgartirish kerak? (ixtiyoriy)',
+    'На какую работу претендуете или что изменить? (необязательно)',
+  ],
+  studioCvNotesPlaceholder: [
+    'A senior accountant job at a bank. Add my 2024 IFRS certificate.',
+    'Bankdagi bosh buxgalter lavozimi. 2024-yilgi MHXS sertifikatimni qo‘shing.',
+    'Должность главного бухгалтера в банке. Добавьте сертификат МСФО 2024 года.',
+  ],
+  studioCvNotesHint: [
+    'Everything in the files goes on the CV, reworded, newest first. Write here only what is new or should change.',
+    'Fayllardagi barcha maʼlumotlar rezyumega kiradi: qayta tahrirlanib, eng yangilaridan boshlab. Bu yerga faqat yangi yoki o‘zgarishi kerak bo‘lgan narsalarni yozing.',
+    'Всё из файлов попадёт в резюме: в новой редакции, от нового к старому. Здесь напишите только то, что добавить или изменить.',
+  ],
+  // The portrait is not taken from the files: they are only read.
+  studioCvPhotoSeparate: [
+    'Your photo is added here, not taken from the files above.',
+    'Fotongiz shu yerda qo‘shiladi, yuqoridagi fayllardan olinmaydi.',
+    'Фото добавляется здесь, а не берётся из файлов выше.',
+  ],
+  // Said beside the upload area, by refusal code (the server's words when it gives them).
+  studioCvNeedLinkedin: [
+    'Add your LinkedIn profile: the PDF or the screenshots.',
+    'LinkedIn profilingizni qo‘shing: PDF yoki skrinshotlarni.',
+    'Добавьте профиль LinkedIn: PDF или скриншоты.',
+  ],
+  studioCvNeedFile: [
+    'Add your old CV: a PDF, a Word file or photos.',
+    'Eski rezyumengizni qo‘shing: PDF, Word fayl yoki fotosuratlar.',
+    'Добавьте старое резюме: PDF, файл Word или фото.',
+  ],
+  studioCvUnreadable: [
+    'We could not read any text in these files. Send a sharper photo or scan, or a PDF that is not protected.',
+    'Bu fayllardan matnni o‘qib bo‘lmadi. Aniqroq foto yoki skan yuboring yoki himoyalanmagan PDF tanlang.',
+    'Не удалось прочитать текст в этих файлах. Пришлите более чёткое фото или скан либо PDF без защиты.',
+  ],
+  studioCvKindLinkedin: [
+    'From LinkedIn takes a PDF or JPG/PNG screenshots.',
+    'LinkedIn profili uchun PDF yoki JPG/PNG skrinshotlar qabul qilinadi.',
+    'Для LinkedIn подойдут PDF или скриншоты JPG/PNG.',
+  ],
+  studioCvKindFile: [
+    'An old CV can be a PDF, a Word file (.docx), or JPG/PNG photos.',
+    'Eski rezyume PDF, Word (.docx) fayl yoki JPG/PNG foto bo‘lishi mumkin.',
+    'Старое резюме может быть в PDF, Word (.docx) или фото JPG/PNG.',
+  ],
+  studioCvFilesMax: [
+    'Up to {max} files. Remove some to add others.',
+    'Ko‘pi bilan {max} ta fayl. Boshqasini qo‘shish uchun ortiqchasini olib tashlang.',
+    'Не больше {max} файлов. Чтобы добавить другие, удалите лишние.',
+  ],
+  // A description that is only a LinkedIn link: the steps are shown instead of sending it.
+  studioCvLinkRefused: [
+    'We cannot open LinkedIn links. Save your profile as a PDF and add it instead:',
+    'LinkedIn havolalarini ocha olmaymiz. Profilingizni PDF qilib saqlang va o‘shani qo‘shing:',
+    'Ссылки на LinkedIn мы открыть не можем. Сохраните профиль в PDF и добавьте его:',
+  ],
+  studioCvUseLinkedin: ['Make it from LinkedIn', 'LinkedIn profilidan tuzish', 'Составить из LinkedIn'],
+  // The review rail: what the CV is made from.
+  studioCvSource: ['Made from', 'Manba', 'Источник'],
+  studioCvSourceText: ['Your description', 'Tavsifingiz', 'Ваше описание'],
+  studioCvSourceLinkedin: ['LinkedIn profile', 'LinkedIn profili', 'Профиль LinkedIn'],
+  studioCvSourceFile: ['Old CV', 'Eski rezyume', 'Старое резюме'],
   // A change to a CV is about its content; its pages are the template's to fit.
   revisePlaceholderCv: [
     'Add my Python course certificate from 2024 and make the profile shorter.',
