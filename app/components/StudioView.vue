@@ -96,6 +96,19 @@ const cvFileForm = computed(() => cvFromFiles.value && !revising.value)
  */
 const cvFiles = reactive<Record<CvFileSource, any[]>>({ linkedin: [], file: [] })
 const cvSourceFiles = computed<any[]>(() => (cvMode.value === 'text' ? [] : cvFiles[cvMode.value as CvFileSource]))
+// What the server could not read of the CV's files (`cv_unread`): each file by
+// name, whole or with how many of its pages were left out.
+const cvUnread = computed(() => {
+  const unread: { asset_id: string; pages: number; whole?: boolean }[] = draft.value?.cv_unread || []
+  if (!isCv.value || !unread.length) return ''
+  const names = new Map(cvSourceFiles.value.map((file) => [String(file.id), String(file.name || '')]))
+  return unread
+    .map((entry) => {
+      const name = names.get(String(entry.asset_id)) || t('studioCvUnreadFile')
+      return entry.whole ? name : t('studioCvUnreadPages', { name, count: entry.pages })
+    })
+    .join('; ')
+})
 const cvKinds = computed<string[]>(() => {
   if (cvMode.value === 'text') return []
   const mode = cvMode.value as CvFileSource
@@ -264,6 +277,9 @@ async function uploadCvSources(list: FileList | null) {
     for (const file of picked) {
       const body = new FormData()
       body.append('file', withExtension(file))
+      // Read for the CV only: a Word CV with links in it (an email, a LinkedIn
+      // address) is taken, and no file tool will take this file.
+      body.append('purpose', 'cv_source')
       try {
         const asset = await ws.api('/files/uploads', { method: 'POST', body })
         cvFiles[mode] = [...cvFiles[mode], asset]
@@ -1711,6 +1727,10 @@ watch([cvSource, () => cvFiles.linkedin, () => cvFiles.file], invalidateQuote, {
                   <AppIcon :name="sourceIcon(file)" :size="15" /><span>{{ file.name }}</span>
                 </li>
               </ul>
+              <!-- Files, or pages of them, the server could not read: said, never left out unsaid. -->
+              <p v-if="cvUnread" class="field-hint studio-cv-unread" role="status" data-testid="studio-cv-unread">
+                <AppIcon name="alert" :size="15" />{{ t('studioCvUnread', { what: cvUnread }) }}
+              </p>
               <div class="meter-row studio-cv-row" data-testid="studio-cv-length">
                 <span>{{ t('guideRowPages') }}</span><strong>{{ t('studioCvLength') }}</strong>
               </div>

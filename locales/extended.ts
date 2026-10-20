@@ -1483,6 +1483,17 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Rasmning saqlanish muddati tugagani uchun rezyumening bu nusxasi rasmsiz tayyorlandi.',
     'Срок хранения фото истёк, поэтому эта версия резюме — без него.',
   ],
+  studioCvUnread: [
+    'Not read: {what}. The CV is made without it; to include it, send fewer pages or clearer photos.',
+    'O‘qib bo‘lmadi: {what}. Rezyume usiz tayyorlanadi; uni ham qo‘shish uchun kamroq sahifa yoki aniqroq rasm yuboring.',
+    'Не удалось прочитать: {what}. Резюме составлено без этого; чтобы добавить, пришлите меньше страниц или более чёткие фото.',
+  ],
+  studioCvUnreadPages: [
+    '{name}, pages left out: {count}',
+    '{name}, o‘qilmagan sahifalar: {count}',
+    '{name}, непрочитанных страниц: {count}',
+  ],
+  studioCvUnreadFile: ['a file', 'bitta fayl', 'один файл'],
   cv_photo_no_slot: [
     'This template has no place for a photo, so the CV was made without it.',
     'Bu shablonda rasm uchun joy yo‘q, shuning uchun rezyume rasmsiz tayyorlandi.',
