@@ -1042,6 +1042,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/studio/cv-reads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description How the reading of a CV's files stands. A file uploaded with `purpose` `cv_source` is read once, in a queue the accounts take turns in, never while a draft is made: a CV draft (`ai.cv`, `cv_source` `linkedin` or `file`) whose files are still queued or being read is refused with `cv_reading` (409; `message_params.ahead` and `estimated_seconds` as here), to be made again once they are read. `ids` names the account's own files, at most ten; an id that is no live file of theirs is `file_unavailable` (404). A file with no read yet is queued. `ahead` is how many reads of other customers' files finish before the first of these still queued is read (the account's own files are not ahead of it): 0 when none waits or one of them is being read; each read's own `ahead` counts every read before that file. `estimated_seconds` is about how long until the last is read, counting what is left of the reads in progress: 0 when none waits, null with no recent reads to tell it from or while no reader is taking the queued reads. Asked every two seconds or so while waiting; more than 120 in an account's minute (counted from its first request) is `rate_limited`. */
+        get: operations["listCvReads"];
+        put?: never;
+        post?: never;
+        /** @description Takes files the customer removed from a CV out of the reading queue: their reads still queued are dropped. A read already started finishes; ids that are gone or not the account's are passed over. A file dropped here and used after all is queued again when a draft asks for it. */
+        delete: operations["cancelCvReads"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/studio/cv-templates": {
         parameters: {
             query?: never;
@@ -1328,6 +1346,20 @@ export interface components {
             id: string;
             status: string;
         };
+        CvRead: {
+            /** @description Reads that finish before this one is read: 0 once it is being read. */
+            ahead: number;
+            /** Format: uuid */
+            asset_id: string;
+            /** @description Why a failed read failed: `cv_file_kind`, `cv_file_unreadable`, `generation_limit` (more pages than any CV is made from, failed as it is uploaded and never read), `source_extraction_failed`, `read_timeout`, `file_unavailable`, `reader_interrupted` or `reader_error`. A failed file is a file not read: the CV says so (`cv_unread`), or is `cv_file_unreadable` when nothing at all was read. */
+            error: string | null;
+            /** @description Of them, pages read by OCR. */
+            ocr_pages: number;
+            /** @description Pages with text, once read. */
+            pages: number;
+            /** @enum {unknown} */
+            status: "queued" | "reading" | "done" | "failed";
+        };
         CvTemplate: {
             category: string;
             colours: {
@@ -1351,6 +1383,13 @@ export interface components {
             preview: string;
             /** @enum {unknown} */
             tone: "light" | "dark" | "paper";
+        };
+        CvUploadRead: {
+            ahead: number;
+            /** @description Why a failed read failed: `cv_file_kind`, `cv_file_unreadable`, `generation_limit` (more pages than any CV is made from, failed as it is uploaded and never read), `source_extraction_failed`, `read_timeout`, `file_unavailable`, `reader_interrupted` or `reader_error`. A failed file is a file not read: the CV says so (`cv_unread`), or is `cv_file_unreadable` when nothing at all was read. */
+            error: string | null;
+            /** @enum {unknown} */
+            status: "queued" | "reading" | "done" | "failed";
         };
         /** @description PDF points from displayed top-left, pages start at 1, image indices start at 0. Image input indices reference extra uploaded assets. Redaction requires explicit rasterization acknowledgement and a separate export. */
         EditorCommand: {
@@ -5195,7 +5234,10 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Asset"];
+                    "application/json": components["schemas"]["Asset"] & {
+                        /** @description Only for `purpose` `cv_source`: the file is queued for reading as it arrives, and this is how its read stands. */
+                        cv_read?: components["schemas"]["CvUploadRead"];
+                    };
                 };
             };
             /** @description Invalid request */
@@ -7190,6 +7232,122 @@ export interface operations {
                             name: string;
                             style?: Record<string, never>;
                         }[];
+                    };
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    listCvReads: {
+        parameters: {
+            query: {
+                ids: string[];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        ahead: number;
+                        estimated_seconds: number | null;
+                        reads: components["schemas"]["CvRead"][];
+                    };
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    cancelCvReads: {
+        parameters: {
+            query: {
+                ids: string[];
+            };
+            header: {
+                "X-CSRFToken": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        cancelled: number;
                     };
                 };
             };

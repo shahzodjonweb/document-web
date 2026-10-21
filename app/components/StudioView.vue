@@ -2,7 +2,7 @@
 import type { CvFileSource, CvSource } from '../composables/useCvSources'
 const props = defineProps<{ draftId?: string }>()
 const route = useRoute()
-const { t, path, locale, date } = useLocale()
+const { t, count, path, locale, date } = useLocale()
 const ws = useWorkspace()
 const studio = useStudio()
 const { name } = useTools()
@@ -227,10 +227,108 @@ function draftFields() {
 }
 
 /**
+ * Each of a CV's files is read by the server in its turn, after the upload:
+ * its chip says where the read is (in line, being read, read, not read). A
+ * draft is made only from files read, so Review pressed before then waits
+ * here, saying how many are ahead, and sends itself as soon as every file is
+ * read or could not be; a server still reading says so (`cv_reading`), and
+ * the wait is the same. Never a "try again".
+ */
+const cvReads = useCvReads(cvSourceIds, () => isCv.value && cvFromFiles.value)
+const cvWaiting = ref(false)
+/** How many were ahead when the wait began: said once, not again at every turn of the line. */
+const cvWaitAhead = ref(0)
+const reviewButton = ref<HTMLButtonElement>()
+function waitForReads() {
+  cvWaitAhead.value = cvReads.ahead.value
+  cvWaiting.value = true
+  step.value = 0
+}
+// Sent once every file is read, unless the files were all taken away meanwhile.
+watch([cvReads.pending, busy], () => {
+  if (!cvWaiting.value || cvReads.pending.value || busy.value) return
+  cvWaiting.value = false
+  if (cvSourceIds().length) review()
+})
+const READ_ICONS: Record<string, string> = {
+  queued: 'clock',
+  reading: 'loader',
+  done: 'check',
+  failed: 'alert',
+}
+const cvRead = (file: any) => cvReads.reads.value[String(file.id)]
+/** Where a file's read is, as its chip shows it: a file read with no text in it was not read. */
+const cvReadState = (file: any) => cvReadShown(cvRead(file))
+function readLabel(file: any) {
+  const read = cvRead(file)
+  if (!read) return ''
+  if (read.status === 'queued')
+    return read.ahead > 0 ? count('studioCvReadQueued', read.ahead) : t('studioCvReadNext')
+  if (read.status === 'reading') return t('studioCvReadReading')
+  if (cvReadFailed(read)) return t('studioCvReadFailed')
+  return read.pages ? count('studioCvReadPages', read.pages) : t('studioCvReadDone')
+}
+const reviewWaitLabel = computed(() =>
+  cvReads.ahead.value > 0
+    ? t('studioCvReadWaiting', { count: cvReads.ahead.value })
+    : t('studioCvReadWaitingNow'),
+)
+/** About how long until the files are read, rounded up: to 5 seconds, or whole minutes past one. */
+function waitTime(seconds: number) {
+  const minutes = seconds > 55 ? Math.ceil(seconds / 60) : 0
+  return new Intl.NumberFormat(locale.value === 'uz' ? 'uz-Latn' : locale.value, {
+    style: 'unit',
+    unit: minutes ? 'minute' : 'second',
+    unitDisplay: 'long',
+  }).format(minutes || Math.max(5, Math.ceil(seconds / 5) * 5))
+}
+const cvWaitHint = computed(() => {
+  const seconds = cvReads.estimate.value
+  return seconds && seconds > 0
+    ? t('studioCvReadWaitTime', { time: waitTime(seconds) })
+    : t('studioCvReadWaitHint')
+})
+/**
+ * What a screen reader is told, politely: the wait as it began, and the files
+ * as they finish, never each turn of the line. The files only once the server
+ * has said how far every one of them is.
+ */
+const cvReadWait = computed(() =>
+  !cvWaiting.value
+    ? ''
+    : cvWaitAhead.value > 0
+      ? count('studioCvReadWaitStatus', cvWaitAhead.value)
+      : t('studioCvReadWaitStatusNow'),
+)
+const cvReadProgress = computed(() => {
+  const ids = cvSourceIds()
+  const known = ids.map((id) => cvReads.reads.value[id])
+  if (!ids.length || known.some((read) => !read)) return ''
+  const read = known.filter((entry) => cvReadShown(entry) === 'done').length
+  if (known.some(cvReadUnfinished)) return t('studioCvReadProgress', { read, total: ids.length })
+  // A file read whose pages are not known yet may have had no text in it: said once they are.
+  if (known.some((entry) => entry?.status === 'done' && entry.pages == null)) return ''
+  const failed = cvSourceFiles.value.filter((file) => cvReadFailed(cvRead(file))).map((file) => file.name)
+  return failed.length ? t('studioCvReadNotRead', { names: failed.join(', ') }) : t('studioCvReadAll')
+})
+/**
+ * The server had not read every file yet (`cv_reading`): the files are asked
+ * after, and the draft waits for them as if Review had been pressed early.
+ */
+function readingRefused(e: any) {
+  const refusal = e?.data?.error
+  const ids = cvSourceIds()
+  if (refusal?.code !== 'cv_reading' || !isCv.value || !ids.length) return false
+  cvReads.expect(ids, refusal.message_params || {})
+  waitForReads()
+  return true
+}
+
+/**
  * The CV's source files: a LinkedIn profile's PDF or screenshots, or an old
  * CV. A file of a kind the mode does not read, or one too many, is said beside
  * the upload area before anything is uploaded; the server checks again, and
- * reads them for their text when the draft is made.
+ * reads them in turn for their text.
  */
 const cvSourceInput = ref<HTMLInputElement>()
 const cvSourceButton = ref<HTMLButtonElement>()
@@ -281,26 +379,46 @@ async function uploadCvSources(list: FileList | null) {
       // address) is taken, and no file tool will take this file.
       body.append('purpose', 'cv_source')
       try {
-        const asset = await ws.api('/files/uploads', { method: 'POST', body })
+        const asset: any = await ws.api('/files/uploads', { method: 'POST', body })
         cvFiles[mode] = [...cvFiles[mode], asset]
+        cvReads.take(asset.id, asset.cv_read)
       } catch (e) {
         const reason = uploadRefusal(e)
         refused.set(reason, [...(refused.get(reason) || []), file.name])
       }
     }
     sourceError.value = [...refused].map(([reason, names]) => `${names.join(', ')}: ${reason}`).join(' ')
+    // Where the line is now, and the pages of a file read already.
+    cvReads.refresh()
   })
   // The form was disabled while the files went up, which took the focus away
   // from the upload button: it goes back there, whose description is any refusal.
   await nextTick()
   if (!document.activeElement || document.activeElement === document.body) focusCvSources()
 }
+/** A file taken off the form is taken out of the line too, if it is still in it: no one waits for its read. */
 function removeCvSource(id: string) {
   if (cvMode.value === 'text') return
   const mode = cvMode.value as CvFileSource
   cvFiles[mode] = cvFiles[mode].filter((file) => file.id !== id)
+  cvReads.cancel([id])
   sourceError.value = ''
 }
+/** Every CV file the page keeps, whichever way to start it is under. */
+const cvFileIds = () => [...cvFiles.linkedin, ...cvFiles.file].map((file) => String(file.id))
+/**
+ * The CV files the page keeps that this CV is not made from: another way to
+ * start's, or all of them for a description or another service. Their reads
+ * still in line are taken out of it when the CV is sent, so its own files
+ * are not kept waiting behind them; shown again, they go back in line.
+ */
+function unsentCvFileIds() {
+  const sent = new Set(cvSourceIds())
+  return cvFileIds().filter((id) => !sent.has(id))
+}
+// The page left, its files are gone from the form: none is read for nothing.
+// A saved draft's files were read before it was saved, and stay so.
+onBeforeUnmount(() => cvReads.cancel(cvFileIds()))
 const SOURCE_ICONS: Record<string, string> = { image: 'image', docx: 'word' }
 const sourceIcon = (file: any) => SOURCE_ICONS[cvFileKind(file)] || 'file'
 /** A CV's description is about the person; made from files, it is notes on top of them. */
@@ -619,6 +737,7 @@ watch([() => form.prompt, () => form.title], () => {
 watch(cvMode, () => {
   sourceError.value = ''
   cvLinkError.value = ''
+  cvWaiting.value = false
   if (isCv.value) {
     promptError.value = ''
     topicGiven.value = false
@@ -678,14 +797,16 @@ async function run(task: string, fn: () => Promise<void>) {
   let refused = false
   let photo = false
   let cv: '' | 'source' | 'link' = ''
+  let reading = false
   try {
     await fn()
   } catch (e) {
-    photo = photoRefused(e)
-    cv = photo ? '' : cvRefused(e)
-    refused = !photo && !cv && promptRefused(e)
+    reading = readingRefused(e)
+    photo = !reading && photoRefused(e)
+    cv = photo || reading ? '' : cvRefused(e)
+    refused = !reading && !photo && !cv && promptRefused(e)
     refusedRun = refused ? () => run(task, fn) : null
-    if (!refused && !photo && !cv) error.value = requestError(e)
+    if (!reading && !refused && !photo && !cv) error.value = requestError(e)
   } finally {
     busy.value = ''
   }
@@ -702,6 +823,10 @@ async function run(task: string, fn: () => Promise<void>) {
     // The photo's button, whose description is the refusal, beside the field.
     await nextTick()
     portraitButton.value?.focus()
+  } else if (reading) {
+    // Review, which now says the files are being read and how many are ahead.
+    await nextTick()
+    reviewButton.value?.focus()
   }
 }
 function acceptDraft(value: any) {
@@ -752,6 +877,8 @@ async function load() {
         cvFiles.linkedin = cvSource.value === 'linkedin' ? sources : []
         cvFiles.file = cvSource.value === 'file' ? sources : []
         files.value = []
+        // Their chips say they were read, and how many pages.
+        if (cvFileForm.value) cvReads.refresh(sources.map((file: any) => file.id))
       } else files.value = sources
       const photo = portrait.value
       if (photo && !photo.name)
@@ -811,8 +938,11 @@ watch(
       quote.value = null
       files.value = []
       cvSource.value = 'text'
+      // A new CV starts with no files: what the last one's were still in line for is not read.
+      cvReads.cancel(cvFileIds())
       cvFiles.linkedin = []
       cvFiles.file = []
+      cvWaiting.value = false
       sourceError.value = ''
       cvLinkError.value = ''
       removePortrait()
@@ -937,7 +1067,9 @@ async function review() {
   if (busy.value || submissionPending.value || !canUseTool.value || !hasEssentialInput.value) return
   sourceError.value = ''
   cvLinkError.value = ''
-  if (cvStopsBeforeSending()) return
+  if (cvStopsBeforeSending() || cvWaiting.value) return
+  cvReads.cancel(unsentCvFileIds())
+  if (cvFileForm.value && cvReads.pending.value) return waitForReads()
   await run('quote', async () => {
     if (!draft.value) await createDraft()
     else await saveDraft()
@@ -1200,8 +1332,24 @@ watch([cvSource, () => cvFiles.linkedin, () => cvFiles.file], invalidateQuote, {
                     class="cv-source-list"
                     data-testid="studio-cv-source-files"
                   >
-                    <li v-for="file in cvSourceFiles" :key="file.id" class="source-chip">
-                      <AppIcon :name="sourceIcon(file)" :size="17" /><span>{{ file.name }}</span
+                    <li
+                      v-for="file in cvSourceFiles"
+                      :key="file.id"
+                      class="source-chip cv-source-chip"
+                      :data-read="cvReadState(file)"
+                    >
+                      <AppIcon :name="sourceIcon(file)" :size="17" /><span class="cv-source-text"
+                        ><span class="cv-source-name">{{ file.name }}</span
+                        ><!-- Where its read is: one line of its own, so a change of state moves nothing. --><small
+                          v-if="readLabel(file)"
+                          class="cv-read-state"
+                          data-testid="studio-cv-read-state"
+                          ><AppIcon
+                            :name="READ_ICONS[cvReadState(file)!] || 'clock'"
+                            :size="13"
+                            :class="{ spin: cvReadState(file) === 'reading' }"
+                          />{{ readLabel(file) }}</small
+                        ></span
                       ><button
                         type="button"
                         class="icon-button"
@@ -1466,6 +1614,16 @@ watch([cvSource, () => cvFiles.linkedin, () => cvFiles.file], invalidateQuote, {
                   /></label>
                 </div>
               </details>
+              <!-- The files' reads, told to a screen reader as they finish; the chips and Review show them. -->
+              <p
+                v-if="isCv && cvFromFiles"
+                class="visually-hidden"
+                role="status"
+                aria-live="polite"
+                data-testid="studio-cv-read-status"
+              >
+                <span>{{ cvReadWait }}</span> <span>{{ cvReadProgress }}</span>
+              </p>
               <div class="studio-defaults" aria-live="polite">
                 <AppIcon name="sparkle" :size="16" /><span
                   >{{ form.output_format.toUpperCase() }} · {{ outputLanguage }} ·
@@ -1482,16 +1640,27 @@ watch([cvSource, () => cvFiles.linkedin, () => cvFiles.file], invalidateQuote, {
                 >
                   {{ t('studioEditOutline') }}
                 </button>
+                <!-- Waiting for the files' reads it stays in reach (the wait is its name), and does nothing more. -->
                 <button
+                  ref="reviewButton"
                   class="button primary"
+                  :class="{ 'studio-review-waiting': cvWaiting && !busy }"
                   data-testid="studio-review"
                   :disabled="!!busy || !canUseTool || !hasEssentialInput"
+                  :aria-disabled="cvWaiting && !busy ? 'true' : undefined"
                   @click="review"
                 >
-                  {{ busy ? t('working') : t('studioReviewStep') }}<AppIcon name="right" :size="17" />
+                  <template v-if="cvWaiting && !busy"
+                    ><AppIcon name="loader" :size="17" class="spin" />{{ reviewWaitLabel }}</template
+                  >
+                  <template v-else
+                    >{{ busy ? t('working') : t('studioReviewStep') }}<AppIcon name="right" :size="17"
+                  /></template>
                 </button>
               </div>
-              <p class="field-hint studio-charge-hint">{{ t('noChargeBefore') }}</p>
+              <p class="field-hint studio-charge-hint" data-testid="studio-charge-hint">
+                {{ cvWaiting && !busy ? cvWaitHint : t('noChargeBefore') }}
+              </p>
             </fieldset>
           </section>
           <section v-else-if="step === 1" class="panel outline-panel">
