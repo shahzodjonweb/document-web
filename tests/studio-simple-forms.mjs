@@ -232,18 +232,36 @@ const CV_PAGES = 30
  * The reads of CV files (apps/studio CvSourceRead), by asset id: the states a
  * read goes through, the first in the upload's answer and one more at each
  * GET studio/cv-reads after it, and where it is now. A file is read at once
- * (LOCAL_SYNC_JOBS) unless its name is given states here; a "blank" one could
- * not be read. Fictional files only.
+ * (LOCAL_SYNC_JOBS) unless its name is given states here. A "blank" one is
+ * read and has no text in it, which the reader says as done with no page
+ * read (reads.finish counts only pages with text); a "damaged" one could not
+ * be opened, and failed. Fictional files only.
  */
 const cvReadSteps = new Map()
 const cvReads = new Map()
 // Files uploaded as if before reads were put in line: the upload says nothing
 // of a read, and the server reads them when a draft asks for them.
 const unannounced = new Set()
+// Files read in the order they came, as one customer's are, with the reader
+// stopped: each is in line behind every earlier one of them still in line.
+const inLine = new Set()
+let readOrder = 0
+// Reads taken out of the line (DELETE studio/cv-reads), and put back at its
+// end when asked after again, as reads.ensure queues a file with no read.
+const requeued = []
 const queued = (ahead) => ({ status: 'queued', ahead })
 function readNow(id) {
   const read = cvReads.get(id)
-  return read && read.steps[read.at]
+  if (!read?.line) return read && read.steps[read.at]
+  const ahead = [...cvReads.values()].filter((other) => other.line && !other.cancelled && other.order < read.order).length
+  return { status: 'queued', ahead, pages: 0, ocr_pages: 0, error: null }
+}
+function requeue(id) {
+  const read = cvReads.get(id)
+  if (!read?.cancelled) return
+  read.cancelled = false
+  read.order = ++readOrder
+  requeued.push(id)
 }
 const readUnfinished = (id) => ['queued', 'reading'].includes(readNow(id)?.status)
 /** What the server says of files still being read: the most reads ahead of one of them, and a guess at the time. */
@@ -282,6 +300,7 @@ function cvSourceRefusal(body, prompt, previous = null) {
       },
     }
   // A draft is made only from what was read: until then the server says how many are ahead.
+  ids.forEach(requeue)
   if (ids.some(readUnfinished))
     return {
       status: 409,
@@ -291,7 +310,7 @@ function cvSourceRefusal(body, prompt, previous = null) {
         message_params: readingParams(ids),
       },
     }
-  if (assets.every((asset) => /^blank/i.test(asset.name))) return refuse('cv_file_unreadable')
+  if (assets.every((asset) => /^(blank|damaged)/i.test(asset.name))) return refuse('cv_file_unreadable')
   return null
 }
 // Uploads the server refuses, by file name: [status, code, message].
@@ -389,7 +408,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   const endpoint = new URL(request.url()).pathname.replace('/api/v1', '')
   const method = request.method()
   const body = request.headers()['content-type']?.includes('application/json') ? request.postDataJSON() : null
-  requests.push({ path: endpoint, method, body, idempotencyKey: request.headers()['idempotency-key'] })
+  requests.push({ path: endpoint, method, body, idempotencyKey: request.headers()['idempotency-key'], url: request.url() })
   const json = (value, status = 200) =>
     route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(value) })
   const failure = (code) => json({ error: { code, message: code } }, 409)
@@ -439,8 +458,14 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
         error: state.status === 'failed' ? 'cv_file_unreadable' : null,
         ...state,
       })
-      const steps = cvReadSteps.get(asset.name) || [{ status: /^blank/i.test(asset.name) ? 'failed' : 'done' }]
-      cvReads.set(asset.id, { steps: steps.map(read), at: 0 })
+      const steps = cvReadSteps.get(asset.name) || [
+        /^blank/i.test(asset.name)
+          ? { status: 'done', pages: 0, ocr_pages: image ? 1 : asset.page_count }
+          : /^damaged/i.test(asset.name)
+            ? { status: 'failed', error: 'source_extraction_failed' }
+            : { status: 'done' },
+      ]
+      cvReads.set(asset.id, { steps: steps.map(read), at: 0, line: inLine.has(asset.name), order: ++readOrder })
       if (!unannounced.has(asset.name)) {
         const { status, ahead, error } = readNow(asset.id)
         return json({ ...asset, cv_read: { status, ahead, error } }, 201)
@@ -451,7 +476,17 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   if (endpoint === '/studio/cv-reads') {
     // The customer's own files only: one that is not is a 404, as for any file.
     const ids = new URL(request.url()).searchParams.getAll('ids')
+    // At most as many as one CV is made from (sources.MAX_FILES).
+    if (ids.length > 10) return json({ error: { code: 'invalid_inputs', message: 'invalid' } }, 400)
     if (!ids.length || ids.some((asset) => !cvReads.has(asset))) return json({ error: { code: 'not_found', message: 'Not found.' } }, 404)
+    // Files taken off the form: a read still in line is taken out of it; one
+    // being read, or read, stays.
+    if (method === 'DELETE') {
+      const cancelled = ids.filter((asset) => readNow(asset)?.status === 'queued')
+      for (const asset of cancelled) cvReads.get(asset).cancelled = true
+      return json({ cancelled })
+    }
+    ids.forEach(requeue)
     for (const asset of ids) {
       const read = cvReads.get(asset)
       read.at = Math.min(read.at + 1, read.steps.length - 1)
@@ -1810,6 +1845,15 @@ try {
         document.querySelectorAll('[data-testid="studio-cv-source-files"] li')[at]?.querySelector('[data-testid="studio-cv-read-state"]')?.textContent.trim() === said,
       [index, text],
     )
+  // What a screen reader is told of the reads, and the files whose reads were taken out of the line.
+  const readStatus = () => page.getByTestId('studio-cv-read-status').evaluate((node) => node.textContent.replace(/\s+/g, ' ').trim())
+  const statusSays = (text) =>
+    page.waitForFunction(
+      (said) => document.querySelector('[data-testid="studio-cv-read-status"]')?.textContent.replace(/\s+/g, ' ').trim() === said,
+      text,
+    )
+  const cancelledIds = () =>
+    calls('/studio/cv-reads', 'DELETE').flatMap((request) => new URL(request.url).searchParams.getAll('ids'))
   // Read once drawn: a new draft's review is drawn again at the draft's own
   // address, and while that page loads the draft there are no names to read.
   const sourceNames = async () =>
@@ -1941,6 +1985,7 @@ try {
   await sourceChips().nth(2).getByRole('button', { name: 'Remove file: profile-3.png' }).click()
   assert.deepEqual(await chipNames(), ['profile-1.png', 'profile-2.png'])
   await readSays(1, 'Read · 1 page')
+  assert.deepEqual(cancelledIds(), [], 'a file read already has no read in line to take out')
   await sourceInput().setInputFiles(shot(3))
   await page.waitForFunction(() => document.querySelectorAll('[data-testid="studio-cv-source-files"] li').length === 3)
   sourceUploads = calls('/files/uploads').length
@@ -1955,6 +2000,22 @@ try {
   assert.equal(fromShots.options.portrait_asset_id, undefined, 'a screenshot is a page to read, not the portrait')
   assert.deepEqual(await sourceNames(), ['profile-1.png', 'profile-2.png', 'profile-3.png'])
 
+  // A blank screenshot is read and has no text in it (done, no page read):
+  // its chip says it was not read, as the review will, and the page never
+  // says every file was read.
+  await open('ai.cv')
+  await choice('linkedin').click()
+  await sourceInput().setInputFiles([shot(1), { name: 'blank-shot.png', mimeType: 'image/png', buffer: PNG }])
+  await readSays(0, 'Read · 1 page')
+  await readSays(1, 'Couldn’t read')
+  assert.equal(await sourceChips().nth(1).getAttribute('data-read'), 'failed', 'drawn as not read')
+  await statusSays('Couldn’t read: blank-shot.png.')
+  await page.setViewportSize({ width: 390, height: 844 })
+  await noOverflow('cv blank screenshot/390')
+  await page.getByTestId('studio-cv-source-files').scrollIntoViewIfNeeded()
+  await page.screenshot({ path: path.join(output, 'cv-source-blank-390.png') })
+  await page.setViewportSize({ width: 1440, height: 1000 })
+
   // From an old CV: a PDF, a Word file or photos. What the server cannot read,
   // or reads as another kind, is said beside the files, never in the banner.
   await open('ai.cv')
@@ -1967,7 +2028,9 @@ try {
   )
   await sourceInput().setInputFiles({ name: 'blank-scan.pdf', mimeType: 'application/pdf', buffer: pdfBytes })
   await sourceChips().first().waitFor()
-  assert.equal(await readState(0).innerText(), 'Couldn’t read', 'a file with no text to read says so under its name')
+  // Read at once with no text in it; its pages, asked after, say it was not read.
+  await readSays(0, 'Couldn’t read')
+  assert.equal(await readStatus(), 'Couldn’t read: blank-scan.pdf.', 'never "All your files have been read."')
   draftsBefore = cvDrafts()
   await review().click()
   await sourceError().waitFor()
@@ -1982,6 +2045,10 @@ try {
   await page.setViewportSize({ width: 1440, height: 1000 })
   await sourceChips().first().getByRole('button', { name: 'Remove file: blank-scan.pdf' }).click()
   assert.equal(await sourceError().count(), 0)
+  // One the server could not open says the same.
+  await sourceInput().setInputFiles({ name: 'damaged-CV.pdf', mimeType: 'application/pdf', buffer: pdfBytes })
+  await readSays(0, 'Couldn’t read')
+  await sourceChips().first().getByRole('button', { name: 'Remove file: damaged-CV.pdf' }).click()
   await sourceInput().setInputFiles({ name: 'Old-CV.docx', mimeType: DOCX, buffer: Buffer.from('PK fixture docx') })
   await page.getByTestId('studio-cv-source-files').getByText('Old-CV.docx').waitFor()
   const oldCvId = [...uploads.values()].at(-1).id
@@ -2212,7 +2279,7 @@ try {
   // Review pressed before they are read waits, saying how many are ahead,
   // then sends the CV itself. A server still reading says so (409
   // cv_reading), and the wait is the same: never a "try again".
-  const readCalls = () => requests.filter((request) => request.path === '/studio/cv-reads').length
+  const readCalls = () => calls('/studio/cv-reads', 'GET').length
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
   const until = async (check, label, timeout = 10000) => {
     const end = Date.now() + timeout
@@ -2221,7 +2288,6 @@ try {
       await sleep(100)
     }
   }
-  const readStatus = () => page.getByTestId('studio-cv-read-status').evaluate((node) => node.textContent.replace(/\s+/g, ' ').trim())
   const reviewSays = (text) =>
     page.waitForFunction((said) => document.querySelector('[data-testid="studio-review"]')?.textContent.trim() === said, text)
   const hintSays = (text) =>
@@ -2296,6 +2362,7 @@ try {
   cvReadSteps.set('Slow-profile.pdf', Array(40).fill(queued(2)))
   await sourceInput().setInputFiles({ name: 'Slow-profile.pdf', mimeType: 'application/pdf', buffer: pdfBytes })
   await readSays(0, 'In line · 2 ahead')
+  const slowId = [...uploads.values()].at(-1).id
   asked = readCalls()
   await until(() => readCalls() >= asked + 2, 'asked after every two seconds while in line', 5000)
   await visibility('hidden')
@@ -2318,6 +2385,7 @@ try {
   asked = readCalls()
   await sleep(3000)
   assert.equal(readCalls(), asked, 'nothing is asked once the page is left')
+  assert.ok(cancelledIds().includes(slowId), 'and the file left with it is taken out of the line')
 
   // A file uploaded before reads were put in line says nothing of its read:
   // the server reads it when the draft asks, and says so (409 cv_reading).
@@ -2345,6 +2413,79 @@ try {
   assert.equal(cvDrafts(), draftsBefore + 2, 'sent again by itself once read')
   assert.deepEqual(lastDraftRequest().body.source_ids, [archiveId])
   assert.equal(await page.locator('.error-banner').count(), 0)
+
+  // A file taken off the form is taken out of the line (DELETE studio/cv-reads),
+  // so the files after it never wait for its read; so are another way to
+  // start's files when the CV is sent, and the page's files when it is left
+  // (above) or a new CV is started, and a file shown again goes back in line.
+  // The reader is stopped here, and the customer's files are read in the
+  // order they came.
+  const lineShot = (name) => ({ name, mimeType: 'image/png', buffer: PNG })
+  const readerRuns = () => cvReads.forEach((read) => (read.line = false))
+  for (const name of ['Line-3.png', 'Line-4.png', 'Line-5.png', 'Line-1.png', 'Line-profile.png', 'Line-old.pdf', 'Line-next.pdf'])
+    inLine.add(name)
+  await open('ai.cv')
+  await choice('linkedin').click()
+  await sourceInput().setInputFiles([lineShot('Line-3.png'), lineShot('Line-4.png'), lineShot('Line-5.png')])
+  await readSays(0, 'Next in line')
+  await readSays(2, 'In line · 2 ahead')
+  const removedIds = [...uploads.values()].slice(-3).map((asset) => asset.id)
+  const removedAsked = () =>
+    calls('/studio/cv-reads', 'GET').filter((request) =>
+      new URL(request.url).searchParams.getAll('ids').some((asset) => removedIds.includes(asset)),
+    ).length
+  const cancelsBefore = cancelledIds().length
+  for (const name of ['Line-3.png', 'Line-4.png', 'Line-5.png'])
+    await page.getByRole('button', { name: `Remove file: ${name}` }).click()
+  await until(() => removedIds.every((asset) => cancelledIds().includes(asset)), 'each removed file is taken out of the line')
+  assert.deepEqual(cancelledIds().slice(cancelsBefore).sort(), [...removedIds].sort(), 'only the removed files, each once')
+  await sourceInput().setInputFiles(lineShot('Line-1.png'))
+  await readSays(0, 'Next in line')
+  asked = removedAsked()
+  await sleep(2500)
+  assert.equal(removedAsked(), asked, 'a removed file is not asked after')
+  assert.equal(requeued.some((asset) => removedIds.includes(asset)), false, 'nor put back in line')
+  readerRuns()
+  // Sent from an old CV, the CV does not wait behind the LinkedIn screenshot
+  // left in that way to start; shown again, the screenshot is in line again.
+  await open('ai.cv')
+  await choice('linkedin').click()
+  await sourceInput().setInputFiles(lineShot('Line-profile.png'))
+  await readSays(0, 'Next in line')
+  const profileLineId = [...uploads.values()].at(-1).id
+  await choice('file').click()
+  await sourceInput().setInputFiles({ name: 'Line-old.pdf', mimeType: 'application/pdf', buffer: pdfBytes })
+  await readSays(0, 'In line · 1 ahead')
+  const oldLineId = [...uploads.values()].at(-1).id
+  await review().click()
+  await until(() => cancelledIds().includes(profileLineId), 'the other way’s file is taken out of the line when the CV is sent')
+  assert.equal(cancelledIds().includes(oldLineId), false, 'the CV’s own file stays in line')
+  await readSays(0, 'Next in line')
+  await reviewSays('Reading your files…')
+  await choice('linkedin').click()
+  await until(() => requeued.includes(profileLineId), 'shown again, it is asked after and put back in line')
+  await readSays(0, 'In line · 1 ahead')
+  readerRuns()
+  // A new CV started from a draft's page: the files the page had are not read.
+  await open('ai.cv')
+  await choice('file').click()
+  await sourceInput().setInputFiles({ name: 'Draft-CV.pdf', mimeType: 'application/pdf', buffer: pdfBytes })
+  await readSays(0, 'Read · 2 pages')
+  await reviewNew()
+  await page.locator('.studio-steps button').first().click()
+  await choice('linkedin').click()
+  await sourceInput().setInputFiles({ name: 'Line-next.pdf', mimeType: 'application/pdf', buffer: pdfBytes })
+  await readSays(0, 'Next in line')
+  const nextLineId = [...uploads.values()].at(-1).id
+  await page.evaluate(() =>
+    document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$router.push('/en/app/create?feature=ai.cv'),
+  )
+  await until(() => cancelledIds().includes(nextLineId), 'a new CV takes the last one’s files out of the line')
+  assert.equal(await page.getByTestId('studio-cv-source-files').count(), 0)
+  readerRuns()
+  checks.push(
+    'A CV file taken off the form, another way to start’s files once the CV is sent, and the page’s files when it is left or a new CV starts are taken out of the line; shown again, a file goes back in it',
+  )
 
   // The same in Uzbek and Russian, numbers and all, on a phone.
   for (const [locale, chips, waiting] of [

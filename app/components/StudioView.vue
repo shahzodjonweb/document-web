@@ -257,13 +257,15 @@ const READ_ICONS: Record<string, string> = {
   failed: 'alert',
 }
 const cvRead = (file: any) => cvReads.reads.value[String(file.id)]
+/** Where a file's read is, as its chip shows it: a file read with no text in it was not read. */
+const cvReadState = (file: any) => cvReadShown(cvRead(file))
 function readLabel(file: any) {
   const read = cvRead(file)
   if (!read) return ''
   if (read.status === 'queued')
     return read.ahead > 0 ? count('studioCvReadQueued', read.ahead) : t('studioCvReadNext')
   if (read.status === 'reading') return t('studioCvReadReading')
-  if (read.status === 'failed') return t('studioCvReadFailed')
+  if (cvReadFailed(read)) return t('studioCvReadFailed')
   return read.pages ? count('studioCvReadPages', read.pages) : t('studioCvReadDone')
 }
 const reviewWaitLabel = computed(() =>
@@ -302,11 +304,11 @@ const cvReadProgress = computed(() => {
   const ids = cvSourceIds()
   const known = ids.map((id) => cvReads.reads.value[id])
   if (!ids.length || known.some((read) => !read)) return ''
-  const read = known.filter((entry) => entry?.status === 'done').length
+  const read = known.filter((entry) => cvReadShown(entry) === 'done').length
   if (known.some(cvReadUnfinished)) return t('studioCvReadProgress', { read, total: ids.length })
-  const failed = cvSourceFiles.value
-    .filter((file) => cvRead(file)?.status === 'failed')
-    .map((file) => file.name)
+  // A file read whose pages are not known yet may have had no text in it: said once they are.
+  if (known.some((entry) => entry?.status === 'done' && entry.pages == null)) return ''
+  const failed = cvSourceFiles.value.filter((file) => cvReadFailed(cvRead(file))).map((file) => file.name)
   return failed.length ? t('studioCvReadNotRead', { names: failed.join(', ') }) : t('studioCvReadAll')
 })
 /**
@@ -394,12 +396,29 @@ async function uploadCvSources(list: FileList | null) {
   await nextTick()
   if (!document.activeElement || document.activeElement === document.body) focusCvSources()
 }
+/** A file taken off the form is taken out of the line too, if it is still in it: no one waits for its read. */
 function removeCvSource(id: string) {
   if (cvMode.value === 'text') return
   const mode = cvMode.value as CvFileSource
   cvFiles[mode] = cvFiles[mode].filter((file) => file.id !== id)
+  cvReads.cancel([id])
   sourceError.value = ''
 }
+/** Every CV file the page keeps, whichever way to start it is under. */
+const cvFileIds = () => [...cvFiles.linkedin, ...cvFiles.file].map((file) => String(file.id))
+/**
+ * The CV files the page keeps that this CV is not made from: another way to
+ * start's, or all of them for a description or another service. Their reads
+ * still in line are taken out of it when the CV is sent, so its own files
+ * are not kept waiting behind them; shown again, they go back in line.
+ */
+function unsentCvFileIds() {
+  const sent = new Set(cvSourceIds())
+  return cvFileIds().filter((id) => !sent.has(id))
+}
+// The page left, its files are gone from the form: none is read for nothing.
+// A saved draft's files were read before it was saved, and stay so.
+onBeforeUnmount(() => cvReads.cancel(cvFileIds()))
 const SOURCE_ICONS: Record<string, string> = { image: 'image', docx: 'word' }
 const sourceIcon = (file: any) => SOURCE_ICONS[cvFileKind(file)] || 'file'
 /** A CV's description is about the person; made from files, it is notes on top of them. */
@@ -919,6 +938,8 @@ watch(
       quote.value = null
       files.value = []
       cvSource.value = 'text'
+      // A new CV starts with no files: what the last one's were still in line for is not read.
+      cvReads.cancel(cvFileIds())
       cvFiles.linkedin = []
       cvFiles.file = []
       cvWaiting.value = false
@@ -1047,6 +1068,7 @@ async function review() {
   sourceError.value = ''
   cvLinkError.value = ''
   if (cvStopsBeforeSending() || cvWaiting.value) return
+  cvReads.cancel(unsentCvFileIds())
   if (cvFileForm.value && cvReads.pending.value) return waitForReads()
   await run('quote', async () => {
     if (!draft.value) await createDraft()
@@ -1314,7 +1336,7 @@ watch([cvSource, () => cvFiles.linkedin, () => cvFiles.file], invalidateQuote, {
                       v-for="file in cvSourceFiles"
                       :key="file.id"
                       class="source-chip cv-source-chip"
-                      :data-read="cvRead(file)?.status"
+                      :data-read="cvReadState(file)"
                     >
                       <AppIcon :name="sourceIcon(file)" :size="17" /><span class="cv-source-text"
                         ><span class="cv-source-name">{{ file.name }}</span
@@ -1323,9 +1345,9 @@ watch([cvSource, () => cvFiles.linkedin, () => cvFiles.file], invalidateQuote, {
                           class="cv-read-state"
                           data-testid="studio-cv-read-state"
                           ><AppIcon
-                            :name="READ_ICONS[cvRead(file)!.status] || 'clock'"
+                            :name="READ_ICONS[cvReadState(file)!] || 'clock'"
                             :size="13"
-                            :class="{ spin: cvRead(file)?.status === 'reading' }"
+                            :class="{ spin: cvReadState(file) === 'reading' }"
                           />{{ readLabel(file) }}</small
                         ></span
                       ><button

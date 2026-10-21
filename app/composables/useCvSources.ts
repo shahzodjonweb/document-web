@@ -136,8 +136,8 @@ export function linkedinLinkOnly(text: string) {
  * How far the server has got reading one of a CV's files. Each file uploaded
  * for a CV is put in line to be read (`cv_read` on the upload), and the line
  * takes turns between customers; a CV draft is made only from what was read,
- * so it waits until every file is read, or could not be (`failed`, said on
- * the review as not read).
+ * so it waits until every file is read, or could not be (`failed`, or
+ * `done` with no page of text: said on the review as not read).
  */
 export type CvReadStatus = 'queued' | 'reading' | 'done' | 'failed'
 export interface CvRead {
@@ -152,10 +152,24 @@ export interface CvRead {
 const UNFINISHED: CvReadStatus[] = ['queued', 'reading']
 /** In line or being read: the draft waits for it. */
 export const cvReadUnfinished = (read?: CvRead | null) => !!read && UNFINISHED.includes(read.status)
+/**
+ * Not read: the server could not read the file (`failed`), or read it and
+ * found no text in it (`done` with no page read), as in a blank photo. The
+ * draft has nothing from it either way, and the review says so. A read whose
+ * pages are not known yet (an upload's answer) is not this.
+ */
+export const cvReadFailed = (read?: CvRead | null) =>
+  !!read && (read.status === 'failed' || (read.status === 'done' && read.pages === 0))
+/** How a read is shown: as the server says it, except that a file read with no text in it was not read. */
+export const cvReadShown = (read?: CvRead | null): CvReadStatus | undefined =>
+  cvReadFailed(read) ? 'failed' : read?.status
 /** How often the reads are asked after while one is unfinished, and the longest wait after failures. */
 const CV_READ_POLL_MS = 2000
 const CV_READ_BACKOFF_MS = 30000
+/** Most files one request names: as many as one CV is made from. */
+const CV_READ_IDS = CV_SOURCE_FILES
 const statusOf = (e: any) => e?.statusCode || e?.status || e?.response?.status
+const readQuery = (list: string[]) => list.map((id) => `ids=${encodeURIComponent(id)}`).join('&')
 
 /**
  * The reads of a CV's files (`ids`), asked after (GET studio/cv-reads) every
@@ -209,9 +223,7 @@ export function useCvReads(ids: () => string[], active: () => boolean) {
     if (!list.length) return
     asking = true
     try {
-      const answer: any = await ws.api(
-        `/studio/cv-reads?${list.map((id) => `ids=${encodeURIComponent(id)}`).join('&')}`,
-      )
+      const answer: any = await ws.api(`/studio/cv-reads?${readQuery(list)}`)
       failures = 0
       const next = { ...reads.value }
       for (const read of answer?.reads || [])
@@ -234,7 +246,35 @@ export function useCvReads(ids: () => string[], active: () => boolean) {
     } finally {
       asking = false
     }
+    sendCancels()
     schedule()
+  }
+  // Reads to take out of the line once no request asks after them: one asked
+  // after while it is taken out could be put back in line by that request.
+  let cancelling: string[] = []
+  function sendCancels() {
+    const list = [...new Set(cancelling)]
+    cancelling = []
+    for (let start = 0; start < list.length; start += CV_READ_IDS)
+      ws.api(`/studio/cv-reads?${readQuery(list.slice(start, start + CV_READ_IDS))}`, { method: 'DELETE' })
+        // The line is shorter now: the files still in it say so at once.
+        .then(() => mounted && pending.value && refresh())
+        // A server without the queue, or a file gone: nothing was in line for it.
+        .catch(() => {})
+  }
+  /**
+   * Files taken off the form (a chip removed, the page left), or not sent with
+   * the CV (another way to start's): a read of theirs still in line is taken
+   * out of it (DELETE studio/cv-reads), so neither the customer's other files
+   * nor anyone else's wait for it. One being read finishes. The file itself
+   * stays, since a saved draft may list it, and what was known of its read is
+   * kept: a file shown again is asked after, and the server puts it back in line.
+   */
+  function cancel(list: string[]) {
+    cancelling.push(
+      ...list.filter((id) => reads.value[id]?.status === 'queued' || expected.value.includes(id)),
+    )
+    if (!asking) sendCancels()
   }
   /** A read as the upload said it. One read already is asked after once, for its pages. */
   function take(id: string, read?: CvRead | null) {
@@ -268,5 +308,5 @@ export function useCvReads(ids: () => string[], active: () => boolean) {
     stop()
     document.removeEventListener('visibilitychange', onVisibility)
   })
-  return { reads, ahead, estimate, pending, take, expect, refresh }
+  return { reads, ahead, estimate, pending, take, expect, refresh, cancel }
 }
