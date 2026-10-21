@@ -223,7 +223,9 @@ export function useCvReads(ids: () => string[], active: () => boolean) {
     if (!list.length) return
     asking = true
     try {
-      const answer: any = await ws.api(`/studio/cv-reads?${readQuery(list)}`)
+      // No automatic retry: $fetch asks a GET again at once on a 429, doubling
+      // the requests that made it; the next poll, two seconds on, is the retry.
+      const answer: any = await ws.api(`/studio/cv-reads?${readQuery(list)}`, { retry: 0 })
       failures = 0
       const next = { ...reads.value }
       for (const read of answer?.reads || [])
