@@ -1494,6 +1494,96 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     '{name}, непрочитанных страниц: {count}',
   ],
   studioCvUnreadFile: ['a file', 'bitta fayl', 'один файл'],
+  // Each CV file's read, under its name: in line, being read, read, or not.
+  // `count` is how many files are read before it.
+  studioCvReadQueued_one: [
+    'In line · {count} ahead',
+    'Navbatda · oldingizda {count} ta fayl',
+    'В очереди · перед вами {count} файл',
+  ],
+  studioCvReadQueued_few: [
+    'In line · {count} ahead',
+    'Navbatda · oldingizda {count} ta fayl',
+    'В очереди · перед вами {count} файла',
+  ],
+  studioCvReadQueued_many: [
+    'In line · {count} ahead',
+    'Navbatda · oldingizda {count} ta fayl',
+    'В очереди · перед вами {count} файлов',
+  ],
+  studioCvReadQueued_other: [
+    'In line · {count} ahead',
+    'Navbatda · oldingizda {count} ta fayl',
+    'В очереди · перед вами {count} файла',
+  ],
+  studioCvReadNext: ['Next in line', 'Navbatda birinchi', 'Следующий в очереди'],
+  studioCvReadReading: ['Reading…', 'O‘qilmoqda…', 'Читаем…'],
+  studioCvReadDone: ['Read', 'O‘qildi', 'Прочитано'],
+  studioCvReadPages_one: ['Read · {count} page', 'O‘qildi · {count} sahifa', 'Прочитано · {count} страница'],
+  studioCvReadPages_few: ['Read · {count} pages', 'O‘qildi · {count} sahifa', 'Прочитано · {count} страницы'],
+  studioCvReadPages_many: ['Read · {count} pages', 'O‘qildi · {count} sahifa', 'Прочитано · {count} страниц'],
+  studioCvReadPages_other: [
+    'Read · {count} pages',
+    'O‘qildi · {count} sahifa',
+    'Прочитано · {count} страницы',
+  ],
+  studioCvReadFailed: ['Couldn’t read', 'O‘qib bo‘lmadi', 'Не удалось прочитать'],
+  // Review pressed before the files are read: the button waits, then sends the CV itself.
+  // One line on a phone, so it names no noun a number would have to agree with.
+  studioCvReadWaiting: [
+    'Reading your files · {count} ahead',
+    'Fayllar o‘qilmoqda · oldingizda {count} ta',
+    'Читаем файлы · перед вами {count}',
+  ],
+  studioCvReadWaitingNow: ['Reading your files…', 'Fayllar o‘qilmoqda…', 'Читаем файлы…'],
+  // Under the waiting button; {time} is "40 seconds", "2 minutes", in the page's language.
+  studioCvReadWaitHint: [
+    'We’ll continue as soon as your files are read.',
+    'Fayllaringiz o‘qilishi bilan davom etamiz.',
+    'Продолжим, как только файлы будут прочитаны.',
+  ],
+  studioCvReadWaitTime: [
+    'About {time}. We’ll continue as soon as your files are read.',
+    'Taxminan {time}. Fayllaringiz o‘qilishi bilan davom etamiz.',
+    'Примерно {time}. Продолжим, как только файлы будут прочитаны.',
+  ],
+  // Told to a screen reader: the wait as it begins, then the files as they finish.
+  studioCvReadWaitStatus_one: [
+    'Your files are being read — {count} ahead of you. This takes a moment; we’ll continue as soon as they’re read.',
+    'Fayllaringiz o‘qilmoqda — navbatda oldingizda {count} ta fayl bor. Bu biroz vaqt oladi; o‘qilishi bilan davom etamiz.',
+    'Читаем ваши файлы — перед вами в очереди {count} файл. Это займёт немного времени; продолжим, как только они будут прочитаны.',
+  ],
+  studioCvReadWaitStatus_few: [
+    'Your files are being read — {count} ahead of you. This takes a moment; we’ll continue as soon as they’re read.',
+    'Fayllaringiz o‘qilmoqda — navbatda oldingizda {count} ta fayl bor. Bu biroz vaqt oladi; o‘qilishi bilan davom etamiz.',
+    'Читаем ваши файлы — перед вами в очереди {count} файла. Это займёт немного времени; продолжим, как только они будут прочитаны.',
+  ],
+  studioCvReadWaitStatus_many: [
+    'Your files are being read — {count} ahead of you. This takes a moment; we’ll continue as soon as they’re read.',
+    'Fayllaringiz o‘qilmoqda — navbatda oldingizda {count} ta fayl bor. Bu biroz vaqt oladi; o‘qilishi bilan davom etamiz.',
+    'Читаем ваши файлы — перед вами в очереди {count} файлов. Это займёт немного времени; продолжим, как только они будут прочитаны.',
+  ],
+  studioCvReadWaitStatus_other: [
+    'Your files are being read — {count} ahead of you. This takes a moment; we’ll continue as soon as they’re read.',
+    'Fayllaringiz o‘qilmoqda — navbatda oldingizda {count} ta fayl bor. Bu biroz vaqt oladi; o‘qilishi bilan davom etamiz.',
+    'Читаем ваши файлы — перед вами в очереди {count} файла. Это займёт немного времени; продолжим, как только они будут прочитаны.',
+  ],
+  studioCvReadWaitStatusNow: [
+    'Your files are being read. This takes a moment; we’ll continue as soon as they’re read.',
+    'Fayllaringiz o‘qilmoqda. Bu biroz vaqt oladi; o‘qilishi bilan davom etamiz.',
+    'Читаем ваши файлы. Это займёт немного времени; продолжим, как только они будут прочитаны.',
+  ],
+  studioCvReadProgress: [
+    'Files read: {read} of {total}.',
+    '{total} ta fayldan {read} tasi o‘qildi.',
+    'Прочитано файлов: {read} из {total}.',
+  ],
+  studioCvReadAll: ['All your files have been read.', 'Barcha fayllaringiz o‘qildi.', 'Все файлы прочитаны.'],
+  studioCvReadNotRead: [
+    'Couldn’t read: {names}.',
+    'O‘qib bo‘lmadi: {names}.',
+    'Не удалось прочитать: {names}.',
+  ],
   cv_photo_no_slot: [
     'This template has no place for a photo, so the CV was made without it.',
     'Bu shablonda rasm uchun joy yo‘q, shuning uchun rezyume rasmsiz tayyorlandi.',

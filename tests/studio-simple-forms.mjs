@@ -228,6 +228,30 @@ function linkedinLinkOnly(text) {
 }
 // sources.MAX_PAGES: the most pages a CV's files have in all.
 const CV_PAGES = 30
+/**
+ * The reads of CV files (apps/studio CvSourceRead), by asset id: the states a
+ * read goes through, the first in the upload's answer and one more at each
+ * GET studio/cv-reads after it, and where it is now. A file is read at once
+ * (LOCAL_SYNC_JOBS) unless its name is given states here; a "blank" one could
+ * not be read. Fictional files only.
+ */
+const cvReadSteps = new Map()
+const cvReads = new Map()
+// Files uploaded as if before reads were put in line: the upload says nothing
+// of a read, and the server reads them when a draft asks for them.
+const unannounced = new Set()
+const queued = (ahead) => ({ status: 'queued', ahead })
+function readNow(id) {
+  const read = cvReads.get(id)
+  return read && read.steps[read.at]
+}
+const readUnfinished = (id) => ['queued', 'reading'].includes(readNow(id)?.status)
+/** What the server says of files still being read: the most reads ahead of one of them, and a guess at the time. */
+function readingParams(ids) {
+  const unfinished = ids.filter(readUnfinished).map(readNow)
+  const ahead = Math.max(0, ...unfinished.map((read) => read.ahead || 0))
+  return { ahead, estimated_seconds: unfinished.length ? (ahead + 1) * 4 : null }
+}
 /** A CV's source refusal, as apps/studio/domain.py decides it, or null. `previous` is the draft a write updates. */
 function cvSourceRefusal(body, prompt, previous = null) {
   const mode = body.options?.cv_source || 'text'
@@ -255,6 +279,16 @@ function cvSourceRefusal(body, prompt, previous = null) {
       error: {
         code: 'generation_limit',
         message: 'The document exceeds your output or source limits. Reduce its length or content.',
+      },
+    }
+  // A draft is made only from what was read: until then the server says how many are ahead.
+  if (ids.some(readUnfinished))
+    return {
+      status: 409,
+      error: {
+        code: 'cv_reading',
+        message: 'Your files are being read — {ahead} ahead of you.',
+        message_params: readingParams(ids),
       },
     }
   if (assets.every((asset) => /^blank/i.test(asset.name))) return refuse('cv_file_unreadable')
@@ -386,6 +420,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
     if (image) uploadedImage = { name: file.name, type: file.type, bytes: file.bytes.length, ...imageFacts(file.bytes) }
     const refused = refuseUpload.get(file?.name)
     if (refused) return json({ error: { code: refused[1], message: refused[2] } }, refused[0])
+    const purpose = /name="purpose"\r\n\r\n([^\r]*)/.exec((request.postDataBuffer() || Buffer.alloc(0)).toString('latin1'))?.[1]
     // Word files keep their name and type, as a CV's old file; anything else is
     // a PDF, of two pages unless its name says how many ("portfolio-12p.pdf").
     const pages = Number(/-(\d+)p\.pdf$/i.exec(file?.name || '')?.[1] || 2)
@@ -395,7 +430,36 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
         ? { id: id(), name: file.name, size_bytes: file.bytes.length, page_count: 1, mime_type: DOCX, state: 'ready' }
         : { id: id(), name: file?.name || 'research-notes.pdf', size_bytes: 4096, page_count: pages, mime_type: 'application/pdf', state: 'ready' }
     uploads.set(asset.id, asset)
+    // A CV's file is put in line to be read, and the upload says where.
+    if (purpose === 'cv_source') {
+      const read = (state) => ({
+        ahead: 0,
+        pages: state.status === 'done' ? asset.page_count || 1 : 0,
+        ocr_pages: state.status === 'done' && image ? 1 : 0,
+        error: state.status === 'failed' ? 'cv_file_unreadable' : null,
+        ...state,
+      })
+      const steps = cvReadSteps.get(asset.name) || [{ status: /^blank/i.test(asset.name) ? 'failed' : 'done' }]
+      cvReads.set(asset.id, { steps: steps.map(read), at: 0 })
+      if (!unannounced.has(asset.name)) {
+        const { status, ahead, error } = readNow(asset.id)
+        return json({ ...asset, cv_read: { status, ahead, error } }, 201)
+      }
+    }
     return json(asset, 201)
+  }
+  if (endpoint === '/studio/cv-reads') {
+    // The customer's own files only: one that is not is a 404, as for any file.
+    const ids = new URL(request.url()).searchParams.getAll('ids')
+    if (!ids.length || ids.some((asset) => !cvReads.has(asset))) return json({ error: { code: 'not_found', message: 'Not found.' } }, 404)
+    for (const asset of ids) {
+      const read = cvReads.get(asset)
+      read.at = Math.min(read.at + 1, read.steps.length - 1)
+    }
+    return json({
+      reads: ids.map((asset) => ({ asset_id: asset, ...readNow(asset) })),
+      ...readingParams(ids),
+    })
   }
   if (uploads.has(endpoint.split('/')[2])) return json(uploads.get(endpoint.split('/')[2]))
   if (endpoint.startsWith('/files/'))
@@ -446,7 +510,10 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
     // no page count is read, and the title is the name.
     if (body.feature_id === 'ai.cv') {
       const sourceRefusal = cvSourceRefusal(body, body.prompt)
-      if (sourceRefusal) return json(sourceRefusal, 400)
+      if (sourceRefusal) {
+        const { status = 400, ...refusal } = sourceRefusal
+        return json(refusal, status)
+      }
       // The server looks for the name in the title too (apps/studio/cv/content.py),
       // and in the files a CV is made from.
       const person = /^\p{Lu}\p{L}+ \p{Lu}\p{L}+$/mu
@@ -540,7 +607,10 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
       // A change keeps its CV's files whatever is sent; a new CV is checked again.
       const cvRefusal =
         draft.feature_id === 'ai.cv' && !draft.revision ? cvSourceRefusal(body, body.prompt ?? draft.prompt, draft) : null
-      if (cvRefusal) return json(cvRefusal, 400)
+      if (cvRefusal) {
+        const { status = 400, ...refusal } = cvRefusal
+        return json(refusal, status)
+      }
       // Match the backend's rebuild trigger: a changed brief/source/format
       // regenerates content unless the user explicitly supplies edited content.
       const rebuild = ['prompt', 'source_text', 'source_ids', 'output_format'].some(
@@ -1731,6 +1801,15 @@ try {
   const sourceInput = () => page.getByTestId('studio-cv-source-input')
   const sourceError = () => page.getByTestId('studio-cv-source-error')
   const sourceChips = () => page.getByTestId('studio-cv-source-files').locator('li')
+  // A chip is a file's name, and under it where its read is.
+  const chipNames = () => page.getByTestId('studio-cv-source-files').locator('.cv-source-name').allInnerTexts()
+  const readState = (index) => sourceChips().nth(index).getByTestId('studio-cv-read-state')
+  const readSays = (index, text) =>
+    page.waitForFunction(
+      ([at, said]) =>
+        document.querySelectorAll('[data-testid="studio-cv-source-files"] li')[at]?.querySelector('[data-testid="studio-cv-read-state"]')?.textContent.trim() === said,
+      [index, text],
+    )
   // Read once drawn: a new draft's review is drawn again at the draft's own
   // address, and while that page loads the draft there are no names to read.
   const sourceNames = async () =>
@@ -1821,7 +1900,9 @@ try {
   await sourceInput().setInputFiles({ name: 'Profile.pdf', mimeType: 'application/pdf', buffer: pdfBytes })
   await sourceChips().first().waitFor()
   assert.equal(await sourceError().count(), 0, 'a file taken clears the refusal')
-  assert.deepEqual(await sourceChips().allInnerTexts(), ['Profile.pdf'])
+  assert.deepEqual(await chipNames(), ['Profile.pdf'])
+  // Read at once here, as in local development; its pages are asked after once.
+  await readSays(0, 'Read · 2 pages')
   const profileId = [...uploads.values()].at(-1).id
   await page.setViewportSize({ width: 390, height: 844 })
   await noOverflow('cv linkedin brief/390')
@@ -1848,7 +1929,8 @@ try {
   // The draft opened again keeps its mode and its files.
   await page.locator('.studio-steps button').first().click()
   assert.equal(await radio(/^From LinkedIn/).isChecked(), true)
-  assert.deepEqual(await sourceChips().allInnerTexts(), ['Profile.pdf'])
+  assert.deepEqual(await chipNames(), ['Profile.pdf'])
+  await readSays(0, 'Read · 2 pages')
 
   // Screenshots instead of the PDF: three at once, up to ten in all, and no notes.
   await open('ai.cv')
@@ -1857,7 +1939,8 @@ try {
   await sourceInput().setInputFiles([shot(1), shot(2), shot(3)])
   await page.waitForFunction(() => document.querySelectorAll('[data-testid="studio-cv-source-files"] li').length === 3)
   await sourceChips().nth(2).getByRole('button', { name: 'Remove file: profile-3.png' }).click()
-  assert.deepEqual(await sourceChips().allInnerTexts(), ['profile-1.png', 'profile-2.png'])
+  assert.deepEqual(await chipNames(), ['profile-1.png', 'profile-2.png'])
+  await readSays(1, 'Read · 1 page')
   await sourceInput().setInputFiles(shot(3))
   await page.waitForFunction(() => document.querySelectorAll('[data-testid="studio-cv-source-files"] li').length === 3)
   sourceUploads = calls('/files/uploads').length
@@ -1884,6 +1967,7 @@ try {
   )
   await sourceInput().setInputFiles({ name: 'blank-scan.pdf', mimeType: 'application/pdf', buffer: pdfBytes })
   await sourceChips().first().waitFor()
+  assert.equal(await readState(0).innerText(), 'Couldn’t read', 'a file with no text to read says so under its name')
   draftsBefore = cvDrafts()
   await review().click()
   await sourceError().waitFor()
@@ -2008,7 +2092,7 @@ try {
   await sourceError().waitFor()
   await page.waitForFunction(() => document.querySelectorAll('[data-testid="studio-cv-source-files"] li').length === 2)
   assert.equal(calls('/files/uploads').length, sourceUploads + 3, 'the file after the refused one is still sent')
-  assert.deepEqual(await sourceChips().allInnerTexts(), ['page-1.png', 'page-3.png'])
+  assert.deepEqual(await chipNames(), ['page-1.png', 'page-3.png'])
   assert.equal(await sourceError().innerText(), 'page-2.png: This file is too large.')
   assert.equal(await sourceError().getAttribute('role'), 'alert', 'read out when it appears')
   await focused('studio-cv-source-button')
@@ -2031,7 +2115,7 @@ try {
   await sourceInput().setInputFiles({ name: 'locked-cv.pdf', mimeType: 'application/pdf', buffer: pdfBytes })
   await page.getByText('locked-cv.pdf: This PDF is protected with a password. Save a copy without the password and add that.').waitFor()
   assert.equal(await page.locator('input[type="password"]').count(), 0)
-  assert.deepEqual(await sourceChips().allInnerTexts(), ['page-1.png', 'page-3.png'])
+  assert.deepEqual(await chipNames(), ['page-1.png', 'page-3.png'])
   await focused('studio-cv-source-button')
   refuseUpload.delete('locked-cv.pdf')
   await page.setViewportSize({ width: 390, height: 844 })
@@ -2120,6 +2204,174 @@ try {
   }
   checks.push(
     'A CV starts from a description, LinkedIn (PDF or screenshots) or an old CV (PDF, Word, photos): the mode and files are sent, a bare link shows the steps, and refusals are said beside their control',
+  )
+
+  // 12. A CV's files are read in turn after the upload, in one line for every
+  // customer: each chip says where its read is, the page asks after them
+  // every two seconds while one is unfinished and the page is in view, and
+  // Review pressed before they are read waits, saying how many are ahead,
+  // then sends the CV itself. A server still reading says so (409
+  // cv_reading), and the wait is the same: never a "try again".
+  const readCalls = () => requests.filter((request) => request.path === '/studio/cv-reads').length
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+  const until = async (check, label, timeout = 10000) => {
+    const end = Date.now() + timeout
+    while (!check()) {
+      assert.ok(Date.now() < end, label)
+      await sleep(100)
+    }
+  }
+  const readStatus = () => page.getByTestId('studio-cv-read-status').evaluate((node) => node.textContent.replace(/\s+/g, ' ').trim())
+  const reviewSays = (text) =>
+    page.waitForFunction((said) => document.querySelector('[data-testid="studio-review"]')?.textContent.trim() === said, text)
+  const hintSays = (text) =>
+    page.waitForFunction((said) => document.querySelector('[data-testid="studio-charge-hint"]')?.textContent.trim() === said, text)
+  const visibility = (state) =>
+    page.evaluate((value) => {
+      if (value === 'hidden') Object.defineProperty(document, 'visibilityState', { value, configurable: true })
+      else delete document.visibilityState
+      document.dispatchEvent(new Event('visibilitychange'))
+    }, state)
+  await page.setViewportSize({ width: 390, height: 844 })
+  await open('ai.cv')
+  await choice('file').click()
+  cvReadSteps.set('Queue-CV.pdf', [queued(3), queued(3), queued(3), { status: 'reading' }, { status: 'done' }])
+  cvReadSteps.set('Queue-scan.png', [queued(4), queued(4), queued(4), queued(2), { status: 'reading' }, { status: 'reading' }, { status: 'done' }])
+  await sourceInput().setInputFiles([
+    { name: 'Queue-CV.pdf', mimeType: 'application/pdf', buffer: pdfBytes },
+    { name: 'Queue-scan.png', mimeType: 'image/png', buffer: PNG },
+  ])
+  await readSays(0, 'In line · 3 ahead')
+  await readSays(1, 'In line · 4 ahead')
+  const queuedIds = [...uploads.values()].slice(-2).map((asset) => asset.id)
+  assert.match(await readStatus(), /^Files read: 0 of 2\.$/)
+  draftsBefore = cvDrafts()
+  await review().click()
+  await reviewSays('Reading your files · 4 ahead')
+  assert.equal(cvDrafts(), draftsBefore, 'nothing is sent while the files are being read')
+  assert.equal(await review().getAttribute('aria-disabled'), 'true', 'the wait is said, the button stays in reach')
+  // Playwright counts aria-disabled as disabled; the button itself is not, so it keeps the focus.
+  assert.equal(await review().evaluate((node) => node.disabled), false)
+  await hintSays('About 20 seconds. We’ll continue as soon as your files are read.')
+  assert.equal(
+    await readStatus(),
+    'Your files are being read — 4 ahead of you. This takes a moment; we’ll continue as soon as they’re read. Files read: 0 of 2.',
+  )
+  assert.equal(await page.locator('.error-banner').count(), 0)
+  await review().focus()
+  await page.keyboard.press('Enter')
+  await sleep(200)
+  assert.equal(cvDrafts(), draftsBefore, 'pressed again, it still waits')
+  await noOverflow('cv reads waiting/390')
+  await page.getByTestId('studio-review').scrollIntoViewIfNeeded()
+  await page.screenshot({ path: path.join(output, 'cv-reads-waiting-390.png') })
+  await auditBrief('cv reads waiting 390')
+  // The first file read, the second being read: the chips say so, and so does the status, once.
+  await readSays(0, 'Read · 2 pages')
+  await readSays(1, 'Reading…')
+  assert.match(await readStatus(), /Files read: 1 of 2\.$/)
+  await reviewSays('Reading your files…')
+  assert.equal(cvDrafts(), draftsBefore)
+  await page.getByTestId('studio-cv-source-files').scrollIntoViewIfNeeded()
+  await page.screenshot({ path: path.join(output, 'cv-reads-reading-390.png') })
+  // Every file read: the CV is sent by itself, once, and reviewed as any other.
+  await quotePanel().waitFor()
+  assert.equal(cvDrafts(), draftsBefore + 1, 'sent by itself once the files are read')
+  const fromQueue = lastDraftRequest().body
+  assert.deepEqual(fromQueue.source_ids, queuedIds)
+  assert.equal(fromQueue.options.cv_source, 'file')
+  assert.deepEqual(await sourceNames(), ['Queue-CV.pdf', 'Queue-scan.png'])
+  assert.equal(await page.locator('.error-banner').count(), 0)
+  // Nothing is asked once every file is read.
+  await sleep(500)
+  let asked = readCalls()
+  await sleep(4500)
+  assert.equal(readCalls(), asked, 'no more asking once every file is read')
+  await page.setViewportSize({ width: 1440, height: 1000 })
+
+  // Asked after only while it can matter: never while the page is out of
+  // view, nor with another way to start chosen, nor once the page is left.
+  await open('ai.cv')
+  await choice('linkedin').click()
+  cvReadSteps.set('Slow-profile.pdf', Array(40).fill(queued(2)))
+  await sourceInput().setInputFiles({ name: 'Slow-profile.pdf', mimeType: 'application/pdf', buffer: pdfBytes })
+  await readSays(0, 'In line · 2 ahead')
+  asked = readCalls()
+  await until(() => readCalls() >= asked + 2, 'asked after every two seconds while in line', 5000)
+  await visibility('hidden')
+  await sleep(300)
+  asked = readCalls()
+  await sleep(3000)
+  assert.equal(readCalls(), asked, 'nothing is asked while the page is out of view')
+  await visibility('visible')
+  await until(() => readCalls() > asked, 'asked at once when the page is in view again', 1000)
+  await choice('text').click()
+  await sleep(300)
+  asked = readCalls()
+  await sleep(3000)
+  assert.equal(readCalls(), asked, 'nothing is asked with a description chosen')
+  await choice('linkedin').click()
+  await until(() => readCalls() > asked, 'asked at once when the files are back', 1000)
+  await page.locator('.studio-head').getByRole('link').click()
+  await page.waitForURL(/\/en\/app\/guide$/)
+  await sleep(300)
+  asked = readCalls()
+  await sleep(3000)
+  assert.equal(readCalls(), asked, 'nothing is asked once the page is left')
+
+  // A file uploaded before reads were put in line says nothing of its read:
+  // the server reads it when the draft asks, and says so (409 cv_reading).
+  await open('ai.cv')
+  await choice('file').click()
+  unannounced.add('Archive-CV.pdf')
+  cvReadSteps.set('Archive-CV.pdf', [queued(2), queued(2), queued(1), { status: 'done' }])
+  await sourceInput().setInputFiles({ name: 'Archive-CV.pdf', mimeType: 'application/pdf', buffer: pdfBytes })
+  await sourceChips().first().waitFor()
+  const archiveId = [...uploads.values()].at(-1).id
+  assert.equal(await readState(0).count(), 0, 'no read said, none shown')
+  await primary().fill('Applying for a logistics coordinator job.')
+  draftsBefore = cvDrafts()
+  await review().click()
+  await reviewSays('Reading your files · 2 ahead')
+  assert.equal(cvDrafts(), draftsBefore + 1, 'the server was asked, and is still reading')
+  assert.equal(await page.locator('.error-banner').count(), 0, 'no banner, no "try again"')
+  assert.equal(await page.getByTestId('studio-cv-source-error').count(), 0)
+  await focused('studio-review')
+  await hintSays('About 15 seconds. We’ll continue as soon as your files are read.')
+  assert.match(await readStatus(), /^Your files are being read — 2 ahead of you\./)
+  await readSays(0, 'In line · 2 ahead')
+  // Read, it is sent at once: the review follows.
+  await quotePanel().waitFor()
+  assert.equal(cvDrafts(), draftsBefore + 2, 'sent again by itself once read')
+  assert.deepEqual(lastDraftRequest().body.source_ids, [archiveId])
+  assert.equal(await page.locator('.error-banner').count(), 0)
+
+  // The same in Uzbek and Russian, numbers and all, on a phone.
+  for (const [locale, chips, waiting] of [
+    ['ru', ['В очереди · перед вами 3 файла', 'В очереди · перед вами 5 файлов'], 'Читаем файлы · перед вами 5'],
+    ['uz', ['Navbatda · oldingizda 3 ta fayl', 'Navbatda · oldingizda 5 ta fayl'], 'Fayllar o‘qilmoqda · oldingizda 5 ta'],
+  ]) {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await open('ai.cv', locale)
+    await choice('file').click()
+    cvReadSteps.set(`${locale}-cv.pdf`, Array(30).fill(queued(3)))
+    cvReadSteps.set(`${locale}-scan.png`, Array(30).fill(queued(5)))
+    await sourceInput().setInputFiles([
+      { name: `${locale}-cv.pdf`, mimeType: 'application/pdf', buffer: pdfBytes },
+      { name: `${locale}-scan.png`, mimeType: 'image/png', buffer: PNG },
+    ])
+    await readSays(0, chips[0])
+    await readSays(1, chips[1])
+    await review().click()
+    await reviewSays(waiting)
+    await noOverflow(`cv reads waiting/${locale}/390`)
+    await page.getByTestId('studio-review').scrollIntoViewIfNeeded()
+    await page.screenshot({ path: path.join(output, `cv-reads-waiting-${locale}-390.png`) })
+    await auditBrief(`cv reads waiting ${locale} 390`)
+  }
+  await page.setViewportSize({ width: 1440, height: 1000 })
+  checks.push(
+    'A CV’s files are read in turn: the chips say in line, reading, read or not read; Review waits for the reads and sends itself, as after a 409 cv_reading; nothing is asked when done, hidden, in another mode or left',
   )
 
   for (const locale of ['en', 'uz', 'ru']) {
