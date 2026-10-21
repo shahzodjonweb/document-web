@@ -3,6 +3,7 @@ import fs from 'node:fs/promises'
 import {createHash} from 'node:crypto'
 import dictionaries from '../locales/catalog.ts'
 import {SLIDE_LAYOUTS,SLIDE_LAYOUT_GROUPS} from '../app/composables/useSlideLayouts.ts'
+import {linkedinLinkOnly} from '../app/composables/useCvSources.ts'
 const keys=Object.keys(dictionaries.en).sort()
 for(const locale of ['uz','ru']){
  assert.deepEqual(Object.keys(dictionaries[locale]).sort(),keys,`${locale} translation parity`)
@@ -51,4 +52,19 @@ assert.equal(new Set(SLIDE_LAYOUTS).size,SLIDE_LAYOUTS.length,'Each layout is in
 for(const id of ['auto',...SLIDE_LAYOUTS])assert.ok(dictionaries.en[`layout.${id}`],`layout.${id} is named`)
 for(const id of SLIDE_LAYOUTS)assert.ok(dictionaries.en[`layoutHint.${id}`],`layoutHint.${id} is written`)
 for(const group of Object.keys(SLIDE_LAYOUT_GROUPS))assert.ok(dictionaries.en[`layoutGroup.${group}`],`layoutGroup.${group} is named`)
-console.log(`Pass: ${keys.length} keys × 3 complete locales; public schema SHA-256 verified; no staff routes; ${SLIDE_LAYOUTS.length} slide layouts match the contract`)
+// A CV described by a LinkedIn link and no fact about the person is stopped
+// before it is sent, however politely it is asked for; a fact, however short
+// the description, is sent, and so is a name, which only the server takes out
+// (apps/studio/cv/sources.py linkedin_link_only).
+const linkOnly=['https://www.linkedin.com/in/fixture-person/','Mening LinkedIn profilim: lnkd.in/abc','Вот мой профиль: linkedin.com/pub/fixture/1/2/3',
+ 'Please make my CV from my profile at linkedin.com/in/fixture-person, thank you very much.',
+ 'Hello, here is my LinkedIn profile, please make a professional CV for me from it: https://www.linkedin.com/in/fixture-person',
+ 'Assalomu alaykum, mana mening LinkedIn profilim, shundan menga yaxshi rezyume qilib bering iltimos: https://www.linkedin.com/in/fixture-person',
+ 'Здравствуйте, вот ссылка на мой профиль в LinkedIn, сделайте, пожалуйста, из него резюме: https://www.linkedin.com/in/fixture-person']
+const sent=['Ali Valiyev, SMM manager. linkedin.com/in/fixture-person','Ali Valiyev, Python developer at EPAM, Django and AWS. LinkedIn: linkedin.com/in/fixture-person',
+ 'Ali Valiyev, dasturchi, 3 yil tajriba, Python, Django. linkedin.com/in/fixture-person','Али Валиев, бухгалтер, опыт 5 лет, 1С. linkedin.com/in/fixture-person',
+ 'Ali Valiyev. Please make my CV from my profile at linkedin.com/in/fixture-person','My CV please: linkedin.com/in/fixture-person, fixture@example.com',
+ 'My CV please: linkedin.com/in/fixture-person +998 90 000 00 00','Make my CV, 2024: linkedin.com/in/fixture-person','linkedin.com/company/fixture','Make my CV from LinkedIn']
+for(const text of linkOnly)assert.equal(linkedinLinkOnly(text),true,`stopped as a bare LinkedIn link: ${text}`)
+for(const text of sent)assert.equal(linkedinLinkOnly(text),false,`sent to the server: ${text}`)
+console.log(`Pass: ${keys.length} keys × 3 complete locales; public schema SHA-256 verified; no staff routes; ${SLIDE_LAYOUTS.length} slide layouts match the contract; ${linkOnly.length+sent.length} CV LinkedIn descriptions`)

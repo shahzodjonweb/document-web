@@ -1499,6 +1499,13 @@ export interface components {
         };
         GenerationDraft: {
             content: components["schemas"]["GenerationContent"];
+            /** @description A CV made from files (`ai.cv`): each file not read whole, with how many of its pages were left out; `whole` when none of it was read. Absent when everything was read. */
+            cv_unread?: {
+                /** Format: uuid */
+                asset_id: string;
+                pages: number;
+                whole?: boolean;
+            }[];
             excerpts?: {
                 /** Format: uuid */
                 asset_id?: string;
@@ -5173,6 +5180,11 @@ export interface operations {
                     file: string;
                     /** Format: password */
                     password?: string;
+                    /**
+                     * @description `cv_source` for a file a CV is made from (an old CV or a LinkedIn profile): a Word file with links in it (an email, a LinkedIn address) is then taken. Such a file is read for the CV and refused by every file tool.
+                     * @enum {string}
+                     */
+                    purpose?: "" | "cv_source";
                 };
             };
         };
