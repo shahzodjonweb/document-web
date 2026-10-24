@@ -1439,11 +1439,10 @@
   display: flex;
   flex-direction: column;
 }
+/* The whole name: its end (what was done, the task's code) tells two results apart. */
 .artifact-row strong {
-  overflow: hidden;
   color: var(--ink);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
 }
 .artifact-row small {
   color: var(--muted);
