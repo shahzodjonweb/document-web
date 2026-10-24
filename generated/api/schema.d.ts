@@ -1538,6 +1538,12 @@ export interface components {
         };
         GenerationDraft: {
             content: components["schemas"]["GenerationContent"];
+            /** @description A new CV (`ai.cv`): which of its facts the description and files give. `given` lists the facts found, `missing` the required ones not found (`name`, `contact`, `background`) and `optional_missing` the optional ones not found, each in the order of the feature's `cv_facts`. A draft made after the customer insisted can still have `missing` facts. Absent on a change. */
+            cv_facts?: {
+                given: string[];
+                missing: string[];
+                optional_missing: string[];
+            };
             /** @description A CV made from files (`ai.cv`): each file not read whole, with how many of its pages were left out; `whole` when none of it was read. Absent when everything was read. */
             cv_unread?: {
                 /** Format: uuid */
@@ -7200,6 +7206,11 @@ export interface operations {
                 content: {
                     "application/json": {
                         features: {
+                            /** @description Only for `ai.cv`: the facts a CV is made of, in the order they are shown. A new CV is refused with `cv_missing` (400; `message_params.missing` and `optional_missing` list the facts) while a `required` one is missing from what the customer gave and wrote, unless they insist (`options.topic_given`). */
+                            cv_facts?: {
+                                optional: string[];
+                                required: string[];
+                            };
                             eligible: boolean;
                             id: string;
                             locales?: string[];
@@ -7209,6 +7220,11 @@ export interface operations {
                             surface?: string;
                         }[];
                         generation_features: {
+                            /** @description Only for `ai.cv`: the facts a CV is made of, in the order they are shown. A new CV is refused with `cv_missing` (400; `message_params.missing` and `optional_missing` list the facts) while a `required` one is missing from what the customer gave and wrote, unless they insist (`options.topic_given`). */
+                            cv_facts?: {
+                                optional: string[];
+                                required: string[];
+                            };
                             eligible: boolean;
                             id: string;
                             locales?: string[];
