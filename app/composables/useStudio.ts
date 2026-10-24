@@ -19,6 +19,8 @@ export interface StudioFeature {
   max_source_files?: number
   /** Most pages a CV's files can have in all. */
   max_source_pages?: number
+  /** What a CV needs (`required`) and may also have (`optional`): fact ids, in the order they are shown. */
+  cv_facts?: { required: string[]; optional: string[] }
 }
 export interface StudioConfig {
   provider: { mode: string; label: string; configured: boolean; image_configured?: boolean }

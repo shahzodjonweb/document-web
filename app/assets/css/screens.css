@@ -2726,7 +2726,8 @@
   font-size: 14px;
 }
 .cv-linkedin-steps ol,
-.cv-link-error ol {
+.cv-link-error ol,
+.cv-missing-error ol {
   display: grid;
   gap: var(--space-1);
   margin: 0;
@@ -2734,6 +2735,60 @@
 }
 .cv-linkedin-steps p {
   margin-top: var(--space-2);
+}
+/* What a CV needs, above its description: the required facts ticked as they
+   are typed, then the optional ones in a line. Neutral, so it is not taken for
+   the LinkedIn steps' blue box beside it. */
+.cv-needs {
+  margin: 0 0 var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  color: var(--text);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+.cv-needs h3 {
+  margin-bottom: var(--space-2);
+  color: var(--ink);
+  font-size: 14px;
+}
+.cv-needs-label {
+  margin-bottom: var(--space-1);
+  color: var(--ink);
+  font-weight: 600;
+}
+.cv-needs-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-5);
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+.cv-needs-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-width: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+.cv-needs-row > svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.cv-needs-row.done {
+  color: var(--success-ink);
+  font-weight: 600;
+}
+.cv-needs-files {
+  margin: 0 0 var(--space-2);
+}
+.cv-needs-optional {
+  margin: 0;
+  color: var(--muted);
 }
 /* The upload area, its refusal and its files, then the notes. */
 .cv-source-block {
@@ -2787,15 +2842,34 @@
 .studio-primary-field.cv-notes-field textarea {
   min-height: 120px;
 }
-/* A bare LinkedIn link: the refusal, then the steps in plain text. */
-.cv-link-error ol {
+/* A bare LinkedIn link: the refusal, then the steps in plain text. A CV that
+   lacks facts: the refusal, then each fact with an example. */
+.cv-link-error ol,
+.cv-missing-error ol {
   flex-basis: 100%;
   color: var(--text);
   font-weight: 400;
 }
+/* The facts are no steps: bullets, so that one is not "1.". */
+.cv-missing-error ol {
+  list-style: disc;
+}
 /* The review rail names the files a CV is made from under its "Made from" row. */
 .studio-quote .studio-cv-row:has(+ .studio-cv-files) {
   border-bottom: 0;
+}
+/* What the server says the CV could still have: the label, and the facts under it. */
+.studio-quote .studio-cv-can-add {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--hairline);
+  font-size: 14px;
+}
+.studio-quote .studio-cv-can-add small {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  line-height: 1.45;
 }
 .studio-cv-files {
   display: grid;
@@ -2844,6 +2918,14 @@
   }
   .cv-picker.compact .cv-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  /* The required facts a row each on a phone, with room to wrap. */
+  .cv-needs {
+    padding: var(--space-3) var(--space-4);
+  }
+  .cv-needs-list {
+    flex-direction: column;
+    gap: var(--space-2);
   }
   /* Under the name on a small card, where the photo hint says to look. */
   .cv-picker.compact .cv-name small {
