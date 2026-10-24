@@ -1042,9 +1042,9 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   // The CV service in Create with AI: one message about the person, an
   // optional portrait and a template. Nothing here is counted in pages.
   studioCvDescribeHint: [
-    'Everything in one message: your full name, email or phone, city, the job you want, where and when you worked, your education, skills and languages. Only what you write goes on the CV.',
-    'Hammasi bitta xabarda: to‘liq ismingiz, email yoki telefon, shahar, qanday ish izlayotganingiz, qayerda va qachon ishlaganingiz, taʼlim, ko‘nikmalar va tillar. Rezyumega faqat siz yozgan maʼlumotlar kiradi.',
-    'Всё в одном сообщении: полное имя, почта или телефон, город, какую работу ищете, где и когда работали, образование, навыки и языки. В резюме попадёт только то, что вы написали.',
+    'Everything in one message, as the list above shows. Only what you write goes on the CV.',
+    'Hammasi bitta xabarda, yuqoridagi ro‘yxatdagidek. Rezyumega faqat siz yozgan maʼlumotlar kiradi.',
+    'Всё в одном сообщении — по списку выше. В резюме попадёт только то, что вы написали.',
   ],
   studioCvPlaceholder: [
     'Sardor Aliyev, Tashkent, sardor.aliyev@example.com. Looking for a job as an accountant. Since 2021 accountant at a trading company: payroll, VAT returns, 1C. Bachelor’s in finance, 2017–2021. Uzbek, Russian, English B1.',
@@ -1052,6 +1052,59 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Сардор Алиев, Ташкент, sardor.aliyev@example.com. Ищу работу бухгалтером. С 2021 года бухгалтер в торговой компании: зарплата, отчёты по НДС, 1С. Бакалавр финансов, 2017–2021. Узбекский, русский, английский B1.',
   ],
   studioCvLength: ['1–2 pages', '1–2 sahifa', '1–2 страницы'],
+  // What a CV needs, listed above the description and ticked as the text gives
+  // it: the three facts it cannot be made without, and those it may also have.
+  // The labels (lower case, as they read in a sentence) are also the server's
+  // list when it refuses a CV for what is missing, and the review's line of
+  // what can still be added; the examples are those the refusal gives.
+  studioCvNeedsTitle: ['What your CV needs', 'Rezyume uchun nimalar kerak', 'Что нужно для резюме'],
+  studioCvNeedsRequired: ['Required', 'Majburiy', 'Обязательно'],
+  studioCvNeedsOptional: ['Optional: {facts}', 'Ixtiyoriy: {facts}', 'Необязательно: {facts}'],
+  studioCvNeedsDone: ['found', 'topildi', 'есть'],
+  studioCvNeedsMissing: ['not found yet', 'hali topilmadi', 'пока нет'],
+  studioCvNeedsFiles: [
+    'The facts come from your files and your notes. If a CV still lacks something, we ask after the files are read.',
+    'Maʼlumotlar fayllaringizdan va istaklaringizdan olinadi. Rezyumega biror narsa yetishmasa, fayllar o‘qilgandan keyin so‘raymiz.',
+    'Данные берутся из ваших файлов и пожеланий. Если для резюме чего-то не хватит, мы спросим после чтения файлов.',
+  ],
+  studioCvMissingLead: [
+    'Still missing — add to the field above:',
+    'Yetishmayapti — yuqoridagi maydonga qo‘shing:',
+    'Не хватает — добавьте в поле выше:',
+  ],
+  studioCvCanAdd: ['You can still add', 'Yana qo‘shishingiz mumkin', 'Ещё можно добавить'],
+  studioCvFactName: ['full name', 'to‘liq ism-familiya', 'имя и фамилия'],
+  studioCvFactContact: ['phone or email', 'telefon yoki email', 'телефон или почта'],
+  studioCvFactBackground: [
+    'work experience (with years) or education',
+    'ish tajribasi (yillari bilan) yoki taʼlim',
+    'опыт работы (с годами) или образование',
+  ],
+  studioCvFactTarget: ['the job you want', 'izlayotgan ish', 'желаемая должность'],
+  studioCvFactLocation: ['city', 'shahar', 'город'],
+  studioCvFactBirth: ['birth date or age', 'tug‘ilgan sana yoki yosh', 'дата рождения или возраст'],
+  studioCvFactSkills: ['skills', 'ko‘nikmalar', 'навыки'],
+  studioCvFactLanguages: ['languages', 'tillar', 'языки'],
+  studioCvFactCertificates: ['certificates', 'sertifikatlar', 'сертификаты'],
+  studioCvFactProjects: ['projects', 'loyihalar', 'проекты'],
+  studioCvFactLinks: [
+    'LinkedIn or other links',
+    'LinkedIn yoki boshqa havolalar',
+    'LinkedIn или другие ссылки',
+  ],
+  studioCvFactPhoto: ['photo', 'foto', 'фото'],
+  studioCvFactNameExample: ['Dilnoza Rahimova', 'Dilnoza Rahimova', 'Дильноза Рахимова'],
+  studioCvFactContactExample: [
+    '+998 90 123 45 67 or dilnoza@example.com',
+    '+998 90 123 45 67 yoki dilnoza@example.com',
+    '+998 90 123 45 67 или dilnoza@example.com',
+  ],
+  // A word joiner (U+2060) after each dash keeps a range of years on one line.
+  studioCvFactBackgroundExample: [
+    'Sales manager, Bahor Foods, 2021–\u20602024; or marketing, Tashkent State University of Economics, 2018',
+    'Sotuv menejeri, Bahor Foods, 2021–\u20602024; yoki marketing yo‘nalishi, TDIU, 2018-yilda bitirganman',
+    'Менеджер по продажам, Bahor Foods, 2021–\u20602024; или маркетинг, ТГЭУ, окончила в 2018 году',
+  ],
   // The review step of a CV: there is no outline, so its settings are changed on the first step.
   studioCvReviewHint: [
     'Ready to create. To change the template or the photo, go back to “Your idea”.',

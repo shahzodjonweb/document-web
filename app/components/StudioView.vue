@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CvFileSource, CvSource } from '../composables/useCvSources'
+import type { CvFactTicks, CvFileSource, CvSource } from '../composables/useCvSources'
 const props = defineProps<{ draftId?: string }>()
 const route = useRoute()
 const { t, count, path, locale, date } = useLocale()
@@ -434,6 +434,72 @@ const cvSourceLabel = computed(() => t(CV_SOURCE_LABELS[cvMode.value]))
  */
 const cvLinkError = ref('')
 const LINKEDIN_STEPS = ['studioCvLinkedinStepComputer', 'studioCvLinkedinStepPhone', 'studioCvLinkedinStepScreenshots']
+/**
+ * What a CV needs, listed above its description: the facts it cannot be made
+ * without, ticked as the text gives them, and those it may also have. The
+ * server lists them (`cv_facts`). The ticks are the form's own reading of the
+ * text (cvFactTicks), which only advises: the server decides, and what it
+ * refused a CV for (`cv_missing`) is believed over the ticks until the text
+ * changes. Made from files, the facts come from them, so nothing is ticked.
+ */
+/** The fact ids of `value` the form knows, each once, in order: nothing when it is not a list. */
+const factList = (value: unknown) =>
+  Array.isArray(value) ? [...new Set(value.map(String))].filter((key) => CV_FACT_KEYS.has(key)) : []
+const cvFacts = computed(() => {
+  const listed = selected.value?.cv_facts
+  if (!Array.isArray(listed?.required) || !Array.isArray(listed?.optional)) return CV_FACTS_FALLBACK
+  // A list that names no fact the form knows (ids renamed on the server) is the form's own.
+  const required = factList(listed.required)
+  const optional = factList(listed.optional)
+  return {
+    required: required.length ? required : CV_FACTS_FALLBACK.required,
+    optional: optional.length ? optional : CV_FACTS_FALLBACK.optional,
+  }
+})
+const cvTicks = computed(() => (cvFromFiles.value ? null : cvFactTicks(form.prompt)))
+/** The patterns behind the ticks are compiled while the page is idle, a piece at a time, not on the first keystroke. */
+function warmCvTicks() {
+  const later = (step: () => void) =>
+    typeof requestIdleCallback === 'function'
+      ? requestIdleCallback(step, { timeout: 3000 })
+      : setTimeout(step, 60)
+  const step = () => {
+    if (warmCvFactTicks()) later(step)
+  }
+  later(step)
+}
+watch(
+  () => isCv.value && !cvFromFiles.value,
+  (typed) => {
+    if (typed && import.meta.client) warmCvTicks()
+  },
+  { immediate: true },
+)
+/** The required facts the server's last refusal said a new CV lacks. */
+const cvMissing = ref<string[]>([])
+const cvDone = (key: string) => !!cvTicks.value?.[key as keyof CvFactTicks] && !cvMissing.value.includes(key)
+const factKey = (key: string) => `studioCvFact${key.charAt(0).toUpperCase()}${key.slice(1)}`
+const factName = (key: string) => t(factKey(key))
+const capital = (text: string) => text.charAt(0).toLocaleUpperCase(locale.value) + text.slice(1)
+/** A refusal's example is given for the required facts. */
+const hasExample = (key: string) => CV_FACTS_FALLBACK.required.includes(key)
+const cvOptional = computed(() =>
+  t('studioCvNeedsOptional', { facts: cvFacts.value.optional.map(factName).join(', ') }),
+)
+/**
+ * Said on the review of a CV the server made with something missing (the
+ * customer insisted) or something it could still have: the missing facts first,
+ * then the optional ones, four at most. The photo has its row of its own.
+ */
+const cvCanAdd = computed(() => {
+  const facts = draft.value?.cv_facts
+  if (!isCv.value || revising.value || !facts) return []
+  // Read as lists whatever the draft holds: a value that is not one is nothing, never a broken page.
+  return [...new Set([...factList(facts.missing), ...factList(facts.optional_missing)])]
+    .filter((key) => key !== 'photo')
+    .slice(0, 4)
+    .map(factName)
+})
 const cvSourceChoice = ref<HTMLFieldSetElement>()
 /** The steps' way to From LinkedIn. The button that was pressed goes away; the checked choice says what changed. */
 function chooseLinkedin() {
@@ -709,10 +775,18 @@ const promptInput = ref<HTMLTextAreaElement>()
 /** A service is only offered when it is another one and this plan can use it. */
 const offered = (id: string) =>
   !!id && id !== form.feature_id && studio.features.value.some((f) => f.id === id && f.eligible !== false)
+/** The required facts a refusal says a CV lacks: listed by `cv_missing`; an older server asks for the name alone. */
+function missingFacts(refusal: any): string[] {
+  if (refusal?.code === 'cv_name_required') return ['name']
+  const listed = refusal?.code === 'cv_missing' ? refusal.message_params?.missing : null
+  return factList(listed).filter((key) => cvFacts.value.required.includes(key))
+}
 function promptRefused(e: any) {
   const refusal = e?.data?.error
-  // A CV is refused for want of the person's name, as the others are for a topic.
-  if (!['topic_required', 'convert_requested', 'cv_name_required'].includes(refusal?.code)) return false
+  // A CV is refused for the facts it lacks, as the others are for a topic.
+  if (!['topic_required', 'convert_requested', 'cv_missing', 'cv_name_required'].includes(refusal?.code))
+    return false
+  cvMissing.value = missingFacts(refusal)
   promptError.value = refusal.message || t('genericError')
   const other = String(refusal.message_params?.service || '')
   promptSwitch.value = offered(other) ? other : ''
@@ -728,6 +802,7 @@ watch([() => form.prompt, () => form.title], () => {
   promptConvert.value = false
   topicGiven.value = false
   cvLinkError.value = ''
+  cvMissing.value = []
 })
 /**
  * Another way to start is another CV: what was said about the last one's
@@ -737,6 +812,7 @@ watch([() => form.prompt, () => form.title], () => {
 watch(cvMode, () => {
   sourceError.value = ''
   cvLinkError.value = ''
+  cvMissing.value = []
   cvWaiting.value = false
   if (isCv.value) {
     promptError.value = ''
@@ -759,7 +835,8 @@ watch(
   () => form.feature_id,
   (now, before) => {
     promptSwitch.value = ''
-    // A CV needs a name, not a topic, so a refusal does not carry across to or
+    cvMissing.value = []
+    // A CV needs its facts, not a topic, so a refusal does not carry across to or
     // from it: the server says what the new service needs when it is reviewed.
     if (promptError.value && (now === 'ai.cv' || before === 'ai.cv')) {
       promptError.value = ''
@@ -1362,6 +1439,43 @@ watch([cvSource, () => cvFiles.linkedin, () => cvFiles.file], invalidateQuote, {
                   </ul>
                 </div>
               </template>
+              <!-- What a CV needs, ticked as it is typed. A section of its own, never inside the label below. -->
+              <section
+                v-if="isCv && !revising"
+                class="cv-needs"
+                aria-labelledby="studio-cv-needs"
+                data-testid="studio-cv-needs"
+              >
+                <h3 id="studio-cv-needs">{{ t('studioCvNeedsTitle') }}</h3>
+                <p v-if="cvFromFiles" class="cv-needs-files" data-testid="studio-cv-needs-files">
+                  {{ t('studioCvNeedsFiles') }}
+                </p>
+                <template v-else>
+                  <p id="studio-cv-required" class="cv-needs-label">{{ t('studioCvNeedsRequired') }}</p>
+                  <ul
+                    class="cv-needs-list"
+                    aria-labelledby="studio-cv-required"
+                    data-testid="studio-cv-needs-required"
+                  >
+                    <li
+                      v-for="key in cvFacts.required"
+                      :key="key"
+                      class="cv-needs-row"
+                      :class="{ done: cvDone(key) }"
+                      :data-testid="`studio-cv-need-${key}`"
+                      :data-done="cvDone(key)"
+                    >
+                      <AppIcon :name="cvDone(key) ? 'check' : 'circle'" :size="16" /><span>{{
+                        capital(factName(key))
+                      }}</span
+                      ><span class="visually-hidden"
+                        >({{ t(cvDone(key) ? 'studioCvNeedsDone' : 'studioCvNeedsMissing') }})</span
+                      >
+                    </li>
+                  </ul>
+                </template>
+                <p class="cv-needs-optional" data-testid="studio-cv-needs-optional">{{ cvOptional }}</p>
+              </section>
               <label class="form-field studio-primary-field" :class="{ 'cv-notes-field': cvFileForm }">
                 <span>{{ t(revising ? 'reviseLabel' : cvFileForm ? 'studioCvNotes' : 'studioDescribe') }}</span>
                 <textarea
@@ -1375,7 +1489,9 @@ watch([cvSource, () => cvFiles.linkedin, () => cvFiles.file], invalidateQuote, {
                   :aria-invalid="promptError || cvLinkError ? 'true' : undefined"
                   :aria-describedby="
                     promptError
-                      ? 'studio-prompt-error'
+                      ? cvMissing.length
+                        ? 'studio-prompt-error studio-cv-missing'
+                        : 'studio-prompt-error'
                       : cvLinkError
                         ? 'studio-cv-link-error'
                         : suggestedService
@@ -1408,8 +1524,22 @@ watch([cvSource, () => cvFiles.linkedin, () => cvFiles.file], invalidateQuote, {
                 </button>
               </div>
               <!-- Outside the label: a button inside one would be part of its name. -->
-              <div v-if="promptError" class="field-error" data-testid="studio-prompt-error">
-                <AppIcon name="alert" :size="17" /><span id="studio-prompt-error">{{ promptError }}</span>
+              <div
+                v-if="promptError"
+                class="field-error"
+                :class="{ 'cv-missing-error': cvMissing.length }"
+                data-testid="studio-prompt-error"
+              >
+                <AppIcon name="alert" :size="17" /><span id="studio-prompt-error">{{
+                  cvMissing.length ? t('studioCvMissingLead') : promptError
+                }}</span>
+                <!-- A CV refused for what it lacks: each fact, with an example of how to give it. -->
+                <ol v-if="cvMissing.length" id="studio-cv-missing" data-testid="studio-cv-missing">
+                  <li v-for="key in cvMissing" :key="key">
+                    <strong>{{ capital(factName(key)) }}</strong
+                    ><template v-if="hasExample(key)"> — {{ t(`${factKey(key)}Example`) }}</template>
+                  </li>
+                </ol>
                 <button
                   v-if="promptSwitch && offered(promptSwitch)"
                   type="button"
@@ -1909,6 +2039,11 @@ watch([cvSource, () => cvFiles.linkedin, () => cvFiles.file], invalidateQuote, {
               <div class="meter-row studio-cv-row" data-testid="studio-cv-photo-row">
                 <span>{{ t('cvSetupPhoto') }}</span
                 ><strong>{{ t(portrait ? 'studioCvPhotoAttached' : 'studioCvPhotoNone') }}</strong>
+              </div>
+              <!-- What the CV lacks, or could still have, and the server says: nothing to do first. -->
+              <div v-if="cvCanAdd.length" class="studio-cv-can-add" data-testid="studio-cv-can-add">
+                <span>{{ t('studioCvCanAdd') }}</span
+                ><small>{{ cvCanAdd.join(' · ') }}</small>
               </div>
             </template>
             <div v-else class="meter-row" data-testid="studio-pages">

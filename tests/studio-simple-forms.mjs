@@ -58,6 +58,17 @@ const topicRefusal = {
   uz: 'Hujjat nima haqida bo‘lishini yozing.',
   ru: 'Напишите, о чём должен быть документ.',
 }
+// What a CV needs (apps/studio/cv/content.py REQUIRED_FACTS, OPTIONAL_FACTS).
+const CV_REQUIRED = ['name', 'contact', 'background']
+const CV_OPTIONAL = ['target', 'location', 'birth', 'skills', 'languages', 'certificates', 'projects', 'links', 'photo']
+// An older server: it lists no facts, and refuses a CV only for its name (`cv_name_required`).
+let legacyCv = false
+// The facts the next new CV is refused for, whatever the text says: the server's reading beats the form's.
+let forceMissing = null
+// What the config lists as a CV's facts, and what a new CV's draft says of them, in place of the
+// server's own: lists the form has to stand whatever they hold.
+let cvFactsListed = null
+let draftCvFacts = null
 const id = () => `00000000-0000-4000-8000-${String(++sequence).padStart(12, '0')}`
 const future = () => new Date(Date.now() + 300000).toISOString()
 const featureIds = ['ai.pdf_topic', 'ai.pptx']
@@ -97,6 +108,7 @@ const config = {
           source_modes: ['text', 'linkedin', 'file'],
           source_kinds: { linkedin: ['pdf', 'image'], file: ['pdf', 'docx', 'image'] },
           max_source_files: 10,
+          cv_facts: { required: CV_REQUIRED, optional: CV_OPTIONAL },
         }
       : {}),
     locales: ['en', 'uz', 'ru'],
@@ -181,6 +193,8 @@ const PNG = Buffer.from(
 )
 const CV_SECTIONS = ['profile', 'experience', 'education', 'skills', 'languages', 'projects', 'certificates', 'extra']
 const cvNameRefusal = 'Write your full name — the CV is made for you, so it has to say who you are.'
+const cvMissingRefusal =
+  'A CV needs your full name, a phone number or an email, and at least one job or education entry. Add what is missing and try again.'
 const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
 // A CV made from files, as the server would answer for them (fictional people
 // and files only): the person is read from the file unless its name says it
@@ -225,6 +239,47 @@ function linkedinLinkOnly(text) {
   return (rest.match(/\p{L}+/gu) || [])
     .map((word) => word.toLowerCase())
     .every((word) => word === 'linkedin' || ASKING.has(word))
+}
+/**
+ * content.facts, as far as these fixtures need it (fictional people only): a
+ * name on a line of its own or before a comma, a contact that is an email or a
+ * phone number once dates are taken out, and a background that is a job or a
+ * school beside a year or a length of service. A file gives all three unless
+ * its name says it holds nothing ("nameless-scan.png").
+ */
+function cvFacts(body) {
+  const text = `${body.prompt || ''}\n${body.source_text || ''}`
+  const files = (body.source_ids || []).map((asset) => uploads.get(asset)?.name || '')
+  const fromFile = files.some((name) => !/^nameless/i.test(name))
+  const dateless = text
+    .replace(/\d{1,2}[./-]\d{1,2}[./-](?:19|20)\d{2}|(?:19|20)\d{2}\s*[-–—/]\s*(?:19|20)\d{2}|\d{1,2}[./](?:19|20)\d{2}/g, ' ')
+    .replace(/(?<!\d)(?:19|20)\d{2}(?!\d)/g, ' ')
+  const given = {
+    name:
+      fromFile ||
+      /^\p{Lu}\p{L}+ \p{Lu}\p{L}+(?=[,.:(]|$)/mu.test(text) ||
+      /^\p{Lu}\p{L}+ \p{Lu}\p{L}+$/u.test(body.title || ''),
+    contact: fromFile || /@[\w-]+\.\w/.test(text) || /\+?\d[\d \t().-]{5,}\d/.test(dateless),
+    background:
+      fromFile ||
+      (/work|engineer|teacher|manager|developer|accountant|nurse|cashier|intern|company|university|school|college|bachelor|diploma|degree/i.test(text) &&
+        /(?<!\d)(?:19|20)\d{2}(?!\d)|\d+\s*(?:years?|yil|лет)/iu.test(text)),
+    target: /looking for|applying|seeking|ish izla|ищу/i.test(text),
+    location: /tashkent|toshkent|ташкент|samarkand|bukhara/i.test(text),
+    birth: /born|tug.ilgan|\d{1,2}\.\d{1,2}\.(?:19|20)\d{2}/i.test(text),
+    skills: /skills|ko.nikma|навык/i.test(text),
+    languages: /languages|tillar|языки/i.test(text),
+    certificates: /certificate|sertifikat|сертификат/i.test(text),
+    projects: /project|loyiha|проект/i.test(text),
+    links: /linkedin\.com|github\.com|t\.me/i.test(text),
+    photo: !!body.options?.portrait_asset_id,
+  }
+  const missing = forceMissing || CV_REQUIRED.filter((key) => !given[key])
+  return {
+    given: [...CV_REQUIRED, ...CV_OPTIONAL].filter((key) => given[key] && !missing.includes(key)),
+    missing,
+    optional_missing: CV_OPTIONAL.filter((key) => !given[key]),
+  }
 }
 // sources.MAX_PAGES: the most pages a CV's files have in all.
 const CV_PAGES = 30
@@ -428,7 +483,19 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   if (endpoint === '/catalog') return json({ features: [], draft: false })
   if (endpoint === '/plans') return json({ plans: [], draft: false })
   if (endpoint === '/usage') return json({ plan: 'free', week, ...weekUsage() })
-  if (endpoint === '/studio/config') return json(config)
+  if (endpoint === '/studio/config')
+    return json(
+      legacyCv
+        ? { ...config, features: config.features.map(({ cv_facts, ...feature }) => feature) }
+        : cvFactsListed
+          ? {
+              ...config,
+              features: config.features.map((feature) =>
+                feature.cv_facts ? { ...feature, cv_facts: cvFactsListed } : feature,
+              ),
+            }
+          : config,
+    )
   if (endpoint === '/studio/cv-templates') return json(cvCatalogue)
   if (/^\/studio\/cv-templates\/[\w-]+\.png$/.test(endpoint))
     return route.fulfill({ status: 200, contentType: 'image/png', body: PNG })
@@ -550,13 +617,28 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
         return json(refusal, status)
       }
       // The server looks for the name in the title too (apps/studio/cv/content.py),
-      // and in the files a CV is made from.
-      const person = /^\p{Lu}\p{L}+ \p{Lu}\p{L}+$/mu
+      // and in the files a CV is made from. It refuses a CV for what it lacks
+      // unless the customer insisted, and says which facts, required first.
+      const person = /^\p{Lu}\p{L}+ \p{Lu}\p{L}+(?=[,.:(]|$)/mu
       const fromFile =
         body.source_ids?.length && !body.source_ids.every((asset) => /^nameless/i.test(uploads.get(asset)?.name || ''))
       const named = person.exec(body.prompt || '') || person.exec(body.title || '') || (fromFile ? [cvFilePerson] : null)
-      if (!named && body.options?.topic_given !== true)
-        return json({ error: { code: 'cv_name_required', message: cvNameRefusal } }, 400)
+      const facts = cvFacts(body)
+      if (body.options?.topic_given !== true) {
+        if (legacyCv && !named) return json({ error: { code: 'cv_name_required', message: cvNameRefusal } }, 400)
+        if (!legacyCv && facts.missing.length) {
+          return json(
+            {
+              error: {
+                code: 'cv_missing',
+                message: cvMissingRefusal,
+                message_params: { missing: facts.missing, optional_missing: facts.optional_missing },
+              },
+            },
+            400,
+          )
+        }
+      }
       if (refusePortrait && body.options?.portrait_asset_id)
         return json({ error: { code: refusePortrait, message: 'Check the request and try again.' } }, 400)
       const title = named ? named[0] : body.title
@@ -567,6 +649,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
         expires_at: future(),
         ...structuredClone(body),
         title,
+        ...(legacyCv ? {} : { cv_facts: draftCvFacts || facts }),
         options: cvOptions(body.options),
         content: { title, sections: CV_SECTIONS.map((section) => ({ id: section, heading: '', body: '', notes: '' })), questions: [], citations: [] },
       }
@@ -1602,12 +1685,18 @@ try {
 
   // 10. A CV: no page count to read or set, a portrait instead of a PDF, and a
   // template picked from the catalogue or left on Auto.
+  const cvMissingLines = [
+    'Full name — Dilnoza Rahimova',
+    'Phone or email — +998 90 123 45 67 or dilnoza@example.com',
+    // The range of years is joined to its dash (U+2060), so it never breaks over two lines.
+    'Work experience (with years) or education — Sales manager, Bahor Foods, 2021–\u20602024; or marketing, Tashkent State University of Economics, 2018',
+  ]
   await open('ai.cv')
   const photoInput = () => page.getByTestId('studio-cv-photo')
   assert.equal(await photoInput().getAttribute('accept'), 'image/png,image/jpeg', 'the portrait is a JPG or PNG')
   assert.equal(await upload().count(), 0, 'a CV reads no PDF')
   assert.equal(await page.getByTestId('studio-title').count(), 0, 'a CV is named after the person')
-  assert.match(await page.getByTestId('studio-describe-hint').innerText(), /your full name, email or phone/)
+  assert.match(await page.getByTestId('studio-describe-hint').innerText(), /Everything in one message, as the list above shows/)
   assert.match(await page.locator('.studio-defaults').innerText(), /PDF[\s\S]*1–2 pages/)
   assert.doesNotMatch(await page.locator('.studio-defaults').innerText(), /\b10 pages/)
   const cvAuto = page.getByTestId('cv-template-auto')
@@ -1670,11 +1759,14 @@ try {
   await page.locator('[data-template="lab"]').click()
   assert.equal(await page.locator('[data-template="lab"]').getAttribute('aria-checked'), 'true')
   assert.equal(await cvAuto.getAttribute('aria-checked'), 'false')
-  // A description that names nobody is refused under the field, as a topic is.
-  await primary().fill('I am an accountant with five years of experience in a bank.')
+  // A description that lacks what a CV needs is refused under the field, as a
+  // topic is, listing each fact with an example of how to give it.
+  await primary().fill('I am an accountant and I like numbers.')
   await review().click()
   await page.getByTestId('studio-prompt-error').waitFor()
-  assert.equal(await page.locator('#studio-prompt-error').innerText(), cvNameRefusal)
+  assert.equal(await page.locator('#studio-prompt-error').innerText(), 'Still missing — add to the field above:')
+  assert.deepEqual(await page.getByTestId('studio-cv-missing').locator('li').allInnerTexts(), cvMissingLines)
+  assert.equal(await primary().getAttribute('aria-describedby'), 'studio-prompt-error studio-cv-missing')
   assert.equal(await page.getByTestId('studio-prompt-switch').count(), 0)
   // Every example names its person on the first line, and needs nothing else.
   for (const index of [0, 1, 2]) assert.match(await page.getByTestId(`studio-example-${index}`).innerText(), /^\p{Lu}\p{L}+ \p{Lu}\p{L}+ /u)
@@ -1829,6 +1921,211 @@ try {
   assert.match(await page.getByTestId('studio-cv-template-row').innerText(), /Template\s+Auto/)
   checks.push('A CV takes one description, a JPG/PNG portrait and a template; it has no page stepper or outline, and quotes as 1–2 pages')
 
+  const noOverflow = async (label) =>
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${label}: horizontal overflow`)
+  const focused = (testId) =>
+    page.waitForFunction((value) => document.activeElement?.getAttribute('data-testid') === value, testId)
+  // 10b. A CV lists what it needs above its description and ticks it as the text
+  // gives it. A refusal for what is missing lists each fact with an example, and
+  // the server's word beats the ticks until the text changes.
+  await open('ai.cv')
+  const needs = () => page.getByTestId('studio-cv-needs')
+  const need = (key) => page.getByTestId(`studio-cv-need-${key}`)
+  const missingList = () => page.getByTestId('studio-cv-missing').locator('li').allInnerTexts()
+  // Waits for the rows to read name, contact, background as `expected` says.
+  const ticked = (expected) =>
+    page.waitForFunction(
+      (want) =>
+        ['name', 'contact', 'background']
+          .map((key) => document.querySelector(`[data-testid="studio-cv-need-${key}"]`)?.dataset.done === 'true')
+          .join() === want.join(),
+      expected,
+    )
+  await needs().waitFor()
+  assert.equal(await needs().getByRole('heading', { name: 'What your CV needs', level: 3 }).count(), 1)
+  assert.deepEqual(
+    await Promise.all(['name', 'contact', 'background'].map((key) => need(key).locator('span').first().innerText())),
+    ['Full name', 'Phone or email', 'Work experience (with years) or education'],
+  )
+  assert.equal(
+    await page.getByTestId('studio-cv-needs-optional').innerText(),
+    'Optional: the job you want, city, birth date or age, skills, languages, certificates, projects, LinkedIn or other links, photo',
+  )
+  assert.ok(
+    await page.evaluate(() => {
+      const [panel, field] = ['studio-cv-needs', 'studio-primary-input'].map((id) =>
+        document.querySelector(`[data-testid="${id}"]`),
+      )
+      return !!(panel.compareDocumentPosition(field) & Node.DOCUMENT_POSITION_FOLLOWING) && !panel.closest('label')
+    }),
+    'the list comes before the description and is not part of its label',
+  )
+  await ticked([false, false, false])
+  assert.match(await need('name').textContent(), /\(not found yet\)/, 'a screen reader is told what is missing')
+  // Typing ticks each fact as the text gives it.
+  await primary().fill('Dilnoza Rahimova')
+  await ticked([true, false, false])
+  assert.match(await need('name').textContent(), /\(found\)/)
+  await primary().fill('Dilnoza Rahimova, +998 90 111 22 33')
+  await ticked([true, true, false])
+  await auditBrief('cv needs')
+  await primary().fill('Dilnoza Rahimova, +998 90 111 22 33\nTeacher at School 12, 2019–2024')
+  await ticked([true, true, true])
+  // A period beside a word is a job's, as the server reads it; dates alone are nothing, and no phone number.
+  await primary().fill('03.2021 - 06.2024 marketing')
+  await ticked([false, false, true])
+  await primary().fill('2015-2019')
+  await ticked([false, false, false])
+  await primary().fill('Karimova Dilnoza 1996-yilda tug‘ilganman')
+  await ticked([true, false, false])
+  await primary().fill('Меня зовут Иван Петров, инженер')
+  await ticked([true, false, false])
+  await primary().fill('')
+  await ticked([false, false, false])
+  // The examples tick all three.
+  for (const index of [0, 1, 2]) {
+    await page.getByTestId(`studio-example-${index}`).click()
+    await ticked([true, true, true])
+  }
+  checks.push('A CV lists what it needs above the description, and ticks name, contact and background as they are typed')
+
+  // Refused for what is missing: the name is given, so it stays ticked; the
+  // contact and the background are listed, with an example each.
+  await primary().fill('Dilnoza Rahimova\nI work as a nurse.')
+  await ticked([true, false, false])
+  await review().click()
+  await page.getByTestId('studio-cv-missing').waitFor()
+  assert.deepEqual(await missingList(), cvMissingLines.slice(1))
+  await ticked([true, false, false])
+  assert.equal(await page.getByTestId('studio-prompt-anyway').count(), 1)
+  await focused('studio-primary-input')
+  // The server's reading beats the form's: it found no contact in what the form ticks.
+  forceMissing = ['contact']
+  await primary().fill('Dilnoza Rahimova, dilnoza@example.com\nTeacher at School 12, 2019–2024')
+  await ticked([true, true, true])
+  assert.equal(await page.getByTestId('studio-cv-missing').count(), 0, 'typing takes the list away')
+  await review().click()
+  await page.getByTestId('studio-cv-missing').waitFor()
+  forceMissing = null
+  assert.deepEqual(await missingList(), [cvMissingLines[1]])
+  await ticked([true, false, true])
+  await primary().fill('Dilnoza Rahimova, dilnoza@example.com\nTeacher at School 12, 2019–2024 ')
+  await ticked([true, true, true])
+  assert.equal(await page.getByTestId('studio-prompt-error').count(), 0)
+  // A refusal belongs to the way it was started: another way, or another service, takes it away.
+  await primary().fill('I am an accountant and I like numbers.')
+  await review().click()
+  await page.getByTestId('studio-cv-missing').waitFor()
+  await page.getByTestId('studio-cv-source-linkedin').click()
+  assert.equal(await page.getByTestId('studio-prompt-error').count(), 0, 'another way to start takes the list away')
+  assert.equal(await page.getByTestId('studio-cv-needs-files').count(), 1)
+  assert.equal(await page.getByTestId('studio-cv-needs-required').count(), 0, 'from LinkedIn nothing is ticked')
+  assert.match(await page.getByTestId('studio-cv-needs-optional').innerText(), /^Optional: the job you want, city/)
+  await page.getByTestId('studio-cv-source-text').click()
+  await review().click()
+  await page.getByTestId('studio-cv-missing').waitFor()
+  await page.getByTestId('studio-purpose').selectOption('ai.pdf_topic')
+  assert.equal(await page.getByTestId('studio-prompt-error').count(), 0, 'another service takes the list away')
+  assert.equal(await needs().count(), 0, 'only a CV lists what it needs')
+  await page.getByTestId('studio-purpose').selectOption('ai.cv')
+  assert.equal(await page.getByTestId('studio-prompt-error').count(), 0)
+  await ticked([false, false, false])
+  // Insisting makes the CV; the review says what it could still have.
+  await primary().fill('Marketing manager in Tashkent, at a food company.')
+  await review().click()
+  await page.getByTestId('studio-prompt-anyway').waitFor()
+  assert.deepEqual(await missingList(), cvMissingLines)
+  await page.getByTestId('studio-prompt-anyway').click()
+  await quotePanel().waitFor()
+  assert.equal(lastDraftRequest().body.options.topic_given, true)
+  assert.match(
+    await page.getByTestId('studio-cv-can-add').innerText(),
+    /^You can still add\s+full name · phone or email · work experience \(with years\) or education · the job you want$/,
+  )
+  // A complete description lacks only what is optional: four of those at most, never the photo.
+  await open('ai.cv')
+  await page.getByTestId('studio-example-0').click()
+  await reviewNew()
+  assert.match(
+    await page.getByTestId('studio-cv-can-add').innerText(),
+    /^You can still add\s+birth date or age · certificates · projects · LinkedIn or other links$/,
+  )
+  checks.push('A CV refused for what it lacks lists each missing fact with an example, believes the server over its ticks until the text changes, and says on the review what it could still have')
+
+  // An older server lists no facts and asks only for the name: the same lists
+  // from the form's own, and nothing about what could be added.
+  legacyCv = true
+  await open('ai.cv')
+  await needs().waitFor()
+  assert.equal(await page.getByTestId('studio-cv-needs-required').locator('li').count(), 3)
+  await primary().fill('I am an accountant and I like numbers.')
+  await review().click()
+  await page.getByTestId('studio-cv-missing').waitFor()
+  assert.equal(await page.locator('#studio-prompt-error').innerText(), 'Still missing — add to the field above:')
+  assert.deepEqual(await missingList(), [cvMissingLines[0]])
+  await ticked([false, false, false])
+  await primary().fill('Dilnoza Rahimova\nI am an accountant.')
+  await reviewNew()
+  assert.equal(await page.getByTestId('studio-cv-can-add').count(), 0, 'an older server says nothing of what could be added')
+  legacyCv = false
+  checks.push('Against a server that lists no facts and refuses a CV only for its name, the form lists the same three facts and asks for the name')
+
+  // Whatever the lists hold, the form stands: a draft's facts that are no list
+  // are nothing (never a broken page), a fact named twice is said once, and a
+  // config that names no fact the form knows is read as the form's own lists.
+  const canAdd = async () =>
+    (await page.getByTestId('studio-cv-can-add').count()) ? page.getByTestId('studio-cv-can-add').innerText() : ''
+  for (const [facts, said] of [
+    [{ missing: 5, optional_missing: [] }, ''],
+    [{ missing: { a: 1 }, optional_missing: ['target'] }, 'the job you want'],
+    [{ missing: [], optional_missing: 7 }, ''],
+    [{ missing: ['name', 'name'], optional_missing: ['target', 'target', 'unknown'] }, 'full name · the job you want'],
+  ]) {
+    draftCvFacts = { given: [], ...facts }
+    await open('ai.cv')
+    await primary().fill('Dilnoza Rahimova, +998 90 111 22 33\nTeacher at School 12, 2019–2024')
+    await reviewNew()
+    assert.equal((await canAdd()).replace(/^You can still add\s+/, ''), said, `the review reads ${JSON.stringify(facts)}`)
+  }
+  draftCvFacts = null
+  const rows = () =>
+    page.getByTestId('studio-cv-needs-required').locator('li > span:not(.visually-hidden)').allInnerTexts()
+  const allRows = ['Full name', 'Phone or email', 'Work experience (with years) or education']
+  for (const [listed, required, optional] of [
+    [{ required: ['full_name', 'phone', 'job'], optional: ['unknown'] }, allRows, /^Optional: the job you want, city, /],
+    [{ required: [], optional: [] }, allRows, /^Optional: the job you want, city, /],
+    [{ required: ['name', 'name', 'contact'], optional: ['target', 'target'] }, allRows.slice(0, 2), /^Optional: the job you want$/],
+  ]) {
+    cvFactsListed = listed
+    await open('ai.cv')
+    await needs().waitFor()
+    assert.deepEqual(await rows(), required, `the rows of ${JSON.stringify(listed)}`)
+    assert.match(await page.getByTestId('studio-cv-needs-optional').innerText(), optional)
+  }
+  cvFactsListed = null
+  // A refusal that names a fact twice lists it once.
+  forceMissing = ['name', 'name', 'contact']
+  await open('ai.cv')
+  await primary().fill('Teacher at School 12, 2019–2024')
+  await review().click()
+  await page.getByTestId('studio-cv-missing').waitFor()
+  assert.deepEqual(await missingList(), cvMissingLines.slice(0, 2))
+  forceMissing = null
+  checks.push('A CV’s lists stand whatever the server sends: facts that are no list, repeated or unknown ids, or none')
+
+  // On a phone and on a desktop, with a refusal showing.
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 900 })
+    await open('ai.cv')
+    await primary().fill('Dilnoza Rahimova, +998 90 111 22 33')
+    await review().click()
+    await page.getByTestId('studio-cv-missing').waitFor()
+    await noOverflow(`cv needs/${width}`)
+    await auditBrief(`cv needs refused ${width}`)
+    await page.getByTestId('studio-brief').screenshot({ path: path.join(output, `cv-needs-${width}.png`) })
+  }
+  await page.setViewportSize({ width: 1440, height: 1000 })
+
   // 11. A CV starts with where it is made from: a description, a LinkedIn
   // profile (its Save to PDF, or screenshots) or an old CV. In the last two the
   // text is notes on top of the files, which go to the draft as its sources.
@@ -1867,10 +2164,6 @@ try {
   const radio = (name) => page.getByRole('radio', { name })
   const linkError = () => page.getByTestId('studio-cv-link-error')
   const cvDrafts = () => calls('/generation/drafts').length
-  const noOverflow = async (label) =>
-    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `${label}: horizontal overflow`)
-  const focused = (testId) =>
-    page.waitForFunction((value) => document.activeElement?.getAttribute('data-testid') === value, testId)
   await open('ai.cv')
   const sourceGroup = page.getByRole('group', { name: 'How do you want to make your CV?' })
   await sourceGroup.waitFor()
@@ -2083,17 +2376,30 @@ try {
   await choice('file').click()
   await page.getByTestId('studio-cv-source-files').getByText('Old-CV.docx').waitFor()
 
-  // No name in the notes nor in the file: asked for under the notes, as for a description.
+  // Nothing a CV needs in the notes nor in the file: asked for under the notes,
+  // as for a description. From a file the panel above says where the facts come from.
   await open('ai.cv')
   await choice('file').click()
   await sourceInput().setInputFiles({ name: 'nameless-scan.png', mimeType: 'image/png', buffer: PNG })
   await sourceChips().first().waitFor()
+  assert.equal(await page.getByTestId('studio-cv-needs-files').count(), 1)
+  assert.equal(await page.getByTestId('studio-cv-need-name').count(), 0, 'from files nothing is ticked')
   await review().click()
   await page.getByTestId('studio-prompt-error').waitFor()
-  assert.equal(await page.locator('#studio-prompt-error').innerText(), cvNameRefusal)
+  assert.equal(await page.locator('#studio-prompt-error').innerText(), 'Still missing — add to the field above:')
+  assert.deepEqual(await page.getByTestId('studio-cv-missing').locator('li').allInnerTexts(), cvMissingLines)
   await focused('studio-primary-input')
-  await primary().fill('Dilnoza Rahimova\nApplying for a teacher job.')
-  assert.equal((await reviewNew()).title, 'Dilnoza Rahimova')
+  assert.equal(await primary().getAttribute('aria-describedby'), 'studio-prompt-error studio-cv-missing')
+  assert.equal(await page.locator('.error-banner').count(), 0, 'not in the banner at the top')
+  await page.setViewportSize({ width: 390, height: 844 })
+  await noOverflow('cv missing from a file/390')
+  await page.getByTestId('studio-cv-missing').scrollIntoViewIfNeeded()
+  await page.screenshot({ path: path.join(output, 'cv-source-missing-390.png') })
+  await page.setViewportSize({ width: 1440, height: 1000 })
+  await primary().fill('Dilnoza Rahimova, +998 90 111 22 33\nTeacher at School 12, 2019–2024')
+  assert.equal(await page.getByTestId('studio-prompt-error').count(), 0, 'typing takes the list away')
+  await reviewNew()
+  assert.equal(await page.locator('.generation-summary h2').innerText(), 'Dilnoza Rahimova', 'named from the notes')
 
   // A description that is a bare link shows the steps, and the way to From LinkedIn.
   await open('ai.cv')
@@ -2138,10 +2444,10 @@ try {
   assert.equal(await page.locator('.error-banner').count(), 0)
   // A short description with facts in it is a CV's description, as it always
   // was, however few its words: the link on it is a contact.
-  await primary().fill('Ali Valiyev\nSMM manager. linkedin.com/in/ali-valiyev')
+  await primary().fill('Ali Valiyev, +998 90 111 22 33\nSMM manager at Bahor Foods, 2021–2024. linkedin.com/in/ali-valiyev')
   const withLink = await reviewNew()
   assert.equal(withLink.options.cv_source, 'text')
-  assert.equal(withLink.prompt, 'Ali Valiyev\nSMM manager. linkedin.com/in/ali-valiyev')
+  assert.equal(withLink.prompt, 'Ali Valiyev, +998 90 111 22 33\nSMM manager at Bahor Foods, 2021–2024. linkedin.com/in/ali-valiyev')
   assert.equal(await linkError().count(), 0)
 
   // A batch in which the server refuses one file: the files after it still go
@@ -2606,6 +2912,42 @@ try {
               path: path.join(output, `${feature}-${mode}-${locale}-${width}.png`),
             })
           }
+        // What a CV needs, and a refusal for what is missing, in every language.
+        if (feature === 'ai.cv') {
+          await page.getByTestId('studio-cv-source-text').click()
+          await primary().fill('Dilnoza Rahimova, +998 90 111 22 33')
+          await review().click()
+          await page.getByTestId('studio-cv-missing').waitFor()
+          assert.equal(await page.getByTestId('studio-cv-missing').locator('li').count(), 1)
+          for (const theme of ['light', 'dark']) {
+            await page.evaluate((value) => (document.documentElement.dataset.theme = value), theme)
+            await page.evaluate(
+              () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+            )
+            const label = `${feature}/needs/${locale}/${width}/${theme}`
+            assert.equal(
+              await page.evaluate(() => document.documentElement.scrollWidth > innerWidth),
+              false,
+              `${label}: horizontal overflow`,
+            )
+            visualChecks += 1
+            const result = await new AxeBuilder({ page })
+              .include('.studio-layout')
+              .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
+              .analyze()
+            assert.deepEqual(
+              result.violations.map((violation) => ({
+                id: violation.id,
+                nodes: violation.nodes.map((node) => ({ target: node.target, failure: node.failureSummary })),
+              })),
+              [],
+              `${label}: accessibility violations`,
+            )
+            await page.getByTestId('studio-brief').screenshot({
+              path: path.join(output, `${feature}-needs-${locale}-${width}-${theme}.png`),
+            })
+          }
+        }
       }
     }
   }
