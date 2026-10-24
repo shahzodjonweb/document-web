@@ -379,6 +379,25 @@ const CV_LABEL = look(
   'i',
 )
 const CAPITAL_AFTER = look(String.raw`[ \t]+(?=[^\W\d_])`)
+/** A CV asked for in Russian for someone named after "для", in the genitive: "резюме для Тимура Сафарова". */
+const GENITIVE_FOR = look(String.raw`(?<![\w'’‘ʼʻ])(?:резюме|рез[юу]ме|cv|анкет[ау])[ \t]+для[ \t]+`, 'i')
+/**
+ * A later sentence of a line, after a full stop, "!" or "?" (not a colon:
+ * "Skills: Adobe Photoshop"), and what makes the words it starts with a name: a
+ * phone or an email straight after them or after a comma ("Хочу работать
+ * бухгалтером. Наталья Павлова, natalya@…").
+ */
+const LATER_SENTENCE = look(String.raw`(?<![.!?])[.!?]+[ \t]+`)
+const CONTACT_CLOSE = look(String.raw`[ \t]*,?[ \t]*(?:\+?[ \t]?\(?\d[\d \t()\-]{6}|[\w.+\-']+@[\w\-]+\.\w)`)
+/**
+ * The ending of a surname: a name may go on with dates from and to on the first
+ * line ("Фарход Умаров, 2015–2019 …") where an employer's words ("UzAuto
+ * Motors, 2018-2022") may not.
+ */
+const SURNAME_END = look(
+  String.raw`(?:ov|ova|ev|eva|yev|yeva|ovich|evich|ovna|evna|in|ina|ов|ова|ев|ева|ёв|ёва|ин|ина` +
+    String.raw`|ын|ына|ович|евич|овна|евна|ский|ская|цкий|цкая|ий|enko|енко|yan|ян|dze|дзе|shvili|швили)$`,
+)
 const SPAN_AFTER = look(
   String.raw`\s*(?:[,;(]\s*)?(?:\d{1,2}[./])?(?:19|20)\d{2}\s*[-–—]\s*` +
     String.raw`(?:(?:\d{1,2}[./])?(?:19|20)?\d{2}(?!\d)|hozir|present|now|current|наст|н\.\s*в)`,
@@ -624,14 +643,37 @@ function* openings(line: string, start: number) {
     yield position
   }
 }
-/** _line_name: whether the words at `start` of `line` make a name (`ends`). */
+/** _surnamed: whether one of a name's words ends as a surname does (SURNAME_END). */
+const surnamed = (text: string, words: Span[]) =>
+  words.some(([start, end]) => !!search(SURNAME_END, folded(text.slice(start, end))))
+/**
+ * _line_name: whether the words at `start` of `line` make a name (`ends`).
+ * Words that go on with dates from and to are an employer's or a school's line,
+ * unless on the first line one of them is a surname.
+ */
 function lineName(line: string, start: number, opening: boolean) {
   const title = matchAt(TITLE, line, start)
   const words = run(line, title ? title.index + title[0].length : start)
   if (!words.length) return false
   const end = nameEnd(line, words)
-  if (matchAt(SPAN_AFTER, line, end) || !ends(line, words, end, opening)) return false
+  if (matchAt(SPAN_AFTER, line, end) && !(opening && surnamed(line, words))) return false
+  if (!ends(line, words, end, opening)) return false
   return named(line, words)
+}
+/** Python's str.isalpha for the one character at `at`. */
+const letterAt = (text: string, at: number) => /^\p{L}$/u.test(String.fromCodePoint(text.codePointAt(at) ?? 32))
+/**
+ * _later_name: whether a name starts a later sentence of `line` and is followed
+ * by a phone or an email (CONTACT_CLOSE).
+ */
+function laterName(line: string) {
+  for (const stop of findAll(LATER_SENTENCE, line)) {
+    const at = stop.index + stop[0].length
+    if (!letterAt(line, at)) continue
+    const words = run(line, at)
+    if (words.length && matchAt(CONTACT_CLOSE, line, nameEnd(line, words)) && named(line, words)) return true
+  }
+  return false
 }
 /** name_in: whether the description names the person (the server's own docstring says how). */
 function nameIn(raw: string) {
@@ -656,7 +698,11 @@ function nameIn(raw: string) {
     if (after && /^\p{Uppercase}/u.test(text.slice(after.index + after[0].length))) continue
     if (named(text, words)) return true
   }
-  return false
+  for (const label of findAll(GENITIVE_FOR, text)) {
+    const at = label.index + label[0].length
+    if (letterAt(text, at) && named(text, run(text, at))) return true
+  }
+  return lines.some(laterName)
 }
 
 // --- A contact and a background (facts) -------------------------------------------
