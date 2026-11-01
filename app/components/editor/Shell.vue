@@ -26,15 +26,25 @@ const doc = session.doc
 const pageCount = computed(() => doc.value?.file.page_count ?? 0)
 const pages = computed(() => doc.value?.pages ?? [])
 
-/** Fit-width uses the widest page so nothing overflows horizontally. */
+/**
+ * Fit-width uses the widest page so nothing overflows horizontally. A phone has
+ * no width to spare: the stage runs edge to edge there and keeps 4 px a side.
+ */
 function applyFit() {
   if (session.fitMode.value === 'custom') return
   const element = stage.value
   if (!element || !pages.value.length) return
   const widest = Math.max(...pages.value.map((page) => page.width))
-  const available = element.clientWidth - 48
-  if (available > 0 && widest > 0) session.zoom.value = Math.min(2, Math.max(0.2, available / widest))
+  const available = element.clientWidth - (window.matchMedia('(max-width: 760px)').matches ? 8 : 48)
+  // A poster fits too: as low as a page can be drawn, where the zoom buttons stop at 25 %.
+  if (available > 0 && widest > 0) session.zoom.value = Math.min(2, Math.max(0.05, available / widest))
 }
+
+// The zoom control and the 0 key ask for fit-width by setting the mode, which
+// Pages mode can do while there is no stage to measure. The page count is there
+// because the fit cannot wait for the file: on a phone a page wider than the
+// screen would scroll sideways for the whole download.
+watch([session.fitMode, stage, () => pages.value.length], applyFit)
 
 /**
  * The bot links here as `?file_id=…` after a file has been sent to the chat.
@@ -73,11 +83,24 @@ async function start() {
   if (feature && isCommandType(tool)) session.activeTool.value = tool
 }
 
+/**
+ * Telegram can be minimised and the app closed without warning, and the timers
+ * of a hidden page may never fire: this is the last chance to send the work.
+ */
+function onVisibilityChange() {
+  if (document.visibilityState === 'hidden') void session.flush()
+}
+function onPageHide() {
+  void session.flush()
+}
+
 onMounted(() => {
   if (!ws.features.value.length) void ws.loadCatalog().catch(() => {})
   void start()
   window.addEventListener('resize', applyFit)
   window.addEventListener('keydown', onKeydown)
+  window.addEventListener('pagehide', onPageHide)
+  document.addEventListener('visibilitychange', onVisibilityChange)
 })
 
 watch(() => props.documentId, start)
@@ -92,8 +115,8 @@ watch(
 
 /**
  * A draft can hold changes made with a tool that has since been switched off.
- * The server refuses the whole array, so say which changes are the problem
- * instead of letting every autosave fail. Every plan has the same tools, so
+ * The server refuses the whole array, so say which changes are the problem:
+ * every autosave fails until they go. Every plan has the same tools, so
  * removing them is the only way on; no plan would bring the tool back.
  */
 const lockedCommands = computed(() => {
@@ -105,10 +128,6 @@ const lockedCommands = computed(() => {
   })
 })
 
-watch(lockedCommands, (list) => {
-  if (list.length) session.saveState.value = 'paused'
-})
-
 function removeLocked() {
   session.removeCommands(lockedCommands.value.map((command) => command._id))
   session.saveState.value = 'dirty'
@@ -118,19 +137,28 @@ function removeLocked() {
 onBeforeUnmount(() => {
   window.removeEventListener('resize', applyFit)
   window.removeEventListener('keydown', onKeydown)
+  window.removeEventListener('pagehide', onPageHide)
+  document.removeEventListener('visibilitychange', onVisibilityChange)
+  // Most links stay on this route record, so the guard below does not see them.
+  void session.flush()
   void render.teardown()
 })
 
 function onKeydown(event: KeyboardEvent) {
+  // The launcher is this component too, and a document opening is not on screen yet.
+  if (!props.documentId || session.isBusy('load')) return
   const target = event.target as HTMLElement | null
   const typing = !!target && ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)
   if (typing) return
   const meta = event.metaKey || event.ctrlKey
-  if (meta && event.key.toLowerCase() === 'z') {
+  // `code` as well: on a Russian layout the Z key reports "я".
+  const pressed = (letter: string) =>
+    event.key.toLowerCase() === letter || event.code === `Key${letter.toUpperCase()}`
+  if (meta && pressed('z')) {
     event.preventDefault()
     if (event.shiftKey) session.redo()
     else session.undo()
-  } else if (meta && event.key.toLowerCase() === 's') {
+  } else if (meta && pressed('s')) {
     event.preventDefault()
     void session.save()
   } else if (event.key === 'Escape') session.activeTool.value = 'select'
@@ -162,9 +190,14 @@ function onScroll() {
   }
 }
 
+/** A refused save says why in the action bar, which stays on screen on a phone. Pages mode has none. */
+const bannerError = computed(
+  () => session.error.value || (session.mode.value === 'pages' ? session.saveError.value : ''),
+)
+
 // Leaving with unsaved work would lose it: the draft only exists server-side.
 onBeforeRouteLeave(async () => {
-  if (session.saveState.value === 'dirty') await session.save()
+  await session.flushBriefly()
   return true
 })
 </script>
@@ -176,85 +209,97 @@ onBeforeRouteLeave(async () => {
       <NuxtLink :to="path('/app/editor')" class="back-link"
         ><AppIcon name="back" :size="15" />{{ t('editor') }}</NuxtLink
       >
-      <h1>{{ doc?.file.name || t('editorTitle') }}</h1>
+      <h1>{{ (!session.isBusy('load') && doc?.file.name) || t('editorTitle') }}</h1>
     </div>
 
-    <ErrorBanner v-if="session.error.value" :message="session.error.value" />
-    <p v-if="session.notice.value" class="info-banner" role="status">
-      <AppIcon name="alert" :size="17" />{{ session.notice.value }}
+    <!-- The document on screen goes as soon as another is asked for, so nothing can be edited in the gap. -->
+    <p v-if="session.isBusy('load')" class="editor-stage-status" role="status" data-testid="editor-opening">
+      <AppIcon name="loader" class="spin" :size="20" />{{ t('editorPreparingPages') }}
     </p>
 
-    <section v-if="session.conflict.value" class="editor-conflict info-banner" role="alert">
-      <div>
-        <strong>{{ t('editorConflictTitle') }}</strong>
-        <p>{{ t('editorConflictBody') }}</p>
-      </div>
-      <span>
-        <button type="button" class="button secondary small" @click="session.resolveTakeServer">
-          {{ t('editorConflictTakeServer') }}
-        </button>
-        <button type="button" class="button primary small" @click="session.resolveKeepMine">
-          {{ t('editorConflictKeepMine') }}
-        </button>
-      </span>
-    </section>
+    <template v-else>
+      <ErrorBanner v-if="bannerError" :message="bannerError" />
+      <p v-if="session.notice.value" class="info-banner" role="status">
+        <AppIcon name="alert" :size="17" />{{ session.notice.value }}
+      </p>
 
-    <section v-if="lockedCommands.length" class="info-banner editor-conflict" role="alert">
-      <div>
-        <strong>{{ t('editorLockedCommands', { count: lockedCommands.length }) }}</strong>
-      </div>
-      <span>
-        <button type="button" class="button primary small" @click="removeLocked">
-          {{ t('editorRemoveLocked') }}
-        </button>
-      </span>
-    </section>
+      <section v-if="session.conflict.value" class="editor-conflict info-banner" role="alert">
+        <div>
+          <strong>{{ t('editorConflictTitle') }}</strong>
+          <p>{{ t('editorConflictBody') }}</p>
+        </div>
+        <span>
+          <button type="button" class="button secondary small" @click="session.resolveTakeServer">
+            {{ t('editorConflictTakeServer') }}
+          </button>
+          <button type="button" class="button primary small" @click="session.resolveKeepMine">
+            {{ t('editorConflictKeepMine') }}
+          </button>
+        </span>
+      </section>
 
-    <EditorToolStrip @toggle-pages="railOpen = !railOpen" />
+      <section v-if="lockedCommands.length" class="info-banner editor-conflict" role="alert">
+        <div>
+          <strong>{{ t('editorLockedCommands', { count: lockedCommands.length }) }}</strong>
+        </div>
+        <span>
+          <button type="button" class="button primary small" @click="removeLocked">
+            {{ t('editorRemoveLocked') }}
+          </button>
+        </span>
+      </section>
 
-    <EditorPagesBoard v-if="session.mode.value === 'pages'" />
+      <EditorToolStrip @toggle-pages="railOpen = !railOpen" />
 
-    <div v-else class="editor-body">
-      <EditorPageRail v-if="railOpen && pageCount" :page-count="pageCount" :current="currentPage" @go="goToPage" />
+      <EditorPagesBoard v-if="session.mode.value === 'pages'" />
 
-      <!-- Focusable so the pages can be scrolled from the keyboard alone. -->
-      <div
-        ref="stage"
-        class="editor-stage"
-        role="region"
-        tabindex="0"
-        :aria-label="t('preview')"
-        @scroll.passive="onScroll"
-      >
-        <p v-if="render.mode.value === 'loading'" class="editor-stage-status" role="status">
-          <AppIcon name="loader" class="spin" :size="20" />{{ t('editorPreparingPages') }}
-        </p>
-        <EditorPageCanvas
-          v-for="(page, index) in pages"
-          :key="index"
-          :page="index + 1"
-          :page-width="page.width"
-          :page-height="page.height"
+      <div v-else class="editor-body">
+        <EditorPageRail
+          v-if="railOpen && pageCount"
           :page-count="pageCount"
-          :zoom="session.zoom.value"
-          :file-id="doc!.file.id"
+          :current="currentPage"
+          @go="goToPage"
+        />
+
+        <!-- Focusable so the pages can be scrolled from the keyboard alone. -->
+        <div
+          ref="stage"
+          class="editor-stage"
+          role="region"
+          tabindex="0"
+          :aria-label="t('preview')"
+          @scroll.passive="onScroll"
         >
-          <EditorMarkLayer
+          <p v-if="render.mode.value === 'loading'" class="editor-stage-status" role="status">
+            <AppIcon name="loader" class="spin" :size="20" />{{ t('editorPreparingPages') }}
+          </p>
+          <EditorPageCanvas
+            v-for="(page, index) in pages"
+            :key="index"
             :page="index + 1"
             :page-width="page.width"
             :page-height="page.height"
+            :page-count="pageCount"
             :zoom="session.zoom.value"
-          />
-        </EditorPageCanvas>
+            :file-id="doc!.file.id"
+          >
+            <EditorMarkLayer
+              :page="index + 1"
+              :page-width="page.width"
+              :page-height="page.height"
+              :zoom="session.zoom.value"
+            />
+          </EditorPageCanvas>
+        </div>
+
+        <aside class="editor-side">
+          <EditorFloatBar />
+          <EditorFieldPanel v-if="session.mode.value === 'edit'" />
+          <EditorCommandList />
+        </aside>
       </div>
 
-      <aside class="editor-side">
-        <EditorFloatBar />
-        <EditorFieldPanel v-if="session.mode.value === 'edit'" />
-        <EditorCommandList />
-      </aside>
-    </div>
-
-    <EditorActionBar v-if="session.mode.value !== 'pages'" />
+      <EditorActionBar v-if="session.mode.value !== 'pages'" />
+    </template>
   </div>
 </template>

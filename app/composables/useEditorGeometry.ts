@@ -58,7 +58,7 @@ export function pageScale(rect: { width: number }, page: PageSize): number {
 export type ClampMode = 'move' | 'resize'
 
 /**
- * Returns a copy whose geometry the server will accept.
+ * Returns a copy whose geometry and sizes the server will accept.
  *
  * `move` keeps the size and slides the position; `resize` keeps the position
  * and shrinks the size. Dragging an edge must not teleport the opposite one.
@@ -67,6 +67,11 @@ export function clampCommand(command: ClientCommand, page: PageSize, mode: Clamp
   const next: ClientCommand = { ...command }
   const shape = COMMAND_SHAPE[command.type]
   const maxCoordinate = LIMITS.coordinate
+
+  if (next.font_size !== undefined)
+    next.font_size = clamp(next.font_size, LIMITS.fontSize.min, LIMITS.fontSize.max)
+  if (next.stroke_width !== undefined)
+    next.stroke_width = clamp(next.stroke_width, LIMITS.strokeWidth.min, LIMITS.strokeWidth.max)
 
   if (next.points) {
     next.points = next.points.map(([x, y]) => [

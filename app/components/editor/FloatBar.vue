@@ -43,9 +43,7 @@ function wrapText() {
 }
 
 function duplicate() {
-  const current = command.value
-  if (!current) return
-  session.addCommand(current.type, { page: current.page ?? 1, x: (current.x ?? 0) + 12, y: (current.y ?? 0) + 12 })
+  if (command.value) session.duplicateCommand(command.value._id)
 }
 </script>
 
@@ -160,14 +158,19 @@ function duplicate() {
             type="button"
             class="editor-swatch"
             :class="{ active: command.color?.toUpperCase() === value }"
-            :style="{ background: value }"
+            :style="{ '--swatch': value }"
             :aria-label="t(key)"
             @click="setColor(value)"
           />
         </div>
       </template>
 
-      <button v-if="command.type === 'add_text'" type="button" class="button secondary full small" @click="wrapText">
+      <button
+        v-if="command.type === 'add_text'"
+        type="button"
+        class="button secondary full small editor-wrap-text"
+        @click="wrapText"
+      >
         <AppIcon name="alignLeft" :size="15" />{{ t('editorWrapToPage') }}
       </button>
 

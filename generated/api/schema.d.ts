@@ -1484,6 +1484,11 @@ export interface components {
             id: string;
             image_counts?: number[];
             input_ids: string[];
+            /** @description The most a draft holds: `commands` changes, measuring `bytes` as UTF-8 compact JSON with the defaults filled in, the count of `new TextEncoder().encode(JSON.stringify(commands)).length`. */
+            limits: {
+                bytes: number;
+                commands: number;
+            };
             pages: {
                 height: number;
                 width: number;
@@ -4478,6 +4483,17 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description `payload_too_large`: the draft measures over `limits.bytes`, or the body over 128 KiB. Nothing is saved. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
             };
         };
     };

@@ -750,6 +750,11 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Изображения сохраняют пропорции и центрируются внутри рамки.',
   ],
   editorImageTypes: ['PNG, JPEG or WebP', 'PNG, JPEG yoki WebP', 'PNG, JPEG или WebP'],
+  editorImageRefused: [
+    'This file can’t be used as an image. Choose a PNG, JPEG or WebP.',
+    'Bu fayldan rasm sifatida foydalanib bo‘lmaydi. PNG, JPEG yoki WebP tanlang.',
+    'Этот файл нельзя использовать как изображение. Выберите PNG, JPEG или WebP.',
+  ],
   editorFitToImage: ['Match image shape', 'Rasm nisbatiga moslash', 'По пропорциям изображения'],
   editorFindReplace: ['Find and replace text', 'Matnni topish va almashtirish', 'Найти и заменить текст'],
   editorFindReplaceNote: [
@@ -784,6 +789,27 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   editorSaving: ['Saving…', 'Saqlanmoqda…', 'Сохранение…'],
   editorSaveFailed: ['Changes are not saved', 'O‘zgarishlar saqlanmadi', 'Изменения не сохранены'],
   editorSaveNow: ['Save now', 'Hozir saqlash', 'Сохранить сейчас'],
+  editorSaveNeedsFix_one: [
+    'Not saved: one change needs fixing',
+    'Saqlanmadi: bitta o‘zgarishni tuzatish kerak',
+    'Не сохранено: {count} изменение нужно исправить',
+  ],
+  editorSaveNeedsFix_few: [
+    'Not saved: {count} changes need fixing',
+    'Saqlanmadi: {count} ta o‘zgarishni tuzatish kerak',
+    'Не сохранено: {count} изменения нужно исправить',
+  ],
+  editorSaveNeedsFix_many: [
+    'Not saved: {count} changes need fixing',
+    'Saqlanmadi: {count} ta o‘zgarishni tuzatish kerak',
+    'Не сохранено: {count} изменений нужно исправить',
+  ],
+  editorSaveNeedsFix_other: [
+    'Not saved: {count} changes need fixing',
+    'Saqlanmadi: {count} ta o‘zgarishni tuzatish kerak',
+    'Не сохранено: {count} изменения нужно исправить',
+  ],
+  editorShowIssue: ['Show', 'Ko‘rsatish', 'Показать'],
   editorAutosaveOff: [
     'Automatic saving is paused.',
     'Avtomatik saqlash to‘xtatilgan.',
@@ -812,7 +838,6 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Bu qoralama hajm chegarasiga yetdi. Matnni qisqartiring yoki bitta o‘zgarishni olib tashlang.',
     'Черновик достиг предела размера. Сократите текст или уберите одно изменение.',
   ],
-  editorIssues: ['{count} problems to fix before export', 'Eksportdan oldin {count} ta muammo', '{count} проблем нужно исправить до экспорта'],
   editorIssueOutOfBounds: ['This sits outside the page.', 'Bu sahifadan tashqarida.', 'Находится за пределами страницы.'],
   editorIssueEmptyText: ['Add some text, or remove this.', 'Matn qo‘shing yoki buni olib tashlang.', 'Добавьте текст или удалите это.'],
   editorIssueNoImage: ['Choose an image for this.', 'Buning uchun rasm tanlang.', 'Выберите изображение.'],

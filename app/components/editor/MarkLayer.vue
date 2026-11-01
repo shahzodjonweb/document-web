@@ -17,7 +17,7 @@ const geometry = useEditorGeometry()
 const metrics = useEditorFontMetrics()
 
 const layer = ref<HTMLElement>()
-const editingId = ref('')
+const editingId = session.editingId
 const textInput = ref<HTMLTextAreaElement>()
 const announcement = ref('')
 
@@ -121,7 +121,7 @@ function finishStroke(event: PointerEvent) {
   if (!strokeId) return
   layer.value?.releasePointerCapture?.(event.pointerId)
   // A tap is not a line; drop anything the server would reject.
-  if (stroke.length < LIMITS.points.min) session.removeCommands([strokeId])
+  if (stroke.length < LIMITS.points.min) session.removeCommands([strokeId], { amend: true })
   strokeId = ''
   stroke = []
 }
@@ -225,7 +225,7 @@ function onTextInput(event: Event) {
 function stopEditing() {
   const command = editingCommand.value
   // An untouched text mark would be rejected by the server; drop it instead.
-  if (command && !(command.text ?? '').trim()) session.removeCommands([command._id])
+  if (command && !(command.text ?? '').trim()) session.removeCommands([command._id], { amend: true })
   editingId.value = ''
 }
 
