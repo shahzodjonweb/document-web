@@ -22,6 +22,7 @@ function allowed(type: 'fill_form' | 'replace_text') {
   return feature ? feature.eligible !== false : true
 }
 
+/** Words count from the first letter, so hiding the app while typing here still saves them. */
 function set(id: string, patch: Record<string, unknown>) {
   session.patchCommand(id, patch, `field:${id}`)
 }
@@ -54,14 +55,14 @@ function applyTemplate(commands: any[]) {
               list="editor-form-fields"
               :maxlength="LIMITS.field"
               :aria-label="t('fieldName')"
-              @change="set(command._id, { field: ($event.target as HTMLInputElement).value })"
+              @input="set(command._id, { field: ($event.target as HTMLInputElement).value })"
           /></label>
           <label class="form-field"
             ><span>{{ t('fieldValue') }}</span
             ><input
               :value="command.value"
               :maxlength="LIMITS.value"
-              @change="set(command._id, { value: ($event.target as HTMLInputElement).value })"
+              @input="set(command._id, { value: ($event.target as HTMLInputElement).value })"
           /></label>
           <button type="button" class="icon-button" :aria-label="t('delete')" @click="session.removeCommands([command._id])">
             <AppIcon name="trash" :size="16" />
@@ -90,14 +91,14 @@ function applyTemplate(commands: any[]) {
           ><input
             :value="command.find"
             :maxlength="LIMITS.findReplace"
-            @change="set(command._id, { find: ($event.target as HTMLInputElement).value })"
+            @input="set(command._id, { find: ($event.target as HTMLInputElement).value })"
         /></label>
         <label class="form-field"
           ><span>{{ t('replacement') }}</span
           ><input
             :value="command.replacement"
             :maxlength="LIMITS.findReplace"
-            @change="set(command._id, { replacement: ($event.target as HTMLInputElement).value })"
+            @input="set(command._id, { replacement: ($event.target as HTMLInputElement).value })"
         /></label>
         <label class="form-field editor-field-page"
           ><span>{{ t('page') }}</span

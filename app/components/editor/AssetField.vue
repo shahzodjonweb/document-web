@@ -12,6 +12,8 @@ const session = useEditorSession()
 
 const input = ref<HTMLInputElement>()
 const padOpen = ref(false)
+const refusal = ref('')
+const refusalLine = ref<HTMLElement>()
 const previews = ref<Record<string, string>>({})
 
 const assets = computed(() => session.assets.value)
@@ -31,14 +33,29 @@ async function previewFor(asset: { id: string }) {
 watch(assets, (list) => list.forEach((asset) => void previewFor(asset)), { immediate: true })
 onBeforeUnmount(() => Object.values(previews.value).forEach((url) => URL.revokeObjectURL(url)))
 
+// The field stays mounted as the selection moves from one mark to the next.
+watch(
+  () => props.commandId,
+  () => (refusal.value = ''),
+)
+
 function choose(index: number) {
+  refusal.value = ''
   session.patchCommand(props.commandId, { input_index: index }, 'image')
+}
+
+async function refuse(why: string) {
+  refusal.value = why
+  await nextTick()
+  // The button tapped can sit just above the bottom bar, which would cover a line that long.
+  refusalLine.value?.scrollIntoView({ block: 'start' })
 }
 
 async function upload(list: FileList | null) {
   const file = list?.[0]
   if (!file) return
-  const index = await session.uploadAsset(file)
+  refusal.value = ''
+  const index = await session.uploadAsset(file, refuse)
   if (index !== null) choose(index)
   if (input.value) input.value.value = ''
 }
@@ -70,6 +87,10 @@ function onSigned(index: number) {
       </button>
     </div>
 
+    <p v-if="refusal" ref="refusalLine" class="editor-invalid editor-refusal" role="alert" data-testid="editor-asset-refusal">
+      {{ refusal }}
+    </p>
+
     <div class="editor-assetfield-actions">
       <button
         type="button"
@@ -100,7 +121,7 @@ function onSigned(index: number) {
       @change="upload(($event.target as HTMLInputElement).files)"
     />
 
-    <EditorSignaturePad v-if="padOpen" @saved="onSigned" @close="padOpen = false" />
+    <EditorSignaturePad v-if="padOpen" @saved="onSigned" @refused="refuse" @close="padOpen = false" />
 
     <p class="field-hint">{{ t('editorImageTypes') }}</p>
   </div>

@@ -133,11 +133,16 @@ function zoomBy(factor: number) {
     </div>
 
     <div class="editor-toolstrip-end">
+      <!--
+        With a text field open these leave focus where it is, as its closing first would be a step of
+        its own to undo. Any other field has to lose it, which is what commits the value typed there.
+      -->
       <button
         type="button"
         class="icon-button"
         :disabled="!session.canUndo.value"
         :aria-label="t('editorUndo')"
+        @mousedown="session.editingId.value && $event.preventDefault()"
         @click="session.undo"
       >
         <AppIcon name="undo" :size="18" />
@@ -147,6 +152,7 @@ function zoomBy(factor: number) {
         class="icon-button"
         :disabled="!session.canRedo.value"
         :aria-label="t('editorRedo')"
+        @mousedown="session.editingId.value && $event.preventDefault()"
         @click="session.redo"
       >
         <AppIcon name="redo" :size="18" />

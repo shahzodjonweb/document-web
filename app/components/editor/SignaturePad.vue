@@ -6,7 +6,7 @@
  * export path is exactly the same as an uploaded signature image — no special
  * case anywhere in the engine.
  */
-const emit = defineEmits<{ saved: [index: number]; close: [] }>()
+const emit = defineEmits<{ saved: [index: number]; refused: [why: string]; close: [] }>()
 
 const { t } = useLocale()
 const session = useEditorSession()
@@ -80,7 +80,7 @@ async function save() {
   const blob = await new Promise<Blob | null>((resolve) => element.toBlob(resolve, 'image/png'))
   if (!blob) return
   const file = new File([blob], 'signature.png', { type: 'image/png' })
-  const index = await session.uploadAsset(file)
+  const index = await session.uploadAsset(file, (why) => emit('refused', why))
   if (index !== null) emit('saved', index)
 }
 </script>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 /** Save state, change budget, pre-flight problems, the week's file tasks and export. */
-const { t, date, path } = useLocale()
+const { t, count, date, path } = useLocale()
 const session = useEditorSession()
 
 const redacting = computed(() => session.commands.value.some((command) => command.type === 'redact'))
@@ -18,19 +18,44 @@ const blocked = computed(
     session.budget.value.oversize,
 )
 
+/** Text past the page is saved like the rest: only the file cannot be made from it. */
+const heldCount = computed(
+  () => session.issues.value.filter((issue) => issue.code !== 'editorTextOverflow').length,
+)
+const firstIssue = computed(() => session.issues.value[0])
+const saveFailed = computed(() => ['failed', 'paused'].includes(session.saveState.value))
+const saveSettled = computed(() => ['saved', 'clean'].includes(session.saveState.value))
+
 const saveLabel = computed(() => {
   switch (session.saveState.value) {
     case 'saving':
       return t('editorSaving')
-    case 'saved':
-      return t('draftSaved')
+    case 'dirty':
+      return t('unsaved')
     case 'failed':
     case 'paused':
       return t('editorSaveFailed')
     default:
-      return session.commands.value.length ? t('unsaved') : t('draftSaved')
+      return heldCount.value ? count('editorSaveNeedsFix', heldCount.value) : t('draftSaved')
   }
 })
+
+/** Go to where the fix is made, which on a phone is below every page. */
+async function showIssue() {
+  const issue = firstIssue.value
+  if (!issue) return
+  session.select(issue.id)
+  await nextTick()
+  const type = session.selected.value[0]?.type
+  const panel = document.querySelector<HTMLDetailsElement>('[data-testid="editor-fields"]')
+  const asset = document.querySelector('.editor-assetfield')
+  const properties = document.querySelector('[data-testid="editor-floatbar"]')
+  const wrap = issue.code === 'editorTextOverflow' ? document.querySelector('.editor-wrap-text') : null
+  if (panel && (type === 'fill_form' || type === 'replace_text')) {
+    panel.open = true
+    panel.scrollIntoView({ block: 'start' })
+  } else (wrap ?? asset ?? properties)?.scrollIntoView({ block: 'start' })
+}
 </script>
 
 <template>
@@ -38,17 +63,19 @@ const saveLabel = computed(() => {
     <div class="editor-actionbar-status">
       <span
         class="status-badge editor-save"
+        :data-state="session.saveState.value"
         :class="{
-          saved: session.saveState.value === 'saved' || session.saveState.value === 'clean',
-          failed: session.saveState.value === 'failed' || session.saveState.value === 'paused',
+          saved: saveSettled && !heldCount,
+          failed: saveFailed || (saveSettled && heldCount),
         }"
         ><span />{{ saveLabel }}</span
       >
       <button
-        v-if="session.saveState.value === 'failed' || session.saveState.value === 'paused'"
+        v-if="session.saveState.value === 'failed'"
         type="button"
         class="text-link"
-        @click="session.save"
+        data-testid="editor-save-now"
+        @click="session.save()"
       >
         {{ t('editorSaveNow') }}
       </button>
@@ -59,9 +86,20 @@ const saveLabel = computed(() => {
 
     <div class="editor-actionbar-notes">
       <p v-if="session.budget.value.oversize" class="editor-invalid" role="status">{{ t('editorSizeBudgetFull') }}</p>
+      <p
+        v-else-if="session.saveError.value"
+        class="editor-invalid"
+        role="status"
+        data-testid="editor-save-error"
+      >
+        {{ session.saveError.value }}
+      </p>
       <p v-else-if="mixedRedaction" class="editor-invalid" role="status">{{ t('editorRedactExclusive') }}</p>
-      <p v-else-if="session.issues.value.length" class="editor-invalid" role="status">
-        {{ t('editorIssues', { count: session.issues.value.length }) }}
+      <p v-else-if="firstIssue" class="editor-invalid editor-issue" role="status" data-testid="editor-issue">
+        <span>{{ session.describeIssue(firstIssue) }}</span>
+        <button type="button" class="text-link" data-testid="editor-issue-show" @click="showIssue">
+          {{ t('editorShowIssue') }}
+        </button>
       </p>
       <p v-else-if="!session.commands.value.length" class="field-hint">{{ t('editorNothingToExport') }}</p>
       <label v-if="redacting && !mixedRedaction" class="check-label"

@@ -4,16 +4,26 @@
  * The server replaces the whole command array on every PATCH and demands the
  * exact current `version`, so this keeps one write in flight at a time and
  * reconciles the normalised response rather than assuming it round-trips.
+ *
+ * A command with an issue never goes out, because the server would refuse the
+ * whole array for it. It stays in the list, in its place, until it is complete,
+ * and Review and export refuse while it is there. They also refuse text that runs
+ * past the page, which saves like any other and only the file cannot be made from.
  */
 import {
+  COMMAND_SHAPE,
   adoptServerCommands,
   commandIssues,
+  newCommandId,
   payloadBudget,
+  renumberInputs,
   seedCommand,
   toServerCommands,
   type ClientCommand,
   type CommandType,
+  type DraftLimits,
   type Issue,
+  type ServerCommand,
 } from './useEditorCommands'
 import { clampCommand, type PageSize } from './useEditorGeometry'
 
@@ -30,6 +40,7 @@ export interface EditorDocument {
   image_counts: number[]
   commands: ClientCommand[]
   input_ids: string[]
+  limits?: DraftLimits
 }
 
 interface Snapshot {
@@ -42,14 +53,62 @@ interface Snapshot {
 const AUTOSAVE_DELAY = 900
 const HISTORY_LIMIT = 50
 const COALESCE_WINDOW = 500
+const DUPLICATE_OFFSET = 12
+/** Browsers refuse a `keepalive` request over 64 KiB; a bigger draft goes as a normal one. */
+const KEEPALIVE_BYTES = 60000
+/** How long leaving a document waits for its last write, which finishes on its own regardless. */
+const LEAVE_WAIT = 3000
+/** What the export engine can draw. The upload route takes documents and TIFF as well. */
+const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp']
+
+/**
+ * What every `useEditorSession()` call shares about one document: each editor
+ * component makes its own call, and they all undo one history and wait behind
+ * one save. Plain data, because nothing here needs reactivity beyond `canUndo`,
+ * `canRedo` and `saveState`.
+ */
+interface DocumentState {
+  past: Snapshot[]
+  future: Snapshot[]
+  saveTimer: number | null
+  /** The write in flight; the next one waits for it, as each PATCH needs the version it returns. */
+  saving: Promise<boolean> | null
+  /** The commands and inputs the server last confirmed, in the form `fingerprint` gives them. */
+  onServer: string
+  /**
+   * Each draft sent with no answer since the last write that got one, in the same
+   * form. Any of them may be the one that landed, however long ago, so none is let go.
+   */
+  unanswered: Set<string>
+}
+
+const documents = new Map<string, DocumentState>()
+/** Counts `reset` calls, so a slow one cannot replace the document asked for after it. */
+let opens = 0
+
+function documentState(id: string): DocumentState {
+  let state = documents.get(id)
+  if (!state) {
+    state = { past: [], future: [], saveTimer: null, saving: null, onServer: '', unanswered: new Set() }
+    documents.set(id, state)
+  }
+  return state
+}
+
+/** Whitelisted fields in a fixed order, whatever order the database handed them back in. */
+function fingerprint(commands: ServerCommand[], inputIds: string[]) {
+  return JSON.stringify([toServerCommands(commands), inputIds])
+}
 
 export function useEditorSession() {
   const ws = useWorkspace()
   const { t } = useLocale()
+  const metrics = useEditorFontMetrics()
 
   const doc = useState<EditorDocument | null>('editor-doc', () => null)
   const commands = useState<ClientCommand[]>('editor-commands', () => [])
   const selection = useState<string[]>('editor-selection', () => [])
+  const editingId = useState('editor-editing', () => '')
   const activeTool = useState<Tool>('editor-tool', () => 'select')
   const mode = useState<EditorMode>('editor-mode', () => 'edit')
   const zoom = useState('editor-zoom', () => 1)
@@ -59,19 +118,15 @@ export function useEditorSession() {
   const saveState = useState<SaveState>('editor-save-state', () => 'clean')
   const conflict = useState('editor-conflict', () => false)
   const error = useState('editor-error', () => '')
+  /** Why the server refused the last save, kept apart as the action bar is where it shows. */
+  const saveError = useState('editor-save-error', () => '')
   const notice = useState('editor-notice', () => '')
   const quote = useState<any>('editor-quote', () => null)
   const submissionPending = useState('editor-submission-pending', () => false)
   const canUndo = useState('editor-can-undo', () => false)
   const canRedo = useState('editor-can-redo', () => false)
 
-  // Plain module-scope stacks: history is large-ish and never needs reactivity
-  // beyond the two booleans above.
-  const past: Snapshot[] = []
-  const future: Snapshot[] = []
-  let saveTimer: number | null = null
-  let saving = false
-  let saveAgain = false
+  const openDocument = () => documentState(doc.value?.id ?? '')
 
   const isBusy = (task: string) => busy.value.includes(task)
   function begin(task: string) {
@@ -83,10 +138,28 @@ export function useEditorSession() {
 
   const pageSize = (page: number): PageSize => doc.value?.pages[page - 1] ?? { width: 595.276, height: 841.89 }
   const selected = computed(() => commands.value.filter((command) => selection.value.includes(command._id)))
-  const budget = computed(() => payloadBudget(commands.value))
+  const budget = computed(() => payloadBudget(commands.value, doc.value?.limits))
+
+  /** The engine never wraps, and fails the whole job for one line past the page. */
+  function overflowIssue(command: ClientCommand): Issue | null {
+    if (command.type !== 'add_text' || !metrics.ready.value) return null
+    const page = pageSize(command.page ?? 1)
+    const { horizontal, vertical } = metrics.textOverflow(
+      command.text ?? '',
+      command.font_size ?? 16,
+      command.x ?? 0,
+      command.y ?? 0,
+      page.width,
+      page.height,
+    )
+    return horizontal || vertical ? { id: command._id, code: 'editorTextOverflow' } : null
+  }
+
   const issues = computed<Issue[]>(() =>
     commands.value
-      .map((command) => commandIssues(command, assets.value.length))
+      // The mark being typed into is not a problem yet.
+      .filter((command) => command._id !== editingId.value)
+      .map((command) => commandIssues(command, assets.value.length) ?? overflowIssue(command))
       .filter((issue): issue is Issue => issue !== null),
   )
 
@@ -94,7 +167,28 @@ export function useEditorSession() {
     return e?.data?.error?.message || e?.data?.message || t('genericError')
   }
 
+  /** Which change it is, numbered as the list of changes numbers it, and what it lacks. */
+  function describeIssue(issue: Issue) {
+    const index = commands.value.findIndex((command) => command._id === issue.id)
+    const command = commands.value[index]
+    return command
+      ? `${index + 1}. ${t(COMMAND_SHAPE[command.type].labelKey)}: ${t(issue.code)}`
+      : t(issue.code)
+  }
+
+  /**
+   * Two versions exist and only the customer can say which stands, so autosave
+   * waits for that, and a quote made from one of them goes.
+   */
+  function holdForChoice() {
+    conflict.value = true
+    saveState.value = 'paused'
+    saveError.value = ''
+    quote.value = null
+  }
+
   function syncHistoryFlags() {
+    const { past, future } = openDocument()
     canUndo.value = past.length > 0
     canRedo.value = future.length > 0
   }
@@ -102,26 +196,32 @@ export function useEditorSession() {
   /**
    * Every command change goes through here. Consecutive changes sharing a
    * label within half a second collapse into one undo entry, so a drag or a
-   * burst of typing is a single step.
+   * burst of typing is a single step. `amend` folds a change into the step
+   * before it, however long ago that was, and leaves no step at all when the
+   * two together changed nothing.
    */
-  function mutate(label: string, apply: () => void, options: { silent?: boolean } = {}) {
-    if (!options.silent) {
-      const previous = past[past.length - 1]
-      const now = Date.now()
-      if (!previous || previous.label !== label || now - previous.at > COALESCE_WINDOW) {
-        past.push({
-          commands: structuredClone(toPlain(commands.value)),
-          selection: [...selection.value],
-          label,
-          at: now,
-        })
-        if (past.length > HISTORY_LIMIT) past.shift()
-      } else previous.at = now
-      future.length = 0
-      syncHistoryFlags()
+  function mutate(label: string, apply: () => void, options: { silent?: boolean; amend?: boolean } = {}) {
+    if (options.silent) return apply()
+    const { past, future } = openDocument()
+    const previous = past[past.length - 1]
+    const now = Date.now()
+    if (previous && (options.amend || (previous.label === label && now - previous.at <= COALESCE_WINDOW))) {
+      previous.at = now
+      previous.label = label
+    } else {
+      past.push({ commands: toPlain(commands.value), selection: [...selection.value], label, at: now })
+      if (past.length > HISTORY_LIMIT) past.shift()
     }
+    future.length = 0
     apply()
-    if (!options.silent) markDirty()
+    if (
+      options.amend &&
+      previous &&
+      JSON.stringify(toServerCommands(previous.commands)) === JSON.stringify(toServerCommands(commands.value))
+    )
+      past.pop()
+    syncHistoryFlags()
+    markDirty()
   }
 
   // structuredClone cannot handle Vue proxies directly in every browser.
@@ -132,23 +232,30 @@ export function useEditorSession() {
   function restore(snapshot: Snapshot) {
     commands.value = snapshot.commands
     selection.value = snapshot.selection.filter((id) => snapshot.commands.some((command) => command._id === id))
+    // An open text field goes with its mark, and stays closed if Redo brings the mark back.
+    if (!snapshot.commands.some((command) => command._id === editingId.value)) editingId.value = ''
   }
 
   function undo() {
+    const { past, future } = openDocument()
     const snapshot = past.pop()
     if (!snapshot) return
-    future.push({
-      commands: toPlain(commands.value),
-      selection: [...selection.value],
-      label: snapshot.label,
-      at: Date.now(),
-    })
+    // A field still empty is dropped as closing it would drop it, with nothing for Redo to bring back.
+    const typing = commands.value.find((command) => command._id === editingId.value)
+    if (!typing || typing.text?.trim())
+      future.push({
+        commands: toPlain(commands.value),
+        selection: [...selection.value],
+        label: snapshot.label,
+        at: Date.now(),
+      })
     restore(snapshot)
     syncHistoryFlags()
     markDirty()
   }
 
   function redo() {
+    const { past, future } = openDocument()
     const snapshot = future.pop()
     if (!snapshot) return
     past.push({
@@ -164,20 +271,29 @@ export function useEditorSession() {
 
   function markDirty() {
     quote.value = null
+    saveError.value = ''
+    // An export that may have failed will not be retried now: its quote has just gone.
+    if (submissionPending.value) {
+      submissionPending.value = false
+      sessionStorage.removeItem('pdf-master-pending-job')
+    }
     if (saveState.value === 'paused') return
     saveState.value = 'dirty'
-    if (saveTimer !== null) clearTimeout(saveTimer)
-    saveTimer = window.setTimeout(() => {
-      saveTimer = null
+    const state = openDocument()
+    if (state.saveTimer !== null) clearTimeout(state.saveTimer)
+    state.saveTimer = window.setTimeout(() => {
+      state.saveTimer = null
       void save()
     }, AUTOSAVE_DELAY)
   }
 
   /**
    * Attach an image for signature/insert_image/replace_image. Index 0 is the
-   * source PDF, so the first upload is `input_index` 1.
+   * source PDF, so the first upload is `input_index` 1. `refused` hears why not, for
+   * the chooser to say beside the button: the top of the screen is out of sight on a phone.
    */
-  async function uploadAsset(file: File): Promise<number | null> {
+  async function uploadAsset(file: File, refused: (why: string) => void): Promise<number | null> {
+    const state = openDocument()
     begin('asset')
     error.value = ''
     try {
@@ -187,12 +303,20 @@ export function useEditorSession() {
         method: 'POST',
         body,
       })
+      // `accept` is only a hint to the picker. Anything else, once attached, would
+      // have the server refuse every later save, and nothing here can detach it.
+      if (!IMAGE_TYPES.includes(asset.mime_type)) {
+        refused(t('editorImageRefused'))
+        return null
+      }
+      // Finished after a `reset`, it is no image of what is open now.
+      if (openDocument() !== state) return null
       assets.value = [...assets.value, asset]
       // Attaching an image changes input_ids, which only a save persists.
       markDirty()
       return assets.value.length
     } catch (e) {
-      error.value = requestError(e)
+      refused(requestError(e))
       return null
     } finally {
       end('asset')
@@ -211,7 +335,28 @@ export function useEditorSession() {
       seedCommand(type, { ...at, inputIndex: assets.value.length ? 1 : 0 }),
       pageSize(at.page),
     )
-    mutate('add', () => {
+    // Placing is one step each time, however quickly the next one follows.
+    mutate(`add:${command._id}`, () => {
+      commands.value = [...commands.value, command]
+      selection.value = [command._id]
+    })
+    return command
+  }
+
+  /** A copy of every field, a little down and to the right, on top of the others. */
+  function duplicateCommand(id: string) {
+    const source = commands.value.find((command) => command._id === id)
+    if (!source) return null
+    if (budget.value.full) {
+      error.value = t('editorBudgetFull')
+      return null
+    }
+    const copy: ClientCommand = { ...JSON.parse(JSON.stringify(source)), _id: newCommandId() }
+    if (copy.x !== undefined) copy.x += DUPLICATE_OFFSET
+    if (copy.y !== undefined) copy.y += DUPLICATE_OFFSET
+    if (copy.points) copy.points = copy.points.map(([x, y]) => [x + DUPLICATE_OFFSET, y + DUPLICATE_OFFSET])
+    const command = copy.page ? clampCommand(copy, pageSize(copy.page)) : copy
+    mutate(`add:${command._id}`, () => {
       commands.value = [...commands.value, command]
       selection.value = [command._id]
     })
@@ -219,20 +364,35 @@ export function useEditorSession() {
   }
 
   function patchCommand(id: string, patch: Partial<ClientCommand>, label = 'edit', mode: 'move' | 'resize' = 'move') {
-    mutate(label, () => {
-      commands.value = commands.value.map((command) => {
-        if (command._id !== id) return command
-        const next = { ...command, ...patch } as ClientCommand
-        return next.page ? clampCommand(next, pageSize(next.page), mode) : next
-      })
-    })
+    const current = commands.value.find((command) => command._id === id)
+    mutate(
+      label,
+      () => {
+        commands.value = commands.value.map((command) => {
+          if (command._id !== id) return command
+          const next = { ...command, ...patch } as ClientCommand
+          if (next.page === undefined) return next
+          next.page = Math.max(1, Math.min(Math.round(next.page) || 1, doc.value?.file.page_count ?? 1000))
+          return clampCommand(next, pageSize(next.page), mode)
+        })
+      },
+      // The first words of a mark belong to placing it, and every point of a line
+      // does: one Undo takes it all away, rather than leaving an empty mark or part
+      // of a line behind.
+      { amend: 'points' in patch || ('text' in patch && !current?.text) },
+    )
   }
 
-  function removeCommands(ids: string[]) {
-    mutate('remove', () => {
-      commands.value = commands.value.filter((command) => !ids.includes(command._id))
-      selection.value = selection.value.filter((id) => !ids.includes(id))
-    })
+  /** `amend` is for dropping an empty mark, which should leave nothing to undo but the steps before it. */
+  function removeCommands(ids: string[], options: { amend?: boolean } = {}) {
+    mutate(
+      `remove:${ids.join()}`,
+      () => {
+        commands.value = commands.value.filter((command) => !ids.includes(command._id))
+        selection.value = selection.value.filter((id) => !ids.includes(id))
+      },
+      options,
+    )
   }
 
   function select(id: string | null, additive = false) {
@@ -244,66 +404,169 @@ export function useEditorSession() {
     else selection.value = [id]
   }
 
+  /**
+   * Resolves true once the server holds everything sendable that was here when
+   * this was called. Whoever asks during a write waits for it, then sends what
+   * is newest by then, so a save never overlaps another and never goes missing.
+   */
   async function save(): Promise<boolean> {
     const current = doc.value
     if (!current || saveState.value === 'paused') return false
-    if (saving) {
-      saveAgain = true
-      return false
+    const state = documentState(current.id)
+    if (state.saveTimer !== null) {
+      clearTimeout(state.saveTimer)
+      state.saveTimer = null
     }
-    if (saveTimer !== null) {
-      clearTimeout(saveTimer)
-      saveTimer = null
+    if (state.saving) {
+      await state.saving
+      return save()
     }
-    saving = true
+    const write = send(current, state)
+    state.saving = write
+    try {
+      return await write
+    } finally {
+      state.saving = null
+    }
+  }
+
+  async function send(current: EditorDocument, state: DocumentState): Promise<boolean> {
+    const incomplete = commands.value.filter((command) => commandIssues(command, assets.value.length))
+    const held = new Set(incomplete.map((command) => command._id))
+    const payload = toServerCommands(commands.value.filter((command) => !held.has(command._id)))
+    const inputIds = [current.file.id, ...assets.value.map((asset) => asset.id)]
+    const sending = fingerprint(payload, inputIds)
+    // The server has all of it, as when only an incomplete mark changed. Writing
+    // anyway would use up a version, and read as a conflict on another device.
+    // A write with no answer may have changed that, so only one that was answered says so.
+    if (sending === state.onServer && !state.unanswered.size) {
+      saveState.value = 'saved'
+      error.value = ''
+      saveError.value = ''
+      return true
+    }
     saveState.value = 'saving'
-    const payload = toServerCommands(commands.value)
-    const sent = JSON.stringify(payload)
+    const body = { version: current.version, commands: payload, input_ids: inputIds }
     try {
       const fresh = await ws.api<EditorDocument>(`/editor/documents/${current.id}`, {
         method: 'PATCH',
-        body: {
-          version: current.version,
-          commands: payload,
-          input_ids: [current.file.id, ...assets.value.map((asset) => asset.id)],
-        },
+        body,
+        // The app can close while any write is on its way, not just one sent as it hides.
+        keepalive: new TextEncoder().encode(JSON.stringify(body)).length <= KEEPALIVE_BYTES,
       })
-      doc.value = { ...current, version: fresh.version }
+      state.onServer = fingerprint(fresh.commands ?? [], inputIds)
+      state.unanswered.clear()
+      // Sent before a `reset`, it has no say over what is open now, even the same document again.
+      if (documents.get(current.id) !== state) return true
+      // A re-render puts every field back to its saved value, wiping whatever is
+      // being typed in one. So a save touches only what it changed: the version
+      // in place, and the commands when normalising altered them.
+      current.version = fresh.version
       // Adopt the server's normalised commands only when nothing changed while
       // the request was in flight — otherwise the user's newer edit wins and
       // the next save normalises it.
-      if (JSON.stringify(toServerCommands(commands.value)) === sent)
-        commands.value = adoptServerCommands(fresh.commands ?? [], commands.value)
-      saveState.value = 'saved'
+      if (saveState.value === 'saving') {
+        const adopted = adoptServerCommands(fresh.commands ?? [], commands.value, held)
+        if (JSON.stringify(toServerCommands(adopted)) !== JSON.stringify(toServerCommands(commands.value)))
+          commands.value = adopted
+        saveState.value = 'saved'
+      }
       error.value = ''
+      saveError.value = ''
       return true
     } catch (e: any) {
-      const code = e?.data?.error?.code
-      if (code === 'version_conflict') {
-        conflict.value = true
-        saveState.value = 'paused'
-      } else {
-        // A payload the server will never accept must not be retried on a
-        // timer; switch to manual saving and show exactly why.
-        saveState.value = 'failed'
-        if (
-          code === 'invalid_editor_command' ||
-          code === 'editor_out_of_bounds' ||
-          code === 'feature_not_in_plan' ||
-          code === 'redaction_requires_separate_export' ||
-          code === 'rasterization_consent_required'
-        )
-          saveState.value = 'paused'
-      }
-      error.value = requestError(e)
-      return false
-    } finally {
-      saving = false
-      if (saveAgain && saveState.value !== 'paused') {
-        saveAgain = false
-        markDirty()
-      } else saveAgain = false
+      if (documents.get(current.id) !== state) return false
+      if (e?.data?.error?.code === 'version_conflict') return onVersionConflict(current, state, e)
+      // Not an answer from the server itself, so it may still have landed.
+      if (!e?.data?.error) state.unanswered.add(sending)
+      return saveRefused(e)
     }
+  }
+
+  /** Any refusal but a conflict is shown, and the next edit tries again: it may be the fix. */
+  function saveRefused(e: unknown) {
+    saveState.value = 'failed'
+    saveError.value = requestError(e)
+    return false
+  }
+
+  /**
+   * A write can land with its answer lost, as when the app is hidden straight
+   * after it, and the next one then reads as a conflict with a device that does
+   * not exist. So look first: only something else on the server is a choice.
+   */
+  async function onVersionConflict(
+    current: EditorDocument,
+    state: DocumentState,
+    refusal: unknown,
+  ): Promise<boolean> {
+    if (state.unanswered.size) {
+      let latest: EditorDocument
+      try {
+        latest = await ws.api<EditorDocument>(`/editor/documents/${current.id}`)
+      } catch (e) {
+        return documents.get(current.id) === state ? saveRefused(e) : false
+      }
+      if (documents.get(current.id) !== state) return false
+      const onServer = fingerprint(latest.commands ?? [], latest.input_ids ?? [])
+      const ours = state.unanswered.has(onServer)
+      state.unanswered.clear()
+      if (ours) {
+        state.onServer = onServer
+        current.version = latest.version
+        return send(current, state)
+      }
+    }
+    holdForChoice()
+    error.value = requestError(refusal)
+    return false
+  }
+
+  /**
+   * Send what is waiting now, because a hidden or closing app may never run the
+   * timer. Resolves when this document's writes are done.
+   */
+  async function flush() {
+    if (saveState.value === 'dirty' || saveState.value === 'failed') await save()
+    else await documents.get(doc.value?.id ?? '')?.saving
+  }
+
+  /** Leaving holds the customer up only so long: a write already sent finishes on its own. */
+  function flushBriefly() {
+    return Promise.race([flush(), new Promise<void>((resolve) => setTimeout(resolve, LEAVE_WAIT))])
+  }
+
+  /**
+   * The images a draft holds, in the server's order, as `input_index` counts them.
+   * `null` is one the server says has gone, which would have it refuse every save
+   * and quote until let go. One that merely could not be read keeps its place.
+   */
+  function readAssets(inputIds: string[]) {
+    return Promise.all(
+      inputIds.slice(1).map((id) =>
+        ws.api<any>(`/files/${id}`).then(
+          (asset) => (asset.state === 'ready' ? asset : null),
+          (e) => (e?.statusCode === 404 ? null : { id, name: '' }),
+        ),
+      ),
+    )
+  }
+
+  /** Take a document as the server holds it, all at once, so that nothing can be edited half known. */
+  function adopt(fresh: EditorDocument, attached: any[]) {
+    doc.value = fresh
+    commands.value = renumberInputs(adoptServerCommands(fresh.commands ?? [], []), attached.map(Boolean))
+    assets.value = attached.filter(Boolean)
+    selection.value = []
+    const state = documentState(fresh.id)
+    state.onServer = fingerprint(fresh.commands ?? [], fresh.input_ids ?? [])
+    state.unanswered.clear()
+    conflict.value = false
+    error.value = ''
+    saveError.value = ''
+    saveState.value = 'clean'
+    // Letting an image go is a change the server has yet to hear, and Review needs it to.
+    if (attached.includes(null)) markDirty()
   }
 
   /** Take the server's version and drop local edits. */
@@ -311,71 +574,88 @@ export function useEditorSession() {
     const current = doc.value
     if (!current) return
     const fresh = await ws.api<EditorDocument>(`/editor/documents/${current.id}`)
-    doc.value = fresh
-    commands.value = adoptServerCommands(fresh.commands ?? [], [])
-    selection.value = []
-    past.length = 0
-    future.length = 0
+    const attached = await readAssets(fresh.input_ids ?? [])
+    if (doc.value?.id !== current.id) return
+    adopt(fresh, attached)
+    const state = documentState(current.id)
+    state.past.length = 0
+    state.future.length = 0
     syncHistoryFlags()
-    conflict.value = false
-    saveState.value = 'clean'
   }
 
   /** Re-issue the local commands against whatever version now exists. */
   async function resolveKeepMine() {
     const current = doc.value
     if (!current) return
+    const state = documentState(current.id)
     const fresh = await ws.api<EditorDocument>(`/editor/documents/${current.id}`)
+    // Asked before a `reset`, it has no say over what is open now: `save` would send
+    // that document's marks, or none, over this one's.
+    if (documents.get(current.id) !== state) return
     doc.value = { ...current, version: fresh.version }
+    state.onServer = fingerprint(fresh.commands ?? [], fresh.input_ids ?? [])
     conflict.value = false
+    // Its "reload" would now throw away the very edits just kept.
+    error.value = ''
     saveState.value = 'dirty'
     await save()
   }
 
   async function reset(documentId?: string) {
-    if (saveTimer !== null) clearTimeout(saveTimer)
-    saveTimer = null
-    past.length = 0
-    future.length = 0
-    syncHistoryFlags()
-    commands.value = []
-    selection.value = []
-    assets.value = []
-    quote.value = null
-    conflict.value = false
-    error.value = ''
-    notice.value = ''
-    submissionPending.value = false
-    activeTool.value = 'select'
-    mode.value = 'edit'
-    saveState.value = 'clean'
-    doc.value = null
-    if (documentId) await load(documentId)
-  }
-
-  async function load(documentId: string) {
+    const opening = ++opens
+    // While this is busy no document is on screen, so nothing can be edited and then lost.
     begin('load')
     try {
-      const fresh = await ws.api<EditorDocument>(`/editor/documents/${documentId}`)
-      doc.value = fresh
-      commands.value = adoptServerCommands(fresh.commands ?? [], [])
-      const extra = (fresh.input_ids ?? []).slice(1)
-      assets.value = extra.length
-        ? await Promise.all(extra.map((id) => ws.api(`/files/${id}`).catch(() => null))).then((list) =>
-            list.filter(Boolean),
-          )
-        : []
+      // What is waiting goes out first, so nothing is lost and a document reopened
+      // straight away loads what its last write saved.
+      await flushBriefly()
+      const previous = doc.value?.id ?? ''
+      const state = documents.get(previous)
+      if (state?.saveTimer != null) clearTimeout(state.saveTimer)
+      documents.delete(previous)
+      canUndo.value = false
+      canRedo.value = false
+      commands.value = []
+      selection.value = []
+      editingId.value = ''
+      assets.value = []
+      quote.value = null
+      conflict.value = false
+      error.value = ''
+      saveError.value = ''
+      notice.value = ''
+      submissionPending.value = false
+      activeTool.value = 'select'
+      mode.value = 'edit'
+      fitMode.value = 'width'
       saveState.value = 'clean'
-    } catch (e) {
-      error.value = requestError(e)
+      doc.value = null
+      if (documentId) await load(documentId, () => opening !== opens)
     } finally {
-      end('load')
+      if (opening === opens) end('load')
     }
+  }
+
+  async function load(documentId: string, superseded = () => false) {
+    try {
+      const fresh = await ws.api<EditorDocument>(`/editor/documents/${documentId}`)
+      const attached = await readAssets(fresh.input_ids ?? [])
+      if (!superseded()) adopt(fresh, attached)
+    } catch (e) {
+      if (!superseded()) error.value = requestError(e)
+    }
+  }
+
+  /** The file is made from what was saved: rather than leave a change out, say which one is in the way. */
+  function refusedForIssues() {
+    const issue = issues.value[0]
+    if (issue) error.value = describeIssue(issue)
+    return !!issue
   }
 
   async function review(acceptRasterization = false) {
     const current = doc.value
-    if (!current || isBusy('quote') || submissionPending.value) return
+    if (!current || isBusy('quote') || submissionPending.value || refusedForIssues()) return
     begin('quote')
     error.value = ''
     try {
@@ -385,11 +665,16 @@ export function useEditorSession() {
       }
       const fresh = doc.value
       if (!fresh) return
-      quote.value = await ws.api(`/editor/documents/${fresh.id}/quote`, {
+      const { id, version } = fresh
+      const made = await ws.api(`/editor/documents/${id}/quote`, {
         method: 'POST',
-        body: { version: fresh.version, accept_rasterization: acceptRasterization },
+        body: { version, accept_rasterization: acceptRasterization },
       })
-    } catch (e) {
+      // A change made meanwhile is not in this quote, and Export would leave it out.
+      const unchanged = doc.value?.id === id && doc.value.version === version
+      if (unchanged && (saveState.value === 'saved' || saveState.value === 'clean')) quote.value = made
+    } catch (e: any) {
+      if (e?.data?.error?.code === 'version_conflict') holdForChoice()
       error.value = requestError(e)
     } finally {
       end('quote')
@@ -400,7 +685,7 @@ export function useEditorSession() {
 
   async function exportDocument() {
     const active = quote.value
-    if (!active || isBusy('export') || active.affordable === false) return
+    if (!active || isBusy('export') || active.affordable === false || refusedForIssues()) return
     begin('export')
     error.value = ''
     // Keyed by quote id so a double-click cannot submit two jobs.
@@ -437,6 +722,7 @@ export function useEditorSession() {
     doc,
     commands,
     selection,
+    editingId,
     selected,
     activeTool,
     mode,
@@ -446,6 +732,7 @@ export function useEditorSession() {
     saveState,
     conflict,
     error,
+    saveError,
     notice,
     quote,
     submissionPending,
@@ -460,12 +747,15 @@ export function useEditorSession() {
     mutate,
     uploadAsset,
     addCommand,
+    duplicateCommand,
     patchCommand,
     removeCommands,
     select,
     undo,
     redo,
     save,
+    flush,
+    flushBriefly,
     load,
     reset,
     review,
@@ -473,5 +763,6 @@ export function useEditorSession() {
     resolveTakeServer,
     resolveKeepMine,
     requestError,
+    describeIssue,
   }
 }

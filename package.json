@@ -24,7 +24,7 @@
     "test:cv-setup": "node tests/cv-setup.mjs",
     "test:services": "node tests/services-directory.mjs",
     "test:guide": "node tests/prompt-guide.mjs",
-    "test:editor": "node tests/editor-workspace.mjs",
+    "test:editor": "node --experimental-strip-types tests/editor-workspace.mjs",
     "test:payments": "node tests/manual-payment.mjs",
     "test:channels": "node tests/channel-gate.mjs",
     "test:frame": "node tests/app-frame.mjs",

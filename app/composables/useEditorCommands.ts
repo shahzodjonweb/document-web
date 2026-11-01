@@ -59,10 +59,15 @@ export const COMMAND_FEATURE: Record<CommandType, string> = {
 /** `normalize()` fills these in server-side; we seed them so previews match. */
 export const COMMAND_DEFAULTS = { fontSize: 16, strokeWidth: 2, textColor: '#17212E', highlightColor: '#FFFF00' }
 
+/**
+ * `commands` and `commandBytes` are the fallback for a document that does not
+ * state its own `limits`. Bytes are always the UTF-8 of compact JSON, the one
+ * unit the server counts too (`apps/core/policy.py: payload_bytes`).
+ */
 export const LIMITS = {
   commands: 100,
-  commandBytes: 20000,
-  bodyBytes: 32768,
+  commandBytes: 100000,
+  bodyBytes: 131072,
   coordinate: 14400,
   minSize: 1,
   text: 2000,
@@ -139,7 +144,7 @@ export function isCommandType(value: unknown): value is CommandType {
   return typeof value === 'string' && (COMMAND_TYPES as readonly string[]).includes(value)
 }
 
-/** 0.01pt is 1/7200 inch — invisible, and it keeps the 20 KB budget honest. */
+/** 0.01pt is 1/7200 inch — invisible, and it keeps the draft's size budget honest. */
 export function quantize(value: number): number {
   return Math.round(value * 100) / 100
 }
@@ -172,9 +177,9 @@ export function seedCommand(type: CommandType, context: SeedContext): ClientComm
   }
   switch (type) {
     case 'add_text':
-      // Left empty on purpose: TextInput opens immediately and an untouched
-      // command is dropped, so the server never sees the empty string it
-      // rejects with `invalid_editor_command`.
+      // Left empty on purpose: the text field opens at once. `commandIssues` keeps
+      // the mark from the server until it has words, as the server refuses an
+      // empty string, and one left empty is dropped when the field closes.
       command.text = ''
       command.font_size = COMMAND_DEFAULTS.fontSize
       command.color = COMMAND_DEFAULTS.textColor
@@ -211,7 +216,7 @@ export function seedCommand(type: CommandType, context: SeedContext): ClientComm
 }
 
 /** Whitelist projection onto the wire format. Never send anything else. */
-export function toServerCommand(command: ClientCommand): ServerCommand {
+export function toServerCommand(command: ServerCommand): ServerCommand {
   const allowed = COMMAND_FIELDS[command.type]
   const source = command as unknown as Record<string, unknown>
   const out: Record<string, unknown> = {}
@@ -223,15 +228,39 @@ export function toServerCommand(command: ClientCommand): ServerCommand {
   return out as ServerCommand
 }
 
-export function toServerCommands(commands: ClientCommand[]): ServerCommand[] {
+export function toServerCommands(commands: ServerCommand[]): ServerCommand[] {
   return commands.map(toServerCommand)
 }
 
-export function adoptServerCommands(commands: ServerCommand[], previous: ClientCommand[]): ClientCommand[] {
-  // `normalize()` neither reorders nor drops, so position carries identity and
-  // the local `_id`s survive — selection and undo stay pointing at the same
-  // objects after a save materialises defaults.
-  return commands.map((command, index) => ({ ...command, _id: previous[index]?._id ?? newCommandId() }))
+export function adoptServerCommands(
+  commands: ServerCommand[],
+  previous: ClientCommand[],
+  held: ReadonlySet<string> = new Set(),
+): ClientCommand[] {
+  // `normalize()` neither reorders nor drops, so position among the commands
+  // that were sent carries identity and the local `_id`s survive — selection and
+  // undo stay pointing at the same objects after a save materialises defaults.
+  // A command held back from the save stays exactly where it is.
+  let next = 0
+  const merged = previous.map((command) => {
+    if (held.has(command._id)) return command
+    const fresh = commands[next++]
+    return fresh ? { ...fresh, _id: command._id } : command
+  })
+  return [...merged, ...commands.slice(next).map((command) => ({ ...command, _id: newCommandId() }))]
+}
+
+/**
+ * `input_index` counts the attached images from 1, so letting one go moves the
+ * later ones down. A command that used it points at 0, which `commandIssues`
+ * reports as "choose an image", rather than at whatever now has its number.
+ */
+export function renumberInputs(commands: ClientCommand[], kept: boolean[]): ClientCommand[] {
+  return commands.map((command) => {
+    const index = command.input_index
+    if (!index) return command
+    return { ...command, input_index: kept[index - 1] ? kept.slice(0, index).filter(Boolean).length : 0 }
+  })
 }
 
 export type IssueCode =
@@ -241,6 +270,7 @@ export type IssueCode =
   | 'editorIssueEmptyFind'
   | 'editorIssueOutOfBounds'
   | 'editorIssueShortLine'
+  | 'editorTextOverflow'
 
 export interface Issue {
   id: string
@@ -299,15 +329,23 @@ export interface Budget {
   oversize: boolean
 }
 
-export function payloadBudget(commands: ClientCommand[]): Budget {
+/** The most one draft holds, as the server states it on the document. */
+export interface DraftLimits {
+  commands: number
+  bytes: number
+}
+
+export function payloadBudget(commands: ClientCommand[], limits?: DraftLimits): Budget {
+  const maxCommands = limits?.commands ?? LIMITS.commands
+  const maxBytes = limits?.bytes ?? LIMITS.commandBytes
   const bytes = new TextEncoder().encode(JSON.stringify(toServerCommands(commands))).length
   return {
     commands: commands.length,
-    maxCommands: LIMITS.commands,
+    maxCommands,
     bytes,
-    maxBytes: LIMITS.commandBytes,
-    full: commands.length >= LIMITS.commands,
-    oversize: bytes > LIMITS.commandBytes,
+    maxBytes,
+    full: commands.length >= maxCommands,
+    oversize: bytes > maxBytes,
   }
 }
 
@@ -325,6 +363,7 @@ export function useEditorCommands() {
     toServerCommand,
     toServerCommands,
     adoptServerCommands,
+    renumberInputs,
     commandIssues,
     payloadBudget,
     quantize,

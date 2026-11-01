@@ -765,7 +765,7 @@
 .editor-shell {
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 70px);
+  min-height: calc(var(--tg-stable-h, 100dvh) - 70px);
   padding: 20px 26px 0;
   gap: 14px;
 }
@@ -886,7 +886,7 @@
   display: flex;
   flex-direction: column;
   gap: 9px;
-  max-height: calc(100vh - 260px);
+  max-height: calc(var(--tg-stable-h, 100dvh) - 260px);
   overflow-y: auto;
   padding-right: 4px;
 }
@@ -933,13 +933,13 @@
 .editor-stage {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 18px;
   padding: 20px 12px 28px;
   background: var(--soft);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  max-height: calc(100vh - 250px);
+  max-height: calc(var(--tg-stable-h, 100dvh) - 250px);
   overflow: auto;
   min-width: 0;
 }
@@ -949,12 +949,13 @@
   gap: 9px;
   color: var(--muted);
   font-size: 12px;
-  margin: 24px 0;
+  margin: 24px auto;
 }
 .editor-page {
   position: relative;
   flex-shrink: 0;
-  max-width: 100%;
+  /* Centred while it fits; zoomed wider, the stage scrolls to both of its edges. */
+  margin-inline: auto;
   background: #fff;
   box-shadow: 0 2px 14px #17212e1f;
   /* Marks size their text against this container. */
@@ -1137,13 +1138,21 @@
   flex-direction: column;
   gap: 14px;
   min-width: 0;
-  max-height: calc(100vh - 250px);
+  max-height: calc(var(--tg-stable-h, 100dvh) - 250px);
   overflow-y: auto;
 }
 .editor-floatbar,
 .editor-fieldpanel,
 .editor-shell .editor-command-list {
   padding: 18px;
+}
+/* What "Show" scrolls to, clear of the sticky top bar. */
+.editor-floatbar,
+.editor-fieldpanel,
+.editor-assetfield,
+.editor-refusal,
+.editor-wrap-text {
+  scroll-margin-top: calc(var(--topbar-height) + 12px);
 }
 .editor-floatbar-head {
   display: flex;
@@ -1165,19 +1174,31 @@
   padding: 3px;
   flex-shrink: 0;
 }
+/* 44 px targets touching, which keeps the 30 px colours 14 px apart. */
 .editor-swatches {
   display: flex;
-  gap: 7px;
-  margin-bottom: 18px;
+  flex-wrap: wrap;
+  margin: 0 -7px 11px;
 }
 .editor-swatch {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+.editor-swatch::before {
+  content: '';
   width: 30px;
   height: 30px;
   border: 1px solid var(--border);
   border-radius: 7px;
-  cursor: pointer;
+  background: var(--swatch);
 }
-.editor-swatch.active {
+.editor-swatch.active::before {
   outline: 2px solid var(--ink);
   outline-offset: 2px;
 }
@@ -1185,6 +1206,9 @@
   color: var(--error);
   font-size: 11px;
   line-height: 1.6;
+}
+.editor-refusal {
+  font-size: 13px;
 }
 .editor-fieldpanel > summary {
   cursor: pointer;
@@ -1298,6 +1322,21 @@
 }
 .editor-actionbar-notes > p {
   margin: 0;
+  font-size: 13px;
+}
+.editor-actionbar-notes > .editor-issue {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+/* The note wraps; a word in a button cannot, and a set `min-width` would let it shrink past its label. */
+.editor-actionbar-notes > .editor-issue > .text-link {
+  flex: none;
+}
+/* The longest of these do not fit one line on the smallest phones. */
+.editor-save {
+  white-space: normal;
 }
 .editor-save.saved {
   background: var(--success-tint);
@@ -1626,13 +1665,17 @@
 @media (max-width: 760px) {
   .editor-shell {
     padding: 16px 16px 0;
-    min-height: calc(100vh - 70px);
+    min-height: calc(var(--tg-stable-h, 100dvh) - 70px);
   }
   .editor-head h1 {
     font-size: 18px;
   }
+  /* Edge to edge, past the shell's padding: the page fit keeps 4 px a side. */
   .editor-stage {
-    padding: 12px 6px 18px;
+    margin-inline: -16px;
+    padding: 12px 4px 18px;
+    border-inline: 0;
+    border-radius: 0;
   }
   .editor-modes {
     width: 100%;
@@ -1648,9 +1691,23 @@
     order: -1;
     padding-bottom: 6px;
   }
+  /* One row down to 360 px; narrower it scrolls, as the row of tools above does. */
+  .editor-toolstrip {
+    padding: 9px 8px;
+  }
   .editor-toolstrip-end {
     width: 100%;
     justify-content: space-between;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .editor-zoom {
+    gap: 0;
+  }
+  .editor-zoom > .text-link {
+    min-width: 44px;
+    min-height: 44px;
   }
   .editor-actionbar {
     /* Sits above the app's fixed mobile navigation, never over it. */
@@ -1661,9 +1718,16 @@
     align-items: stretch;
     gap: 9px;
   }
-  .editor-actionbar-notes > p,
   .editor-actionbar-notes .check-label {
-    font-size: 11px;
+    font-size: 13px;
+  }
+  .editor-actionbar .text-link {
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+  }
+  .editor-shell .button.editor-wrap-text {
+    min-height: 44px;
   }
   .editor-shell .editor-actionbar-actions {
     flex-wrap: nowrap;
