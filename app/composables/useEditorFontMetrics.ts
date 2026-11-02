@@ -1,5 +1,6 @@
 /**
- * Exact text metrics for the single font the export engine uses.
+ * Exact text metrics for the single font the export engine uses, and for the
+ * faces a generated deck is measured in (the deck part further down).
  *
  * The server raises `editor_text_overflow` using reportlab's `stringWidth`,
  * which is `0.001 * size * sum(charWidths.get(ord(ch), defaultWidth))`. To
@@ -91,23 +92,23 @@ function readCharToGlyph(view: DataView, start: number) {
     const startBase = endBase + segments * 2 + 2
     const deltaBase = startBase + segments * 2
     const rangeBase = deltaBase + segments * 2
+    const limit = Math.min(start + view.getUint16(start + 2), view.byteLength - 1)
     for (let segment = 0; segment < segments; segment += 1) {
       const end = view.getUint16(endBase + segment * 2)
       const first = view.getUint16(startBase + segment * 2)
       const delta = view.getInt16(deltaBase + segment * 2)
       const rangeOffset = view.getUint16(rangeBase + segment * 2)
-      if (first > end || end === 0xffff) continue
       for (let code = first; code <= end; code += 1) {
-        let glyph: number
+        let glyph = 0
         if (rangeOffset === 0) glyph = (code + delta) & 0xffff
         else {
           const at = rangeBase + segment * 2 + rangeOffset + (code - first) * 2
-          if (at + 1 >= view.byteLength) continue
-          const raw = view.getUint16(at)
-          if (raw === 0) continue
-          glyph = (raw + delta) & 0xffff
+          const raw = at < limit ? view.getUint16(at) : 0
+          if (raw) glyph = (raw + delta) & 0xffff
         }
-        if (glyph) charToGlyph.set(code, glyph)
+        // Glyph 0 counts as mapped, as in reportlab, down to the U+FFFF that
+        // closes the table: deck text falls back on whether a family has a letter.
+        charToGlyph.set(code, glyph)
       }
     }
     return charToGlyph
@@ -231,6 +232,124 @@ export function splitLines(text: string): string[] {
   return parts
 }
 
+/**
+ * A generated deck's text is measured on the server in stand-ins for the faces
+ * its slides name, a letter at a time in the first family that has it: Caladea
+ * has no Cyrillic, so a Cambria heading in Russian is Noto Serif and its digits
+ * Caladea, no narrower than `DECK_DIGIT_FLOORS`. This is `processors/deck_fonts.py`'s
+ * table, and `check:fonts` pins the widths below to `slides._face_units` and
+ * `slides._text_width`.
+ */
+const DECK_FONT_URLS = {
+  Carlito: '/fonts/carlito-regular.ttf',
+  Caladea: '/fonts/caladea-regular.ttf',
+  'Liberation Sans': '/fonts/liberation-sans-regular.ttf',
+  'Noto Sans': '/fonts/noto-sans-regular.ttf',
+  'Noto Serif': '/fonts/noto-serif-regular.ttf',
+} as const
+type DeckFamily = keyof typeof DECK_FONT_URLS
+
+const DECK_SANS: readonly DeckFamily[] = ['Carlito', 'Noto Sans']
+export const DECK_STAND_INS: Readonly<Record<string, readonly DeckFamily[]>> = {
+  Calibri: DECK_SANS,
+  Corbel: DECK_SANS,
+  Candara: DECK_SANS,
+  Arial: ['Liberation Sans', 'Noto Sans'],
+  'Trebuchet MS': ['Noto Sans'],
+  Cambria: ['Caladea', 'Noto Serif', 'Noto Sans'],
+  Georgia: ['Noto Serif', 'Noto Sans'],
+  Constantia: ['Noto Serif', 'Noto Sans'],
+}
+export const DECK_OTHER_FACE: readonly DeckFamily[] = ['Noto Sans']
+/** `deck_fonts.DIGIT_FLOORS`: a stand-in's digits can be far narrower than the real face's, and a figure alone shows it. */
+export const DECK_DIGIT_FLOORS: Readonly<Record<string, number>> = { Cambria: 554, Georgia: 602 }
+/** `slides.WIDTH_SAFETY`: a viewer has kerning of its own and may have the real face. */
+export const DECK_WIDTH_SAFETY = 1.1
+
+const deckFamilies = new Map<DeckFamily, FontMetrics>()
+const deckLoading = new Map<DeckFamily, Promise<FontMetrics | null>>()
+
+function deckStandIn(face: string) {
+  return Object.hasOwn(DECK_STAND_INS, face) ? DECK_STAND_INS[face]! : DECK_OTHER_FACE
+}
+
+function loadDeckFamily(family: DeckFamily) {
+  const known = deckLoading.get(family)
+  if (known) return known
+  const loading = (async () => {
+    try {
+      const response = await fetch(DECK_FONT_URLS[family])
+      if (!response.ok) throw new Error(String(response.status))
+      const parsed = parseFontMetrics(await response.arrayBuffer())
+      if (parsed) deckFamilies.set(family, parsed)
+      else deckLoading.delete(family)
+      return parsed
+    } catch {
+      // A dropped connection on a phone should not leave the meter blind for good.
+      deckLoading.delete(family)
+      return null
+    }
+  })()
+  deckLoading.set(family, loading)
+  return loading
+}
+
+/**
+ * Fetches only the families `text` reaches, so an English deck on Calibri costs
+ * one file rather than the whole list. Nothing here runs until a caller asks.
+ * False when a file could not be had: the meter then says nothing, not a guess.
+ */
+export async function ensureDeckFace(face: string, text: string): Promise<boolean> {
+  let letters = [...new Set(Array.from(text, (character) => character.codePointAt(0) ?? 0))]
+  for (const family of deckStandIn(face)) {
+    if (!letters.length) break
+    const metrics = await loadDeckFamily(family)
+    if (!metrics) return false
+    letters = letters.filter((code) => !metrics.widths.has(code))
+  }
+  return true
+}
+
+/**
+ * Pure: `slides._face_units`, a width in thousandths of the size. A letter no
+ * family has takes the last family's default. Null when a family that may hold
+ * a letter is not there yet, because then the total is not known. `digitFloor`
+ * is the face's entry in `DECK_DIGIT_FLOORS`.
+ */
+export function deckUnits(
+  stack: readonly (FontMetrics | undefined)[],
+  text: string,
+  digitFloor = 0,
+): number | null {
+  let total = 0
+  for (const character of text) {
+    const code = character.codePointAt(0) ?? 0
+    let width: number | undefined
+    let last: FontMetrics | undefined
+    for (const family of stack) {
+      if (!family) return null
+      last = family
+      width = family.widths.get(code)
+      if (width !== undefined) {
+        if (code >= 0x30 && code <= 0x39) width = Math.max(width, digitFloor)
+        break
+      }
+    }
+    total += width ?? last?.defaultWidth ?? 0
+  }
+  return total
+}
+
+/** `slides._text_width` for text set in `face`; null until `ensureDeckFace` has fetched what it needs. */
+export function deckTextWidth(face: string, text: string, size: number): number | null {
+  const units = deckUnits(
+    deckStandIn(face).map((family) => deckFamilies.get(family)),
+    text,
+    Object.hasOwn(DECK_DIGIT_FLOORS, face) ? DECK_DIGIT_FLOORS[face] : 0,
+  )
+  return units === null ? null : units * 0.001 * size * DECK_WIDTH_SAFETY
+}
+
 export function useEditorFontMetrics() {
   const ready = useState('editor-font-ready', () => false)
 
@@ -295,5 +414,14 @@ export function useEditorFontMetrics() {
       .join('\n')
   }
 
-  return { ready, ensure, stringWidth, textOverflow, wrapToWidth, isApproximate: () => approximate }
+  return {
+    ready,
+    ensure,
+    stringWidth,
+    textOverflow,
+    wrapToWidth,
+    isApproximate: () => approximate,
+    ensureDeckFace,
+    deckTextWidth,
+  }
 }
