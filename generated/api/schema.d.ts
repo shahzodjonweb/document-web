@@ -533,6 +533,7 @@ export interface paths {
         };
         get: operations["listEditorDocuments"];
         put?: never;
+        /** @description One draft per account and file: 201 for a new one, 200 with the marks already there for a file opened before. A file the editor cannot open is `unsupported_file`, with `message_params.reason` one of `password`, `signed`, `pptx_upload`, `not_pdf` when it is known. A file of this account that has run out is `file_expired` (410); one the customer deleted, is unknown or belongs to another account is `file_unavailable` (404). */
         post: operations["createEditorDocument"];
         delete?: never;
         options?: never;
@@ -1391,10 +1392,14 @@ export interface components {
             /** @enum {unknown} */
             status: "queued" | "reading" | "done" | "failed";
         };
-        /** @description PDF points from displayed top-left, pages start at 1, image indices start at 0. Image input indices reference extra uploaded assets. Redaction requires explicit rasterization acknowledgement and a separate export. */
+        /** @description PDF points from displayed top-left, pages start at 1, image indices start at 0. Image input indices reference extra uploaded assets. Redaction requires explicit rasterization acknowledgement and a separate export. Every position is in source page numbers: `reorder.order` lists all source pages, deleted ones too, and the final order is that minus the deleted pages. */
         EditorCommand: {
+            bold?: boolean;
             color?: string;
+            /** @enum {unknown} */
+            font?: "sans" | "serif";
             font_size?: number;
+            italic?: boolean;
             page: number;
             text: string;
             /** @constant */
@@ -1467,14 +1472,50 @@ export interface components {
         } | {
             height: number;
             page: number;
+            text?: string;
             /** @constant */
             type: "redact";
             width: number;
             x: number;
             y: number;
+        } | {
+            height: number;
+            original: string;
+            page: number;
+            text: string;
+            /** @constant */
+            type: "edit_text";
+            width: number;
+            x: number;
+            y: number;
+        } | {
+            color?: string;
+            height: number;
+            page: number;
+            /** @constant */
+            type: "whiteout";
+            width: number;
+            x: number;
+            y: number;
+        } | {
+            /** @enum {integer} */
+            angle: 90 | 180 | 270;
+            page: number;
+            /** @constant */
+            type: "rotate_page";
+        } | {
+            page: number;
+            /** @constant */
+            type: "delete_page";
+        } | {
+            order: number[];
+            /** @constant */
+            type: "reorder";
         };
         EditorDocument: {
             commands: components["schemas"]["EditorCommand"][];
+            /** @description The device that last changed it, as it named itself; empty when it did not. */
+            device: string;
             file: components["schemas"]["Asset"];
             form_fields?: {
                 name: string;
@@ -1493,6 +1534,11 @@ export interface components {
                 height: number;
                 width: number;
             }[];
+            /**
+             * Format: date-time
+             * @description When the draft last changed; null until it first does.
+             */
+            updated_at: string | null;
             version: number;
         };
         EducationProject: {
@@ -4268,6 +4314,15 @@ export interface operations {
         };
         responses: {
             /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EditorDocument"];
+                };
+            };
+            /** @description Success */
             201: {
                 headers: {
                     [name: string]: unknown;
@@ -4307,6 +4362,17 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description `file_expired`: the file has run out and has to be sent again. */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
             };
         };
     };
@@ -4437,6 +4503,7 @@ export interface operations {
             content: {
                 "application/json": {
                     commands: components["schemas"]["EditorCommand"][];
+                    device?: string;
                     input_ids?: string[];
                     version: number;
                 };
@@ -4452,7 +4519,7 @@ export interface operations {
                     "application/json": components["schemas"]["EditorDocument"];
                 };
             };
-            /** @description Invalid request */
+            /** @description Invalid request. `invalid_editor_command`: one change cannot be saved. `message_params` has `index`, its position in `commands` counted from 0, and `code`, why it was refused. Nothing is saved. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4477,12 +4544,16 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description State conflict or quota unavailable */
+            /** @description `version_conflict`: the draft changed elsewhere. `message_params` has `updated_at`, `device` and the marks each side holds, `theirs` and `mine`. Nothing is saved. */
             409: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
             };
             /** @description `payload_too_large`: the draft measures over `limits.bytes`, or the body over 128 KiB. Nothing is saved. */
             413: {
@@ -4551,12 +4622,16 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description State conflict or quota unavailable */
+            /** @description `version_conflict`: the draft changed elsewhere. `message_params` has `updated_at`, `device` and `theirs`, the marks it holds now; the request carries no marks, so the client counts its own. Nothing is quoted. */
             409: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
             };
         };
     };
@@ -7249,7 +7324,18 @@ export interface operations {
                             requires_provider?: boolean;
                             surface?: string;
                         }[];
-                        limits: Record<string, never>;
+                        limits: {
+                            /** @description Which parts of the new editors are on. The web treats a missing one as off. */
+                            editor?: {
+                                count_once: boolean;
+                                deck_editor: boolean;
+                                edit_buttons: boolean;
+                                editor_v2: boolean;
+                                pdfcraft: boolean;
+                                photos_task: boolean;
+                                text_edit: boolean;
+                            };
+                        };
                         provider: {
                             configured: boolean;
                             id: string;
