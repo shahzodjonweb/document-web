@@ -22,13 +22,18 @@ export const COMMAND_TYPES = [
   'replace_image',
   'remove_image',
   'redact',
+  'edit_text',
+  'whiteout',
+  'rotate_page',
+  'delete_page',
+  'reorder',
 ] as const
 
 export type CommandType = (typeof COMMAND_TYPES)[number]
 
 /** Exactly `processors/editor.py: FIELDS`. Extra keys are a hard rejection. */
 export const COMMAND_FIELDS: Record<CommandType, readonly string[]> = {
-  add_text: ['type', 'page', 'x', 'y', 'text', 'font_size', 'color'],
+  add_text: ['type', 'page', 'x', 'y', 'text', 'font_size', 'color', 'font', 'bold', 'italic'],
   highlight: ['type', 'page', 'x', 'y', 'width', 'height', 'color'],
   note: ['type', 'page', 'x', 'y', 'text'],
   draw: ['type', 'page', 'points', 'color', 'stroke_width'],
@@ -38,7 +43,12 @@ export const COMMAND_FIELDS: Record<CommandType, readonly string[]> = {
   replace_text: ['type', 'page', 'find', 'replacement'],
   replace_image: ['type', 'page', 'image_index', 'input_index'],
   remove_image: ['type', 'page', 'image_index'],
-  redact: ['type', 'page', 'x', 'y', 'width', 'height'],
+  redact: ['type', 'page', 'x', 'y', 'width', 'height', 'text'],
+  edit_text: ['type', 'page', 'x', 'y', 'width', 'height', 'original', 'text'],
+  whiteout: ['type', 'page', 'x', 'y', 'width', 'height', 'color'],
+  rotate_page: ['type', 'page', 'angle'],
+  delete_page: ['type', 'page'],
+  reorder: ['type', 'order'],
 }
 
 /** Exactly `apps/studio/editor_policy.py: COMMAND_FEATURES`. */
@@ -54,10 +64,21 @@ export const COMMAND_FEATURE: Record<CommandType, string> = {
   replace_image: 'editor.replace_images',
   remove_image: 'editor.replace_images',
   redact: 'editor.redact',
+  edit_text: 'editor.existing_text',
+  whiteout: 'editor.add_text',
+  rotate_page: 'editor.visual',
+  delete_page: 'editor.visual',
+  reorder: 'editor.visual',
 }
 
 /** `normalize()` fills these in server-side; we seed them so previews match. */
-export const COMMAND_DEFAULTS = { fontSize: 16, strokeWidth: 2, textColor: '#17212E', highlightColor: '#FFFF00' }
+export const COMMAND_DEFAULTS = {
+  fontSize: 16,
+  strokeWidth: 2,
+  textColor: '#17212E',
+  highlightColor: '#FFFF00',
+  whiteoutColor: '#FFFFFF',
+}
 
 /**
  * `commands` and `commandBytes` are the fallback for a document that does not
@@ -82,6 +103,9 @@ export const LIMITS = {
 
 export const COLOR_PATTERN = /^#[0-9A-Fa-f]{6}$/
 
+export const ROTATE_ANGLES = [90, 180, 270] as const
+export type RotateAngle = (typeof ROTATE_ANGLES)[number]
+
 export interface ClientCommand {
   /** Client-only identity for selection and undo; stripped before sending. */
   _id: string
@@ -102,6 +126,13 @@ export interface ClientCommand {
   replacement?: string
   image_index?: number
   input_index?: number
+  original?: string
+  angle?: RotateAngle
+  /** Every source page, deleted ones too; the final order is this minus the deleted pages. */
+  order?: number[]
+  font?: 'sans' | 'serif'
+  bold?: boolean
+  italic?: boolean
 }
 
 export type ServerCommand = Omit<ClientCommand, '_id'>
@@ -129,6 +160,12 @@ export const COMMAND_SHAPE: Record<CommandType, Shape> = {
   replace_image: { positional: false, box: false, image: true, icon: 'image', labelKey: 'replaceImage' },
   remove_image: { positional: false, box: false, image: false, icon: 'trash', labelKey: 'removeImage' },
   redact: { positional: true, box: true, image: false, icon: 'redact', labelKey: 'redact' },
+  // In the contract ahead of their tools: nothing offers these yet, so the labels are the nearest there are.
+  edit_text: { positional: true, box: true, image: false, icon: 'replace', labelKey: 'replaceText' },
+  whiteout: { positional: true, box: true, image: false, icon: 'type', labelKey: 'addText' },
+  rotate_page: { positional: false, box: false, image: false, icon: 'rotate', labelKey: 'editorRotateRight' },
+  delete_page: { positional: false, box: false, image: false, icon: 'trash', labelKey: 'editorModePages' },
+  reorder: { positional: false, box: false, image: false, icon: 'reorder', labelKey: 'editorModePages' },
 }
 
 /**
@@ -138,7 +175,14 @@ export const COMMAND_SHAPE: Record<CommandType, Shape> = {
  * `accept_rasterization: true`, so a draft mixing redaction with anything else
  * is refused at *save* time, not just export. It therefore gets its own mode.
  */
-export const CANVAS_TOOLS: CommandType[] = ['add_text', 'highlight', 'note', 'draw', 'signature', 'insert_image']
+export const CANVAS_TOOLS: CommandType[] = [
+  'add_text',
+  'highlight',
+  'note',
+  'draw',
+  'signature',
+  'insert_image',
+]
 
 export function isCommandType(value: unknown): value is CommandType {
   return typeof value === 'string' && (COMMAND_TYPES as readonly string[]).includes(value)
@@ -165,7 +209,7 @@ interface SeedContext {
 
 export function seedCommand(type: CommandType, context: SeedContext): ClientCommand {
   const command: ClientCommand = { _id: newCommandId(), type }
-  if (type !== 'fill_form') command.page = context.page
+  if (type !== 'fill_form' && type !== 'reorder') command.page = context.page
   const shape = COMMAND_SHAPE[type]
   if (shape.positional) {
     command.x = quantize(context.x ?? 40)
@@ -206,6 +250,19 @@ export function seedCommand(type: CommandType, context: SeedContext): ClientComm
     case 'replace_image':
     case 'remove_image':
       command.image_index = 0
+      break
+    case 'edit_text':
+      command.original = ''
+      command.text = ''
+      break
+    case 'whiteout':
+      command.color = COMMAND_DEFAULTS.whiteoutColor
+      break
+    case 'rotate_page':
+      command.angle = 90
+      break
+    case 'reorder':
+      command.order = []
       break
     default:
       break
@@ -305,9 +362,23 @@ export function commandIssues(command: ClientCommand, assetCount = 0): Issue | n
     }
     case 'draw':
       return (command.points?.length ?? 0) < LIMITS.points.min ? { id, code: 'editorIssueShortLine' } : null
+    case 'edit_text': {
+      const original = command.original ?? ''
+      const text = command.text ?? ''
+      if (!original || controlCharacters(original) || controlCharacters(text))
+        return { id, code: 'editorIssueEmptyText' }
+      return [...original].length > LIMITS.text || [...text].length > LIMITS.text
+        ? { id, code: 'editorIssueEmptyText' }
+        : null
+    }
     case 'fill_form':
+      // `field` is the name the PDF gave it, not typed text: the server takes it as it is.
+      if (controlCharacters((command.value ?? '').replaceAll('\r', '')))
+        return { id, code: 'editorIssueEmptyField' }
       return !command.field?.trim() ? { id, code: 'editorIssueEmptyField' } : null
     case 'replace_text':
+      if (controlCharacters(command.find ?? '') || controlCharacters(command.replacement ?? ''))
+        return { id, code: 'editorIssueEmptyFind' }
       return !command.find ? { id, code: 'editorIssueEmptyFind' } : null
     case 'signature':
     case 'insert_image':
