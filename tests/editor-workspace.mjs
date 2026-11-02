@@ -307,7 +307,11 @@ const fixtureApi = async (route) => {
   if (endpoint === '/editor/form-templates')
     return json({ results: [], limit: switchedOff.has('editor.form_templates') ? 0 : 30 })
 
-  if (endpoint === '/editor/documents' && method === 'GET') return json({ results: [documentPayload()] })
+  if (endpoint === '/editor/documents' && method === 'GET') {
+    // A list answers without the marks: only the draft itself holds them.
+    const { commands: _commands, ...row } = documentPayload()
+    return json({ results: [row] })
+  }
   if (endpoint === '/editor/documents' && method === 'POST') return json({ id: editor.id }, 201)
   if (endpoint === `/editor/documents/${editor.id}` && method === 'GET') {
     if (documentReadDelay) await new Promise((resolve) => setTimeout(resolve, documentReadDelay))
