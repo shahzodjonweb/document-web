@@ -566,6 +566,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** @description One send of the stored draft: one quote, one job, one file task. The marks are read again at submission and when the job runs; if they have changed since, that is `version_conflict` and nothing is counted. A send identical to the last file made, or to the one being made, returns that job rather than a new one. */
         post: operations["quoteEditorDocument"];
         delete?: never;
         options?: never;
@@ -751,6 +752,40 @@ export interface paths {
         patch: operations["updateGenerationDraft"];
         trace?: never;
     };
+    "/generation/drafts/{id}/export-quote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description The price of sending a generated deck again from its draft, as PowerPoint, PDF or both: no AI edit, one file task, submitted through `/jobs`. It holds nothing of the deck but ids and the format. Refused, with status 409, when: `version_conflict`; `generation_running`; `deck_not_editable` (not a deck, or none has been drawn from this draft yet); `pinned_asset_expired` (`message_params.sections`: [{id, index}], the slides whose picture is no longer stored); `slide_text_too_long` (`message_params.sections`: [{id, index, words_over}], the slides whose text would not all show). */
+        post: operations["quoteDeckExport"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/generation/drafts/{id}/fit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description How one slide as it stands in the editor sits on this deck, and the layouts that would hold it whole. Nothing is saved or drawn into a file. A section whose id the deck does not have is measured as a slide added at the end. `deck_not_editable` as for the export quote. */
+        post: operations["measureDeckSlide"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/generation/drafts/{id}/generate": {
         parameters: {
             query?: never;
@@ -799,6 +834,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/generation/drafts/{id}/render": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description How the drawing of this version of the deck stands; the draft's current one without `version`. Reads only. Answers `feature_unavailable` with the deck editor off. */
+        get: operations["getDeckRender"];
+        put?: never;
+        /** @description Have this version of the deck drawn, in a queue of its own and free, when a field is committed: not on every autosave. A newer ask replaces one still queued. Only the slides that changed are drawn. `version_conflict`; `deck_not_editable`; `lane_busy` (429, retryable) past the day's budget or with three tasks waiting. */
+        post: operations["requestDeckRender"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/generation/drafts/{id}/setup": {
         parameters: {
             query?: never;
@@ -810,6 +863,40 @@ export interface paths {
         put?: never;
         /** @description A deck's slide count and design, or a CV's template, chosen over what its description says. A deck (`ai.pptx`) takes `pages` and `deck_design` (a design id or `auto`); a CV (`ai.cv`) takes `cv_template` (a template id or `auto`); anything else is refused. Returns the new quote; the review in the Telegram chat is redrawn with it. */
         post: operations["setupGenerationDraft"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/generation/drafts/{id}/slides/{key}.png": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description A slide already drawn, 1280 by 720 px, inline. Nothing is drawn for this request: anything else is 404. */
+        get: operations["getDeckSlide"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/generation/drafts/{id}/slides/{key}.thumb.png": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description A slide already drawn, 96 by 54 px, inline. Nothing is drawn for this request: anything else is 404. */
+        get: operations["getDeckSlideThumb"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -858,7 +945,7 @@ export interface paths {
         };
         get: operations["listJobs"];
         put?: never;
-        /** @description Returns 200 on identical retry. Same key with changed quote returns 409. */
+        /** @description Returns 200 on identical retry, and for a send of a draft that already made this very file or is making it, with that job and with its file kept another 24 hours. Same key with changed quote returns 409, and so does a quote already sent under another key (`quote_already_submitted`). `telegram_link_required` (409) when the result is to go to a chat and the account has no Telegram; `send_limit` (429, retryable) when a draft has been sent too often. A failed black-out check is a job failed with `editor_check_failed`, `error.message_params.index` naming the change, and is not counted. */
         post: operations["submitJob"];
         delete?: never;
         options?: never;
@@ -1392,6 +1479,85 @@ export interface components {
             /** @enum {unknown} */
             status: "queued" | "reading" | "done" | "failed";
         };
+        DeckExportSummary: {
+            cost: components["schemas"]["QuoteCost"];
+            /** @enum {unknown} */
+            format: "pptx" | "pdf" | "both";
+            /**
+             * Format: date-time
+             * @description When a file made now would expire.
+             */
+            kept_until: string;
+            /** @description About how many bytes the files come to. */
+            size_estimate: number;
+            slides: number;
+            /** @description What the file would come without: `logo_left_out` when the logo is no longer stored. */
+            warnings: string[];
+        };
+        DeckPins: {
+            body_size: number;
+            deck_seed: string;
+            design: string;
+            photos: {
+                [key: string]: {
+                    /** Format: uuid */
+                    asset_id: string | null;
+                    candidates: {
+                        /** Format: uuid */
+                        asset_id: string;
+                    }[];
+                };
+            };
+            variants: {
+                [key: string]: string;
+            };
+        };
+        DeckRender: {
+            /** @description Why the last try failed: `render_deck_interrupted` is worth asking again, `pinned_asset_expired` is not until the picture is changed. */
+            error: string | null;
+            slides: components["schemas"]["DeckRenderSlide"][];
+            /**
+             * @description `none`: nothing has been asked for, or it has gone; POST asks. `queued` and `running`: a task will draw this version or a later one. `done`: `slides` are this version. `failed`: see `error`. `stale`: this version was not drawn and the deck has moved on.
+             * @enum {unknown}
+             */
+            status: "none" | "queued" | "running" | "done" | "failed" | "stale";
+            version: number;
+        };
+        DeckRenderSlide: {
+            fits: boolean;
+            /** @description Where the slide's heading, body and picture lie, as fractions of the slide. */
+            frames: {
+                /** @enum {unknown} */
+                field: "heading" | "body" | "picture";
+                h: number;
+                w: number;
+                x: number;
+                y: number;
+            }[];
+            /** @description The slide's position in the deck, from 0. */
+            index: number;
+            /** @description What its picture is made from: the same key is the same picture. */
+            key: string;
+            /** @description Letters of this slide that do not show. */
+            letters_over: number;
+            /** @description The picture, 96 by 54 px. */
+            thumb_url: string;
+            /** @description The picture, 1280 by 720 px. */
+            url: string;
+        };
+        DeckSlideFit: {
+            fits: boolean;
+            id: string;
+            /** @description The slide's position in the deck, from 0. */
+            index: number;
+            /** @description The layouts that can carry this slide and show all of it. */
+            layouts_fitting: ("cover" | "agenda" | "section" | "bullets" | "two_column" | "statement" | "quote" | "big_number" | "stats" | "timeline" | "process" | "comparison" | "pros_cons" | "cards" | "matrix" | "chart" | "table" | "image_split" | "image_full" | "closing")[];
+            lines_max: number;
+            /** @description Lines its text takes at the sizes it is set in. Past `lines_max` whenever it does not fit. */
+            lines_used: number;
+            /** @description Words of this slide that would not show. */
+            words_over: number;
+        };
         /** @description PDF points from displayed top-left, pages start at 1, image indices start at 0. Image input indices reference extra uploaded assets. Redaction requires explicit rasterization acknowledgement and a separate export. Every position is in source page numbers: `reorder.order` lists all source pages, deleted ones too, and the final order is that minus the deleted pages. */
         EditorCommand: {
             bold?: boolean;
@@ -1541,6 +1707,53 @@ export interface components {
             updated_at: string | null;
             version: number;
         };
+        /** @description A draft as a list shows it: without its marks, which only the draft itself answers with. */
+        EditorDocumentRow: {
+            /** @description The device that last changed it, as it named itself; empty when it did not. */
+            device: string;
+            file: components["schemas"]["Asset"];
+            form_fields?: {
+                name: string;
+                type: string;
+            }[];
+            /** Format: uuid */
+            id: string;
+            image_counts?: number[];
+            input_ids: string[];
+            /** @description The most a draft holds: `commands` changes, measuring `bytes` as UTF-8 compact JSON with the defaults filled in, the count of `new TextEncoder().encode(JSON.stringify(commands)).length`. */
+            limits: {
+                bytes: number;
+                commands: number;
+            };
+            pages: {
+                height: number;
+                width: number;
+            }[];
+            /**
+             * Format: date-time
+             * @description When the draft last changed; null until it first does.
+             */
+            updated_at: string | null;
+            version: number;
+        };
+        EditorQuoteSummary: {
+            /** @description How many changes each page holds, by its number in the file as uploaded. A form field or a new page order belongs to no page. */
+            changes_by_page: {
+                [key: string]: number;
+            };
+            cost: components["schemas"]["QuoteCost"];
+            /**
+             * Format: date-time
+             * @description When a file made now would expire.
+             */
+            kept_until: string;
+            pages_after: number;
+            pages_before: number;
+            /** @description The pages, numbered as uploaded, that will become pictures for their black-out. A page being deleted is not among them. */
+            raster_pages: number[];
+            /** @description About how many bytes the file comes to. In a chat, a file over 50 MB arrives as a link. */
+            size_estimate: number;
+        };
         EducationProject: {
             attempts: components["schemas"]["PracticeResult"][];
             content?: components["schemas"]["GenerationContent"];
@@ -1625,6 +1838,8 @@ export interface components {
             output_locale: "en" | "uz" | "ru";
             prompt?: string;
             provider_mode: string;
+            /** @description A generated deck (`ai.pptx`): how it was drawn, so an edit changes only the slide it touches. `variants` and `photos` are by section id; a photo `asset_id` is the account's own file, null when none was kept, and `candidates` are small copies kept on offer for that slide, possibly none. `deck_seed` is opaque. Absent until a deck has been made. */
+            readonly render?: components["schemas"]["DeckPins"];
             revision?: {
                 base_content?: components["schemas"]["GenerationContent"];
                 selected_section_ids?: string[];
@@ -1688,6 +1903,19 @@ export interface components {
             input_files: components["schemas"]["Asset"][];
             origin_channel?: string;
             parameters?: Record<string, never>;
+            /** @description What a send from the editor did with each change, once it has run. */
+            per_command?: {
+                engine: string;
+                /** @description Its position in the draft's `commands`, from 0. */
+                index: number;
+                /**
+                 * @description `skipped`: its page was deleted in the same send.
+                 * @enum {unknown}
+                 */
+                status: "applied" | "skipped";
+            }[];
+            /** @description The pages, numbered as uploaded, that became pictures in a send from the editor. */
+            rasterized_pages?: number[];
             /** Format: date-time */
             started_at?: string | null;
             /** @enum {unknown} */
@@ -1817,6 +2045,16 @@ export interface components {
                 /** Format: date-time */
                 resets_at?: string;
             };
+        };
+        QuoteCost: {
+            /**
+             * @description `file_task`: this send uses one of the week's file tasks. `included`: the plan has no weekly limit. `none`: it uses nothing, as the same file already exists or is being made or, with `count_once` on, this draft has been counted this week.
+             * @enum {unknown}
+             */
+            kind: "file_task" | "included" | "none";
+            /** @description File tasks left this week, before this send; null when `included`. */
+            left: number | null;
+            limit: number | null;
         };
         SavedDefinition: {
             content?: Record<string, never>;
@@ -2080,6 +2318,18 @@ export interface operations {
                 };
                 content: {
                     "image/png": string;
+                };
+            };
+            /** @description With the deck editor on, a page not drawn yet is being drawn: ask again. Refused with `lane_busy` (429, retryable) past the day's budget or with three tasks waiting. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** Format: uuid */
+                        task_id: string;
+                    };
                 };
             };
             /** @description Invalid request */
@@ -4257,7 +4507,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        results: components["schemas"]["EditorDocument"][];
+                        results: components["schemas"]["EditorDocumentRow"][];
                     };
                 };
             };
@@ -4583,6 +4833,11 @@ export interface operations {
             content: {
                 "application/json": {
                     accept_rasterization?: boolean;
+                    /**
+                     * @description Where the file goes: this is a send of the stored draft, by a pointer to it. The Quote holds no marks and comes with `summary`. Left out by the web from before these sends, whose quote carries the marks.
+                     * @enum {unknown}
+                     */
+                    deliver?: "chat" | "download";
                     version: number;
                 };
             };
@@ -4594,10 +4849,12 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Quote"];
+                    "application/json": components["schemas"]["Quote"] & {
+                        summary?: components["schemas"]["EditorQuoteSummary"];
+                    };
                 };
             };
-            /** @description Invalid request */
+            /** @description `rasterization_consent_required`: pages would become pictures and `accept_rasterization` was not true; `message_params.pages` lists them. `editor_text_overflow`: a text does not fit its page; `message_params.index` is its position in `commands`, counted from 0. `invalid_editor_command`, as on saving. Nothing is quoted. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4622,8 +4879,19 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description `version_conflict`: the draft changed elsewhere. `message_params` has `updated_at`, `device` and `theirs`, the marks it holds now; the request carries no marks, so the client counts its own. Nothing is quoted. */
+            /** @description `version_conflict`: the draft changed elsewhere. `message_params` has `updated_at`, `device` and `theirs`, the marks it holds now; the request carries no marks, so the client counts its own. `telegram_link_required`: `deliver` is `chat` and the account has no Telegram. Nothing is quoted. */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description `weekly_file_limit`: this week's file tasks are used up. `send_limit`: too many sends for now, `retryable`; `message_params` has `limit` and `per`, `day` for this draft or `hour` for the account. Nothing is quoted. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -5557,6 +5825,18 @@ export interface operations {
                     "image/png": string;
                 };
             };
+            /** @description With the deck editor on, a page not drawn yet is being drawn: ask again. Refused with `lane_busy` (429, retryable) past the day's budget or with three tasks waiting. */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** Format: uuid */
+                        task_id: string;
+                    };
+                };
+            };
             /** @description Invalid request */
             400: {
                 headers: {
@@ -5913,6 +6193,136 @@ export interface operations {
             };
         };
     };
+    quoteDeckExport: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRFToken": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {unknown} */
+                    deliver: "chat" | "download";
+                    /** @enum {unknown} */
+                    format: "pptx" | "pdf" | "both";
+                    version: number;
+                };
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Quote"] & {
+                        summary: components["schemas"]["DeckExportSummary"];
+                    };
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    measureDeckSlide: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRFToken": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    section: components["schemas"]["GenerationSection"];
+                };
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeckSlideFit"];
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     generateDraft: {
         parameters: {
             query?: never;
@@ -6103,6 +6513,129 @@ export interface operations {
             };
         };
     };
+    getDeckRender: {
+        parameters: {
+            query?: {
+                version?: number;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeckRender"];
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    requestDeckRender: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRFToken": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    version: number;
+                };
+            };
+        };
+        responses: {
+            /** @description Success */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {unknown} */
+                        status: "queued" | "running" | "done" | "failed";
+                        /** Format: uuid */
+                        task_id: string;
+                    };
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     setupGenerationDraft: {
         parameters: {
             query?: never;
@@ -6134,6 +6667,116 @@ export interface operations {
                         draft: components["schemas"]["GenerationDraft"];
                         quote: components["schemas"]["Quote"];
                     };
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getDeckSlide: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Private PNG; no-store */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/png": string;
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getDeckSlideThumb: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Private PNG; no-store */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/png": string;
                 };
             };
             /** @description Invalid request */
@@ -6354,6 +6997,8 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
+                    /** @description Send the result to the account's Telegram chat as well. A quote with `deliver` `chat` does so without asking. */
+                    deliver_to_chat?: boolean;
                     /** Format: uuid */
                     quote_id: string;
                 };
