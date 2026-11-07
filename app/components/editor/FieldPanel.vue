@@ -2,12 +2,16 @@
 /**
  * Commands that have no place on the page: form values, find-and-replace and
  * image operations. They are addressed by name or index, not by coordinate.
+ *
+ * Under `editor_v2` this is "Fill in the form": the file's own text fields as a list,
+ * each value typed in place. Filling by tapping the field on the page comes later.
  */
 import { COMMAND_FEATURE, LIMITS } from '~/composables/useEditorCommands'
 
 const { t } = useLocale()
 const ws = useWorkspace()
 const session = useEditorSession()
+const editorV2 = useEditorV2()
 
 const open = ref(false)
 const doc = computed(() => session.doc.value)
@@ -27,6 +31,22 @@ function set(id: string, patch: Record<string, unknown>) {
   session.patchCommand(id, patch, `field:${id}`)
 }
 
+/** The fields the engine can write words into; the rest are counted, not offered. */
+const textFields = computed(() => formFields.value.filter((field) => field.type === '/Tx'))
+const otherFields = computed(() => formFields.value.length - textFields.value.length)
+const valueOf = (name: string) => fills.value.find((command) => command.field === name)?.value ?? ''
+
+/** A value starts its change with the first letter and ends it when emptied: an empty fill is no change. */
+function fill(name: string, value: string) {
+  const current = fills.value.find((command) => command.field === name)
+  if (current && !value) return session.removeCommands([current._id])
+  if (current) return set(current._id, { value })
+  if (!value || !allowed('fill_form')) return
+  session.addCommand('fill_form', { page: 1 }, { field: name, value })
+  // The list is the form here; a change with no place on the page has nothing to select.
+  session.select(null)
+}
+
 /** A saved template replaces the form values wholesale, never merges them. */
 function applyTemplate(commands: any[]) {
   session.mutate('template', () => {
@@ -39,7 +59,33 @@ function applyTemplate(commands: any[]) {
 </script>
 
 <template>
-  <details class="editor-fieldpanel panel" :open="open" data-testid="editor-fields" @toggle="open = ($event.target as HTMLDetailsElement).open">
+  <section v-if="editorV2" class="editor-fill" :aria-label="t('editorFillForm')" data-testid="editor-fields">
+    <p v-if="!textFields.length" class="field-hint">{{ t('editorNoFormFields') }}</p>
+    <template v-else>
+      <p v-if="!allowed('fill_form')" class="editor-lock">
+        <AppIcon name="lock" :size="15" />
+        <span>{{ t('editorLockedTool', { tool: t('editorFillForm') }) }}</span>
+      </p>
+      <label v-for="field in textFields" :key="field.name" class="form-field">
+        <span>{{ field.name }}</span>
+        <input
+          :value="valueOf(field.name)"
+          :maxlength="LIMITS.value"
+          :disabled="!allowed('fill_form')"
+          :data-testid="`editor-field-${field.name}`"
+          @input="fill(field.name, ($event.target as HTMLInputElement).value)"
+        />
+      </label>
+      <p v-if="otherFields" class="field-hint">{{ t('editorOtherFields', { count: otherFields }) }}</p>
+    </template>
+  </section>
+  <details
+    v-else
+    class="editor-fieldpanel panel"
+    :open="open"
+    data-testid="editor-fields"
+    @toggle="open = ($event.target as HTMLDetailsElement).open"
+  >
     <summary>{{ t('editorFormFields') }} · {{ t('editorFindReplace') }}</summary>
 
     <section :aria-label="t('editorFormFields')">

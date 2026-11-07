@@ -11,11 +11,15 @@
 import { CANVAS_TOOLS, COMMAND_FEATURE, COMMAND_SHAPE, type CommandType } from '~/composables/useEditorCommands'
 import type { EditorMode } from '~/composables/useEditorSession'
 
+// `bar` is the new frame's bottom row: at most four tabs, each one a place with its own content.
+defineProps<{ bar?: boolean }>()
 const emit = defineEmits<{ togglePages: [] }>()
 
 const { t } = useLocale()
 const ws = useWorkspace()
 const session = useEditorSession()
+const tools = useEditorTools()
+const snackbar = useEditorSnackbar()
 
 const lockedTool = ref<CommandType | ''>('')
 const modeBlocked = ref('')
@@ -36,6 +40,38 @@ const eligibility = computed(() => {
 })
 
 const canRedact = computed(() => allows('editor.redact'))
+
+type Tab = 'sign' | 'add' | 'blackout' | 'pages'
+const TABS: { id: Tab; labelKey: string; icon: string; tool?: CommandType }[] = [
+  { id: 'sign', labelKey: 'editorTabSign', icon: 'signature', tool: 'signature' },
+  { id: 'add', labelKey: 'editorTabAdd', icon: 'plus' },
+  { id: 'blackout', labelKey: 'editorTabBlackOut', icon: 'redact', tool: 'redact' },
+  { id: 'pages', labelKey: 'editorModePages', icon: 'pages' },
+]
+
+/** Each tab is a place with its own sheet; a second tap on it closes it again. */
+function tabActive(id: Tab) {
+  if (id === 'pages') return session.mode.value === 'pages'
+  if (id === 'blackout') return session.mode.value === 'redact'
+  return tools.sheet.value === id
+}
+
+function chooseTab(tab: (typeof TABS)[number]) {
+  if (tab.tool && !tools.allows(tab.tool)) {
+    snackbar.show({ message: t('editorLockedTool', { tool: t(tab.labelKey) }) })
+    return
+  }
+  const open = tabActive(tab.id)
+  session.select(null)
+  tools.stopBlackOut()
+  tools.closeSheet()
+  tools.disarm()
+  if (session.mode.value === 'pages') session.mode.value = 'edit'
+  if (open) return
+  if (tab.id === 'pages') session.mode.value = 'pages'
+  else if (tab.id === 'blackout') tools.startBlackOut()
+  else tools.openSheet(tab.id)
+}
 
 const MODES: { id: EditorMode; labelKey: string; icon: string }[] = [
   { id: 'edit', labelKey: 'editorModeEdit', icon: 'edit' },
@@ -83,7 +119,22 @@ function zoomBy(factor: number) {
 </script>
 
 <template>
-  <div class="editor-toolstrip" role="toolbar" :aria-label="t('editorTools')">
+  <nav v-if="bar" class="editor-tabbar" :aria-label="t('editorTools')" data-testid="editor-tabbar">
+    <button
+      v-for="tab in TABS"
+      :key="tab.id"
+      type="button"
+      class="editor-toolpill"
+      :class="{ active: tabActive(tab.id) }"
+      :aria-pressed="tabActive(tab.id)"
+      :data-locked="(tab.tool && !tools.allows(tab.tool)) || undefined"
+      :data-testid="`editor-tab-${tab.id}`"
+      @click="chooseTab(tab)"
+    >
+      <AppIcon :name="tab.icon" :size="20" /><span>{{ t(tab.labelKey) }}</span>
+    </button>
+  </nav>
+  <div v-else class="editor-toolstrip" role="toolbar" :aria-label="t('editorTools')">
     <div class="editor-modes" role="group" :aria-label="t('editorTools')">
       <button
         v-for="item in MODES"

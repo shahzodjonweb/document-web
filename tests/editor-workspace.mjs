@@ -716,7 +716,7 @@ try {
   await page.getByTestId('editor-mode-blocked').waitFor()
   assert.match(
     await page.getByTestId('editor-mode-blocked').innerText(),
-    /Redaction exports on its own/,
+    /Removing content makes a file of its own/,
     'mixing redaction with other changes is refused up front',
   )
   checks.push('Redaction is refused alongside other changes before anything is saved')

@@ -10,8 +10,13 @@
  * pixels:
  *
  *   pdfjs  → canvas rendering, crisp at any zoom
- *   server → <img src="/files/{id}/preview?page=N">, fixed 96 DPI
+ *   server → /files/{id}/preview?page=N through PreviewImage, fixed 96 DPI
  *   blank  → a correctly proportioned empty page
+ *
+ * Under the switch pdf.js reads the file by HTTP ranges, only the parts a page on
+ * screen needs, so a phone on a slow line draws the first page long before the
+ * whole file has arrived; the first page's server picture shows meanwhile. Without
+ * ranges the same request brings the whole file, as before.
  */
 import type { PDFDocumentProxy, RenderTask } from 'pdfjs-dist'
 
@@ -20,6 +25,10 @@ export type RenderMode = 'idle' | 'loading' | 'pdfjs' | 'server' | 'blank'
 /** Safari refuses canvases beyond roughly this area. */
 const MAX_CANVAS_PIXELS = 16_000_000
 const MAX_DEVICE_SCALE = 2
+/** A phone's 3x screen draws a page nine times over for little a person can see: 1.5 is plenty. */
+const PHONE_DEVICE_SCALE = 1.5
+/** pdf.js's own default: a range read asks for at least this much at a time. */
+const RANGE_CHUNK = 65536
 const THUMBNAIL_CACHE = 48
 const THUMBNAIL_WIDTH = 96
 
@@ -92,6 +101,88 @@ export function useEditorRender() {
   const mode = useState<RenderMode>('editor-render-mode', () => 'idle')
   const pageCount = useState('editor-render-pages', () => 0)
   const ws = useWorkspace()
+  const v2 = useEditorV2()
+  const deviceScale = () =>
+    Math.min(globalThis.devicePixelRatio || 1, v2.value ? PHONE_DEVICE_SCALE : MAX_DEVICE_SCALE)
+
+  const options = {
+    cMapUrl: '/pdfjs/cmaps/',
+    cMapPacked: true,
+    standardFontDataUrl: '/pdfjs/standard_fonts/',
+    wasmUrl: '/pdfjs/wasm/',
+    isEvalSupported: false,
+  }
+
+  /**
+   * By ranges, read here rather than by pdf.js's own loader, which wants the whole
+   * file's Content-Length on a first full answer: the app's /api proxy streams that
+   * answer without one. A 206 says how long the file is in its Content-Range, and
+   * pdf.js then asks for only the parts a page on screen needs. A server that
+   * answers 200 has sent the file itself, which is read as before.
+   */
+  async function openByRanges(pdfjs: Pdfjs, fileId: string): Promise<PDFDocumentProxy | null> {
+    const url = `/api/v1/files/${fileId}/download`
+    const read = (from: number, to: number) =>
+      fetch(url, { credentials: 'include', headers: { Range: `bytes=${from}-${to - 1}` } })
+    try {
+      const first = await read(0, RANGE_CHUNK)
+      if (first.status === 200)
+        return await pdfjs.getDocument({ ...options, data: new Uint8Array(await first.arrayBuffer()) })
+          .promise
+      const total = Number(/\/(\d+)$/.exec(first.headers.get('content-range') ?? '')?.[1])
+      if (first.status !== 206 || !total) return null
+      const initial = new Uint8Array(await first.arrayBuffer())
+      if (initial.length >= total) return await pdfjs.getDocument({ ...options, data: initial }).promise
+      // A part that does not come is cut from the whole file instead, fetched once.
+      let whole: Promise<ArrayBuffer> | null = null
+      const wholeFile = () =>
+        (whole ??= fetch(url, { credentials: 'include' }).then((answer) =>
+          answer.ok ? answer.arrayBuffer() : Promise.reject(answer.status),
+        ))
+      let opened = false
+      let fail: (reason: unknown) => void = () => {}
+      const failed = new Promise<never>((_resolve, reject) => (fail = reject))
+      class Ranges extends pdfjs.PDFDataRangeTransport {
+        override requestDataRange(begin: number, end: number) {
+          void read(begin, end)
+            .then((answer) => (answer.status === 206 ? answer.arrayBuffer() : Promise.reject(answer.status)))
+            // pdf.js waits for the part it asked for, at the place it asked: a copy, as it takes the buffer.
+            .catch(() => wholeFile().then((file) => file.slice(begin, Math.min(end, total))))
+            .then(
+              (part) => {
+                try {
+                  this.onDataRange(begin, new Uint8Array(part))
+                } catch {
+                  // Closed meanwhile: nothing waits for it any more.
+                }
+              },
+              // Not even that: the server draws the pages, as pdf.js would wait for good.
+              (reason) => {
+                if (!opened) fail(reason)
+                else if (session?.fileId === fileId && mode.value === 'pdfjs') downgrade('server')
+              },
+            )
+        }
+      }
+      const task = pdfjs.getDocument({
+        ...options,
+        range: new Ranges(total, initial),
+        disableAutoFetch: true,
+        disableStream: true,
+        rangeChunkSize: RANGE_CHUNK,
+      })
+      try {
+        const document = await Promise.race([task.promise, failed])
+        opened = true
+        return document
+      } catch (reason) {
+        void task.destroy()
+        throw reason
+      }
+    } catch {
+      return null
+    }
+  }
 
   /**
    * Fetch the bytes and hand them to pdf.js. Any failure downgrades to the
@@ -108,17 +199,12 @@ export function useEditorRender() {
       return mode.value
     }
     try {
-      const bytes = await ws.api<ArrayBuffer>(`/files/${fileId}/download`, { responseType: 'arrayBuffer' })
-      // pdf.js transfers this buffer to its worker; never reuse it afterwards.
-      const task = pdfjs.getDocument({
-        data: new Uint8Array(bytes),
-        cMapUrl: '/pdfjs/cmaps/',
-        cMapPacked: true,
-        standardFontDataUrl: '/pdfjs/standard_fonts/',
-        wasmUrl: '/pdfjs/wasm/',
-        isEvalSupported: false,
-      })
-      const document = await task.promise
+      let document = v2.value ? await openByRanges(pdfjs, fileId) : null
+      if (!document) {
+        const bytes = await ws.api<ArrayBuffer>(`/files/${fileId}/download`, { responseType: 'arrayBuffer' })
+        // pdf.js transfers this buffer to its worker; never reuse it afterwards.
+        document = await pdfjs.getDocument({ ...options, data: new Uint8Array(bytes) }).promise
+      }
       session = { fileId, document, tasks: new Map(), thumbnails: new Map(), order: [] }
       pageCount.value = document.numPages
       mode.value = 'pdfjs'
@@ -150,7 +236,7 @@ export function useEditorRender() {
     try {
       const proxy = await current.document.getPage(page)
       const base = proxy.getViewport({ scale: 1 })
-      const dpr = Math.min(globalThis.devicePixelRatio || 1, MAX_DEVICE_SCALE)
+      const dpr = deviceScale()
       const wanted = (cssWidth / base.width) * dpr
       const ceiling = Math.sqrt(MAX_CANVAS_PIXELS / (base.width * base.height))
       const scale = Math.max(0.05, Math.min(wanted, ceiling))
@@ -185,7 +271,7 @@ export function useEditorRender() {
     try {
       const proxy = await current.document.getPage(page)
       const base = proxy.getViewport({ scale: 1 })
-      const dpr = Math.min(globalThis.devicePixelRatio || 1, MAX_DEVICE_SCALE)
+      const dpr = deviceScale()
       const viewport = proxy.getViewport({ scale: (THUMBNAIL_WIDTH / base.width) * dpr })
       const canvas = document.createElement('canvas')
       canvas.width = Math.max(1, Math.round(viewport.width))
@@ -224,5 +310,21 @@ export function useEditorRender() {
     return `/api/v1/files/${fileId}/preview?page=${page}`
   }
 
-  return { mode, pageCount, open, renderPage, thumbnail, teardown, downgrade, serverPreview }
+  /**
+   * Whether a page has any words of its own, as pdf.js reads them; null when that
+   * cannot be known here, as with server pictures. Nothing read is kept.
+   */
+  async function hasWords(page: number): Promise<boolean | null> {
+    const current = session
+    if (!current?.document || mode.value !== 'pdfjs') return null
+    try {
+      const proxy = await current.document.getPage(page)
+      const content = await proxy.getTextContent()
+      return content.items.some((item) => 'str' in item && item.str.trim() !== '')
+    } catch {
+      return null
+    }
+  }
+
+  return { mode, pageCount, open, renderPage, thumbnail, teardown, downgrade, serverPreview, hasWords }
 }

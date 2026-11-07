@@ -4,6 +4,8 @@ const { t, count, path, locale, localePath } = useLocale()
 const ws = useWorkspace()
 const studio = useStudio()
 const auth = useAuthentication()
+const telegram = useTelegramApp()
+const editorFrame = useEditorFrame()
 const miniAppError = ref('')
 const miniAppBusy = ref(false)
 const { user, sessionReady } = ws
@@ -13,13 +15,17 @@ const isEditor = computed(() => /\/app\/editor(\/|$)/.test(route.path))
 // The resolved theme on screen: a saved "system" choice shows as light or dark.
 const theme = ref('light')
 type NavItem = { key: string; label: string; url: string; icon: string }
-const plan = computed(() => ws.plans.value.find((item: any) => item.id === (user.value?.plan || 'free')) as any)
+const plan = computed(
+  () => ws.plans.value.find((item: any) => item.id === (user.value?.plan || 'free')) as any,
+)
 // Every plan keeps the same number of saved workflows. The menu still reads it
 // from the plan, so a cap set to zero hides a page that could save nothing.
 const hasWorkflows = computed(() => Number(plan.value?.limits?.saved_workflows || 0) > 0)
 const workNav = computed<NavItem[]>(() => [
   { key: 'home', label: 'navHome', url: '/app', icon: 'home' },
-  ...(studio.config.value ? [{ key: 'create', label: 'navCreate', url: '/app/create', icon: 'sparkle' }] : []),
+  ...(studio.config.value
+    ? [{ key: 'create', label: 'navCreate', url: '/app/create', icon: 'sparkle' }]
+    : []),
   { key: 'tools', label: 'navTools', url: '/app/tools', icon: 'tools' },
   ...(studio.config.value ? [{ key: 'editor', label: 'editor', url: '/app/editor', icon: 'edit' }] : []),
   { key: 'tasks', label: 'navTasks', url: '/app/jobs', icon: 'tasks' },
@@ -45,8 +51,9 @@ const current = (url: string) =>
   url === '/app' ? route.path === path(url) : route.path.startsWith(path(url))
 const moreActive = computed(() => moreNav.value.some((item) => current(item.url)))
 watch(user, (value) => {
-  if (value) studio.load()
-  else studio.config.value = null
+  // A saved profile is a new `user` too; a deep link has what it needs from the first read.
+  if (value && !(editorFrame.onDocument.value && studio.config.value)) studio.load()
+  else if (!value) studio.config.value = null
 })
 const title = computed(() => {
   const item = [...workNav.value, ...accountNav.value]
@@ -66,6 +73,16 @@ const initial = computed(() => (user.value?.display_name || 'P').slice(0, 1).toU
 // or the mini-app sign-in is still settling, the app frame stays up so a
 // returning customer never sees the frame change under them.
 const framed = computed(() => isApp.value && (!!user.value || !sessionReady.value || miniAppBusy.value))
+// A document on a phone, or inside Telegram, has the whole screen and scrolls only its pages.
+const bare = computed(() => framed.value && editorFrame.bare.value)
+watch(bare, (on) => document.documentElement.classList.toggle('editor-bare', on), { immediate: true })
+// The frame shows no plans, so a deep link does not wait on them, but the app's menus do once it leaves.
+let plansWaiting = false
+watch(bare, (on) => {
+  if (on || !plansWaiting) return
+  plansWaiting = false
+  void ws.loadPlans().catch(() => {})
+})
 const more = ref<HTMLDialogElement | null>(null)
 function openMore() {
   more.value?.showModal()
@@ -104,12 +121,11 @@ async function changeLocale(event: Event) {
   await navigateTo(localePath(value))
 }
 async function signInMiniApp() {
-  const telegram = (window as any).Telegram?.WebApp
-  if (!telegram?.initData || user.value || miniAppBusy.value) return
+  if (!telegram.initData() || user.value || miniAppBusy.value) return
   miniAppError.value = ''
   miniAppBusy.value = true
   try {
-    await auth.startRequest('/auth/telegram/miniapp', { init_data: telegram.initData })
+    await auth.startRequest('/auth/telegram/miniapp', { init_data: telegram.initData() })
     await auth.refreshAccount()
     telegram.ready()
     telegram.expand()
@@ -125,7 +141,7 @@ onMounted(async () => {
     saved = localStorage.getItem('pdf-master-theme') || ''
   } catch {}
   // Inside Telegram, a customer who never chose a theme gets Telegram's own.
-  applyTheme(saved || (window as any).Telegram?.WebApp?.colorScheme || 'light')
+  applyTheme(saved || telegram.colorScheme() || 'light')
   // Settings changes the theme too; the toggle follows whatever is on screen.
   new MutationObserver(() => {
     theme.value = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light'
@@ -137,13 +153,17 @@ onMounted(async () => {
     } catch {}
   }
   ws.restoreDraft()
-  const telegram = (window as any).Telegram?.WebApp
-  if (telegram) {
-    telegram.ready()
-    telegram.expand()
-  }
-  if (telegram?.initData && !user.value) await signInMiniApp()
-  await Promise.allSettled([ws.loadCatalog(), ws.loadPlans(), ws.loadAccount(), studio.load()])
+  telegram.ready()
+  telegram.expand()
+  if (telegram.initData() && !user.value) await signInMiniApp()
+  // The switch for the frame lives in the studio's config, so a document reads that once.
+  const config = editorFrame.onDocument.value && studio.config.value ? null : studio.load()
+  // Decided now, as everything else here waits on it: only the frame expected on a document holds the plans back.
+  if (bare.value) {
+    await Promise.allSettled([ws.loadCatalog(), ws.loadAccount(), config])
+    if (bare.value) plansWaiting = true
+    else await ws.loadPlans().catch(() => {})
+  } else await Promise.allSettled([ws.loadCatalog(), ws.loadPlans(), ws.loadAccount(), config])
   if (user.value) {
     try {
       const pending = JSON.parse(sessionStorage.getItem('pdf-master-pending-job') || 'null')
@@ -172,7 +192,7 @@ watch(
 <template>
   <a class="skip-link" href="#main-content">{{ t('skipToContent') }}</a>
   <div :class="framed ? 'app-shell' : 'public-shell'">
-    <aside v-if="framed" class="sidebar">
+    <aside v-if="framed && !bare" class="sidebar">
       <div class="sidebar-inner">
         <NuxtLink :to="path('/app')" class="brand sidebar-brand"><BrandLogo /></NuxtLink>
         <nav class="side-nav" :aria-label="t('navLabel')">
@@ -201,13 +221,14 @@ watch(
         <NuxtLink v-if="user" :to="path('/app/settings')" class="sidebar-profile"
           ><span class="avatar" aria-hidden="true">{{ initial }}</span
           ><span class="profile-text"
-            ><strong>{{ user.display_name }}</strong><small>{{ t(user.plan || 'free') }}</small></span
+            ><strong>{{ user.display_name }}</strong
+            ><small>{{ t(user.plan || 'free') }}</small></span
           ><AppIcon name="chevron" :size="16"
         /></NuxtLink>
       </div>
     </aside>
     <div class="app-body">
-      <header v-if="framed" class="app-topbar">
+      <header v-if="framed && !bare" class="app-topbar">
         <NuxtLink :to="path('/app')" class="brand mobile-brand"><BrandLogo /></NuxtLink>
         <p class="topbar-title">{{ title }}</p>
         <div class="header-actions">
@@ -236,7 +257,7 @@ watch(
           </button>
         </div>
       </header>
-      <header v-else class="public-topbar">
+      <header v-else-if="!framed" class="public-topbar">
         <NuxtLink :to="path()" class="brand"><BrandLogo /></NuxtLink>
         <nav class="public-nav">
           <NuxtLink :to="path('/tools')">{{ t('navTools') }}</NuxtLink
@@ -283,7 +304,7 @@ watch(
         </nav>
       </footer>
     </div>
-    <nav v-if="framed && user" class="mobile-nav" :aria-label="t('navLabel')">
+    <nav v-if="framed && user && !bare" class="mobile-nav" :aria-label="t('navLabel')">
       <NuxtLink
         v-for="item in phoneNav"
         :key="item.key"
@@ -298,7 +319,7 @@ watch(
       </button>
     </nav>
     <dialog
-      v-if="framed && user"
+      v-if="framed && user && !bare"
       ref="more"
       class="more-sheet"
       :aria-label="t('navMore')"
@@ -342,7 +363,8 @@ watch(
         <div class="sheet-account">
           <span class="avatar" aria-hidden="true">{{ initial }}</span
           ><span class="profile-text"
-            ><strong>{{ user.display_name }}</strong><small>{{ t(user.plan || 'free') }}</small></span
+            ><strong>{{ user.display_name }}</strong
+            ><small>{{ t(user.plan || 'free') }}</small></span
           ><button class="button quiet small" type="button" @click="signOut">
             <AppIcon name="logout" :size="16" />{{ t('logout') }}
           </button>

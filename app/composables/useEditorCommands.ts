@@ -163,10 +163,26 @@ export const COMMAND_SHAPE: Record<CommandType, Shape> = {
   // In the contract ahead of their tools: nothing offers these yet, so the labels are the nearest there are.
   edit_text: { positional: true, box: true, image: false, icon: 'replace', labelKey: 'replaceText' },
   whiteout: { positional: true, box: true, image: false, icon: 'type', labelKey: 'addText' },
-  rotate_page: { positional: false, box: false, image: false, icon: 'rotate', labelKey: 'editorRotateRight' },
-  delete_page: { positional: false, box: false, image: false, icon: 'trash', labelKey: 'editorModePages' },
-  reorder: { positional: false, box: false, image: false, icon: 'reorder', labelKey: 'editorModePages' },
+  rotate_page: {
+    positional: false,
+    box: false,
+    image: false,
+    icon: 'rotate',
+    labelKey: 'editorKindPageTurn',
+  },
+  delete_page: {
+    positional: false,
+    box: false,
+    image: false,
+    icon: 'trash',
+    labelKey: 'editorKindPageRemoved',
+  },
+  reorder: { positional: false, box: false, image: false, icon: 'reorder', labelKey: 'editorKindPageOrder' },
 }
+
+/** A page's own changes: no mark on the paper, applied after every mark, in the pages as uploaded. */
+export const PAGE_TYPES: readonly CommandType[] = ['rotate_page', 'delete_page', 'reorder']
+export const isPageCommand = (command: { type: CommandType }) => PAGE_TYPES.includes(command.type)
 
 /**
  * Tools offered on the canvas, in tool-strip order.
@@ -320,6 +336,109 @@ export function renumberInputs(commands: ClientCommand[], kept: boolean[]): Clie
   })
 }
 
+/* ------------------------------------------------- the phone's object form */
+
+interface Area {
+  width: number
+  height: number
+}
+
+/** The corners a mark's own footprint spans: its box, or the reach of its line. */
+function extent(command: ClientCommand) {
+  if (command.points?.length) {
+    const xs = command.points.map(([x]) => x)
+    const ys = command.points.map(([, y]) => y)
+    return { left: Math.min(...xs), top: Math.min(...ys), right: Math.max(...xs), bottom: Math.max(...ys) }
+  }
+  const left = command.x ?? 0
+  const top = command.y ?? 0
+  return { left, top, right: left + (command.width ?? 0), bottom: top + (command.height ?? 0) }
+}
+
+/**
+ * A move as one change, held on the page whole. A line's points are clamped one by
+ * one later, which would squash it against an edge; so the step itself stops there.
+ */
+export function moveBy(command: ClientCommand, dx: number, dy: number, page: Area): Partial<ClientCommand> {
+  if (command.points?.length) {
+    const { left, top, right, bottom } = extent(command)
+    const x = Math.min(Math.max(dx, -left), page.width - right)
+    const y = Math.min(Math.max(dy, -top), page.height - bottom)
+    return { points: command.points.map(([px, py]) => [quantize(px + x), quantize(py + y)]) }
+  }
+  return { x: quantize((command.x ?? 0) + dx), y: quantize((command.y ?? 0) + dy) }
+}
+
+/** The size a mark is read at: its text, its box, or its line's reach. */
+export function sizeOf(command: ClientCommand): number {
+  if (command.type === 'add_text') return command.font_size ?? COMMAND_DEFAULTS.fontSize
+  const { left, right } = extent(command)
+  return right - left
+}
+
+/**
+ * Larger or smaller about the mark's middle, as far as the page allows. Text takes
+ * whole sizes, as a step of a tenth would round back to where it was at the small end.
+ */
+export function scaleBy(command: ClientCommand, factor: number, page: Area): Partial<ClientCommand> | null {
+  if (command.type === 'add_text') {
+    const now = command.font_size ?? COMMAND_DEFAULTS.fontSize
+    let next = Math.round(now * factor)
+    if (next === now) next += factor > 1 ? 1 : -1
+    next = Math.min(LIMITS.fontSize.max, Math.max(LIMITS.fontSize.min, next))
+    return next === now ? null : { font_size: next }
+  }
+  const { left, top, right, bottom } = extent(command)
+  const width = right - left
+  const height = bottom - top
+  if (width <= 0 && height <= 0) return null
+  // No smaller than a few millimetres, no larger than the page.
+  const most = Math.min(width ? page.width / width : Infinity, height ? page.height / height : Infinity)
+  const least = Math.max(width ? 8 / width : 0, height ? 8 / height : 0)
+  const scale = Math.min(most, Math.max(least, factor))
+  if (Math.abs(scale - 1) < 0.001) return null
+  const middleX = (left + right) / 2
+  const middleY = (top + bottom) / 2
+  if (command.points?.length) {
+    const points = command.points.map(([x, y]) => [
+      middleX + (x - middleX) * scale,
+      middleY + (y - middleY) * scale,
+    ])
+    const shift = (low: number, high: number, limit: number) =>
+      low < 0 ? -low : high > limit ? limit - high : 0
+    const xs = points.map(([x]) => x!)
+    const ys = points.map(([, y]) => y!)
+    const dx = shift(Math.min(...xs), Math.max(...xs), page.width)
+    const dy = shift(Math.min(...ys), Math.max(...ys), page.height)
+    return { points: points.map(([x, y]) => [quantize(x! + dx), quantize(y! + dy)] as [number, number]) }
+  }
+  const nextWidth = width * scale
+  const nextHeight = height * scale
+  return {
+    x: quantize(middleX - nextWidth / 2),
+    y: quantize(middleY - nextHeight / 2),
+    width: quantize(nextWidth),
+    height: quantize(nextHeight),
+  }
+}
+
+/** A tick drawn as a line, as the one font the engine has holds no tick mark. */
+export function tickPoints(x: number, y: number, size = 14): [number, number][] {
+  const left = x - size / 2
+  const top = y - size / 2
+  return [
+    [quantize(left), quantize(top + size * 0.55)],
+    [quantize(left + size * 0.38), quantize(top + size)],
+    [quantize(left + size), quantize(top)],
+  ]
+}
+
+/** Today on this device, as forms in Uzbekistan and Russia write it, whatever the language. */
+export function todayText(now = new Date()): string {
+  const pad = (value: number) => String(value).padStart(2, '0')
+  return `${pad(now.getDate())}.${pad(now.getMonth() + 1)}.${now.getFullYear()}`
+}
+
 export type IssueCode =
   | 'editorIssueEmptyText'
   | 'editorIssueNoImage'
@@ -439,5 +558,10 @@ export function useEditorCommands() {
     payloadBudget,
     quantize,
     newCommandId,
+    moveBy,
+    scaleBy,
+    sizeOf,
+    tickPoints,
+    todayText,
   }
 }

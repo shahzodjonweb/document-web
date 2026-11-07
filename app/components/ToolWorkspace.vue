@@ -328,11 +328,11 @@ function onDrop(event: DragEvent) {
               @click="openPreview(file.id)"
               :aria-label="t('previewFile', { name: file.name || file.filename || 'PDF' })"
             >
-              <img
+              <PreviewImage
                 :src="file.preview_url"
-                alt=""
-                loading="lazy"
-                @error="thumbnailErrors[file.id] = true"
+                lazy
+                quiet
+                @failed="thumbnailErrors[file.id] = true"
               /></button
             ><span v-else class="file-tile"
               ><AppIcon :name="isImages ? 'image' : 'file'" :size="22"
@@ -414,11 +414,11 @@ function onDrop(event: DragEvent) {
               <AppIcon name="x" :size="18" />
             </button>
           </div>
-          <img
+          <PreviewImage
             v-if="!previewError"
             :src="`${previewFile.preview_url}?page=${previewPage}`"
             :alt="`${previewFile.name} · ${t('pageOf', { page: previewPage, count: previewFile.page_count || 1 })}`"
-            @error="previewError = true"
+            @failed="previewError = true"
           />
           <p v-else class="preview-error" role="status">{{ t('previewUnavailable') }}</p>
           <p class="preview-note"><AppIcon name="shield" :size="14" />{{ t('previewFree') }}</p>

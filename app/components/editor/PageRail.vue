@@ -1,6 +1,7 @@
 <script setup lang="ts">
 /** Page thumbnails. Rendered locally, so they cost no preview requests. */
-const props = defineProps<{ pageCount: number; current: number }>()
+// `pages` is the order the new frame shows them in, as uploaded numbers; by default every page in turn.
+const props = defineProps<{ pageCount: number; current: number; pages?: number[] }>()
 const emit = defineEmits<{ go: [page: number] }>()
 
 const { t } = useLocale()
@@ -8,6 +9,7 @@ const session = useEditorSession()
 const render = useEditorRender()
 
 const thumbnails = ref<Record<number, string>>({})
+const listed = computed(() => props.pages ?? Array.from({ length: props.pageCount }, (_, index) => index + 1))
 
 const changesOn = (page: number) => session.commands.value.filter((command) => command.page === page).length
 
@@ -42,20 +44,20 @@ function observe(element: Element | null, page: number) {
 <template>
   <nav class="editor-rail" :aria-label="t('editorPagesPanel')" data-testid="editor-rail">
     <button
-      v-for="page in pageCount"
+      v-for="(page, index) in listed"
       :key="page"
       :ref="(element) => observe(element as Element | null, page)"
       type="button"
       class="editor-rail-item"
       :class="{ active: page === current }"
       :aria-current="page === current ? 'true' : undefined"
-      :aria-label="t('editorPageLabel', { page, count: pageCount })"
+      :aria-label="t('editorPageLabel', { page: index + 1, count: listed.length })"
       @click="emit('go', page)"
     >
       <span class="editor-rail-thumb">
         <img v-if="thumbnails[page]" :src="thumbnails[page]" alt="" />
       </span>
-      <small>{{ page }}</small>
+      <small>{{ index + 1 }}</small>
       <span v-if="changesOn(page)" class="count-tag">{{ changesOn(page) }}</span>
     </button>
   </nav>

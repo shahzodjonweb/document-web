@@ -7,6 +7,8 @@
  * and whenever the document in the URL changes.
  */
 import { COMMAND_FEATURE, isCommandType, type CommandType } from '~/composables/useEditorCommands'
+import { turnedSize } from '~/composables/useEditorPageOrder'
+import type { Refusal } from '~/composables/useEditorSession'
 
 const props = defineProps<{ documentId?: string }>()
 
@@ -17,6 +19,9 @@ const session = useEditorSession()
 const render = useEditorRender()
 const metrics = useEditorFontMetrics()
 const board = useEditorPages()
+const frame = useEditorFrame()
+const studio = useStudio()
+const pageOrder = useEditorPageOrder()
 
 const stage = ref<HTMLElement>()
 const railOpen = ref(true)
@@ -25,6 +30,21 @@ const currentPage = ref(1)
 const doc = session.doc
 const pageCount = computed(() => doc.value?.file.page_count ?? 0)
 const pages = computed(() => doc.value?.pages ?? [])
+/**
+ * The new frame shows the file as it will be made: its pages in their new order,
+ * turned, without the removed ones. Marks keep the numbers of the pages as uploaded.
+ */
+const shown = computed(() =>
+  pageOrder.kept.value
+    .filter((page) => pages.value[page - 1])
+    .map((page) => {
+      const size = pages.value[page - 1]!
+      const turn = pageOrder.turnOf(page)
+      return { page, size, turn, box: turnedSize(size, turn) }
+    }),
+)
+/** Why the bot's link could not open its file, said as a state of its own rather than the launcher. */
+const refusal = ref<Refusal | null>(null)
 
 /**
  * Fit-width uses the widest page so nothing overflows horizontally. A phone has
@@ -34,7 +54,9 @@ function applyFit() {
   if (session.fitMode.value === 'custom') return
   const element = stage.value
   if (!element || !pages.value.length) return
-  const widest = Math.max(...pages.value.map((page) => page.width))
+  const widest = frame.v2.value
+    ? Math.max(...shown.value.map((item) => item.box.width))
+    : Math.max(...pages.value.map((page) => page.width))
   const available = element.clientWidth - (window.matchMedia('(max-width: 760px)').matches ? 8 : 48)
   // A poster fits too: as low as a page can be drawn, where the zoom buttons stop at 25 %.
   if (available > 0 && widest > 0) session.zoom.value = Math.min(2, Math.max(0.05, available / widest))
@@ -45,6 +67,8 @@ function applyFit() {
 // because the fit cannot wait for the file: on a phone a page wider than the
 // screen would scroll sideways for the whole download.
 watch([session.fitMode, stage, () => pages.value.length], applyFit)
+// A page turned a quarter is as wide as it was tall.
+watch(() => shown.value.map((item) => item.box.width).join(), applyFit)
 
 /**
  * The bot links here as `?file_id=…` after a file has been sent to the chat.
@@ -52,6 +76,7 @@ watch([session.fitMode, stage, () => pages.value.length], applyFit)
  */
 async function openLinkedFile() {
   const [id] = linkedFileIds(route.query.file_id)
+  refusal.value = null
   if (!id || props.documentId) return
   try {
     const created = await ws.api<{ id: string }>('/editor/documents', {
@@ -59,9 +84,25 @@ async function openLinkedFile() {
       body: { file_id: id },
     })
     await navigateTo(path(`/app/editor/${created.id}`))
-  } catch {
-    // Expired, deleted, encrypted or not ours: fall back to the launcher.
+  } catch (e) {
+    // Expired, deleted, encrypted or not ours. Today's editor falls back to the launcher;
+    // the new frame says which, with the way on where there is one.
+    refusal.value = session.refusalOf(e)
   }
+}
+
+/** Until the switch answers, which way the file is read is not known yet. */
+function switchKnown() {
+  if (studio.loaded.value) return Promise.resolve()
+  return new Promise<void>((resolve) => {
+    const timer = setTimeout(done, 5000)
+    const stop = watch(studio.loaded, (loaded) => loaded && done())
+    function done() {
+      clearTimeout(timer)
+      stop()
+      resolve()
+    }
+  })
 }
 
 async function start() {
@@ -73,6 +114,8 @@ async function start() {
   void metrics.ensure()
   const current = session.doc.value
   if (!current) return
+  // Only a device that last saw the new frame waits to hear: anyone else reads the file at once, as before.
+  if (frame.expected.value) await switchKnown()
   const mode = await render.open(current.file.id)
   if (mode !== 'pdfjs') session.notice.value = t('editorRenderFallback')
   await nextTick()
@@ -104,6 +147,11 @@ onMounted(() => {
 })
 
 watch(() => props.documentId, start)
+// Edit under a result links here with the file; the old editor never did.
+watch(
+  () => route.query.file_id,
+  () => frame.v2.value && !props.documentId && void openLinkedFile(),
+)
 
 // Page organisation always starts from the document as it stands now.
 watch(
@@ -156,6 +204,8 @@ function onKeydown(event: KeyboardEvent) {
     event.key.toLowerCase() === letter || event.code === `Key${letter.toUpperCase()}`
   if (meta && pressed('z')) {
     event.preventDefault()
+    // A sheet that waits for an answer has the screen: a step undone under it, as under Review, changes what it says.
+    if (frame.v2.value && document.querySelector('dialog[open][data-modal]')) return
     if (event.shiftKey) session.redo()
     else session.undo()
   } else if (meta && pressed('s')) {
@@ -181,14 +231,21 @@ function onScroll() {
   const element = stage.value
   if (!element) return
   const middle = element.scrollTop + element.clientHeight / 2
-  const frames = element.querySelectorAll<HTMLElement>('[data-page]')
+  // A turned page sits inside its slot, which is what takes the room on the stage.
+  const frames = element.querySelectorAll<HTMLElement>(frame.v2.value ? '[data-page-slot]' : '[data-page]')
   for (const frame of frames) {
     if (frame.offsetTop <= middle && frame.offsetTop + frame.offsetHeight > middle) {
-      currentPage.value = Number(frame.dataset.page)
+      currentPage.value = Number(frame.dataset.page ?? frame.dataset.pageSlot)
       return
     }
   }
 }
+
+// A new order, or the stage back from Pages, puts a different page on screen.
+watch(
+  () => [shown.value.map((item) => item.page).join(), session.mode.value],
+  () => void nextTick(onScroll),
+)
 
 /** A refused save says why in the action bar, which stays on screen on a phone. Pages mode has none. */
 const bannerError = computed(
@@ -203,7 +260,68 @@ onBeforeRouteLeave(async () => {
 </script>
 
 <template>
-  <EditorLauncher v-if="!documentId" />
+  <EditorOpenRefusal v-if="!documentId && refusal && frame.v2.value" :refusal="refusal" />
+  <EditorLauncher v-else-if="!documentId" />
+  <!-- On a device that last saw the new frame, the switch's answer decides it: swapping under someone's work would be worse than a moment's wait. -->
+  <p
+    v-else-if="!frame.known.value && frame.expected.value"
+    class="editor-stage-status"
+    role="status"
+    data-testid="editor-opening"
+  >
+    <AppIcon name="loader" class="spin" :size="20" />{{ t('editorPreparingPages') }}
+  </p>
+  <EditorFrame
+    v-else-if="frame.v2.value"
+    :page-count="pageCount"
+    :current-page="currentPage"
+    :locked-count="lockedCommands.length"
+    @go="goToPage"
+    @remove-locked="removeLocked"
+  >
+    <div
+      ref="stage"
+      class="editor-stage"
+      role="region"
+      tabindex="0"
+      :aria-label="t('preview')"
+      @scroll.passive="onScroll"
+    >
+      <p v-if="render.mode.value === 'loading'" class="editor-stage-status" role="status">
+        <AppIcon name="loader" class="spin" :size="20" />{{ t('editorPreparingPages') }}
+      </p>
+      <div
+        v-for="(item, index) in shown"
+        :key="item.page"
+        class="editor-page-slot"
+        :data-page-slot="item.page"
+        :style="{
+          width: `${item.box.width * session.zoom.value}px`,
+          aspectRatio: `${item.box.width} / ${item.box.height}`,
+        }"
+      >
+        <EditorPageCanvas
+          :page="item.page"
+          :page-width="item.size.width"
+          :page-height="item.size.height"
+          :page-count="shown.length"
+          :position="index + 1"
+          :zoom="session.zoom.value"
+          :file-id="doc!.file.id"
+          :turn="item.turn"
+          :early="index === 0"
+        >
+          <EditorMarkLayer
+            :page="item.page"
+            :page-width="item.size.width"
+            :page-height="item.size.height"
+            :zoom="session.zoom.value"
+            :turn="item.turn"
+          />
+        </EditorPageCanvas>
+      </div>
+    </div>
+  </EditorFrame>
   <div v-else class="editor-shell" :class="{ 'rail-open': railOpen }">
     <div class="editor-head">
       <NuxtLink :to="path('/app/editor')" class="back-link"

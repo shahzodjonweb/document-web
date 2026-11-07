@@ -32,6 +32,8 @@ export interface StudioConfig {
   default_pages?: number
   [key: string]: any
 }
+/** The app and a screen can ask together; one answer serves both. */
+let loading: Promise<void> | null = null
 export function useStudio() {
   const ws = useWorkspace()
   const config = useState<StudioConfig | null>('studio-config', () => null)
@@ -42,13 +44,17 @@ export function useStudio() {
       loaded.value = true
       return
     }
-    try {
-      config.value = await ws.api('/studio/config')
-    } catch {
-      config.value = null
-    } finally {
-      loaded.value = true
-    }
+    loading ??= (async () => {
+      try {
+        config.value = await ws.api('/studio/config')
+      } catch {
+        config.value = null
+      } finally {
+        loaded.value = true
+        loading = null
+      }
+    })()
+    return loading
   }
   const features = computed(() => config.value?.features || config.value?.generation_features || [])
   const localProvider = computed(() => config.value?.provider?.mode === 'local_fixture')

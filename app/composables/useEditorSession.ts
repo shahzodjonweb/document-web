@@ -30,6 +30,37 @@ import { clampCommand, type PageSize } from './useEditorGeometry'
 export type EditorMode = 'edit' | 'pages' | 'redact'
 export type SaveState = 'clean' | 'dirty' | 'saving' | 'saved' | 'failed' | 'paused'
 export type Tool = 'select' | CommandType
+/** Where a send of the stored draft goes: back to the Telegram chat, or to this browser. */
+export type Deliver = 'chat' | 'download'
+
+/** A refusal as the server gave it, for the screen that has a state for each code. */
+export interface Refusal {
+  code: string
+  message: string
+  params: Record<string, any>
+  status?: number
+}
+
+export interface QuoteCost {
+  kind: 'file_task' | 'included' | 'none'
+  left: number | null
+  limit: number | null
+}
+export interface QuoteSummary {
+  changes_by_page: Record<string, number>
+  pages_before: number
+  pages_after: number
+  raster_pages: number[]
+  size_estimate: number
+  kept_until: string
+  cost: QuoteCost
+}
+export interface DraftQuote {
+  id: string
+  expires_at: string
+  affordable?: boolean
+  summary?: QuoteSummary
+}
 
 export interface EditorDocument {
   id: string
@@ -51,6 +82,8 @@ interface Snapshot {
 }
 
 const AUTOSAVE_DELAY = 900
+/** A save the server holds back for a moment, as while a generation runs, goes again after this. */
+const BUSY_RETRY = 2000
 const HISTORY_LIMIT = 50
 const COALESCE_WINDOW = 500
 const DUPLICATE_OFFSET = 12
@@ -125,8 +158,17 @@ export function useEditorSession() {
   const submissionPending = useState('editor-submission-pending', () => false)
   const canUndo = useState('editor-can-undo', () => false)
   const canRedo = useState('editor-can-redo', () => false)
+  /**
+   * A send in flight: its job reads the draft when it starts, and a draft changed
+   * before then fails it with `version_conflict`. So nothing changes meanwhile.
+   */
+  const held = useState('editor-held', () => false)
+  /** Goes up with every change to the history, so an offer to undo one step can tell it is still the last. */
+  const steps = useState('editor-steps', () => 0)
 
   const openDocument = () => documentState(doc.value?.id ?? '')
+  /** The open document's state, if it has one, without making one: it changes when the document is left or opened again. */
+  const openedState = (): object | null => documents.get(doc.value?.id ?? '') ?? null
 
   const isBusy = (task: string) => busy.value.includes(task)
   function begin(task: string) {
@@ -191,6 +233,7 @@ export function useEditorSession() {
     const { past, future } = openDocument()
     canUndo.value = past.length > 0
     canRedo.value = future.length > 0
+    steps.value += 1
   }
 
   /**
@@ -198,10 +241,14 @@ export function useEditorSession() {
    * label within half a second collapse into one undo entry, so a drag or a
    * burst of typing is a single step. `amend` folds a change into the step
    * before it, however long ago that was, and leaves no step at all when the
-   * two together changed nothing.
+   * two together changed nothing. False when nothing changed, as while a send holds the draft.
    */
   function mutate(label: string, apply: () => void, options: { silent?: boolean; amend?: boolean } = {}) {
-    if (options.silent) return apply()
+    if (held.value) return false
+    if (options.silent) {
+      apply()
+      return true
+    }
     const { past, future } = openDocument()
     const previous = past[past.length - 1]
     const now = Date.now()
@@ -222,6 +269,7 @@ export function useEditorSession() {
       past.pop()
     syncHistoryFlags()
     markDirty()
+    return true
   }
 
   // structuredClone cannot handle Vue proxies directly in every browser.
@@ -237,6 +285,7 @@ export function useEditorSession() {
   }
 
   function undo() {
+    if (held.value) return
     const { past, future } = openDocument()
     const snapshot = past.pop()
     if (!snapshot) return
@@ -255,6 +304,7 @@ export function useEditorSession() {
   }
 
   function redo() {
+    if (held.value) return
     const { past, future } = openDocument()
     const snapshot = future.pop()
     if (!snapshot) return
@@ -279,6 +329,8 @@ export function useEditorSession() {
     }
     if (saveState.value === 'paused') return
     saveState.value = 'dirty'
+    // A send holds the draft until its job has read it: this goes once it lets go.
+    if (held.value) return
     const state = openDocument()
     if (state.saveTimer !== null) clearTimeout(state.saveTimer)
     state.saveTimer = window.setTimeout(() => {
@@ -293,6 +345,8 @@ export function useEditorSession() {
    * the chooser to say beside the button: the top of the screen is out of sight on a phone.
    */
   async function uploadAsset(file: File, refused: (why: string) => void): Promise<number | null> {
+    // Nothing new goes into a draft a send holds; one already on its way lands and waits.
+    if (held.value) return null
     const state = openDocument()
     begin('asset')
     error.value = ''
@@ -309,8 +363,9 @@ export function useEditorSession() {
         refused(t('editorImageRefused'))
         return null
       }
-      // Finished after a `reset`, it is no image of what is open now.
-      if (openDocument() !== state) return null
+      // Finished after a `reset`, or while one is leaving the document, it is no image of what is open
+      // now: the draft is on its way out, and a change to it now would not be saved.
+      if (openDocument() !== state || isBusy('load')) return null
       assets.value = [...assets.value, asset]
       // Attaching an image changes input_ids, which only a save persists.
       markDirty()
@@ -323,7 +378,13 @@ export function useEditorSession() {
     }
   }
 
-  function addCommand(type: CommandType, at: { page: number; x?: number; y?: number }) {
+  /** `extra` is what a placing tool knows better than the seed: the words, the size, the line. */
+  function addCommand(
+    type: CommandType,
+    at: { page: number; x?: number; y?: number },
+    extra: Partial<Omit<ClientCommand, '_id' | 'type'>> = {},
+  ) {
+    if (held.value) return null
     if (budget.value.full) {
       error.value = t('editorBudgetFull')
       return null
@@ -332,7 +393,7 @@ export function useEditorSession() {
       // With nothing attached yet the command deliberately points at 0, which
       // `commandIssues` reports as "choose an image" instead of letting the
       // server reject an index that does not exist.
-      seedCommand(type, { ...at, inputIndex: assets.value.length ? 1 : 0 }),
+      { ...seedCommand(type, { ...at, inputIndex: assets.value.length ? 1 : 0 }), ...extra },
       pageSize(at.page),
     )
     // Placing is one step each time, however quickly the next one follows.
@@ -346,7 +407,7 @@ export function useEditorSession() {
   /** A copy of every field, a little down and to the right, on top of the others. */
   function duplicateCommand(id: string) {
     const source = commands.value.find((command) => command._id === id)
-    if (!source) return null
+    if (!source || held.value) return null
     if (budget.value.full) {
       error.value = t('editorBudgetFull')
       return null
@@ -363,9 +424,15 @@ export function useEditorSession() {
     return command
   }
 
-  function patchCommand(id: string, patch: Partial<ClientCommand>, label = 'edit', mode: 'move' | 'resize' = 'move') {
+  function patchCommand(
+    id: string,
+    patch: Partial<ClientCommand>,
+    label = 'edit',
+    mode: 'move' | 'resize' = 'move',
+    options: { amend?: boolean } = {},
+  ) {
     const current = commands.value.find((command) => command._id === id)
-    mutate(
+    return mutate(
       label,
       () => {
         commands.value = commands.value.map((command) => {
@@ -379,13 +446,49 @@ export function useEditorSession() {
       // The first words of a mark belong to placing it, and every point of a line
       // does: one Undo takes it all away, rather than leaving an empty mark or part
       // of a line behind.
-      { amend: 'points' in patch || ('text' in patch && !current?.text) },
+      { amend: options.amend ?? ('points' in patch || ('text' in patch && !current?.text)) },
     )
+  }
+
+  /**
+   * A mark placed before its picture finished uploading points at 0 until now. It
+   * takes its picture everywhere it is, Undo's copies too, so no step brings back
+   * a mark that has none; nothing else of that step changes.
+   */
+  function attachInput(id: string, index: number) {
+    const { past, future } = openDocument()
+    const fix = (list: ClientCommand[]) =>
+      list.map((command) =>
+        command._id === id && !command.input_index ? { ...command, input_index: index } : command,
+      )
+    for (const snapshot of [...past, ...future]) snapshot.commands = fix(snapshot.commands)
+    commands.value = fix(commands.value)
+    markDirty()
+  }
+
+  /** Drawn under or over the marks it overlaps on its page: the engine draws them in order. */
+  function restack(id: string, direction: -1 | 1) {
+    const list = commands.value
+    const index = list.findIndex((command) => command._id === id)
+    const page = list[index]?.page
+    if (index < 0 || page === undefined) return false
+    // Only another mark on that page: a page's own changes keep their place.
+    const mark = (command: ClientCommand) =>
+      command.page === page && (COMMAND_SHAPE[command.type].positional || command.type === 'draw')
+    let other = index + direction
+    while (other >= 0 && other < list.length && !mark(list[other]!)) other += direction
+    if (other < 0 || other >= list.length) return false
+    mutate(`restack:${id}`, () => {
+      const next = [...list]
+      ;[next[index], next[other]] = [next[other]!, next[index]!]
+      commands.value = next
+    })
+    return true
   }
 
   /** `amend` is for dropping an empty mark, which should leave nothing to undo but the steps before it. */
   function removeCommands(ids: string[], options: { amend?: boolean } = {}) {
-    mutate(
+    return mutate(
       `remove:${ids.join()}`,
       () => {
         commands.value = commands.value.filter((command) => !ids.includes(command._id))
@@ -411,7 +514,7 @@ export function useEditorSession() {
    */
   async function save(): Promise<boolean> {
     const current = doc.value
-    if (!current || saveState.value === 'paused') return false
+    if (!current || saveState.value === 'paused' || held.value) return false
     const state = documentState(current.id)
     if (state.saveTimer !== null) {
       clearTimeout(state.saveTimer)
@@ -477,10 +580,22 @@ export function useEditorSession() {
     } catch (e: any) {
       if (documents.get(current.id) !== state) return false
       if (e?.data?.error?.code === 'version_conflict') return onVersionConflict(current, state, e)
+      // Held back while a generation runs, not refused: it goes again by itself, and says nothing.
+      if (e?.data?.error?.code === 'generation_running') return retryLater(state)
       // Not an answer from the server itself, so it may still have landed.
       if (!e?.data?.error) state.unanswered.add(sending)
       return saveRefused(e)
     }
+  }
+
+  function retryLater(state: DocumentState) {
+    saveState.value = 'dirty'
+    if (state.saveTimer !== null) clearTimeout(state.saveTimer)
+    state.saveTimer = window.setTimeout(() => {
+      state.saveTimer = null
+      void save()
+    }, BUSY_RETRY)
+    return false
   }
 
   /** Any refusal but a conflict is shown, and the next edit tries again: it may be the fix. */
@@ -625,6 +740,7 @@ export function useEditorSession() {
       saveError.value = ''
       notice.value = ''
       submissionPending.value = false
+      held.value = false
       activeTool.value = 'select'
       mode.value = 'edit'
       fitMode.value = 'width'
@@ -653,29 +769,60 @@ export function useEditorSession() {
     return !!issue
   }
 
-  async function review(acceptRasterization = false) {
+  /** A refusal's code, words and parameters; one with no answer from the server is `unanswered`. */
+  function refusalOf(e: any): Refusal {
+    const refused = e?.data?.error
+    return {
+      code: refused?.code || 'unanswered',
+      message: requestError(e),
+      params: refused?.message_params ?? {},
+      status: e?.statusCode || e?.status || e?.response?.status,
+    }
+  }
+
+  /**
+   * Quotes what the server holds. With `deliver` this is a send of the stored draft:
+   * the answer carries its `summary`, and a refusal comes back to say rather than
+   * landing in `error`, as the Review sheet has a state for each code. Without it,
+   * today's editor's quote, whose marks travel with it.
+   */
+  async function review(
+    acceptRasterization = false,
+    deliver?: Deliver,
+  ): Promise<DraftQuote | Refusal | null> {
     const current = doc.value
-    if (!current || isBusy('quote') || submissionPending.value || refusedForIssues()) return
+    if (!current || isBusy('quote') || submissionPending.value) return null
+    if (!deliver && refusedForIssues()) return null
     begin('quote')
-    error.value = ''
+    if (!deliver) error.value = ''
     try {
       if (saveState.value !== 'saved' && saveState.value !== 'clean') {
         const ok = await save()
-        if (!ok) return
+        if (!ok)
+          return {
+            code: saveState.value === 'paused' ? 'version_conflict' : 'not_saved',
+            message: '',
+            params: {},
+          }
       }
       const fresh = doc.value
-      if (!fresh) return
+      if (!fresh) return null
       const { id, version } = fresh
-      const made = await ws.api(`/editor/documents/${id}/quote`, {
+      const made = await ws.api<DraftQuote>(`/editor/documents/${id}/quote`, {
         method: 'POST',
-        body: { version, accept_rasterization: acceptRasterization },
+        body: deliver
+          ? { version, deliver, accept_rasterization: acceptRasterization }
+          : { version, accept_rasterization: acceptRasterization },
       })
       // A change made meanwhile is not in this quote, and Export would leave it out.
       const unchanged = doc.value?.id === id && doc.value.version === version
-      if (unchanged && (saveState.value === 'saved' || saveState.value === 'clean')) quote.value = made
+      const settled = saveState.value === 'saved' || saveState.value === 'clean'
+      if (unchanged && settled) quote.value = made
+      return unchanged && settled ? made : { code: 'changed_meanwhile', message: '', params: {} }
     } catch (e: any) {
       if (e?.data?.error?.code === 'version_conflict') holdForChoice()
-      error.value = requestError(e)
+      if (!deliver) error.value = requestError(e)
+      return refusalOf(e)
     } finally {
       end('quote')
     }
@@ -731,6 +878,8 @@ export function useEditorSession() {
     assets,
     saveState,
     conflict,
+    held,
+    steps,
     error,
     saveError,
     notice,
@@ -741,6 +890,7 @@ export function useEditorSession() {
     budget,
     issues,
     isBusy,
+    openedState,
     begin,
     end,
     pageSize,
@@ -749,6 +899,8 @@ export function useEditorSession() {
     addCommand,
     duplicateCommand,
     patchCommand,
+    attachInput,
+    restack,
     removeCommands,
     select,
     undo,
@@ -763,6 +915,8 @@ export function useEditorSession() {
     resolveTakeServer,
     resolveKeepMine,
     requestError,
+    refusalOf,
     describeIssue,
+    holdForChoice,
   }
 }

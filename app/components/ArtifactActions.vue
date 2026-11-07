@@ -1,7 +1,26 @@
 <script setup lang="ts">
-const props = defineProps<{ artifact: any }>()
+// `source` is the editor draft this file was sent from, if it was: Edit goes back to it.
+const props = defineProps<{ artifact: any; source?: string }>()
 const { t, path, date } = useLocale()
 const ws = useWorkspace()
+const editorV2 = useEditorV2()
+const telegram = useTelegramApp()
+/**
+ * ✏️ Edit under a PDF, behind the editor's switch: a file sent from the editor
+ * reopens the draft it came from, still undoable; any other opens a new one on it.
+ */
+const editable = computed(
+  () =>
+    editorV2.value &&
+    props.artifact.mime_type === 'application/pdf' &&
+    !props.artifact.encrypted &&
+    !!(props.source || props.artifact.file_id),
+)
+const editLink = computed(() =>
+  path(props.source ? `/app/editor/${props.source}` : `/app/editor?file_id=${props.artifact.file_id}`),
+)
+/** Inside Telegram the bot is the chat this app was opened from. */
+const inChat = computed(() => editorV2.value && telegram.isMiniApp.value)
 const share = ref<any>(null)
 const copied = ref(false)
 const busy = ref(false)
@@ -60,6 +79,9 @@ async function deliver() {
   <div class="artifact-secondary">
     <span v-if="artifact.role === 'teacher_key'" class="status-badge"
       ><AppIcon name="lock" :size="12" />{{ t('teacherKey') }}</span
+    ><NuxtLink v-if="editable" :to="editLink" class="text-link" data-testid="artifact-edit">{{
+      t('editorEdit')
+    }}</NuxtLink
     ><button
       v-if="['learner_material', 'public_preview'].includes(artifact.role)"
       class="text-link"
@@ -73,7 +95,9 @@ async function deliver() {
       class="text-link"
       ><AppIcon name="send" :size="15" />{{ t('authLinkTelegram') }}</NuxtLink
     ><button v-else class="text-link" @click="deliver" :disabled="busy || delivered">
-      <AppIcon name="send" :size="15" />{{ t(delivered ? 'sentToBot' : 'sendToBot') }}</button
+      <AppIcon name="send" :size="15" />{{
+        t(delivered ? (inChat ? 'sentToChat' : 'sentToBot') : inChat ? 'sendToChat' : 'sendToBot')
+      }}</button
     ><ErrorBanner v-if="error" :message="error"
       ><NuxtLink v-if="telegramRequired" :to="path('/app/settings')" class="text-link">{{
         t('authSignInMethods')

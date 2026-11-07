@@ -18,7 +18,7 @@ const requestError = (e: any) => e.data?.error?.message || e.data?.message || t(
 const chosenName = computed(() => cv.find(template.value)?.name || t('cvSetupAuto'))
 // A portrait sent in the chat goes only on templates with a place for one.
 const hasPhoto = computed(() => !!draft.value?.options?.portrait_asset_id)
-const telegram = () => (import.meta.client ? (window as any).Telegram?.WebApp : null)
+const telegram = useTelegramApp()
 
 async function load() {
   if (!ws.user.value || !draftId.value) {
@@ -56,8 +56,8 @@ async function save() {
     draft.value = result.draft
     saved.value = true
     // Back to the chat, where the review now names the template.
-    telegram()?.HapticFeedback?.notificationOccurred?.('success')
-    if (telegram()?.initData) setTimeout(() => telegram()?.close(), 700)
+    telegram.haptic('success')
+    if (telegram.isMiniApp.value) setTimeout(telegram.close, 700)
   } catch (e) {
     error.value = requestError(e)
   } finally {

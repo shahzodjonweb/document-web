@@ -763,3 +763,1211 @@
     display: none;
   }
 }
+
+/* ------------------------------------------------------------ editor frame */
+
+/* On a phone, or inside Telegram, the editor has the screen and only its stage
+   scrolls: a page that moves under the finger cannot be placed on. */
+html.editor-bare,
+html.editor-bare body {
+  height: var(--tg-stable-h, 100dvh);
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+html.editor-bare .app-shell {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+html.editor-bare .app-body,
+html.editor-bare .main-content.main-content-wide {
+  height: 100%;
+  padding: 0;
+}
+
+.editor-frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - var(--topbar-height));
+  min-height: 0;
+  background: var(--soft);
+}
+.editor-frame.bare {
+  height: var(--tg-stable-h, 100dvh);
+}
+.editor-frame .icon-button {
+  min-width: 44px;
+  min-height: 44px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.editor-frame .button.small,
+.editor-frame .text-link {
+  min-height: 44px;
+}
+.editor-frame .text-link {
+  min-width: 44px;
+  justify-content: center;
+  flex: none;
+}
+/* Below 16 px, iOS zooms the page on focus. */
+.editor-frame input,
+.editor-frame select,
+.editor-frame textarea {
+  font-size: 16px;
+}
+
+.editor-topbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-height: calc(52px + var(--editor-safe-top, 0px));
+  padding: var(--editor-safe-top, 0px) var(--space-1) 0 var(--space-3);
+  background: var(--surface);
+  border-bottom: 1px solid var(--hairline);
+}
+.editor-topbar:has(> .icon-button:first-child) {
+  padding-left: var(--space-1);
+}
+.editor-topbar > h1 {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font: 600 15px/1.3 var(--font-body);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.editor-topbar-save {
+  flex: none;
+  display: inline-flex;
+  margin: 0 var(--space-1);
+  color: var(--success-ink);
+}
+.editor-topbar-save[data-state='dirty'],
+.editor-topbar-save[data-state='saving'] {
+  color: var(--muted);
+}
+.editor-topbar-save[data-state='failed'],
+.editor-topbar-save[data-state='paused'] {
+  color: var(--danger);
+}
+
+.editor-frame-notices {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  /* A choice between two versions has to fit, and the short phones' text runs to six lines. */
+  max-height: 55%;
+  overflow-y: auto;
+}
+.editor-frame-notices > * {
+  flex: none;
+  align-items: center;
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+  border-width: 0 0 1px;
+  border-radius: 0;
+  font-size: 13px;
+}
+.editor-frame-notices > * > span:not(:only-child) {
+  flex: 1;
+  min-width: 0;
+}
+/* A scan's line: the way on goes under the words, which keep the width they need. */
+.editor-frame-notices > .editor-scan {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  column-gap: var(--space-2);
+}
+.editor-scan > .text-link {
+  grid-column: 2;
+  justify-self: start;
+  min-height: 44px;
+  text-align: start;
+}
+.editor-scan > .icon-button {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+}
+
+.editor-frame-work {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.editor-frame-canvas {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.editor-frame .editor-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  margin: 0;
+  padding: var(--space-3) 4px 18px;
+  border: 0;
+  border-radius: 0;
+}
+.editor-frame .editor-board-panel {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+.editor-page-chip {
+  position: absolute;
+  z-index: 3;
+  top: var(--space-2);
+  left: var(--space-2);
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: var(--shadow-md);
+}
+/* Paper is white in both themes, so the ring around a mark does not follow the theme. */
+.editor-frame .editor-mark.selected,
+.editor-frame .editor-mark:focus-visible {
+  outline-color: var(--page-ring);
+  box-shadow: 0 0 0 6px var(--page-halo);
+}
+.editor-frame .editor-handle::after {
+  border-color: var(--page-ring);
+  background: var(--page-halo);
+}
+
+.editor-tabbar {
+  flex: none;
+  display: flex;
+  justify-content: center;
+  padding: 0 0 var(--editor-safe-bottom, env(safe-area-inset-bottom));
+  background: var(--surface);
+  border-top: 1px solid var(--hairline);
+}
+.editor-tabbar:has(+ .editor-primary-fallback) {
+  padding-bottom: 0;
+}
+.editor-tabbar .editor-toolpill {
+  flex: 1 1 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  min-width: 0;
+  min-height: 56px;
+  padding: 2px;
+  border-radius: 0;
+  font-size: 13px;
+  line-height: 1.15;
+  text-align: center;
+  white-space: normal;
+}
+.editor-tabbar .editor-toolpill.active {
+  border-color: transparent;
+}
+/* Measured at 320 px with text at 1.3: Russian's longest words are 87 px in a 78 px tab, so they break. */
+.editor-tabbar .editor-toolpill > span {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+.editor-primary-fallback {
+  flex: none;
+  padding: var(--space-2) var(--space-3)
+    calc(var(--space-2) + var(--editor-safe-bottom, env(safe-area-inset-bottom)));
+  background: var(--surface);
+  border-top: 1px solid var(--hairline);
+}
+.editor-primary-fallback > .button {
+  width: 100%;
+}
+
+.editor-snackbar-region {
+  position: absolute;
+  z-index: 4;
+  left: var(--space-2);
+  right: var(--space-2);
+  bottom: var(--space-2);
+  pointer-events: none;
+}
+.editor-snackbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0 var(--space-1) 0 var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--ink);
+  color: var(--surface);
+  font-size: 14px;
+  box-shadow: var(--shadow-lg);
+  pointer-events: auto;
+}
+.editor-snackbar > p {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-2) 0;
+}
+.editor-snackbar > .text-link,
+.editor-snackbar > .icon-button {
+  color: inherit;
+}
+.editor-snackbar > .text-link {
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+/* Sheets: the heights are shares of what Telegram says is stable, keyboard or not. */
+.editor-sheet.more-sheet {
+  max-height: calc(var(--tg-stable-h, 100dvh) * 0.75);
+}
+.editor-sheet > .sheet-body {
+  max-height: inherit;
+  padding-bottom: calc(var(--space-3) + var(--editor-safe-bottom, env(safe-area-inset-bottom)));
+}
+.editor-sheet .sheet-head {
+  position: sticky;
+  top: calc(-1 * var(--space-2));
+  z-index: 1;
+  background: var(--surface);
+  padding: 0 0 0 var(--space-1);
+}
+.editor-sheet[data-size='compact'].more-sheet {
+  position: static;
+  flex: none;
+  max-height: calc(var(--tg-stable-h, 100dvh) * 0.45);
+  border-top: 1px solid var(--hairline);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  box-shadow: var(--shadow-md);
+}
+.editor-sheet[data-size='full'].more-sheet {
+  height: var(--tg-stable-h, 100dvh);
+  max-height: none;
+  border-radius: 0;
+}
+.editor-sheet[data-size='docked'].more-sheet {
+  bottom: var(--editor-keyboard, 0px);
+  max-height: none;
+  border-radius: 0;
+}
+.editor-sheet .panel {
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+.editor-sheet:not(.permanent) .editor-floatbar-head > strong,
+.editor-sheet:not(.permanent) .editor-command-list > .panel-heading {
+  display: none;
+}
+.editor-sheet:not(.permanent) .editor-floatbar-head {
+  justify-content: flex-end;
+}
+.editor-sheet .editor-actionbar {
+  position: static;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--space-3);
+}
+.editor-sheet .editor-actionbar-actions {
+  flex-wrap: wrap;
+}
+.editor-sheet .editor-actionbar-actions > .button {
+  flex: 1;
+}
+
+.editor-more-rows {
+  display: flex;
+  flex-direction: column;
+}
+.editor-more-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  font-size: var(--text-base);
+  font-weight: 500;
+  text-align: start;
+}
+.editor-more-row > svg {
+  flex: none;
+  color: var(--muted);
+}
+.editor-more-row > span:first-of-type {
+  flex: 1;
+  min-width: 0;
+}
+.editor-more-row:disabled {
+  opacity: 0.5;
+}
+.editor-more-zoom {
+  justify-content: center;
+  min-width: 52px;
+}
+
+/* ------------------------------------------------------------ editor tools */
+
+/* Marks on the paper. Only the chosen one keeps the finger: anywhere else on the page
+   a finger scrolls, and below Bot API 7.7 the chosen one does too. */
+.editor-frame .editor-layer {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.editor-frame .editor-layer.drawing {
+  touch-action: none;
+  cursor: crosshair;
+}
+.editor-frame .editor-mark {
+  touch-action: pan-x pan-y pinch-zoom;
+  cursor: pointer;
+}
+.editor-frame .editor-mark.selected {
+  touch-action: none;
+  cursor: move;
+  /* Scrolled to, it brings its grip and corner into sight as well. */
+  scroll-margin: 60px;
+}
+.editor-frame .editor-layer.still .editor-mark.selected {
+  touch-action: pan-x pan-y pinch-zoom;
+}
+.editor-frame .editor-mark.stroke {
+  border-color: transparent;
+}
+.editor-frame .editor-mark.signature,
+.editor-frame .editor-mark.insert_image {
+  border-color: transparent;
+  background: none;
+}
+/* Its picture is on its way: the outline says where it will be. */
+.editor-frame .editor-mark.signature:not(:has(img)),
+.editor-frame .editor-mark.insert_image:not(:has(img)) {
+  border-color: var(--primary);
+  background: #0275fc14;
+}
+.editor-mark-picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+/* Hatched until the file is made: a box still waiting, not yet the black of the result. */
+.editor-frame .editor-mark.pending {
+  background: repeating-linear-gradient(135deg, #111 0 5px, #4a4a4a 5px 8px);
+}
+.editor-selection {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+}
+.editor-grip {
+  position: absolute;
+  top: 50%;
+  right: calc(100% + 6px);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-top: -22px;
+  border: 2px solid var(--page-ring);
+  border-radius: 50%;
+  background: var(--page-halo);
+  color: var(--page-ring);
+  box-shadow: 0 1px 4px #0003;
+  pointer-events: auto;
+  touch-action: none;
+  cursor: move;
+}
+.editor-selection.right .editor-grip {
+  right: auto;
+  left: calc(100% + 6px);
+}
+.editor-selection.below .editor-grip {
+  top: calc(100% + 6px);
+  right: auto;
+  left: 0;
+  margin-top: 0;
+}
+.editor-scale {
+  position: absolute;
+  right: -22px;
+  bottom: -22px;
+  width: 44px;
+  height: 44px;
+  pointer-events: auto;
+  touch-action: none;
+  cursor: nwse-resize;
+}
+.editor-scale::after {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--page-ring);
+  border-radius: 4px;
+  background: var(--page-halo);
+}
+.editor-pin {
+  position: absolute;
+  z-index: 2;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 3px solid var(--page-halo);
+  border-radius: 50%;
+  background: var(--page-ring);
+  box-shadow: 0 0 0 2px var(--page-ring);
+  pointer-events: none;
+}
+
+/* A first-use line over the bottom of the page; it never takes a tap. */
+.editor-hint {
+  position: absolute;
+  z-index: 3;
+  left: var(--space-2);
+  right: var(--space-2);
+  bottom: var(--space-2);
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  pointer-events: none;
+}
+
+/* Armed from the bar: what the next tap places, where the bar was. */
+.editor-armed {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 56px;
+  padding: var(--space-1) var(--space-2)
+    calc(var(--space-1) + var(--editor-safe-bottom, env(safe-area-inset-bottom))) var(--space-3);
+  background: var(--info-tint);
+  border-top: 1px solid var(--info-border);
+  color: var(--ink);
+  font-size: 14px;
+}
+.editor-armed:has(+ .editor-primary-fallback) {
+  padding-bottom: var(--space-1);
+}
+.editor-armed > span {
+  flex: 1;
+  min-width: 0;
+}
+
+/* The docked field, where the top bar was. */
+.editor-dock {
+  position: relative;
+  z-index: 5;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: calc(var(--editor-safe-top, 0px) + var(--space-2)) var(--space-2) var(--space-2);
+  background: var(--surface);
+  border-bottom: 1px solid var(--hairline);
+  box-shadow: var(--shadow-md);
+}
+/* Typing, the page's own number would sit on the words being typed. */
+.editor-frame.typing .editor-page-chip {
+  display: none;
+}
+.editor-dock-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.editor-dock-head > strong {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font: 600 15px/1.3 var(--font-body);
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.editor-dock-input {
+  width: 100%;
+  min-height: 48px;
+  max-height: 96px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--ink);
+  font:
+    16px/1.35 'PDFMasterNoto',
+    var(--font-body);
+  resize: none;
+}
+.editor-dock-message {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 var(--space-2);
+  margin: 0;
+  color: var(--ink);
+  font-size: 13px;
+}
+/* While typing, the words have to be reachable above the keyboard Telegram does not make room for. */
+.editor-frame.typing .editor-stage {
+  padding-bottom: calc(var(--editor-keyboard, 0px) + 24px);
+  scroll-padding-bottom: calc(var(--editor-keyboard, 0px) + 16px);
+  scroll-padding-top: 16px;
+}
+
+/* Add: one list. */
+.editor-add-signatures {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+  overflow-x: auto;
+}
+.editor-kept {
+  flex: none;
+  width: 96px;
+  height: 52px;
+  padding: var(--space-1);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  /* A signature is ink on paper, and paper is white in both themes. */
+  background: #fff;
+}
+.editor-kept > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.editor-add-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: var(--space-1);
+}
+.editor-add-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 0;
+  min-height: 64px;
+  padding: var(--space-1);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.editor-add-item > svg:first-child {
+  color: var(--action);
+}
+.editor-add-item.wide {
+  flex: 1 0 auto;
+  flex-direction: row;
+  gap: var(--space-2);
+  min-height: 52px;
+  padding: 0 var(--space-3);
+}
+.editor-add-item[data-locked] {
+  color: var(--muted);
+}
+/* At 320 three columns break a word like «Сегодняшняя» mid-word: two, each with room. */
+/* ------------------------------------------------------------ editor send */
+
+/* The stage shows the file as it will be made: a turned page takes its turned room. */
+.editor-page-slot {
+  position: relative;
+  flex-shrink: 0;
+  margin-inline: auto;
+}
+.editor-page-slot > .editor-page {
+  margin: 0;
+}
+.editor-page-slot > .editor-page.turned {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+/* The server's picture of the first page, until pdf.js has drawn it over. */
+.editor-page-early {
+  position: absolute;
+  inset: 0;
+}
+.editor-topbar-unsent {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  margin-right: var(--space-1);
+  border-radius: 50%;
+  background: var(--warning-ink);
+}
+
+/* Pages: three to a row, two below 360 px. */
+.editor-pages-panel {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-3) var(--space-4);
+}
+.editor-pages-moving {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-3);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+.editor-pages-moving > span {
+  flex: 1;
+  min-width: 0;
+}
+.editor-pages-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.editor-pages-card,
+.editor-pages-slot {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.editor-pages-pick {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-1);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--ink);
+}
+.editor-pages-card.chosen .editor-pages-pick {
+  border-color: var(--action);
+  box-shadow: 0 0 0 2px var(--action);
+}
+.editor-pages-card.drop-before::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(-1 * var(--space-2) + -2px);
+  width: 4px;
+  border-radius: 2px;
+  background: var(--action);
+}
+.editor-pages-card.removed .editor-pages-pick {
+  border-style: dashed;
+  color: var(--muted);
+}
+.editor-pages-card.removed .editor-pages-thumb {
+  opacity: 0.35;
+}
+.editor-pages-thumb {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  max-height: 140px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 1px 4px #17212e26;
+}
+.editor-pages-thumb > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.editor-pages-thumb > img.turned {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  max-width: none;
+  object-fit: fill;
+}
+.editor-pages-pick > strong {
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.editor-pages-turn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.editor-pages-pick > .count-tag {
+  position: absolute;
+  top: var(--space-1);
+  right: var(--space-1);
+}
+.editor-pages-marks {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.editor-pages-grip.icon-button {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  border-radius: var(--radius-md) 0 var(--radius-md) 0;
+  color: var(--muted);
+  touch-action: none;
+  cursor: grab;
+}
+.editor-pages-card > .button.small {
+  margin-top: var(--space-1);
+}
+.editor-pages-target {
+  flex: 1;
+  min-height: 88px;
+  padding: var(--space-2);
+  border: 2px dashed var(--action);
+  border-radius: var(--radius-md);
+  background: var(--blue-50);
+  color: var(--link);
+  font-size: 13px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.editor-page-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+.editor-page-actions > .button {
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  min-height: 52px;
+  padding: var(--space-1) 2px;
+  white-space: normal;
+  line-height: 1.15;
+  font-size: 13px;
+  text-align: center;
+}
+.editor-page-ask > p {
+  margin: 0 0 var(--space-3);
+  color: var(--ink);
+  font-weight: 600;
+}
+.editor-page-ask > span {
+  display: flex;
+  gap: var(--space-2);
+}
+.editor-page-ask .button {
+  flex: 1;
+  min-height: 44px;
+}
+
+/* Review: the server's summary, then one Confirm. */
+.editor-review {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.editor-review > p,
+.editor-review section > p {
+  margin: 0;
+}
+.editor-review-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--muted);
+  font-size: 14px;
+}
+.editor-review-pages {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--hairline);
+}
+.editor-review-pages > li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  border-bottom: 1px solid var(--hairline);
+  color: var(--ink);
+  font-size: 14px;
+}
+.editor-review-pages > li > span {
+  font-weight: 600;
+}
+.editor-review-pages > li > small {
+  flex: 1;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.editor-review-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  color: var(--ink);
+  font-size: 14px;
+}
+.editor-review .retention-note {
+  align-items: flex-start;
+  margin-top: 0;
+}
+.editor-review .retention-note > svg {
+  flex: none;
+  margin-top: 2px;
+}
+.editor-review-consent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  background: repeating-linear-gradient(135deg, var(--surface) 0 10px, var(--soft) 10px 14px);
+}
+.editor-review-consent .check-label {
+  min-height: 44px;
+  margin: 0;
+  color: var(--ink);
+  font-weight: 600;
+}
+.editor-review-done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  text-align: center;
+}
+.editor-review-done > .button {
+  width: 100%;
+}
+/* Pictures that never got in, one line each, above what the file will be; and one come too late. */
+.editor-review-notices {
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+}
+.editor-review-notices > p {
+  margin: 0;
+}
+.editor-review-refused {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border: 1px solid var(--error-border);
+  border-radius: var(--radius-md);
+  background: var(--error-tint);
+  color: var(--ink);
+}
+.editor-review-refused .button {
+  min-height: 44px;
+}
+.editor-review-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.editor-review-choices > .button {
+  flex: 1 1 auto;
+}
+/* Held at the sheet's foot, over its bottom padding, so the cost is read just before Confirm. */
+.editor-review-foot {
+  position: sticky;
+  bottom: calc(-1 * (var(--space-3) + var(--editor-safe-bottom, env(safe-area-inset-bottom))));
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: calc(-1 * (var(--space-3) + var(--editor-safe-bottom, env(safe-area-inset-bottom))));
+  padding: var(--space-2) 0 calc(var(--space-3) + var(--editor-safe-bottom, env(safe-area-inset-bottom)));
+  border-top: 1px solid var(--hairline);
+  background: var(--surface);
+}
+.editor-review-foot > .weekly-line {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.editor-review-foot > .button.full {
+  width: 100%;
+}
+
+/* A file the editor cannot open: what it is, and the way on. */
+.editor-open-refusal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  min-height: var(--tg-stable-h, 100dvh);
+  padding: var(--space-5) var(--space-4);
+  text-align: center;
+}
+.editor-open-refusal > p {
+  max-width: 34ch;
+  margin: 0;
+  color: var(--ink);
+  font-size: 16px;
+}
+.editor-open-refusal > .button {
+  min-height: 44px;
+  width: min(100%, 320px);
+}
+
+@media (max-width: 359px) {
+  .editor-add-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .editor-add-item {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: var(--space-2);
+    min-height: 48px;
+    padding: var(--space-1) var(--space-2);
+    overflow-wrap: break-word;
+    text-align: start;
+  }
+  .editor-add-item > svg:first-child {
+    flex: none;
+  }
+  /* Six actions in two rows still: the icon goes over the word, so Russian's longest fits. */
+  .editor-pages-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Sign. */
+.editor-sign > .field-hint {
+  margin-top: 0;
+}
+.editor-kept-list {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  overflow-x: auto;
+  list-style: none;
+}
+.editor-kept-list > li {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Room between the signature to use and Forget, for a finger that lands a little low. */
+  gap: var(--space-2);
+}
+.editor-sign-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.editor-sign-actions > .button {
+  flex: 1 1 130px;
+}
+.editor-frame .editor-invalid {
+  font-size: 13px;
+  line-height: 1.45;
+}
+.editor-frame .editor-keep,
+.editor-sheet .editor-keep {
+  min-height: 44px;
+  margin: var(--space-1) 0 0;
+}
+.editor-signature.local {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.editor-signature.local .editor-signature-actions > .button {
+  flex: 1;
+  min-height: 44px;
+}
+
+/* Black out. */
+.editor-blackout,
+.editor-fill,
+.editor-objectform {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.editor-blackout > p {
+  margin: 0;
+}
+.editor-blackout > .button {
+  align-self: flex-start;
+}
+.editor-blackout-count {
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* The object form. */
+.editor-objectform > p {
+  margin: 0;
+}
+.editor-object-words {
+  align-self: flex-start;
+}
+.editor-object-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+}
+.editor-object-label {
+  flex: 1 0 auto;
+  min-width: 60px;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+.editor-object-row > .icon-button {
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+}
+.editor-object-value {
+  min-width: 52px;
+  color: var(--ink);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.editor-object-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.editor-object-actions > .button {
+  flex: 1 1 auto;
+}
+/* The ink, not the fill: it reads on the surface in both themes. */
+.editor-object-delete.button,
+.editor-object-delete.button:hover:not(:disabled) {
+  color: var(--error-ink);
+}
+.editor-objectform .editor-swatches {
+  margin: 0 -7px;
+}
+.editor-object-exact > summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.editor-object-exact .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+}
+
+@media (min-width: 980px) {
+  .editor-frame-work {
+    flex-direction: row;
+  }
+  .editor-frame .editor-rail {
+    flex: none;
+    max-height: none;
+    padding: var(--space-2);
+    overflow-y: auto;
+    border-right: 1px solid var(--hairline);
+  }
+  .editor-sheet[data-size='compact'].more-sheet {
+    width: 320px;
+    height: auto;
+    max-height: none;
+    border-top: 0;
+    border-left: 1px solid var(--hairline);
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .editor-sheet[data-size='compact'] > .sheet-body {
+    height: 100%;
+    max-height: none;
+  }
+  /* What is modal on a phone comes in from the side, as tall as the window. */
+  .editor-sheet[data-size='tall'].more-sheet,
+  .editor-sheet[data-size='full'].more-sheet {
+    inset: 0 0 0 auto;
+    width: 380px;
+    height: 100%;
+    max-height: none;
+    border-radius: 0;
+  }
+  .editor-primary-fallback {
+    display: flex;
+    justify-content: flex-end;
+  }
+  .editor-primary-fallback > .button {
+    width: 296px;
+  }
+  .editor-tabbar .editor-toolpill {
+    flex: 0 1 160px;
+    flex-direction: row;
+    gap: var(--space-2);
+    min-height: 52px;
+  }
+  /* The page's sheet is the right-hand panel here, as a mark's is. */
+  .editor-frame-canvas:has(> .editor-pages-panel) {
+    flex-direction: row;
+  }
+  .editor-pages-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+}

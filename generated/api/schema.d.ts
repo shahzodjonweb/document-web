@@ -1356,6 +1356,11 @@ export interface components {
             download_url: string;
             /** Format: date-time */
             expires_at?: string;
+            /**
+             * Format: uuid
+             * @description The stored file itself, as `POST /editor/documents` takes it.
+             */
+            file_id: string;
             /** Format: uuid */
             id: string;
             mime_type: string;
@@ -5752,7 +5757,10 @@ export interface operations {
     downloadFile: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description One byte range: `bytes=0-99`, `bytes=100-` or `bytes=-500`. Several ranges, anything ill-formed, or an `If-Range` header answer with the whole file and 200. */
+                Range?: string;
+            };
             path: {
                 id: string;
             };
@@ -5763,6 +5771,19 @@ export interface operations {
             /** @description Private file, attachment; no-store */
             200: {
                 headers: {
+                    "Accept-Ranges"?: "bytes";
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/octet-stream": string;
+                };
+            };
+            /** @description The asked part of the private file, attachment; no-store */
+            206: {
+                headers: {
+                    "Accept-Ranges"?: "bytes";
+                    /** @description `bytes first-last/size` */
+                    "Content-Range"?: string;
                     [name: string]: unknown;
                 };
                 content: {
@@ -5800,6 +5821,19 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description The range starts past the end of the file: refused with `range_not_satisfiable`. */
+            416: {
+                headers: {
+                    /** @description `bytes *\/size` */
+                    "Content-Range"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
             };
         };
     };
