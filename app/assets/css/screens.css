@@ -2155,6 +2155,32 @@
     width: 100%;
   }
 }
+/* The company's legal details, label beside value; stacked on phones. */
+.company-details {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-4) 0 0;
+}
+.company-details > div {
+  display: grid;
+  grid-template-columns: minmax(140px, 200px) 1fr;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-5);
+}
+.company-details dt {
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+.company-details dd {
+  margin: 0;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+@media (max-width: 640px) {
+  .company-details > div {
+    grid-template-columns: 1fr;
+  }
+}
 
 /* Deck setup: a deck's slide count and design, opened from the bot as a Mini
    App. CV setup, its template only, is the same screen. */

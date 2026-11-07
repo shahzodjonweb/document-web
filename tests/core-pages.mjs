@@ -127,7 +127,10 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   if (endpoint.startsWith('/jobs/')) return json(jobs.get(endpoint.split('/')[2]) || {})
   if (endpoint === '/contacts')
     return json({ support: { username: 'pdfmaster_help', url: 'https://t.me/pdfmaster_help' },
-      ads: { username: 'pdfmaster_ads', url: 'https://t.me/pdfmaster_ads' } })
+      ads: { username: 'pdfmaster_ads', url: 'https://t.me/pdfmaster_ads' },
+      company: { name: '"ARCANIUM TECHNOLOGIES" MCHJ', tin: '313458514',
+        address: 'Toshkent shahri, Yunusobod tumani, Qashqar MFY, Markaz 4 mavzesi, 25-uy',
+        phone: '+998 (71) 200-00-00', email: '' } })
   if (endpoint === '/referrals')
     return json({ code: 'MALIKA7', url: 'https://pdfmaster.orderdesk.live/r/MALIKA7', rewards_count: 2, pending_count: 1,
       monthly_cap: 5, expires_in_days: 90, qualification: '', sandbox: false })
@@ -284,6 +287,10 @@ try {
   await page.getByPlaceholder('Search help…').fill('24 hours')
   assert.ok((await page.locator('section.help-card').count()) < articles, 'search narrows the articles')
   await page.getByPlaceholder('Search help…').fill('')
+  // The company's legal details close the page, as payment providers require; an unset email is left out.
+  assert.equal(await page.locator('.help-page > :last-child').getAttribute('id'), 'company')
+  assert.deepEqual(await page.locator('#company dt').allInnerTexts(), ['Legal name', 'TIN (STIR)', 'Legal address', 'Phone'])
+  assert.equal(await page.locator('#company a').getAttribute('href'), 'tel:+998712000000')
   // What sets the plans apart is listed in full: the week's limits, the edits
   // per file, and that Premium needs no channel subscription.
   const billingHelp = await page.locator('section.help-card', { hasText: 'Usage & payments' }).innerText()
@@ -295,7 +302,7 @@ try {
   }
   await theme('light')
   await shot('help-1440', true)
-  checks.push('Help: the support and advertising Telegram contacts, searchable articles and the guide; no form; the plans answer names Premium’s channels')
+  checks.push('Help: the support and advertising Telegram contacts, searchable articles and the guide, then the company details; no form; the plans answer names Premium’s channels')
 
   // The public front page: what it does, the AI services, tools, plans and questions.
   await go('/en')
