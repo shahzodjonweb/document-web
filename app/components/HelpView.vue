@@ -12,5 +12,6 @@ defineProps<{ legal?: string }>()
     </div>
     <HelpArticles :keys="legal ? ['helpPrivacy', 'helpBilling'] : undefined" />
     <ContactLinks />
+    <CompanyDetails />
   </div>
 </template>

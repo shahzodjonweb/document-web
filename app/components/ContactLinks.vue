@@ -1,21 +1,8 @@
 <script setup lang="ts">
 // Where to reach a person: the support and the advertising Telegram accounts,
-// as set in the admin. Public, so it works on the signed-out Help page too.
-type Contact = { username: string; url: string }
+// as set in the admin.
 const { t } = useLocale()
-const contacts = ref<{ support: Contact; ads: Contact } | null>(null)
-const loaded = ref(false)
-onMounted(async () => {
-  try {
-    // A plain string: Nuxt's typed routes otherwise expand every server route here.
-    const url: string = '/api/v1/contacts'
-    contacts.value = await $fetch<{ support: Contact; ads: Contact }>(url)
-  } catch {
-    contacts.value = null
-  } finally {
-    loaded.value = true
-  }
-})
+const { contacts, loaded } = useContacts()
 const people = computed(() =>
   (['support', 'ads'] as const)
     .filter((kind) => contacts.value?.[kind]?.username)

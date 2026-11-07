@@ -18,6 +18,13 @@ const entries: Record<string, [string, string, string]> = {
     'Aloqa ma’lumotlari tez orada shu yerda bo‘ladi.',
     'Контакты скоро появятся здесь.',
   ],
+  // The company behind the service, at the end of the Help pages: payment providers require it.
+  companyTitle: ['Company details', 'Rekvizitlar', 'Реквизиты'],
+  companyName: ['Legal name', 'Yuridik nomi', 'Юридическое название'],
+  companyTin: ['TIN (STIR)', 'STIR (INN)', 'ИНН'],
+  companyAddress: ['Legal address', 'Yuridik manzil', 'Юридический адрес'],
+  companyPhone: ['Phone', 'Telefon', 'Телефон'],
+  companyEmail: ['Email', 'Elektron pochta', 'Эл. почта'],
   previewFile: ['Preview {name}', '{name} faylini ko‘rish', 'Просмотреть {name}'],
   previousPage: ['Previous page', 'Oldingi sahifa', 'Предыдущая страница'],
   nextPage: ['Next page', 'Keyingi sahifa', 'Следующая страница'],

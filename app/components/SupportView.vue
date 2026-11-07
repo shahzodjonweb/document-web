@@ -11,5 +11,6 @@ const { t } = useLocale()
     </div>
     <ContactLinks />
     <HelpArticles guide />
+    <CompanyDetails />
   </div>
 </template>
