@@ -76,6 +76,13 @@ import {
   AlignLeft,
   Minus,
   BadgePercent,
+  GripVertical,
+  Calendar,
+  Camera,
+  ArrowLeft,
+  BringToFront,
+  SendToBack,
+  SquareCheck,
 } from 'lucide-vue-next'
 const props = withDefaults(defineProps<{ name: string; size?: number }>(), { size: 20 })
 const icons: Record<string, any> = {
@@ -156,6 +163,13 @@ const icons: Record<string, any> = {
   alignLeft: AlignLeft,
   minus: Minus,
   percent: BadgePercent,
+  grip: GripVertical,
+  calendar: Calendar,
+  camera: Camera,
+  left: ArrowLeft,
+  bringForward: BringToFront,
+  sendBack: SendToBack,
+  tick: SquareCheck,
 }
 </script>
 <template>

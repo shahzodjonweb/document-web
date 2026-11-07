@@ -42,11 +42,42 @@ export function pointFromEvent(
   event: { clientX: number; clientY: number },
   rect: DOMRect,
   page: PageSize,
+  turn = 0,
 ): { x: number; y: number } {
+  if (turn) {
+    // A turned page's rect is the box it turned into. From its middle, the finger is
+    // turned back the other way, into the page as uploaded, where every mark lives.
+    const width = turn % 180 ? rect.height : rect.width
+    const height = turn % 180 ? rect.width : rect.height
+    const scale = width / page.width || 1
+    const [dx, dy] = unturn(
+      event.clientX - rect.left - rect.width / 2,
+      event.clientY - rect.top - rect.height / 2,
+      turn,
+    )
+    return { x: quantize((dx + width / 2) / scale), y: quantize((dy + height / 2) / scale) }
+  }
   const scale = rect.width / page.width || 1
   return {
     x: quantize((event.clientX - rect.left) / scale),
     y: quantize((event.clientY - rect.top) / scale),
+  }
+}
+
+/**
+ * A step as seen on a page turned `turn` degrees clockwise, as a step on the page as
+ * uploaded: Move up on a page turned a quarter is a step left on its own paper.
+ */
+export function unturn(dx: number, dy: number, turn = 0): [number, number] {
+  switch (((turn % 360) + 360) % 360) {
+    case 90:
+      return [dy, -dx]
+    case 180:
+      return [-dx, -dy]
+    case 270:
+      return [-dy, dx]
+    default:
+      return [dx, dy]
   }
 }
 
@@ -175,9 +206,43 @@ export function snap(value: number, candidates: number[], tolerance: number): nu
   return best
 }
 
+/** Something a tap can mean: one of our marks, a line of the file's words, or a picture of the file's own. */
+export interface Hit {
+  id: string
+  kind: 'mark' | 'line' | 'picture'
+  rect: Rect
+}
+
+const HIT_ORDER: Hit['kind'][] = ['mark', 'line', 'picture']
+
+/**
+ * What a tap at `at` could mean, first first: our own marks, newest on top, then a
+ * line of text, then a picture. A picture covering over 80 % of the page is the page
+ * itself (a scan, a certificate's background) and is never picked by a tap. `slop`
+ * widens anything smaller than a fingertip to that size, in PDF points.
+ */
+export function hitOrder(candidates: Hit[], at: { x: number; y: number }, page: PageSize, slop = 0): Hit[] {
+  const reach = (rect: Rect) => {
+    const padX = Math.max(0, (slop - rect.width) / 2)
+    const padY = Math.max(0, (slop - rect.height) / 2)
+    return (
+      at.x >= rect.x - padX &&
+      at.x <= rect.x + rect.width + padX &&
+      at.y >= rect.y - padY &&
+      at.y <= rect.y + rect.height + padY
+    )
+  }
+  const pageArea = page.width * page.height
+  return candidates
+    .filter((hit) => !(hit.kind === 'picture' && hit.rect.width * hit.rect.height > pageArea * 0.8))
+    .filter((hit) => reach(hit.rect))
+    .sort((a, b) => HIT_ORDER.indexOf(a.kind) - HIT_ORDER.indexOf(b.kind))
+}
+
 export function useEditorGeometry() {
   return {
     pointFromEvent,
+    unturn,
     pageScale,
     clampCommand,
     outOfBounds,
@@ -186,5 +251,6 @@ export function useEditorGeometry() {
     snap,
     strictMax,
     inclusiveMax,
+    hitOrder,
   }
 }

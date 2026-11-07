@@ -52,7 +52,7 @@ const chosenName = computed(() => {
   }
   return t('deckSetupAuto')
 })
-const telegram = () => (import.meta.client ? (window as any).Telegram?.WebApp : null)
+const telegram = useTelegramApp()
 
 async function load() {
   if (!ws.user.value || !draftId.value) {
@@ -104,8 +104,8 @@ async function save() {
     draft.value = result.draft
     saved.value = true
     // Back to the chat, where the review now shows the new count and price.
-    telegram()?.HapticFeedback?.notificationOccurred?.('success')
-    if (telegram()?.initData) setTimeout(() => telegram()?.close(), 700)
+    telegram.haptic('success')
+    if (telegram.isMiniApp.value) setTimeout(telegram.close, 700)
   } catch (e) {
     error.value = requestError(e)
   } finally {

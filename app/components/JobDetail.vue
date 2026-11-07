@@ -22,6 +22,12 @@ const stageIndex = computed(() =>
     : 0,
 )
 const outputs = computed(() => job.value?.artifacts || job.value?.outputs || [])
+/** A send from the editor names its draft, which Edit under the file reopens. */
+const editorSource = computed(() =>
+  job.value?.feature_id?.startsWith('editor.')
+    ? String((job.value as any)?.parameters?.editor_document_id || '')
+    : '',
+)
 /**
  * A generated document can be changed by asking; a converted file cannot.
  * The draft behind the job is what the change applies to.
@@ -264,7 +270,12 @@ function downloadUrl(url: string | undefined, id: string) {
             ><AppIcon name="download" :size="17" />{{ t('download') }}</a
           >
         </div>
-        <ArtifactActions v-for="artifact in outputs" :key="`actions-${artifact.id}`" :artifact="artifact" />
+        <ArtifactActions
+          v-for="artifact in outputs"
+          :key="`actions-${artifact.id}`"
+          :artifact="artifact"
+          :source="editorSource"
+        />
         <p v-if="job.expires_at || outputs[0]?.expires_at" class="retention-note">
           <AppIcon name="clock" :size="15" />{{ t('expires') }}
           {{ date(job.expires_at || outputs[0]?.expires_at, true) }} · {{ timeZone }}

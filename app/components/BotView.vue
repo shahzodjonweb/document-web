@@ -2,6 +2,7 @@
 const { t, path, date } = useLocale()
 const ws = useWorkspace()
 const messages = ref<any[]>([])
+const brokenPreviews = ref<Record<string, boolean>>({})
 const text = ref('')
 const busy = ref(false)
 const error = ref('')
@@ -131,11 +132,12 @@ async function clear() {
             class="bot-asset"
             target="_blank"
             rel="noopener"
-            ><img
-              v-if="message.asset.preview_url"
+            ><PreviewImage
+              v-if="message.asset.preview_url && !brokenPreviews[message.id]"
               :src="message.asset.preview_url"
-              alt=""
-              loading="lazy" /><AppIcon v-else name="file" :size="25" /><span
+              lazy
+              quiet
+              @failed="brokenPreviews[message.id] = true" /><AppIcon v-else name="file" :size="25" /><span
               ><strong>{{ message.asset.name }}</strong
               ><small>{{ Math.ceil(message.asset.size_bytes / 1024) }} KB</small></span
             ><AppIcon name="download" :size="19"

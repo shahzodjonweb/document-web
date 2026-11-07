@@ -11,6 +11,10 @@
  * takes it up at once, and they go away as screens are rebuilt.
  */
 :root {
+  /* Around a mark on a page. Paper is white in both themes, so these have one value. */
+  --page-ring: #0e1726;
+  --page-halo: #ffffff;
+
   /* Surfaces */
   --paper: #f5f7fa;
   --surface: #ffffff;

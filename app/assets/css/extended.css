@@ -361,9 +361,16 @@
   object-fit: contain;
   background: white;
 }
-.bot-asset > span {
+.bot-asset > span:not(.preview-wait) {
   flex: 1;
   min-width: 0;
+}
+/* A preview on its way holds the picture's place, and the name keeps the rest of the row. */
+.bot-asset > .preview-wait {
+  flex: none;
+  width: 38px;
+  height: 49px;
+  padding: 0;
 }
 .bot-asset strong {
   display: block;
