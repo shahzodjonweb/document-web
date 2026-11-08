@@ -18,9 +18,136 @@
  * whole file has arrived; the first page's server picture shows meanwhile. Without
  * ranges the same request brings the whole file, as before.
  */
-import type { PDFDocumentProxy, RenderTask } from 'pdfjs-dist'
+import type { PDFDocumentProxy, PDFPageProxy, RenderTask } from 'pdfjs-dist'
 
 export type RenderMode = 'idle' | 'loading' | 'pdfjs' | 'server' | 'blank'
+
+/**
+ * A line of the file's own words as pdf.js reads it, in the editor's frame: PDF points
+ * from the page's top-left, the crop box with /Rotate applied, as the server's page
+ * sizes are. The box runs from 0.95 of the size above the baseline to 0.3 below it,
+ * which holds the baseline the server matches a change by.
+ */
+export interface TextLine {
+  /** `p{page}-{index}`: a tap's hit, never a mark's id. */
+  id: string
+  page: number
+  text: string
+  x: number
+  y: number
+  width: number
+  height: number
+  baseline: number
+  size: number
+  family: 'serif' | 'sans' | 'mono'
+  bold: boolean
+  italic: boolean
+  /** pdf.js's own name for the face. */
+  fontName: string
+  /**
+   * The family the browser drew the line in, as pdf.js registered it: the embedded face
+   * under `fontName`, or for a face the file only names (Helvetica, Times) the system
+   * face pdf.js put in its place.
+   */
+  face: string
+}
+
+/** One run of words as pdf.js gives it, already in the editor's frame. */
+export interface TextRun {
+  str: string
+  x: number
+  baseline: number
+  width: number
+  size: number
+  fontName: string
+}
+
+interface PageText {
+  proxy: PDFPageProxy
+  runs: TextRun[]
+  styles: Record<string, { fontFamily?: string }>
+  /** Any words at all, turned ones too: what tells a scan from a page with words. */
+  words: boolean
+  lines: TextLine[]
+  /** Whether the faces' bold and italic were known: pdf.js has them only once the page is drawn. */
+  styled: boolean
+  /** The faces drawn only out of sight, once read; see `unseenFaces`. */
+  hidden: Promise<Set<string>> | null
+  unseen: Set<string>
+}
+
+const SERIF_NAME = /times|serif|georgia|cambria|garamond|mincho|book|minion|palatino/i
+const MONO_NAME = /courier|mono|consol/i
+/** Tesseract's and OCRmyPDF's face for the words they lay unseen over a scan. */
+const OCR_FACE = /glyphless/i
+
+/**
+ * Runs into lines: on one baseline (within a quarter of the size), of about one size
+ * (within 15 %), and close (a gap of at most 0.6 of the size: pdf.js often leaves the
+ * spaces out as gaps). Two columns on one baseline stay two lines.
+ */
+export function groupRuns(
+  runs: TextRun[],
+  page: number,
+): Omit<TextLine, 'family' | 'bold' | 'italic' | 'face'>[] {
+  const rows: TextRun[][] = []
+  const sorted = [...runs].sort((a, b) => a.baseline - b.baseline || a.x - b.x)
+  for (const run of sorted) {
+    const row = rows.find((candidate) => {
+      const first = candidate[0]!
+      const size = Math.max(first.size, run.size)
+      const level = Math.abs(first.baseline - run.baseline) <= 0.25 * size
+      return level && Math.abs(first.size - run.size) <= 0.15 * size
+    })
+    if (row) row.push(run)
+    else rows.push([run])
+  }
+  const lines: Omit<TextLine, 'family' | 'bold' | 'italic' | 'face'>[] = []
+  for (const row of rows) {
+    row.sort((a, b) => a.x - b.x)
+    let segment: TextRun[] = []
+    const close = () => {
+      if (!segment.length) return
+      const size = Math.max(...segment.map((run) => run.size))
+      let text = ''
+      let end = -Infinity
+      for (const run of segment) {
+        // A space where the gap is one and neither side has it already.
+        if (text && run.x - end > 0.15 * size && !/\s$/.test(text) && !/^\s/.test(run.str)) text += ' '
+        text += run.str
+        end = Math.max(end, run.x + run.width)
+      }
+      const baseline = segment[0]!.baseline
+      const x = segment[0]!.x
+      lines.push({
+        id: '',
+        page,
+        text: text.trim(),
+        x,
+        y: baseline - 0.95 * size,
+        width: end - x,
+        height: 1.25 * size,
+        baseline,
+        size,
+        fontName: segment[0]!.fontName,
+      })
+      segment = []
+    }
+    for (const run of row) {
+      const last = segment[segment.length - 1]
+      if (last) {
+        const gap = run.x - (last.x + last.width)
+        // The same words drawn twice a hair apart are one run: some files fake bold that way.
+        if (run.str === last.str && Math.abs(run.x - last.x) < 0.1 * run.size) continue
+        if (gap > 0.6 * Math.max(run.size, last.size)) close()
+      }
+      segment.push(run)
+    }
+    close()
+  }
+  lines.sort((a, b) => a.y - b.y || a.x - b.x)
+  return lines.map((line, index) => ({ ...line, id: `p${page}-${index}` }))
+}
 
 /** Safari refuses canvases beyond roughly this area. */
 const MAX_CANVAS_PIXELS = 16_000_000
@@ -63,6 +190,8 @@ interface Session {
   tasks: Map<number, RenderTask>
   thumbnails: Map<number, string>
   order: number[]
+  /** Each page's words, read once: the scan check and the text layer share it. */
+  text: Map<number, Promise<PageText | null>>
 }
 
 let session: Session | null = null
@@ -100,6 +229,8 @@ async function teardown() {
 export function useEditorRender() {
   const mode = useState<RenderMode>('editor-render-mode', () => 'idle')
   const pageCount = useState('editor-render-pages', () => 0)
+  /** Goes up with each file opened, so whatever was read of the last one is known for stale. */
+  const generation = useState('editor-render-generation', () => 0)
   const ws = useWorkspace()
   const v2 = useEditorV2()
   const deviceScale = () =>
@@ -191,6 +322,8 @@ export function useEditorRender() {
   async function open(fileId: string): Promise<RenderMode> {
     if (session?.fileId === fileId && mode.value === 'pdfjs') return mode.value
     await teardown()
+    // Whatever was read of the last file goes now, whether or not pdf.js opens this one.
+    generation.value += 1
     mode.value = 'loading'
 
     const pdfjs = await loadLibrary()
@@ -205,7 +338,7 @@ export function useEditorRender() {
         // pdf.js transfers this buffer to its worker; never reuse it afterwards.
         document = await pdfjs.getDocument({ ...options, data: new Uint8Array(bytes) }).promise
       }
-      session = { fileId, document, tasks: new Map(), thumbnails: new Map(), order: [] }
+      session = { fileId, document, tasks: new Map(), thumbnails: new Map(), order: [], text: new Map() }
       pageCount.value = document.numPages
       mode.value = 'pdfjs'
     } catch {
@@ -311,20 +444,192 @@ export function useEditorRender() {
   }
 
   /**
-   * Whether a page has any words of its own, as pdf.js reads them; null when that
-   * cannot be known here, as with server pictures. Nothing read is kept.
+   * A page's words, read once per file and kept with it. Runs that are turned,
+   * mirrored, empty or only spaces are no line anyone could change in place.
    */
-  async function hasWords(page: number): Promise<boolean | null> {
+  function readText(page: number): Promise<PageText | null> {
     const current = session
-    if (!current?.document || mode.value !== 'pdfjs') return null
-    try {
-      const proxy = await current.document.getPage(page)
-      const content = await proxy.getTextContent()
-      return content.items.some((item) => 'str' in item && item.str.trim() !== '')
-    } catch {
-      return null
-    }
+    if (!current?.document || mode.value !== 'pdfjs') return Promise.resolve(null)
+    const known = current.text.get(page)
+    if (known) return known
+    const reading = (async (): Promise<PageText | null> => {
+      try {
+        const pdfjs = await loadLibrary()
+        const proxy = await current.document!.getPage(page)
+        const content = await proxy.getTextContent()
+        if (!pdfjs) return null
+        const frame = proxy.getViewport({ scale: 1 }).transform
+        const runs: TextRun[] = []
+        let words = false
+        for (const item of content.items) {
+          if (!('str' in item) || !item.str.trim()) continue
+          words = true
+          const [a, b, c, d, x, baseline] = pdfjs.Util.transform(frame, item.transform) as number[]
+          const size = Math.hypot(c!, d!)
+          const turned = Math.abs(b!) > size * 1e-3 || Math.abs(c!) > size * 1e-3 || a! <= 0 || d! >= 0
+          if (!(size > 0) || turned) continue
+          runs.push({
+            str: item.str,
+            x: x!,
+            baseline: baseline!,
+            width: item.width,
+            size,
+            fontName: item.fontName,
+          })
+        }
+        const text: PageText = {
+          proxy,
+          runs,
+          styles: content.styles,
+          words,
+          lines: [],
+          styled: false,
+          hidden: null,
+          unseen: new Set(),
+        }
+        style(text)
+        return text
+      } catch {
+        // Read again next time: a range that did not come is no reason to give up on the page.
+        current.text.delete(page)
+        return null
+      }
+    })()
+    current.text.set(page, reading)
+    return reading
   }
 
-  return { mode, pageCount, open, renderPage, thumbnail, teardown, downgrade, serverPreview, hasWords }
+  /**
+   * Family, bold and italic of each line, from the faces pdf.js has loaded for drawing.
+   * Before the page is drawn only the family is known; read again once it has been.
+   */
+  function style(text: PageText) {
+    const faces = text.proxy.commonObjs
+    let complete = true
+    type Face = {
+      name?: string
+      bold?: boolean
+      black?: boolean
+      italic?: boolean
+      systemFontInfo?: { loadedName?: string } | null
+    }
+    const faceOf = (name: string): Face | null => {
+      try {
+        if (faces.has(name)) return faces.get(name) as any
+      } catch {
+        // Not resolved yet.
+      }
+      complete = false
+      return null
+    }
+    // Words laid unseen over a picture, as OCR lays them over a scan, are the picture's: a change
+    // to them would show here and leave the file's page as it was.
+    const shown = text.runs.filter(
+      (run) => !text.unseen.has(run.fontName) && !OCR_FACE.test(faceOf(run.fontName)?.name ?? ''),
+    )
+    text.lines = groupRuns(shown, Number(text.proxy.pageNumber)).map((line) => {
+      const face = faceOf(line.fontName)
+      const name = face?.name ?? ''
+      const generic = text.styles[line.fontName]?.fontFamily ?? ''
+      const family: TextLine['family'] =
+        generic === 'monospace' || MONO_NAME.test(name)
+          ? 'mono'
+          : generic === 'serif' || (SERIF_NAME.test(name) && !/sans/i.test(name))
+            ? 'serif'
+            : 'sans'
+      return {
+        ...line,
+        family,
+        bold: !!(face?.bold || face?.black) || /bold|black|heavy|semibold|demibold/i.test(name),
+        italic: !!face?.italic || /italic|oblique/i.test(name),
+        face: face?.systemFontInfo?.loadedName || line.fontName,
+      }
+    })
+    text.styled = complete
+  }
+
+  /**
+   * The lines of a page's own words, for a tap to change in place; null when that
+   * cannot be known here, as with server pictures.
+   */
+  async function textLines(page: number): Promise<TextLine[] | null> {
+    const text = await readText(page)
+    if (!text) return null
+    text.hidden ??= unseenFaces(text.proxy).then((faces) => {
+      text.unseen = faces
+      text.styled = false
+      return faces
+    })
+    await text.hidden
+    if (!text.styled) style(text)
+    return text.lines
+  }
+
+  /**
+   * The faces a page draws only out of sight (text render mode 3, or 7 which only clips),
+   * as an OCR layer lies over a scan's picture so its words can be found and copied. A
+   * face drawn in sight anywhere on the page is kept. Read once per page, and only for the
+   * lines: whether a page has words at all counts these too, so an OCR'd scan is not
+   * offered OCR again. Unknown, every face counts as in sight.
+   */
+  async function unseenFaces(proxy: PDFPageProxy): Promise<Set<string>> {
+    const unseen = new Set<string>()
+    try {
+      const pdfjs = await loadLibrary()
+      if (!pdfjs) return unseen
+      const { OPS } = pdfjs
+      const { fnArray, argsArray } = await proxy.getOperatorList()
+      const shows = new Set<number>([
+        OPS.showText,
+        OPS.showSpacedText,
+        OPS.nextLineShowText,
+        OPS.nextLineSetSpacingShowText,
+      ])
+      const seen = new Set<string>()
+      // The render mode and face are part of the graphics state: saved and restored with it.
+      const saved: [number, string][] = []
+      let mode = 0
+      let face = ''
+      for (let index = 0; index < fnArray.length; index++) {
+        const fn = fnArray[index]
+        const args = argsArray[index] as any[] | null
+        if (fn === OPS.save || fn === OPS.paintFormXObjectBegin) saved.push([mode, face])
+        else if (fn === OPS.restore || fn === OPS.paintFormXObjectEnd)
+          [mode, face] = saved.pop() ?? [mode, face]
+        else if (fn === OPS.setTextRenderingMode) mode = Number(args?.[0]) || 0
+        else if (fn === OPS.setFont) face = String(args?.[0] ?? '')
+        else if (fn === OPS.setGState) {
+          for (const [key, value] of (args?.[0] ?? []) as [string, any][])
+            if (key === 'Font') face = String(value?.[0] ?? '')
+        } else if (fn !== undefined && shows.has(fn)) (mode === 3 || mode === 7 ? unseen : seen).add(face)
+      }
+      for (const name of seen) unseen.delete(name)
+    } catch {
+      unseen.clear()
+    }
+    return unseen
+  }
+
+  /**
+   * Whether a page has any words of its own, as pdf.js reads them; null when that
+   * cannot be known here, as with server pictures.
+   */
+  async function hasWords(page: number): Promise<boolean | null> {
+    const text = await readText(page)
+    return text ? text.words : null
+  }
+
+  return {
+    mode,
+    pageCount,
+    generation,
+    open,
+    renderPage,
+    thumbnail,
+    teardown,
+    downgrade,
+    serverPreview,
+    hasWords,
+    textLines,
+  }
 }

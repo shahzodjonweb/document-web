@@ -160,8 +160,9 @@ export const COMMAND_SHAPE: Record<CommandType, Shape> = {
   replace_image: { positional: false, box: false, image: true, icon: 'image', labelKey: 'replaceImage' },
   remove_image: { positional: false, box: false, image: false, icon: 'trash', labelKey: 'removeImage' },
   redact: { positional: true, box: true, image: false, icon: 'redact', labelKey: 'redact' },
-  // In the contract ahead of their tools: nothing offers these yet, so the labels are the nearest there are.
-  edit_text: { positional: true, box: true, image: false, icon: 'replace', labelKey: 'replaceText' },
+  // A line of the file's own words, changed in place: its box is the line's, never moved or sized.
+  edit_text: { positional: true, box: true, image: false, icon: 'replace', labelKey: 'editorKindEditText' },
+  // In the contract ahead of its tool: nothing offers it yet, so the label is the nearest there is.
   whiteout: { positional: true, box: true, image: false, icon: 'type', labelKey: 'addText' },
   rotate_page: {
     positional: false,
@@ -447,6 +448,7 @@ export type IssueCode =
   | 'editorIssueOutOfBounds'
   | 'editorIssueShortLine'
   | 'editorTextOverflow'
+  | 'editorEditTextTooLong'
 
 export interface Issue {
   id: string

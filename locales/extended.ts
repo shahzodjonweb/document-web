@@ -980,6 +980,26 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Qora qutili har bir sahifa yangi faylda rasmga aylanadi, undagi so‘zlarni endi belgilab yoki qidirib bo‘lmaydi.',
     'Каждая страница с плашкой станет в новом файле картинкой: её текст нельзя будет выделить или найти.',
   ],
+  // The file's own words, changed in place
+  editorHintEditText: [
+    'Select any text on the page to change it.',
+    'O‘zgartirish uchun sahifadagi istalgan matnni tanlang.',
+    'Выберите любой текст на странице, чтобы изменить его.',
+  ],
+  editorKindEditText: ['Changed text', 'O‘zgartirilgan matn', 'Изменённый текст'],
+  editorEditTextTitle: ['Change text', 'Matnni o‘zgartirish', 'Изменить текст'],
+  editorEditTextLonger: [
+    'Longer than the line: it will be set a little smaller to fit.',
+    'Qatordan uzunroq: sig‘ishi uchun biroz kichikroq yoziladi.',
+    'Длиннее строки: текст будет немного уменьшен, чтобы поместиться.',
+  ],
+  editorEditTextTooLong: [
+    'Too long for this line. Shorten it, or add the rest as new text.',
+    'Bu qator uchun juda uzun. Qisqartiring yoki qolganini yangi matn sifatida qo‘shing.',
+    'Слишком длинно для этой строки. Сократите текст или добавьте остальное как новый текст.',
+  ],
+  editorEditTextRemoved: ['The line will be removed.', 'Qator olib tashlanadi.', 'Строка будет удалена.'],
+  editorRestoreText: ['Restore the original', 'Asl holiga qaytarish', 'Вернуть исходный текст'],
   // The object form
   editorChangeWords: ['Change words', 'So‘zlarni o‘zgartirish', 'Изменить слова'],
   editorSize: ['Size', 'O‘lcham', 'Размер'],
@@ -1239,6 +1259,26 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Keep editing the sent file',
     'Yuborilgan faylni tahrirlash',
     'Продолжить с отправленным файлом',
+  ],
+  editorTextRetyped_one: [
+    '{count} text change was set in a similar font: the document’s own font couldn’t show it.',
+    '{count} ta matn o‘zgarishi o‘xshash shriftda yozildi: hujjatning o‘z shrifti uni ko‘rsata olmadi.',
+    '{count} изменение текста набрано похожим шрифтом: шрифт документа не может его показать.',
+  ],
+  editorTextRetyped_few: [
+    '{count} text changes were set in a similar font: the document’s own font couldn’t show them.',
+    '{count} ta matn o‘zgarishi o‘xshash shriftda yozildi: hujjatning o‘z shrifti uni ko‘rsata olmadi.',
+    '{count} изменения текста набраны похожим шрифтом: шрифт документа не может их показать.',
+  ],
+  editorTextRetyped_many: [
+    '{count} text changes were set in a similar font: the document’s own font couldn’t show them.',
+    '{count} ta matn o‘zgarishi o‘xshash shriftda yozildi: hujjatning o‘z shrifti uni ko‘rsata olmadi.',
+    '{count} изменений текста набраны похожим шрифтом: шрифт документа не может их показать.',
+  ],
+  editorTextRetyped_other: [
+    '{count} text changes were set in a similar font: the document’s own font couldn’t show them.',
+    '{count} ta matn o‘zgarishi o‘xshash shriftda yozildi: hujjatning o‘z shrifti uni ko‘rsata olmadi.',
+    '{count} изменения текста набраны похожим шрифтом: шрифт документа не может их показать.',
   ],
   editorSkipped_one: [
     '{count} change was on a removed page and was left out.',

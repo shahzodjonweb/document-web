@@ -34,6 +34,7 @@ const emit = defineEmits<{ rendered: [page: number]; failed: [page: number] }>()
 
 const { t } = useLocale()
 const render = useEditorRender()
+const textLayer = useEditorTextLayer()
 
 const frame = ref<HTMLElement>()
 const canvas = ref<HTMLCanvasElement>()
@@ -63,6 +64,8 @@ async function draw() {
   if (ok) {
     drawn.value = true
     emit('rendered', props.page)
+    // Its lines are read now, so a tap on its words has them at once.
+    void textLayer.ensure(props.page)
   } else if (!drawn.value) emit('failed', props.page)
 }
 

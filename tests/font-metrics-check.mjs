@@ -336,11 +336,29 @@ for (const [face, rows] of Object.entries(DECK_MEASURES)) {
   }
 }
 
+// The bold faces a changed line of the file's own words is previewed in: the platform's
+// NotoSans-Bold.ttf and NotoSerif-Bold.ttf, unmodified, under their family's OFL notice.
+const PREVIEW_FACES = {
+  'noto-sans-bold.ttf': [
+    '3a08a47daa00cade516425c15c57615aef2fd418ec9811a7b9f465088f92cc05',
+    'noto-sans-OFL.txt',
+  ],
+  'noto-serif-bold.ttf': [
+    '24ad531e6b05ddad8c3d89572d2c93eb86a6b74e652ce7ee3c3e171de68e84c3',
+    'noto-serif-OFL.txt',
+  ],
+}
+for (const [file, [sha256, notice]] of Object.entries(PREVIEW_FACES)) {
+  const bytes = await fs.readFile(path.join(root, 'public/fonts', file))
+  assert.equal(createHash('sha256').update(bytes).digest('hex'), sha256, `${file}: not the platform's file`)
+  await fs.access(path.join(root, 'public/fonts', notice))
+}
+
 // Not in the page's fonts or head: a font here is fetched for every visitor.
 for (const shell of ['app/assets/css/fonts.css', 'nuxt.config.ts']) {
   const source = await fs.readFile(path.join(root, shell), 'utf8')
-  for (const { file } of Object.values(DECK_FAMILIES))
-    assert.ok(!source.includes(file), `${shell} loads ${file}`)
+  const files = [...Object.values(DECK_FAMILIES).map((family) => family.file), ...Object.keys(PREVIEW_FACES)]
+  for (const file of files) assert.ok(!source.includes(file), `${shell} loads ${file}`)
 }
 
 console.log(`Pass: 5 deck families match reportlab; ${measured} deck widths exact`)

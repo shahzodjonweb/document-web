@@ -3,7 +3,8 @@
  * The docked field for new words: it takes the top bar's place, as iOS Telegram does
  * not make room for the keyboard and the page below the top has to stay in sight.
  * 16 px, or iOS zooms the page in. What it has to say goes under the field, where the
- * eyes already are. The page's own words are not changed here in this release.
+ * eyes already are. On a phone a line of the file's own words is changed here too,
+ * one line long, while the page shows it as it will stand.
  */
 import { LIMITS } from '~/composables/useEditorCommands'
 
@@ -12,12 +13,21 @@ const session = useEditorSession()
 const tools = useEditorTools()
 const metrics = useEditorFontMetrics()
 const telegram = useTelegramApp()
+const textLayer = useEditorTextLayer()
 
 const input = ref<HTMLTextAreaElement>()
 const command = computed(
   () => session.commands.value.find((item) => item._id === session.editingId.value) ?? null,
 )
-const title = computed(() => (command.value?.type === 'note' ? t('editorKindNote') : t('editorKindText')))
+const title = computed(() =>
+  command.value?.type === 'note'
+    ? t('editorKindNote')
+    : command.value?.type === 'edit_text'
+      ? t('editorEditTextTitle')
+      : t('editorKindText'),
+)
+/** A line of the file's own words: one row, Enter is Done. */
+const oneLine = computed(() => command.value?.type === 'edit_text')
 
 // Back keeps what was typed, as Done does: going back loses nothing.
 telegram.useBackLayer(() => !!command.value, tools.commitField)
@@ -35,7 +45,10 @@ onMounted(() => {
 })
 watch(telegram.keyboardInset, () => void nextTick(showMark))
 
-/** The server's rule: no control characters but newline and tab, and no more than it takes. */
+/**
+ * The server's rule: no control characters but newline and tab, and no more than it
+ * takes. A line of the file's words has no second row: a break or tab is a space.
+ */
 function onInput(event: Event) {
   const current = command.value
   if (!current) return
@@ -43,11 +56,12 @@ function onInput(event: Event) {
   let clean = ''
   for (const character of raw) {
     const code = character.codePointAt(0) ?? 0
-    if (code >= 32 || character === '\n' || character === '\t') clean += character
+    if (oneLine.value && (character === '\n' || character === '\r' || character === '\t')) clean += ' '
+    else if (code >= 32 || character === '\n' || character === '\t') clean += character
   }
   const capped = [...clean].slice(0, LIMITS.text).join('')
   if (capped !== raw) (event.target as HTMLTextAreaElement).value = capped
-  session.patchCommand(current._id, { text: capped }, `text:${current._id}`)
+  tools.typed(current._id, capped)
 }
 
 const overflowing = computed(() => {
@@ -65,6 +79,8 @@ const overflowing = computed(() => {
   return result.horizontal || result.vertical
 })
 const left = computed(() => LIMITS.text - [...(command.value?.text ?? '')].length)
+/** How a line of the file's words fits: removed, set a little smaller, or too long to go. */
+const fit = computed(() => (command.value ? textLayer.fitOf(command.value) : null))
 
 /** The engine never wraps: real line breaks where the page ends. */
 function fitToPage() {
@@ -81,10 +97,11 @@ function fitToPage() {
 }
 
 function onKeydown(event: KeyboardEvent) {
+  const done = event.metaKey || event.ctrlKey || (oneLine.value && !event.shiftKey)
   if (event.key === 'Escape') {
     event.preventDefault()
     tools.cancelField()
-  } else if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+  } else if (event.key === 'Enter' && done) {
     event.preventDefault()
     tools.commitField()
   }
@@ -112,11 +129,12 @@ function onKeydown(event: KeyboardEvent) {
       class="editor-dock-input"
       rows="2"
       :value="command.text"
-      :placeholder="t('editorTextPlaceholder')"
+      :placeholder="oneLine ? '' : t('editorTextPlaceholder')"
       :aria-label="title"
       aria-describedby="editor-dock-message"
       spellcheck="false"
-      autocapitalize="sentences"
+      :autocapitalize="oneLine ? 'off' : 'sentences'"
+      :enterkeyhint="oneLine ? 'done' : undefined"
       data-testid="editor-text-input"
       @input="onInput"
       @keydown="onKeydown"
@@ -129,6 +147,11 @@ function onKeydown(event: KeyboardEvent) {
           {{ t('editorWrapToPage') }}
         </button>
       </template>
+      <span v-else-if="fit?.state === 'removed'">{{ t('editorEditTextRemoved') }}</span>
+      <span v-else-if="fit?.state === 'longer'">{{ t('editorEditTextLonger') }}</span>
+      <span v-else-if="fit?.state === 'tooLong'" class="editor-invalid">{{
+        t('editorEditTextTooLong')
+      }}</span>
       <span v-else-if="left < 200">{{ t('editorTextLeft', { count: left }) }}</span>
     </p>
   </div>

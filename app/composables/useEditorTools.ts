@@ -73,6 +73,7 @@ export const PLACE_LABEL: Record<PlaceKind, string> = {
 /** What a mark is called in its form's title and its snackbar, as a person would name it. */
 const KIND_LABEL: Partial<Record<CommandType, string>> = {
   add_text: 'editorKindText',
+  edit_text: 'editorKindEditText',
   highlight: 'editorKindHighlight',
   note: 'editorKindNote',
   draw: 'editorKindDrawing',
@@ -128,6 +129,17 @@ const started = ref(0)
 const sent = new Map<string, Promise<string | null>>()
 /** The words a field held when it opened, for Cancel; and whether it was a new mark. */
 const field = { before: '', fresh: false }
+/**
+ * Whether the open field is the one over its line on the paper, as a line of the file's
+ * own words is changed at 980 px and over, rather than the dock; and where its caret goes.
+ */
+const inline = ref(false)
+const caret = ref<number | null>(null)
+/**
+ * When a field last closed, on the events' clock: the click whose press took focus from
+ * the field over a line has finished it, and opens nothing on bare paper.
+ */
+let closedAt = -Infinity
 
 /**
  * iOS shows the keyboard only for a field focused inside the tap's own handler, and
@@ -156,6 +168,7 @@ export function useEditorTools() {
   const images = useEditorImages()
   const metrics = useEditorFontMetrics()
   const ws = useWorkspace()
+  const wide = useEditorWide()
 
   /**
    * Every plan has every tool, so one the catalog marks ineligible is switched off for
@@ -189,6 +202,7 @@ export function useEditorTools() {
   function reset() {
     closeSheet()
     disarm()
+    inline.value = false
     waiting.clear()
     changing.clear()
     // A file asked for in the document left is not waited for here.
@@ -200,33 +214,67 @@ export function useEditorTools() {
 
   /* ------------------------------------------------------------- the field */
 
-  function openField(id: string, fresh = false) {
+  function openField(id: string, fresh = false, options: { inline?: boolean; caret?: number } = {}) {
     primeKeyboard()
     snackbar.dismiss()
     const command = session.commands.value.find((item) => item._id === id)
     field.before = command?.text ?? ''
     field.fresh = fresh
+    inline.value = !!options.inline
+    caret.value = options.caret ?? null
     session.select(null)
     session.editingId.value = id
   }
-  /** Done, Back and any send keep what was typed; an empty mark was never wanted. */
+  /** A line of the file's own words opens over itself at 980 px and over, in the dock on a phone. */
+  function openWords(id: string, fresh = false, at?: number) {
+    const command = session.commands.value.find((item) => item._id === id)
+    openField(id, fresh, { inline: command?.type === 'edit_text' && wide.value, caret: at })
+  }
+  /**
+   * Done, Back and any send keep what was typed; an empty mark was never wanted. A line
+   * of the file's own words left empty is taken out of the file, and one left as it was
+   * is no change at all.
+   */
   function commitField() {
     const id = session.editingId.value
     if (!id) return
     const command = session.commands.value.find((item) => item._id === id)
-    if (command && !(command.text ?? '').trim()) session.removeCommands([id], { amend: true })
+    if (command?.type === 'edit_text') {
+      if ((command.text ?? '').trim() === (command.original ?? '').trim())
+        session.removeCommands([id], { amend: true })
+      else hints.retire('editText')
+    } else if (command && !(command.text ?? '').trim()) session.removeCommands([id], { amend: true })
     session.editingId.value = ''
+    inline.value = false
+    closedAt = performance.now()
     telegram.hideKeyboard()
   }
+  /** Cancel drops a new mark and puts an old one back as it was, a line's removal included. */
   function cancelField() {
     const id = session.editingId.value
     if (!id) return
     const command = session.commands.value.find((item) => item._id === id)
-    if (command && (field.fresh || !field.before.trim())) session.removeCommands([id], { amend: true })
+    const empty = command?.type !== 'edit_text' && !field.before.trim()
+    if (command && (field.fresh || empty)) session.removeCommands([id], { amend: true })
     else if (command && command.text !== field.before)
       session.patchCommand(id, { text: field.before }, `text:${id}`)
     session.editingId.value = ''
+    inline.value = false
+    closedAt = performance.now()
     telegram.hideKeyboard()
+  }
+  /** Whether a field closed since a time on the events' clock, as a press's `timeStamp`. */
+  const closedSince = (time: number) => closedAt >= time
+  /**
+   * Typing into a new change of the file's own words belongs to making it, as a new
+   * mark's first words do: one Undo takes the whole change away. Into one opened again
+   * it is a step of its own, even where the change had been emptied to take its line
+   * out: it does not fold into whatever was done in between.
+   */
+  function typed(id: string, text: string) {
+    const command = session.commands.value.find((item) => item._id === id)
+    const amend = command?.type === 'edit_text' ? { amend: field.fresh } : {}
+    session.patchCommand(id, { text }, `text:${id}`, 'move', amend)
   }
 
   /* ------------------------------------------------------------- pictures */
@@ -591,8 +639,13 @@ export function useEditorTools() {
     replacePicture,
     upload,
     openField,
+    openWords,
     commitField,
     cancelField,
+    closedSince,
+    typed,
+    inline: computed(() => inline.value),
+    caret: computed(() => caret.value),
     fromTool,
     startBlackOut,
     stopBlackOut,

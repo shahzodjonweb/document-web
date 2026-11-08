@@ -177,6 +177,37 @@ async function registerFace(buffer: ArrayBuffer) {
   }
 }
 
+/**
+ * The faces a changed line of the file's own words is previewed in, as the server
+ * sets new letters: Noto Sans or Serif, regular or bold. Sans regular is the face
+ * above; the rest are fetched only when a preview first needs one, as each is half
+ * a megabyte or more.
+ */
+export const SERIF_FAMILY = 'PDFMasterNotoSerif'
+const PREVIEW_FACES: Record<string, [family: string, url: string, weight: string]> = {
+  'sans-700': [FONT_FAMILY, '/fonts/noto-sans-bold.ttf', '700'],
+  'serif-400': [SERIF_FAMILY, '/fonts/noto-serif-regular.ttf', '400'],
+  'serif-700': [SERIF_FAMILY, '/fonts/noto-serif-bold.ttf', '700'],
+}
+const previewAsked = new Set<string>()
+
+export function previewFamily(serif: boolean, bold: boolean): string {
+  const key = `${serif ? 'serif' : 'sans'}-${bold ? 700 : 400}`
+  const face = PREVIEW_FACES[key]
+  if (face && !previewAsked.has(key) && import.meta.client && typeof FontFace !== 'undefined') {
+    previewAsked.add(key)
+    try {
+      // Swap: the words show at once in the next face, rather than hide while this one comes.
+      const loading = new FontFace(face[0], `url(${face[1]})`, { weight: face[2], display: 'swap' })
+      document.fonts.add(loading)
+      void loading.load().catch(() => previewAsked.delete(key))
+    } catch {
+      // The generic family at the end of the stack stands in.
+    }
+  }
+  return serif ? SERIF_FAMILY : FONT_FAMILY
+}
+
 async function load(): Promise<Metrics | null> {
   if (metrics) return metrics
   if (!loading) {
@@ -423,5 +454,6 @@ export function useEditorFontMetrics() {
     isApproximate: () => approximate,
     ensureDeckFace,
     deckTextWidth,
+    previewFamily,
   }
 }
