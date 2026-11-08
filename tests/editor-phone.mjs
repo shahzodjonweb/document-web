@@ -25,6 +25,10 @@ const pdfBytes = await fs.readFile('tests/fixtures/research-notes.pdf')
 const numberedBytes = await fs.readFile('tests/fixtures/numbered-pages.pdf')
 // Two made-up scanned pages: a picture each, with no words of their own.
 const scannedBytes = await fs.readFile('tests/fixtures/scanned-pages.pdf')
+// Made-up Uzbek Latin and Cyrillic lines in Noto Sans, Serif and Bold, as reportlab embeds them.
+const wordsBytes = await fs.readFile('tests/fixtures/uzbek-cyrillic.pdf')
+// A made-up OCR'd scan: a picture of words with the same words laid unseen over it, and one visible line.
+const ocrBytes = await fs.readFile('tests/fixtures/scanned-ocr.pdf')
 const onePixelPng = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
   'base64',
@@ -4229,6 +4233,835 @@ for (const [name, width, height, locale, theme] of [
 passed(
   'Pages, Review and its states at 390 and 320, en uz ru, light and dark: axe, 44 px, no sideways scroll, compact sheets',
 )
+
+/* ------------------------------------------------------------------ the file's own words */
+
+const TEXT_ON = { editor_v2: true, text_edit: true }
+// research-notes.pdf, as pdf.js reads it: its second line, in page points.
+const NOTES_LINE = {
+  text: 'A real document fixture for upload, order, merge and download verification.',
+  x: 72,
+  y: 125.5,
+  width: 397.5,
+  height: 15,
+}
+const NOTES_TITLE = 'PDF Master test / research-notes.pdf / page 1'
+/** A spot on page 1 in page points, as Playwright's position on the page element. */
+const at = async (page, x, y) => {
+  const zoom = await zoomOf(page)
+  return { x: x * zoom, y: y * zoom }
+}
+/** The lines are read once the page is drawn: the first-use line says they are there. */
+const linesRead = (page) =>
+  page.waitForFunction(
+    () =>
+      document.querySelector('[data-testid="editor-hint"]')?.textContent.trim() ===
+      'Select any text on the page to change it.',
+  )
+const inline = (page) => page.getByTestId('editor-inline-text')
+/** The caret to the end of a field's words, whatever End does on this platform. */
+const toEnd = (locator) =>
+  locator.evaluate((node) => node.setSelectionRange(node.value.length, node.value.length))
+/** The field over the line is up and has the caret. */
+const inlineOpen = async (page) => {
+  await inline(page).waitFor()
+  await page.waitForFunction(() => document.activeElement?.dataset.testid === 'editor-inline-text')
+}
+
+{
+  // At 1440, Sejda's way: the line under the mouse is outlined, a click types over it in place.
+  const opened = await openContext({ width: 1440, height: 900, inside: false, marks: [], editor: TEXT_ON })
+  const { page, server } = opened
+  await goToDocument(opened)
+  await settle(page)
+  await linesRead(page)
+  const spot = await at(page, 230, 133)
+  const pageBox = await page.getByTestId('editor-page-1').boundingBox()
+  await page.mouse.move(pageBox.x + spot.x, pageBox.y + spot.y)
+  const hover = page.getByTestId('editor-line-hover')
+  await hover.waitFor()
+  const zoom = await zoomOf(page)
+  const outline = await hover.boundingBox()
+  assert.ok(
+    Math.abs(outline.x - (pageBox.x + NOTES_LINE.x * zoom)) < 3,
+    'the outline starts where the line does',
+  )
+  assert.ok(Math.abs(outline.width - NOTES_LINE.width * zoom) < 4, 'and is as wide')
+  assert.equal(
+    await page
+      .locator('.editor-layer.texting')
+      .first()
+      .evaluate((node) => getComputedStyle(node).cursor),
+    'text',
+  )
+  await page.screenshot({ path: path.join(output, 'text-1440-hover.png') })
+
+  await page.mouse.click(pageBox.x + spot.x, pageBox.y + spot.y)
+  await inlineOpen(page)
+  assert.equal(await inline(page).inputValue(), NOTES_LINE.text, 'the field holds exactly that line')
+  assert.equal(await page.evaluate(() => document.activeElement?.dataset.testid), 'editor-inline-text')
+  const caret = await inline(page).evaluate((node) => node.selectionStart)
+  assert.ok(
+    caret > 10 && caret < NOTES_LINE.text.length - 10,
+    `the caret is by the letter clicked (${caret})`,
+  )
+  assert.equal(await page.getByTestId('editor-text-form').count(), 0, 'no dock at 1440')
+  assert.ok(await page.getByTestId('editor-topbar').isVisible(), 'the top bar stays')
+  const field = await inline(page).boundingBox()
+  assert.ok(Math.abs(field.y - (pageBox.y + NOTES_LINE.y * zoom)) < 3, 'the field is over the line')
+  await noSidewaysScroll(page, 'inline')
+  assert.deepEqual(await smallTargets(page), [], 'inline: tap targets')
+  await axe(page, 'inline')
+  await page.screenshot({ path: path.join(output, 'text-1440-inline.png') })
+
+  // Longer words warn as they are typed; past what can be shrunk, the field says it cannot go.
+  await page.keyboard.press('ControlOrMeta+a')
+  await page.keyboard.type(`${NOTES_LINE.text} With a few more words`)
+  await page.getByTestId('editor-inline-message').filter({ hasText: 'set a little smaller' }).waitFor()
+  await page.screenshot({ path: path.join(output, 'text-1440-inline-longer.png') })
+  await page.keyboard.type(' and then a great deal more, far past the room this line has left on the page')
+  await page.getByTestId('editor-inline-message').filter({ hasText: 'Too long for this line' }).waitFor()
+  await page.keyboard.press('ControlOrMeta+a')
+  await page.keyboard.type('Fixture words, changed in place.')
+  assert.equal(
+    (await page.getByTestId('editor-inline-message').textContent()).trim(),
+    '',
+    'shorter words say nothing',
+  )
+  await page.keyboard.press('Enter')
+  await inline(page).waitFor({ state: 'detached' })
+  let commands = await saved(page, server)
+  assert.equal(commands.length, 1, 'one change')
+  const [change] = commands
+  assert.equal(change.type, 'edit_text')
+  assert.equal(change.original, NOTES_LINE.text)
+  assert.equal(change.text, 'Fixture words, changed in place.')
+  for (const key of ['x', 'y', 'width', 'height'])
+    assert.ok(Math.abs(change[key] - NOTES_LINE[key]) <= 2, `${key} ${change[key]} is within 2 of the line's`)
+  const mark = page.locator('.editor-mark.edit_text')
+  assert.equal(await mark.textContent(), 'Fixture words, changed in place.', 'the page shows the new words')
+  assert.ok(await mark.evaluate((node) => node.classList.contains('changed')), 'marked as changed')
+  assert.equal(
+    await mark.evaluate((node) => getComputedStyle(node).backgroundColor),
+    'rgb(255, 255, 255)',
+    'on the page’s own colour',
+  )
+  assert.notEqual(
+    await page
+      .getByTestId('editor-hint')
+      .textContent()
+      .catch(() => ''),
+    'Select any text on the page to change it.',
+    'the first-use line retired',
+  )
+  assert.match(
+    await page.getByTestId('editor-command-list').textContent(),
+    /1\. Changed text/,
+    'listed as Changed text',
+  )
+  await page.screenshot({ path: path.join(output, 'text-1440-changed.png') })
+
+  // Escape on a fresh change leaves nothing behind.
+  const title = await at(page, 150, 95)
+  await page.mouse.click(pageBox.x + title.x, pageBox.y + title.y)
+  await inlineOpen(page)
+  assert.equal(await inline(page).inputValue(), NOTES_TITLE)
+  await page.keyboard.type(' typed then let go')
+  await page.keyboard.press('Escape')
+  await inline(page).waitFor({ state: 'detached' })
+  assert.equal(
+    await page.evaluate(() => document.activeElement?.getAttribute('role')),
+    'region',
+    'with the change gone, focus is on the pages',
+  )
+  commands = await saved(page, server)
+  assert.equal(commands.length, 1, 'Escape left no change')
+  assert.equal(await page.locator('.editor-mark.edit_text').count(), 1)
+
+  // The changed line opens again with its new words; a click elsewhere keeps what was typed.
+  await page.mouse.click(pageBox.x + spot.x - 100 * zoom, pageBox.y + spot.y)
+  await inlineOpen(page)
+  assert.equal(
+    await inline(page).inputValue(),
+    'Fixture words, changed in place.',
+    'reopened with the new words',
+  )
+  await toEnd(inline(page))
+  await page.keyboard.type(' Again')
+  const empty = await at(page, 300, 400)
+  await page.mouse.click(pageBox.x + empty.x, pageBox.y + empty.y)
+  await inline(page).waitFor({ state: 'detached' })
+  commands = await saved(page, server)
+  assert.deepEqual(
+    commands.map((command) => command.text),
+    ['Fixture words, changed in place. Again'],
+    'a click elsewhere committed it',
+  )
+  // That click on bare paper only finished the change: it opens no Add here to put away.
+  await page.waitForTimeout(300)
+  assert.equal(
+    await page.getByTestId('editor-add-sheet').count(),
+    0,
+    'the click that finished opened nothing',
+  )
+  // Closed from the keys, the field hands focus to its change rather than to the page's start.
+  await page.mouse.click(pageBox.x + spot.x - 100 * zoom, pageBox.y + spot.y)
+  await inlineOpen(page)
+  await page.keyboard.press('Enter')
+  await inline(page).waitFor({ state: 'detached' })
+  assert.match(
+    await page.evaluate(() => document.activeElement?.dataset.testid ?? ''),
+    /^editor-mark-/,
+    'Enter leaves focus on the change',
+  )
+  // The next click on bare paper is an ordinary one: Add here, as before.
+  await page.mouse.click(pageBox.x + empty.x, pageBox.y + empty.y)
+  await page.getByTestId('editor-add-sheet').waitFor()
+  await page.getByTestId('editor-add-sheet').getByTestId('editor-sheet-close').click()
+  await page.getByTestId('editor-add-sheet').waitFor({ state: 'detached' })
+
+  // A double click opens the line with a word chosen.
+  await page.mouse.dblclick(pageBox.x + title.x, pageBox.y + title.y)
+  await inlineOpen(page)
+  const chosen = await inline(page).evaluate((node) =>
+    node.value.slice(node.selectionStart, node.selectionEnd),
+  )
+  assert.ok(chosen.trim().length > 0, `a double click chooses words (${JSON.stringify(chosen)})`)
+  await page.keyboard.press('Escape')
+  await inline(page).waitFor({ state: 'detached' })
+
+  // Chosen from the list, the change offers Change words and Restore the original, and nothing to move.
+  await page.getByTestId('editor-command-list').locator('.editor-command-row').first().click()
+  await page.getByTestId('editor-object-restore').waitFor()
+  assert.equal(await page.getByTestId('editor-object-left').count(), 0, 'no moving')
+  assert.equal(await page.getByTestId('editor-object-larger').count(), 0, 'no sizing')
+  assert.equal(await page.getByTestId('editor-grip').count(), 0, 'no grip')
+  await page.screenshot({ path: path.join(output, 'text-1440-object.png') })
+  await page.getByTestId('editor-object-words').click()
+  await inlineOpen(page)
+  await page.keyboard.press('Escape')
+  await page.getByTestId('editor-command-list').locator('.editor-command-row').first().click()
+  await page.getByTestId('editor-object-restore').click()
+  commands = await saved(page, server)
+  assert.equal(commands.length, 0, 'Restore the original takes the change away')
+  assert.deepEqual(opened.errors, [])
+  assert.deepEqual(server.unexpected, [])
+  await opened.context.close()
+  passed(
+    'At 1440 a line is outlined under the mouse and typed over in place: Enter and a click away keep, Escape drops, Restore takes back',
+  )
+}
+
+{
+  // Words a little longer than their line, with room after it: the change's box, paper and ring reach over all of them.
+  const opened = await openContext({ width: 1440, height: 900, inside: false, marks: [], editor: TEXT_ON })
+  const { page, server } = opened
+  await goToDocument(opened)
+  await settle(page)
+  await linesRead(page)
+  const pageBox = await page.getByTestId('editor-page-1').boundingBox()
+  const spot = await at(page, 230, 133)
+  await page.mouse.click(pageBox.x + spot.x, pageBox.y + spot.y)
+  await inlineOpen(page)
+  await toEnd(inline(page))
+  await page.keyboard.type(' Today')
+  await page.keyboard.press('Enter')
+  await inline(page).waitFor({ state: 'detached' })
+  await saved(page, server)
+  const [box, words] = await page
+    .locator('.editor-mark.edit_text')
+    .evaluate((node) => [
+      node.getBoundingClientRect().right,
+      node.querySelector('.editor-mark-edit').getBoundingClientRect().right,
+    ])
+  assert.ok(words <= box + 0.5, `the box reaches past the last letter (${words} over ${box})`)
+  assert.deepEqual(opened.errors, [])
+  await opened.context.close()
+  passed('At 1440 a change longer than its line is boxed whole, so its ring hides none of it')
+}
+
+{
+  // On a phone the dock: the page shows the words as typed; empty takes the line out; unchanged is nothing.
+  for (const [width, height] of [
+    [390, 656],
+    [320, 568],
+  ]) {
+    const opened = await openContext({ width, height, marks: [], editor: TEXT_ON })
+    const { page, server } = opened
+    await goToDocument(opened)
+    await settle(page)
+    await linesRead(page)
+    const line = await at(page, 120, 133)
+    await page.getByTestId('editor-page-1').click({ position: line })
+    await page.getByTestId('editor-text-form').waitFor()
+    assert.equal(
+      (await page.getByTestId('editor-text-form').locator('strong').textContent()).trim(),
+      'Change text',
+      `${width}: titled Change text`,
+    )
+    assert.equal(await page.getByTestId('editor-text-input').inputValue(), NOTES_LINE.text)
+    assert.equal(await inline(page).count(), 0, `${width}: nothing typed over the page on a phone`)
+    await page.evaluate(() => window.__tg.keyboard(253))
+    await page.getByTestId('editor-text-input').fill('')
+    await page.keyboard.type('Fixture line')
+    const mark = page.locator('.editor-mark.edit_text')
+    assert.equal(await mark.textContent(), 'Fixture line', `${width}: the page shows the words as typed`)
+    await page.screenshot({ path: path.join(output, `text-${width}-en-light-notes-dock.png`) })
+    await page.getByTestId('editor-text-done').click()
+    await page.evaluate(() => window.__tg.keyboard(0))
+    await page.getByTestId('editor-topbar').waitFor()
+    let commands = await saved(page, server)
+    assert.deepEqual(
+      commands.map(({ type, original, text }) => [type, original, text]),
+      [['edit_text', NOTES_LINE.text, 'Fixture line']],
+    )
+
+    // Opened again from the page, emptied: the line goes, and the dock says so.
+    await page.getByTestId('editor-page-1').click({ position: line })
+    await page.getByTestId('editor-text-form').waitFor()
+    assert.equal(await page.getByTestId('editor-text-input').inputValue(), 'Fixture line')
+    await page.getByTestId('editor-text-input').fill('')
+    assert.equal(
+      (await page.getByTestId('editor-text-message').textContent()).trim(),
+      'The line will be removed.',
+    )
+    await page.getByTestId('editor-text-done').click()
+    commands = await saved(page, server)
+    assert.deepEqual(
+      commands.map(({ type, text }) => [type, text]),
+      [['edit_text', '']],
+      `${width}: an empty change is kept, to take the line out`,
+    )
+
+    // Another line opened and left as it was is no change.
+    await page.getByTestId('editor-page-1').click({ position: await at(page, 150, 95) })
+    await page.getByTestId('editor-text-form').waitFor()
+    assert.equal(await page.getByTestId('editor-text-input').inputValue(), NOTES_TITLE)
+    await page.getByTestId('editor-text-done').click()
+    await page.getByTestId('editor-topbar').waitFor()
+    commands = await saved(page, server)
+    assert.equal(commands.length, 1, `${width}: unchanged saves nothing`)
+    assert.deepEqual(opened.errors, [])
+    await opened.context.close()
+  }
+  passed(
+    'On a phone a line opens in the dock as Change text: typed live, Done keeps, empty takes it out, unchanged is nothing',
+  )
+}
+
+{
+  // With the dock open, a tap on the page finishes the change as Done does and opens nothing else:
+  // not the same line again, not the line a fingertip's reach finds next to it, not Add here.
+  for (const [width, height] of [
+    [390, 656],
+    [320, 568],
+  ]) {
+    const opened = await openContext({ width, height, marks: [], editor: TEXT_ON })
+    const { page, server } = opened
+    await goToDocument(opened)
+    await settle(page)
+    await linesRead(page)
+    const form = page.getByTestId('editor-text-form')
+    const tapAt = async (x, y) => {
+      const box = await page.getByTestId('editor-page-1').boundingBox()
+      const spot = await at(page, x, y)
+      await page.mouse.click(box.x + spot.x, box.y + spot.y)
+    }
+    const nothingOpened = async (label) => {
+      await form.waitFor({ state: 'detached' })
+      await page.waitForTimeout(300)
+      assert.equal(await form.count(), 0, `${width} ${label}: no other line opened`)
+      assert.equal(await page.getByTestId('editor-add-sheet').count(), 0, `${width} ${label}: no Add here`)
+    }
+    await tapAt(120, 133)
+    await form.waitFor()
+    // The same line again, near its top, where the title's reach comes down to.
+    await tapAt(120, 127)
+    await nothingOpened('same line')
+    let commands = await saved(page, server)
+    assert.equal(commands.length, 0, `${width}: a line opened and tapped away unchanged is nothing`)
+
+    await tapAt(120, 133)
+    await form.waitFor()
+    await page.getByTestId('editor-text-input').fill('Fixture line, tapped away')
+    await tapAt(150, 95)
+    await nothingOpened('another line')
+    commands = await saved(page, server)
+    assert.deepEqual(
+      commands.map(({ type, original, text }) => [type, original, text]),
+      [['edit_text', NOTES_LINE.text, 'Fixture line, tapped away']],
+      `${width}: the change was kept and the title was not opened`,
+    )
+
+    await tapAt(150, 95)
+    await form.waitFor()
+    assert.equal(await page.getByTestId('editor-text-input').inputValue(), NOTES_TITLE)
+    await tapAt(300, 400)
+    await nothingOpened('bare paper')
+    commands = await saved(page, server)
+    assert.equal(commands.length, 1, `${width}: the title left as it was is no change`)
+    assert.deepEqual(opened.errors, [])
+    await opened.context.close()
+  }
+  passed('With the dock open a tap on the page only finishes the change: no second field, no Add here')
+}
+
+{
+  // Something open or chosen: a tap on the file's words only closes it, as a tap on paper does.
+  const opened = await openContext({ width: 390, height: 656, marks: [], editor: TEXT_ON })
+  const { page, server } = opened
+  await goToDocument(opened)
+  await settle(page)
+  await linesRead(page)
+  const line = await at(page, 120, 133)
+  await page.getByTestId('editor-page-1').click({ position: await at(page, 300, 400) })
+  await page.getByTestId('editor-add-sheet').waitFor()
+  await page.getByTestId('editor-page-1').click({ position: line })
+  await page.getByTestId('editor-add-sheet').waitFor({ state: 'detached' })
+  await page.waitForTimeout(300)
+  assert.equal(await page.getByTestId('editor-text-form').count(), 0, 'closing Add here opened no line')
+
+  await page.getByTestId('editor-page-1').click({ position: await at(page, 300, 400) })
+  await page.getByTestId('editor-add-highlight').click()
+  await page.locator('.editor-mark.highlight').waitFor()
+  await selectMark(page)
+  await page.getByTestId('editor-page-1').click({ position: line })
+  await page.getByTestId('editor-object-sheet').waitFor({ state: 'detached' })
+  await page.waitForTimeout(300)
+  assert.equal(await page.getByTestId('editor-text-form').count(), 0, 'letting go of the mark opened no line')
+
+  await page.getByTestId('editor-page-1').click({ position: line })
+  await page.getByTestId('editor-text-form').waitFor()
+  await page.getByTestId('editor-text-cancel').click()
+  const commands = await saved(page, server)
+  assert.deepEqual(
+    commands.map((command) => command.type),
+    ['highlight'],
+  )
+  assert.deepEqual(opened.errors, [])
+  await opened.context.close()
+  passed('With a sheet open or a mark chosen, a tap on the words closes it; the next one opens the line')
+}
+
+{
+  // At 1440: words left in the dock go when a line is clicked, and the line is not opened over them;
+  // Undo with a line just opened leaves nothing for Redo; typing into a change emptied earlier is a
+  // step of its own; and a change of the file's words is drawn under the marks over it.
+  const opened = await openContext({ width: 1440, height: 900, inside: false, marks: [], editor: TEXT_ON })
+  const { page, server } = opened
+  await goToDocument(opened)
+  await settle(page)
+  await linesRead(page)
+  const click = async (x, y) => {
+    const box = await page.getByTestId('editor-page-1').boundingBox()
+    const spot = await at(page, x, y)
+    await page.mouse.click(box.x + spot.x, box.y + spot.y)
+  }
+  const undo = page.locator('button[aria-label="Undo"]:visible').first()
+  const redo = page.locator('button[aria-label="Redo"]:visible').first()
+  await click(300, 400)
+  await page.getByTestId('editor-add-sheet').waitFor()
+  await page.getByTestId('editor-add-text').click()
+  await page.getByTestId('editor-text-form').waitFor()
+  await click(230, 133)
+  await page.getByTestId('editor-text-form').waitFor({ state: 'detached' })
+  await page.waitForTimeout(300)
+  assert.equal(await inline(page).count(), 0, 'the click finished the dock and opened no line')
+  assert.equal(await page.getByTestId('editor-frame-issue').count(), 0, 'no empty text left to fix')
+  let commands = await saved(page, server)
+  assert.equal(commands.length, 0, 'the empty words went')
+
+  await click(230, 133)
+  await inlineOpen(page)
+  await undo.click()
+  await inline(page).waitFor({ state: 'detached' })
+  assert.ok(await redo.isDisabled(), 'a line opened and undone leaves nothing to redo')
+  commands = await saved(page, server)
+  assert.equal(commands.length, 0)
+
+  await click(230, 133)
+  await inlineOpen(page)
+  await page.keyboard.press('ControlOrMeta+a')
+  await page.keyboard.press('Backspace')
+  await page.keyboard.press('Enter')
+  await inline(page).waitFor({ state: 'detached' })
+  await click(300, 400)
+  await page.getByTestId('editor-add-highlight').click()
+  await page.locator('.editor-mark.highlight').waitFor()
+  await click(230, 133)
+  await inlineOpen(page)
+  assert.equal(await inline(page).inputValue(), '', 'the emptied change opens empty')
+  await page.keyboard.type('x')
+  await page.keyboard.press('Enter')
+  await inline(page).waitFor({ state: 'detached' })
+  commands = await saved(page, server)
+  assert.deepEqual(
+    commands.map(({ type, text }) => [type, text ?? null]),
+    [
+      ['edit_text', 'x'],
+      ['highlight', null],
+    ],
+  )
+  await undo.click()
+  commands = await saved(page, server)
+  assert.deepEqual(
+    commands.map(({ type, text }) => [type, text ?? null]),
+    [
+      ['edit_text', ''],
+      ['highlight', null],
+    ],
+    'Undo took back the typing only, and the highlight stayed',
+  )
+  await page.locator('button[aria-label="Undo"]:visible').first().click()
+  await page.locator('button[aria-label="Undo"]:visible').first().click()
+  commands = await saved(page, server)
+  assert.equal(commands.length, 0, 'back to the start')
+
+  // A black box placed first, then its line changed: the box stays in sight over the change.
+  await page.getByTestId('editor-tab-blackout').click()
+  await page.getByTestId('editor-blackout-sheet').waitFor()
+  await click(400, 133)
+  await page.getByTestId('editor-blackout-count').waitFor()
+  await page.getByTestId('editor-blackout-done').click()
+  await click(100, 133)
+  await inlineOpen(page)
+  await page.keyboard.press('ControlOrMeta+a')
+  await page.keyboard.type('Fixture words over and under a black box, set again.')
+  await page.keyboard.press('Enter')
+  await inline(page).waitFor({ state: 'detached' })
+  commands = await saved(page, server)
+  assert.deepEqual(
+    commands.map((command) => command.type),
+    ['redact', 'edit_text'],
+  )
+  const onTop = await page.locator('.editor-mark.redact').evaluate((node) => {
+    const box = node.getBoundingClientRect()
+    return (
+      document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2)?.closest('.editor-mark') ===
+      node
+    )
+  })
+  assert.ok(onTop, 'the black box is drawn over the changed line, as the engine draws it')
+  await page.screenshot({ path: path.join(output, 'text-1440-under-blackout.png') })
+  assert.deepEqual(opened.errors, [])
+  assert.deepEqual(server.unexpected, [])
+  await opened.context.close()
+  passed(
+    'At 1440 a click on a line finishes the dock; Undo leaves no unchanged change to redo; typing again is its own step; changes draw under marks',
+  )
+}
+
+{
+  // An OCR'd scan: the words laid unseen over its picture are the picture's, and offer no line to change.
+  const opened = await openContext({ width: 390, height: 656, marks: [], editor: TEXT_ON, pdf: ocrBytes })
+  const { page, server } = opened
+  await goToDocument(opened)
+  await settle(page)
+  await linesRead(page)
+  await page.getByTestId('editor-page-1').click({ position: await at(page, 140, 140) })
+  await page.getByTestId('editor-add-sheet').waitFor()
+  assert.equal(await page.getByTestId('editor-text-form').count(), 0, 'the scanned words opened no field')
+  await page.getByTestId('editor-add-sheet').getByTestId('editor-sheet-close').click()
+  await page.getByTestId('editor-add-sheet').waitFor({ state: 'detached' })
+  await page.getByTestId('editor-page-1').click({ position: await at(page, 120, 295) })
+  await page.getByTestId('editor-text-form').waitFor()
+  assert.equal(
+    await page.getByTestId('editor-text-input').inputValue(),
+    'A visible fixture line below the scan.',
+    'the visible line still opens',
+  )
+  await page.getByTestId('editor-text-cancel').click()
+  assert.equal(server.commands.length, 0)
+  assert.deepEqual(opened.errors, [])
+  await opened.context.close()
+  passed(
+    'On an OCR’d scan the unseen words offer no line: a tap there opens Add here; visible words still open',
+  )
+}
+
+{
+  // Words longer than the line: set smaller with a word of warning; too long for it, Review asks for a fix.
+  const opened = await openContext({
+    width: 390,
+    height: 844,
+    inside: false,
+    marks: [],
+    editor: TEXT_ON,
+    pdf: wordsBytes,
+  })
+  const { page, server } = opened
+  await goToDocument(opened)
+  await settle(page)
+  await linesRead(page)
+  // "Qisqa", with other words on its baseline from 150 points.
+  await page.getByTestId('editor-page-1').click({ position: await at(page, 85, 256) })
+  await page.getByTestId('editor-text-form').waitFor()
+  assert.equal(await page.getByTestId('editor-text-input').inputValue(), 'Qisqa')
+  const message = page.getByTestId('editor-text-message')
+  await page.getByTestId('editor-text-input').fill('Qisqacha matn')
+  assert.equal(
+    (await message.textContent()).trim(),
+    'Longer than the line: it will be set a little smaller to fit.',
+  )
+  await page.getByTestId('editor-text-input').fill('Qisqacha emas, ancha uzunroq matn')
+  assert.equal(
+    (await message.textContent()).trim(),
+    'Too long for this line. Shorten it, or add the rest as new text.',
+  )
+  await page.screenshot({ path: path.join(output, 'text-390-en-light-too-long.png') })
+  await page.getByTestId('editor-text-done').click()
+  await page.getByTestId('editor-frame-issue').waitFor()
+  const commands = await saved(page, server)
+  assert.equal(commands[0].text, 'Qisqacha emas, ancha uzunroq matn', 'saved like any change')
+  await page.getByTestId('editor-primary').click()
+  const refused = page.getByTestId('editor-refused')
+  await refused.waitFor()
+  assert.equal(await refused.getAttribute('data-code'), 'needs_fix')
+  assert.equal(
+    (await refused.locator('p').first().textContent()).trim(),
+    '1. Changed text: Too long for this line. Shorten it, or add the rest as new text.',
+  )
+  assert.equal(server.quotes.length, 0, 'nothing was asked of the server')
+  await page.screenshot({ path: path.join(output, 'text-390-en-light-review-needs-fix.png') })
+  await page.getByTestId('editor-review-show').click()
+  await page.getByTestId('editor-object-sheet').waitFor()
+  assert.equal(
+    (await page.getByTestId('editor-object-sheet').locator('.editor-invalid').first().textContent()).trim(),
+    'Too long for this line. Shorten it, or add the rest as new text.',
+  )
+  await page.getByTestId('editor-object-words').click()
+  await page.getByTestId('editor-text-input').fill('Qisqacha matn')
+  await page.getByTestId('editor-text-done').click()
+  await page.getByTestId('editor-frame-issue').waitFor({ state: 'detached' })
+  assert.deepEqual(opened.errors, [])
+  await opened.context.close()
+  passed('Words longer than their line say they will be set smaller; too long for it, Review asks for a fix')
+}
+
+{
+  // Switched off, a tap on words opens Add here as before; and a scan, which has no lines, does too.
+  for (const [label, options] of [
+    ['off at 390', { width: 390, height: 656 }],
+    ['off at 1440', { width: 1440, height: 900, inside: false }],
+    ['a scan', { width: 390, height: 656, editor: TEXT_ON, pdf: scannedBytes, imageCounts: [1, 1] }],
+  ]) {
+    const opened = await openContext({ marks: [], ...options })
+    const { page, server } = opened
+    await goToDocument(opened)
+    await settle(page)
+    await page.waitForTimeout(600)
+    await page.getByTestId('editor-page-1').click({ position: await at(page, 120, 133) })
+    await page.getByTestId('editor-add-sheet').waitFor()
+    assert.equal(await page.getByTestId('editor-text-form').count(), 0, `${label}: no field`)
+    assert.equal(await inline(page).count(), 0, `${label}: nothing typed over the page`)
+    assert.equal(server.commands.length, 0)
+    await opened.context.close()
+  }
+  passed('Switched off, or on a scan, a tap on the page opens Add here as before')
+}
+
+{
+  // Review and send: the change is counted on its page and sent; a line set in a similar font is said after.
+  const opened = await openContext({
+    width: 390,
+    height: 844,
+    inside: false,
+    marks: [],
+    editor: TEXT_ON,
+    perCommand: [{ index: 0, status: 'applied', engine: 'retyped' }],
+  })
+  const { page, server } = opened
+  await goToDocument(opened)
+  await settle(page)
+  await linesRead(page)
+  await page.getByTestId('editor-page-1').click({ position: await at(page, 120, 133) })
+  await page.getByTestId('editor-text-form').waitFor()
+  await page.getByTestId('editor-text-input').fill('Fixture line, sent')
+  await page.getByTestId('editor-text-done').click()
+  await page.getByTestId('editor-primary').click()
+  await reviewReady(page)
+  assert.deepEqual(
+    await page
+      .locator('[data-testid="editor-review-pages"] > li')
+      .evaluateAll((rows) =>
+        rows.map((row) => [...row.children].map((part) => part.textContent.trim()).join(' ')),
+      ),
+    ['Page 1 1 change Show'],
+  )
+  assert.deepEqual(lastQuote(server).body, {
+    version: server.version,
+    deliver: 'download',
+    accept_rasterization: false,
+  })
+  assert.deepEqual(
+    server.commands.map(({ type, original, text }) => [type, original, text]),
+    [['edit_text', NOTES_LINE.text, 'Fixture line, sent']],
+    'the quote is of the change',
+  )
+  await page.getByTestId('editor-confirm').click()
+  await page.getByTestId('editor-download').waitFor()
+  assert.equal(
+    (await page.getByTestId('editor-retyped').textContent()).trim(),
+    '1 text change was set in a similar font: the document’s own font couldn’t show it.',
+  )
+  await noSidewaysScroll(page, 'retyped')
+  assert.deepEqual(await smallTargets(page), [], 'retyped: tap targets')
+  await axe(page, 'retyped')
+  await page.screenshot({ path: path.join(output, 'text-390-en-light-made-retyped.png') })
+  assert.deepEqual(opened.errors, [])
+  assert.deepEqual(server.unexpected, [])
+  await opened.context.close()
+  passed(
+    'Review counts a changed line on its page and sends it; a line set in a similar font is said once made',
+  )
+}
+
+{
+  // Uzbek Latin and Cyrillic in Noto: the preview is the document's own face first, then the Noto face
+  // the server sets new letters in.
+  const opened = await openContext({
+    width: 1440,
+    height: 900,
+    inside: false,
+    marks: [],
+    editor: TEXT_ON,
+    pdf: wordsBytes,
+  })
+  const { page, server } = opened
+  await goToDocument(opened)
+  await settle(page)
+  await linesRead(page)
+  const pageBox = await page.getByTestId('editor-page-1').boundingBox()
+  const click = async (x, y) => {
+    const spot = await at(page, x, y)
+    await page.mouse.click(pageBox.x + spot.x, pageBox.y + spot.y)
+    await inlineOpen(page)
+  }
+  const faces = (locator) => locator.evaluate((node) => getComputedStyle(node).fontFamily.split(/,\s*/))
+  await click(140, 136)
+  assert.equal(
+    await inline(page).inputValue(),
+    'Bog‘dagi o‘rik gulladi va qo‘shiq yangradi.',
+    'o‘ and g‘ as they are',
+  )
+  let stack = await faces(inline(page))
+  assert.match(stack[0], /^"?g_d\d+_f\d+"?$/, `the document’s own face first (${stack.join(', ')})`)
+  assert.deepEqual(stack.slice(1), ['PDFMasterNoto', 'sans-serif'])
+  assert.ok(
+    await page.evaluate(
+      (face) =>
+        [...document.fonts].some(
+          (item) => item.family.replace(/"/g, '') === face.replace(/"/g, '') && item.status === 'loaded',
+        ),
+      stack[0],
+    ),
+    'pdf.js gave the browser that face',
+  )
+  await page.keyboard.press('ControlOrMeta+a')
+  await page.keyboard.type('Bog‘dagi o‘rik va jo‘xori: Жёлтый цвет')
+  await page.keyboard.press('Enter')
+  const uzbek = page.locator('.editor-mark.edit_text').first()
+  assert.equal(await uzbek.textContent(), 'Bog‘dagi o‘rik va jo‘xori: Жёлтый цвет')
+  stack = await faces(uzbek.locator('.editor-mark-edit'))
+  assert.deepEqual(stack.slice(1), ['PDFMasterNoto', 'sans-serif'], 'new letters fall to Noto Sans')
+
+  // The Cyrillic line keeps its colour; the serif line its family; the bold title its weight.
+  await click(140, 176)
+  assert.equal(await inline(page).inputValue(), 'Пример строки для проверки редактора.')
+  const [red, , blue] = (await inline(page).evaluate((node) => getComputedStyle(node).color))
+    .match(/\d+/g)
+    .map(Number)
+  assert.ok(blue > red + 40, 'the words keep their blue')
+  await page.keyboard.press('Escape')
+  await click(100, 216)
+  assert.equal(await inline(page).inputValue(), 'Shartnoma raqami: 0000-FIX')
+  stack = await faces(inline(page))
+  assert.deepEqual(stack.slice(1), ['PDFMasterNotoSerif', 'serif'], 'a serif line previews in Noto Serif')
+  // Its neighbour on the same baseline at 360 points bounds its room.
+  await toEnd(inline(page))
+  await page.keyboard.type(' va qo‘shimcha raqam 12345')
+  await page.getByTestId('editor-inline-message').filter({ hasText: 'set a little smaller' }).waitFor()
+  await page.keyboard.press('Escape')
+  await click(120, 86)
+  assert.equal(await inline(page).inputValue(), 'Fixture hujjat: namuna')
+  assert.equal(
+    await inline(page).evaluate((node) => getComputedStyle(node).fontWeight),
+    '700',
+    'bold stays bold',
+  )
+  await page.waitForFunction(() =>
+    [...document.fonts].some(
+      (face) =>
+        face.family.replace(/"/g, '') === 'PDFMasterNoto' &&
+        face.weight === '700' &&
+        face.status === 'loaded',
+    ),
+  )
+  await toEnd(inline(page))
+  await page.keyboard.type(' 2')
+  await page.screenshot({ path: path.join(output, 'text-1440-uz-inline-bold.png') })
+  await page.keyboard.press('Enter')
+  await page.screenshot({ path: path.join(output, 'text-1440-uz-changed.png') })
+  const commands = await saved(page, server)
+  assert.deepEqual(
+    commands.map((command) => command.text),
+    ['Bog‘dagi o‘rik va jo‘xori: Жёлтый цвет', 'Fixture hujjat: namuna 2'],
+  )
+  await axe(page, 'uzbek inline')
+  assert.deepEqual(opened.errors, [])
+  await opened.context.close()
+  passed(
+    'Uzbek Latin and Cyrillic: the preview is the line’s own face, then Noto Sans or Serif, bold kept, colour kept',
+  )
+}
+
+for (const [name, width, height, locale, theme] of [
+  ['390-en-light', 390, 656, 'en', 'light'],
+  ['320-ru-dark', 320, 568, 'ru', 'dark'],
+  ['320-uz-light', 320, 568, 'uz', 'light'],
+  ['390-uz-dark', 390, 656, 'uz', 'dark'],
+  ['390-ru-light', 390, 656, 'ru', 'light'],
+]) {
+  // The dock for a line of the file's own words, in every language and theme.
+  const opened = await openContext({
+    width,
+    height,
+    locale,
+    theme,
+    marks: [],
+    editor: TEXT_ON,
+    pdf: wordsBytes,
+  })
+  const { page, errors } = opened
+  await goToDocument(opened)
+  await settle(page)
+  await page.waitForFunction(() => document.querySelector('[data-testid="editor-hint"]'))
+  const look = async (state) => {
+    await noSidewaysScroll(page, `${name} ${state}`)
+    assert.deepEqual(await smallTargets(page), [], `${name} ${state}: tap targets`)
+    await axe(page, `${name} ${state}`)
+    await page.screenshot({ path: path.join(output, `text-${name}-${state}.png`) })
+  }
+  await look('hint')
+  await page.getByTestId('editor-page-1').click({ position: await at(page, 140, 136) })
+  await page.getByTestId('editor-text-form').waitFor()
+  await page.evaluate(() => window.__tg.keyboard(253))
+  await toEnd(page.getByTestId('editor-text-input'))
+  await page.keyboard.type(
+    locale === 'ru' ? ' и ещё немного слов сверху' : ' va yana bir necha so‘z qo‘shildi',
+  )
+  await page.waitForTimeout(150)
+  await look('dock')
+  await page.getByTestId('editor-text-input').fill('')
+  await look('dock-removed')
+  await page.getByTestId('editor-text-cancel').click()
+  await page.evaluate(() => window.__tg.keyboard(0))
+  assert.equal(opened.server.commands.length, 0, `${name}: Cancel took the new change away`)
+  assert.deepEqual(errors, [], `${name}: page errors`)
+  assert.deepEqual(opened.server.unexpected, [], `${name}: requests with no fixture`)
+  await opened.context.close()
+}
+passed('Changing a line in the dock at 390 and 320, en uz ru, light and dark: axe, 44 px, no sideways scroll')
 
 await browser.close()
 console.log(`Pass: ${checks.length} groups of checks`)

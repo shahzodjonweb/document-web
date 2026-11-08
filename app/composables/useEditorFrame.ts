@@ -36,6 +36,12 @@ function watchWidth() {
   query.addEventListener('change', (event) => (wide.value = event.matches))
 }
 
+/** Whether the frame has the room of 980 px and over, for what is not a component of it. */
+export function useEditorWide() {
+  watchWidth()
+  return computed(() => wide.value)
+}
+
 /** Only the server's own `true` turns it on: absent, or a config that failed, is today's editor. */
 export function useEditorV2() {
   const studio = useStudio()

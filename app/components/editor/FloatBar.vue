@@ -77,7 +77,11 @@ const footprint = computed(() => {
   }
   return { x: current.x ?? 0, y: current.y ?? 0, width: current.width ?? 0, height: current.height ?? 0 }
 })
-const movable = computed(() => !!command.value && (shape.value?.positional || command.value.type === 'draw'))
+/** A change of the file's own words stays on its line at its size: it is only changed again or taken back. */
+const words = computed(() => command.value?.type === 'edit_text')
+const movable = computed(
+  () => !!command.value && !words.value && (shape.value?.positional || command.value.type === 'draw'),
+)
 const sizable = computed(() => movable.value && command.value?.type !== 'note')
 const picture = computed(() => !!shape.value?.image)
 const coloured = computed(() => ['add_text', 'highlight', 'draw'].includes(command.value?.type ?? ''))
@@ -228,13 +232,22 @@ const issue = computed(() => session.issues.value.find((item) => item.id === com
     <template v-else>
       <p v-if="issue" class="editor-invalid" role="status">{{ t(issue.code) }}</p>
       <button
-        v-if="command.type === 'add_text' || command.type === 'note'"
+        v-if="command.type === 'add_text' || command.type === 'note' || words"
         type="button"
         class="button secondary small editor-object-words"
         data-testid="editor-object-words"
-        @click="tools.openField(command._id)"
+        @click="tools.openWords(command._id)"
       >
         <AppIcon name="type" :size="16" />{{ t('editorChangeWords') }}
+      </button>
+      <button
+        v-if="words"
+        type="button"
+        class="button secondary small editor-object-words"
+        data-testid="editor-object-restore"
+        @click="remove"
+      >
+        <AppIcon name="undo" :size="16" />{{ t('editorRestoreText') }}
       </button>
 
       <div v-if="sizable" class="editor-object-row" role="group" :aria-label="t('editorSize')">
@@ -279,7 +292,7 @@ const issue = computed(() => session.issues.value.find((item) => item.id === com
         </button>
       </div>
 
-      <div class="editor-object-actions">
+      <div v-if="!words" class="editor-object-actions">
         <button
           v-if="picture"
           type="button"

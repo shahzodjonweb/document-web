@@ -26,6 +26,7 @@ import {
   type ServerCommand,
 } from './useEditorCommands'
 import { clampCommand, type PageSize } from './useEditorGeometry'
+import { editTextFit, linesOn } from './useEditorTextLayer'
 
 export type EditorMode = 'edit' | 'pages' | 'redact'
 export type SaveState = 'clean' | 'dirty' | 'saving' | 'saved' | 'failed' | 'paused'
@@ -197,11 +198,25 @@ export function useEditorSession() {
     return horizontal || vertical ? { id: command._id, code: 'editorTextOverflow' } : null
   }
 
+  /**
+   * A line of the file's own words given more than the server can shrink to fit:
+   * saved like any other change, and only the file cannot be made from it.
+   */
+  function tooLongIssue(command: ClientCommand): Issue | null {
+    if (command.type !== 'edit_text' || !metrics.ready.value) return null
+    const page = command.page ?? 1
+    const fit = editTextFit(command, pageSize(page), linesOn(page), metrics.stringWidth)
+    return fit.state === 'tooLong' ? { id: command._id, code: 'editorEditTextTooLong' } : null
+  }
+
   const issues = computed<Issue[]>(() =>
     commands.value
       // The mark being typed into is not a problem yet.
       .filter((command) => command._id !== editingId.value)
-      .map((command) => commandIssues(command, assets.value.length) ?? overflowIssue(command))
+      .map(
+        (command) =>
+          commandIssues(command, assets.value.length) ?? overflowIssue(command) ?? tooLongIssue(command),
+      )
       .filter((issue): issue is Issue => issue !== null),
   )
 
@@ -289,9 +304,14 @@ export function useEditorSession() {
     const { past, future } = openDocument()
     const snapshot = past.pop()
     if (!snapshot) return
-    // A field still empty is dropped as closing it would drop it, with nothing for Redo to bring back.
+    // A field still empty is dropped as closing it would drop it, with nothing for Redo to bring back;
+    // so is a change of the file's own words still holding them as they were, which is no change.
     const typing = commands.value.find((command) => command._id === editingId.value)
-    if (!typing || typing.text?.trim())
+    const nothing =
+      typing?.type === 'edit_text'
+        ? (typing.text ?? '').trim() === (typing.original ?? '').trim()
+        : !typing?.text?.trim()
+    if (!typing || !nothing)
       future.push({
         commands: toPlain(commands.value),
         selection: [...selection.value],

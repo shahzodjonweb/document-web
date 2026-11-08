@@ -21,6 +21,7 @@ const snackbar = useEditorSnackbar()
 const send = useEditorSend()
 const pageOrder = useEditorPageOrder()
 const render = useEditorRender()
+const textLayer = useEditorTextLayer()
 const ws = useWorkspace()
 
 const moreOpen = ref(false)
@@ -118,7 +119,8 @@ watch(
 )
 
 const selected = computed(() => session.selected.value[0] ?? null)
-const editing = computed(() => !!session.editingId.value)
+/** The dock is up. A line of the file's own words typed over itself on the paper leaves the frame be. */
+const editing = computed(() => !!session.editingId.value && !tools.inline.value)
 /** What the compact sheet holds: the chosen mark's form first, then the open tool's sheet. */
 const panel = computed<'object' | Exclude<ToolSheet, 'fields'> | null>(() => {
   if (session.mode.value === 'pages' || editing.value) return null
@@ -192,16 +194,22 @@ const armedBar = computed(() => {
   const armed = tools.armed.value
   return armed && armed.kind !== 'redact' && !editing.value ? armed : null
 })
-/** One first-use line at a time, only on a quiet page. */
-const rootHint = computed(
-  () =>
+/**
+ * One first-use line at a time, only on a quiet page: the page's own words first, while
+ * they can be changed and the page on screen has some, then placing.
+ */
+const rootHint = computed(() => {
+  const quiet =
     session.mode.value === 'edit' &&
     !panel.value &&
     !tools.armed.value &&
-    !editing.value &&
-    !snackbar.snack.value &&
-    hints.showing('place'),
-)
+    !session.editingId.value &&
+    !snackbar.snack.value
+  if (!quiet) return ''
+  if (textLayer.enabled.value && textLayer.linesOn(props.currentPage).length && hints.showing('editText'))
+    return 'editorHintEditText'
+  return hints.showing('place') ? 'editorHintPlace' : ''
+})
 
 // A picture still on its way is not a change that needs fixing: it is held back until it lands.
 const heldCount = computed(
@@ -396,7 +404,7 @@ const chipCount = computed(() => pageOrder.kept.value.length || props.pageCount)
             </button>
             <slot />
           </template>
-          <p v-if="rootHint" class="editor-hint" data-testid="editor-hint">{{ t('editorHintPlace') }}</p>
+          <p v-if="rootHint" class="editor-hint" data-testid="editor-hint">{{ t(rootHint) }}</p>
           <EditorSnackbar />
         </div>
 

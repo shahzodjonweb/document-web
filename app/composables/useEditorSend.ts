@@ -125,6 +125,11 @@ export function useEditorSend() {
   const skipped = computed(
     () => (job.value?.per_command ?? []).filter((row: any) => row.status === 'skipped').length,
   )
+  /** Lines of the file's own words its font could not show, so set in a Noto face that looks like it. */
+  const retyped = computed(
+    () =>
+      (job.value?.per_command ?? []).filter((row: any) => ['retyped', 'covered'].includes(row.engine)).length,
+  )
   const result = computed(
     () =>
       (job.value?.artifacts ?? []).find((artifact: any) => artifact.mime_type === 'application/pdf') ??
@@ -488,6 +493,7 @@ export function useEditorSend() {
     job: computed(() => job.value),
     result,
     skipped,
+    retyped,
     canConfirm,
     stayOpen,
     unsent,

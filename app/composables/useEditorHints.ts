@@ -2,7 +2,7 @@
  * First-use hints: one line per task, shown until that task first works, then not
  * again on this device. More → Show tips again brings them all back. No wizards.
  */
-export type HintTask = 'place' | 'sign' | 'blackout'
+export type HintTask = 'place' | 'sign' | 'blackout' | 'editText'
 
 const KEY = 'pdf-master-editor-tips'
 const retired = ref<HintTask[] | null>(null)

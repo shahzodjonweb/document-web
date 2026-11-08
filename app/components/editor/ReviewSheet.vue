@@ -238,6 +238,9 @@ watch(
       <p v-if="send.skipped.value" class="field-hint" data-testid="editor-skipped">
         {{ plural('editorSkipped', send.skipped.value) }}
       </p>
+      <p v-if="send.retyped.value" class="field-hint" data-testid="editor-retyped">
+        {{ plural('editorTextRetyped', send.retyped.value) }}
+      </p>
       <a
         v-if="send.deliver.value === 'download' && stage === 'made' && send.result.value"
         class="button primary full"
