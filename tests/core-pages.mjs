@@ -132,8 +132,14 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
         address: 'Toshkent shahri, Yunusobod tumani, Qashqar MFY, Markaz 4 mavzesi, 25-uy',
         phone: '+998 (71) 200-00-00', email: '' } })
   if (endpoint === '/referrals')
-    return json({ code: 'MALIKA7', url: 'https://pdfmaster.orderdesk.live/r/MALIKA7', rewards_count: 2, pending_count: 1,
-      monthly_cap: 5, expires_in_days: 90, qualification: '', sandbox: false })
+    // Seven friends counted: one reward (1 month), two toward the next (2 months), this month's five
+    // used up with one more waiting, and one who joined without finishing a task.
+    return json({ code: 'MALIKA7', url: 'https://t.me/pdfmaster_bot?start=ref_MALIKA7', rewards_count: 7, pending_count: 2,
+      monthly_cap: 5, qualification: 'first_successful_task', sandbox: false, step: 5, counted: 7, counted_this_month: 5,
+      month_full: true, next_month: '2026-12-01T00:00:00+05:00', waiting_next_month: 1,
+      next_reward: { tier: 2, months: 2, invites: 10, have: 2, remaining: 3 },
+      rewards: [{ tier: 1, months: 1, invites: 5, days: 30, starts_at: '2026-11-02T10:00:00+05:00',
+        ends_at: '2026-12-02T10:00:00+05:00', created_at: '2026-11-02T10:00:00+05:00' }] })
   unexpected.push(`${method} ${endpoint}`)
   return json({})
 })
@@ -347,15 +353,31 @@ try {
   assert.match(await page.getByTestId('discount-banner').innerText(),
     /Скидка на Plus:\s+Обычная цена\s+20 000 so'm\s+15 000 so'm\s+−25%\s+· до \d+ [а-я]+/)
 
-  // Referrals: the link with a copy button, and two numbers.
+  // Invite friends: the link to copy or share, how far to the next Plus months, and the months earned.
   await go('/en/app/referrals')
   await page.locator('.referral-link-panel').waitFor()
-  assert.equal(await page.locator('.copy-field input').first().inputValue(), 'https://pdfmaster.orderdesk.live/r/MALIKA7')
-  assert.deepEqual(await texts(page.locator('.referral-numbers strong')), ['2', '1'])
-  assert.equal(await page.getByTestId('referral-rewards').innerText(), 'Rewards for invitations are coming soon.')
+  assert.equal(await page.locator('.copy-field input').first().inputValue(), 'https://t.me/pdfmaster_bot?start=ref_MALIKA7')
+  assert.match(await page.locator('.referral-share').getAttribute('href'),
+    /^https:\/\/t\.me\/share\/url\?url=https%3A%2F%2Ft\.me%2Fpdfmaster_bot%3Fstart%3Dref_MALIKA7&text=/)
+  const progress = page.getByTestId('referral-progress')
+  assert.equal(await progress.locator('h2').innerText(), 'Next reward: 2 months of Plus')
+  assert.equal(await progress.locator('.referral-progress-count').innerText(), '2 of 5 friends')
+  assert.equal(await progress.locator('[role=progressbar] span').getAttribute('style'), 'width: 40%;')
+  assert.match(await page.getByTestId('referral-month-full').innerText(), /^This month’s 5 friends are counted\. New friends count from 1 Dec/)
+  assert.deepEqual(await texts(page.locator('.referral-numbers strong')), ['7', '1', '1'])
+  assert.match(await page.getByTestId('referral-rules').innerText(), /Every 5 friends earn Plus: 1 month for the first 5, 2 months for the next 5/)
+  assert.equal(await page.getByTestId('referral-rewards').locator('li strong').innerText(), '1 month of Plus')
+  assert.equal(await page.locator('.sidebar a[href="/en/app/referrals"], nav a[href="/en/app/referrals"]').count() > 0, true, 'in the menu')
   await axe('referrals 1440')
   await shot('referrals-1440', true)
-  checks.push('Landing: what it does, AI services, tools, plans with their weeks and volume-only subtitles, the Plus discount on the teaser and the banner (Russian too), questions, Russian ИИ; referrals: link, copy and two numbers')
+  await go('/ru/app/referrals')
+  await page.getByTestId('referral-progress').waitFor()
+  assert.equal(await page.getByTestId('referral-progress').locator('h2').innerText(), 'Следующая награда: 2 месяца Plus')
+  assert.equal(await page.getByTestId('referral-rewards').locator('li strong').innerText(), '1 месяц Plus')
+  await go('/uz/app/referrals')
+  await page.getByTestId('referral-progress').waitFor()
+  assert.match(await page.getByTestId('referral-month-full').innerText(), /Yangi do‘stlar 1-dekabrdan hisoblanadi\./)
+  checks.push('Landing: what it does, AI services, tools, plans with their weeks and volume-only subtitles, the Plus discount on the teaser and the banner (Russian too), questions, Russian ИИ; invite friends: link, share, progress to the next Plus months, the month full, months earned, Russian plurals, Uzbek "from" day')
 
   // The AI shortcuts, as many to a row as their words fit, in every language:
   // from a tablet up, nothing runs out of its card or under its arrow or button.
@@ -416,6 +438,11 @@ try {
   assert.equal(await overflow(), false, 'merge 390 overflow')
   await axe('merge 390')
   await shot('merge-390')
+  await go('/en/app/referrals')
+  await page.getByTestId('referral-progress').waitFor()
+  assert.equal(await overflow(), false, 'referrals 390 overflow')
+  await axe('referrals 390')
+  await shot('referrals-390', true)
   checks.push('Phones: Home and the tool fit; the next step stays in reach above the phone bar')
 
   await page.setViewportSize({ width: 1440, height: 900 })

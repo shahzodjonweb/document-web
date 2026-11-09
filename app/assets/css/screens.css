@@ -2002,9 +2002,58 @@
 .referral-link-panel h2 {
   font-size: var(--text-lg);
 }
+.referral-share {
+  justify-self: start;
+}
+.referral-progress-panel {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-6);
+}
+.referral-progress-panel h2,
+.referral-rewards-panel h2 {
+  font-size: var(--text-lg);
+}
+.referral-progress-count {
+  margin: 0;
+}
+.referral-progress-count strong {
+  color: var(--ink);
+  font: 750 var(--text-2xl) / 1.1 var(--font-display);
+  letter-spacing: -0.02em;
+}
+.referral-month-full {
+  margin: 0;
+  color: var(--ink);
+  font-size: var(--text-sm);
+}
+.referral-progress-panel .field-hint {
+  margin: 0;
+}
+.referral-rewards-panel {
+  padding: var(--space-5) var(--space-6);
+}
+.referral-rewards-panel ul {
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.referral-rewards-panel li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--hairline);
+}
+.referral-rewards-panel li span {
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
 .referral-numbers {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
   border: 1px solid var(--hairline);
   border-radius: var(--radius-md);
 }
@@ -2067,8 +2116,18 @@
   .landing-cta .button {
     width: 100%;
   }
-  .referral-link-panel {
+  .referral-link-panel,
+  .referral-progress-panel {
     padding: var(--space-5) var(--space-4);
+  }
+  .referral-rewards-panel {
+    padding: var(--space-4);
+  }
+  .referral-share {
+    justify-self: stretch;
+  }
+  .referral-numbers > div {
+    padding: var(--space-3);
   }
   .copy-field {
     flex-direction: column;

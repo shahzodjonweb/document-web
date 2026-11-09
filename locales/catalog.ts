@@ -216,16 +216,38 @@ const entries: Record<string, [string, string, string]> = {
     'Да. Отправьте файл боту или откройте приложение в Telegram — аккаунт и лимиты те же.',
   ],
   ctaTitle: ['Start free. No installation needed.', 'Bepul boshlang. Hech narsa o‘rnatish shart emas.', 'Начните бесплатно. Ничего устанавливать не нужно.'],
-  // Referrals.
+  // Referrals: invite friends, earn Plus (the rules are the server's, apps/commerce/referrals.py).
   referralLead: [
-    'Share your link and see who joins with it.',
-    'Havolangizni ulashing va u orqali kim qo‘shilganini ko‘ring.',
-    'Поделитесь ссылкой и смотрите, кто присоединился по ней.',
+    'Invite friends and get Plus free.',
+    'Do‘stlarni taklif qiling va Plus tarifini bepul oling.',
+    'Приглашайте друзей и получайте Plus бесплатно.',
   ],
-  referralRewardsSoon: [
-    'Rewards for invitations are coming soon.',
-    'Takliflar uchun mukofotlar tez orada.',
-    'Награды за приглашения скоро появятся.',
+  referralRules: [
+    'A friend counts when they open the bot with your link and finish their first task. Every {step} friends earn Plus: 1 month for the first {step}, 2 months for the next {step}, then 3, and so on. Up to {cap} friends count each month.',
+    'Do‘stingiz botni havolangiz orqali ochib, birinchi vazifasini bajarganda hisobga olinadi. Har {step} do‘st uchun Plus beriladi: birinchi {step} tasi uchun 1 oy, keyingi {step} tasi uchun 2 oy, keyin 3 oy va hokazo. Bir oyda {cap} tagacha do‘st hisobga olinadi.',
+    'Друг засчитывается, когда откроет бота по вашей ссылке и выполнит первую задачу. Каждые {step} друзей дают Plus: 1 месяц за первых {step}, 2 месяца за следующих {step}, затем 3 и так далее. В месяц засчитывается до {cap} друзей.',
+  ],
+  referralNext: ['Next reward: {months} of Plus', 'Keyingi sovg‘a: {months} Plus', 'Следующая награда: {months} Plus'],
+  referralProgress: ['{have} of {step} friends', '{step} tadan {have} ta do‘st', '{have} из {step} друзей'],
+  referralMonthFull: [
+    'This month’s {cap} friends are counted. New friends count from {day}.',
+    'Bu oy {cap} ta do‘st hisobga olindi. Yangi do‘stlar {day}dan hisoblanadi.',
+    'В этом месяце засчитано {cap} друзей. Новые друзья засчитаются с {day}.',
+  ],
+  referralCounted: ['Friends counted', 'Hisoblangan do‘stlar', 'Засчитано друзей'],
+  referralNoTaskYet: ['Joined, no task yet', 'Qo‘shilgan, vazifa bajarmagan', 'Пришли, но без задачи'],
+  referralNextMonth: ['Waiting for next month', 'Keyingi oyni kutmoqda', 'Ждут следующего месяца'],
+  referralEarned: ['Plus you earned', 'Olingan Plus', 'Полученный Plus'],
+  referralRewardRow: ['{months} of Plus', '{months} Plus', '{months} Plus'],
+  referralMonths_one: ['{count} month', '{count} oy', '{count} месяц'],
+  referralMonths_few: ['{count} months', '{count} oy', '{count} месяца'],
+  referralMonths_many: ['{count} months', '{count} oy', '{count} месяцев'],
+  referralMonths_other: ['{count} months', '{count} oy', '{count} месяца'],
+  referralShare: ['Share in Telegram', 'Telegramda ulashish', 'Поделиться в Telegram'],
+  referralShareText: [
+    'Make PDFs, slides and CVs right in Telegram:',
+    'PDF, slayd va rezyumelarni Telegramda tayyorlang:',
+    'PDF, слайды и резюме прямо в Telegram:',
   ],
   haveCode: ['Have an invitation code?', 'Taklif kodingiz bormi?', 'Есть код приглашения?'],
   // The app frame: menu, top bar, phone bar.

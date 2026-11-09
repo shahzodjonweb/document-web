@@ -119,7 +119,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   }
   if (endpoint === '/studio/config') return json({ provider: { mode: 'openai', configured: true }, features: [], default_pages: 10 })
   if (endpoint === '/jobs') return json({ results: [], count: 0 })
-  if (endpoint === '/referrals') return json({ code: 'x', url: null, rewards_count: 0, pending_count: 0, monthly_cap: 5, expires_in_days: 7, qualification: '', sandbox: false })
+  if (endpoint === '/referrals') return json({ code: 'x', url: null, rewards_count: 0, pending_count: 0, monthly_cap: 5, qualification: 'first_successful_task', sandbox: false, step: 5, counted: 0, counted_this_month: 0, month_full: false, next_month: '2026-12-01T00:00:00+05:00', waiting_next_month: 0, next_reward: { tier: 1, months: 1, invites: 5, have: 0, remaining: 5 }, rewards: [] })
   unexpected.push(`${method} ${endpoint}`)
   return json({ error: { code: 'not_found', message: 'not found' } }, 404)
 })

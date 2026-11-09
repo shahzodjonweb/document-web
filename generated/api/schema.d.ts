@@ -1040,6 +1040,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description Invite friends, earn Plus. A friend counts after opening the bot with `url` and finishing a first task, at most `monthly_cap` a calendar month (Tashkent). Every `step` counted friends earn Plus, one month more each time: 1 month, then 2, then 3. The months follow any paid period. Reading this counts the friends who are due. */
         get: operations["getReferrals"];
         put?: never;
         post: operations["claimReferral"];
@@ -7571,14 +7572,50 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        code?: string;
-                        expires_in_days?: number;
-                        monthly_cap?: number;
-                        pending_count?: number;
-                        qualification?: string;
-                        rewards_count?: number;
-                        sandbox?: boolean;
-                        url?: string | null;
+                        code: string;
+                        /** @description Friends counted toward Plus months. */
+                        counted: number;
+                        counted_this_month: number;
+                        /** @description This month's friends are all counted; new ones count from `next_month`. */
+                        month_full: boolean;
+                        monthly_cap: number;
+                        /**
+                         * Format: date-time
+                         * @description The start of the next calendar month, Tashkent time.
+                         */
+                        next_month: string;
+                        next_reward: {
+                            /** @description Friends counted toward this reward so far, 0 to `step`. */
+                            have: number;
+                            /** @description Counted friends this reward needs in all. */
+                            invites: number;
+                            months: number;
+                            remaining: number;
+                            tier: number;
+                        };
+                        /** @description Friends who joined with the link and have not been counted yet. */
+                        pending_count: number;
+                        qualification: string;
+                        rewards: {
+                            /** Format: date-time */
+                            created_at: string;
+                            days: number;
+                            /** Format: date-time */
+                            ends_at: string | null;
+                            invites: number;
+                            months: number;
+                            /** Format: date-time */
+                            starts_at: string | null;
+                            tier: number;
+                        }[];
+                        /** @description Every friend ever counted, including those from before invitations earned Plus. */
+                        rewards_count: number;
+                        sandbox: boolean;
+                        /** @description Counted friends per reward. */
+                        step: number;
+                        url: string | null;
+                        /** @description Friends who finished a task but wait for next month's room. */
+                        waiting_next_month: number;
                     };
                 };
             };
