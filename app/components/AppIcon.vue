@@ -84,6 +84,8 @@ import {
   SendToBack,
   SquareCheck,
   Ellipsis,
+  Gift,
+  Share2,
 } from 'lucide-vue-next'
 const props = withDefaults(defineProps<{ name: string; size?: number }>(), { size: 20 })
 const icons: Record<string, any> = {
@@ -172,6 +174,8 @@ const icons: Record<string, any> = {
   sendBack: SendToBack,
   tick: SquareCheck,
   more: Ellipsis,
+  gift: Gift,
+  share: Share2,
 }
 </script>
 <template>

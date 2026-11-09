@@ -35,6 +35,7 @@ const workNav = computed<NavItem[]>(() => [
 ])
 const accountNav = computed<NavItem[]>(() => [
   { key: 'billing', label: 'navBilling', url: '/app/billing', icon: 'billing' },
+  { key: 'referrals', label: 'referrals', url: '/app/referrals', icon: 'gift' },
   { key: 'settings', label: 'settings', url: '/app/settings', icon: 'settings' },
   { key: 'support', label: 'navHelp', url: '/app/support', icon: 'help' },
   ...(studio.config.value ? [{ key: 'guide', label: 'guide', url: '/app/guide', icon: 'book' }] : []),
