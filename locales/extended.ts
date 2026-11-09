@@ -2168,6 +2168,386 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Bu shablonda rasm uchun joy yo‘q, shuning uchun rezyume rasmsiz tayyorlandi.',
     'В этом шаблоне нет места для фото, поэтому резюме сделано без него.',
   ],
+  // The slide editor (/app/editor/deck/{id}): the bot’s ✏️ Edit on an AI deck opens it.
+  deckEditorTitle: ['Slide editor', 'Slayd muharriri', 'Редактор слайдов'],
+  deckOpening: ['Opening the slides…', 'Slaydlar ochilmoqda…', 'Открываем слайды…'],
+  deckEditorOff: [
+    'Changing slides here is not available yet.',
+    'Slaydlarni bu yerda o‘zgartirish hozircha mavjud emas.',
+    'Менять слайды здесь пока нельзя.',
+  ],
+  deckNotEditable: [
+    'This deck can’t be changed here. Describe it again to make a new one.',
+    'Bu taqdimotni bu yerda o‘zgartirib bo‘lmaydi. Yangisini yaratish uchun uni qayta tasvirlab bering.',
+    'Эту презентацию здесь изменить нельзя. Опишите её заново, чтобы сделать новую.',
+  ],
+  deckExpired: [
+    'Deleted after 24 hours. Describe the deck again to make a new one.',
+    '24 soatdan keyin o‘chirildi. Yangisini yaratish uchun taqdimotni qayta tasvirlab bering.',
+    'Удалено через 24 часа. Опишите презентацию заново, чтобы сделать новую.',
+  ],
+  deckMakeAgain: ['Make again', 'Qayta yaratish', 'Сделать заново'],
+  deckConflictTitle: [
+    'This deck changed somewhere else',
+    'Bu taqdimot boshqa joyda o‘zgardi',
+    'Презентация изменена в другом месте',
+  ],
+  deckUntil: ['until {time}', '{time} gacha', 'до {time}'],
+  deckOffline: [
+    'No connection. Changes save when you’re back online.',
+    'Aloqa yo‘q. Aloqa tiklanganda o‘zgarishlar saqlanadi.',
+    'Нет связи. Изменения сохранятся, когда связь вернётся.',
+  ],
+  deckOtherNotSaved: [
+    'The last change to your other deck wasn’t saved. Open that deck again to save it.',
+    'Boshqa taqdimotdagi oxirgi o‘zgarish saqlanmadi. Saqlash uchun o‘sha taqdimotni qayta oching.',
+    'Последнее изменение в другой презентации не сохранилось. Откройте её снова, чтобы сохранить.',
+  ],
+  deckOpenOther: ['Open it', 'Ochish', 'Открыть'],
+  deckSlideOf: ['Slide {n} of {total}', '{total} tadan {n}-slayd', 'Слайд {n} из {total}'],
+  deckSlideNumber: ['Slide {n}', '{n}-slayd', 'Слайд {n}'],
+  deckSlideAlt: ['Slide {n}: {heading}', '{n}-slayd: {heading}', 'Слайд {n}: {heading}'],
+  deckPrevSlide: ['Previous slide', 'Oldingi slayd', 'Предыдущий слайд'],
+  deckNextSlide: ['Next slide', 'Keyingi slayd', 'Следующий слайд'],
+  deckSlideMenu: ['Slide actions', 'Slayd amallari', 'Действия со слайдом'],
+  deckRegionHeading: [
+    'Headline of slide {n}: {text}',
+    '{n}-slayd sarlavhasi: {text}',
+    'Заголовок слайда {n}: {text}',
+  ],
+  deckRegionBody: [
+    'Change the lines of slide {n}',
+    '{n}-slayd qatorlarini o‘zgartirish',
+    'Изменить строки слайда {n}',
+  ],
+  deckHintTap: [
+    'Tap any words to change them',
+    'O‘zgartirish uchun istalgan so‘zni bosing',
+    'Нажмите на любые слова, чтобы изменить их',
+  ],
+  deckHintRegions: [
+    'Tap a part of the slide to change it',
+    'O‘zgartirish uchun slaydning bir qismini bosing',
+    'Нажмите на часть слайда, чтобы изменить её',
+  ],
+  deckDrawing: ['Updating the slide…', 'Slayd yangilanmoqda…', 'Обновляем слайд…'],
+  deckNotDrawn: [
+    'Its picture appears in a moment',
+    'Ko‘rinishi birozdan keyin chiqadi',
+    'Картинка появится через мгновение',
+  ],
+  deckPreviewUnavailable: ['Preview unavailable.', 'Ko‘rinish mavjud emas.', 'Предпросмотр недоступен.'],
+  deckPreviewBusy: [
+    'Slide pictures are paused for now.',
+    'Slayd ko‘rinishlari hozircha to‘xtatildi.',
+    'Картинки слайдов пока приостановлены.',
+  ],
+  deckSavedInFile: [
+    'Your changes are saved and will be in the file.',
+    'O‘zgarishlaringiz saqlandi va faylda bo‘ladi.',
+    'Изменения сохранены и будут в файле.',
+  ],
+  deckPictureGone: [
+    'A picture in this deck is no longer stored.',
+    'Bu taqdimotdagi rasm endi saqlanmagan.',
+    'Картинка из этой презентации больше не хранится.',
+  ],
+  deckPictureGoneSlide: [
+    'Slide {n}: its picture is no longer stored',
+    '{n}-slayd: rasmi endi saqlanmagan',
+    'Слайд {n}: его картинка больше не хранится',
+  ],
+  deckPictureGoneCover: [
+    'The title slide’s picture is no longer stored. Make the deck again to get a new one.',
+    'Sarlavha slaydining rasmi endi saqlanmagan. Yangisini olish uchun taqdimotni qayta yarating.',
+    'Картинка титульного слайда больше не хранится. Сделайте презентацию заново, чтобы получить новую.',
+  ],
+  // After the first drawing: slides the generator left words off.
+  deckSlidesHidden_one: [
+    '{count} slide has words that don’t show',
+    '{count} ta slaydda baʼzi so‘zlar ko‘rinmaydi',
+    'На {count} слайде видны не все слова',
+  ],
+  deckSlidesHidden_few: [
+    '{count} slides have words that don’t show',
+    '{count} ta slaydda baʼzi so‘zlar ko‘rinmaydi',
+    'На {count} слайдах видны не все слова',
+  ],
+  deckSlidesHidden_many: [
+    '{count} slides have words that don’t show',
+    '{count} ta slaydda baʼzi so‘zlar ko‘rinmaydi',
+    'На {count} слайдах видны не все слова',
+  ],
+  deckSlidesHidden_other: [
+    '{count} slides have words that don’t show',
+    '{count} ta slaydda baʼzi so‘zlar ko‘rinmaydi',
+    'На {count} слайдах видны не все слова',
+  ],
+  deckStrip: ['Slides of the deck', 'Taqdimot slaydlari', 'Слайды презентации'],
+  deckAddSlide: ['Add slide', 'Slayd qo‘shish', 'Добавить слайд'],
+  deckWordsHidden: ['Some words don’t show', 'Baʼzi so‘zlar ko‘rinmaydi', 'Не все слова видны'],
+  deckTabs: ['Deck tools', 'Taqdimot vositalari', 'Инструменты презентации'],
+  deckTabSlides: ['Slides', 'Slaydlar', 'Слайды'],
+  deckFieldHeadline: ['Headline', 'Sarlavha', 'Заголовок'],
+  deckFieldLines: ['Lines', 'Qatorlar', 'Строки'],
+  deckFieldNotes: ['Speaker notes', 'Taqdimotchi qaydlari', 'Заметки докладчика'],
+  deckDockTitle: ['Slide {n} · {field}', '{n}-slayd · {field}', 'Слайд {n} · {field}'],
+  // Chosen by {max}: “из 1 строки”, “из 21 строки”, “из 6 строк”.
+  deckLinesBudget_one: ['{used} of {max} line', '{max} qatordan {used} ta', '{used} из {max} строки'],
+  deckLinesBudget_few: ['{used} of {max} lines', '{max} qatordan {used} ta', '{used} из {max} строк'],
+  deckLinesBudget_many: ['{used} of {max} lines', '{max} qatordan {used} ta', '{used} из {max} строк'],
+  deckLinesBudget_other: ['{used} of {max} lines', '{max} qatordan {used} ta', '{used} из {max} строки'],
+  deckLine: ['Line {n}', '{n}-qator', 'Строка {n}'],
+  deckLineMenu: ['More for line {n}', '{n}-qator uchun yana', 'Ещё для строки {n}'],
+  deckAddLine: ['Add line', 'Qator qo‘shish', 'Добавить строку'],
+  deckRemoveLine: ['Remove line', 'Qatorni olib tashlash', 'Убрать строку'],
+  deckLineUp: ['Move line up', 'Qatorni yuqoriga', 'Строку выше'],
+  deckLineDown: ['Move line down', 'Qatorni pastga', 'Строку ниже'],
+  deckPro: ['Pro', 'Afzallik', 'За'],
+  deckCon: ['Con', 'Kamchilik', 'Против'],
+  deckItemNeedsLabel: [
+    'Add a label, or this one won’t show',
+    'Nom qo‘shing, aks holda bu ko‘rinmaydi',
+    'Добавьте название, иначе это не будет видно',
+  ],
+  // A paste that does not all fit: what was left out, said in the dock’s head (two lines at
+  // 320 px, so one sentence each) or under the field it was pasted in.
+  deckPasteLinesLeft_one: [
+    '{count} pasted line was not added: a slide has at most {max} lines.',
+    '{count} ta joylashtirilgan qator qo‘shilmadi: slaydda ko‘pi bilan {max} ta qator bo‘ladi.',
+    'Не добавлена {count} вставленная строка: на слайде не больше {max} строк.',
+  ],
+  deckPasteLinesLeft_few: [
+    '{count} pasted lines were not added: a slide has at most {max} lines.',
+    '{count} ta joylashtirilgan qator qo‘shilmadi: slaydda ko‘pi bilan {max} ta qator bo‘ladi.',
+    'Не добавлены {count} вставленные строки: на слайде не больше {max} строк.',
+  ],
+  deckPasteLinesLeft_many: [
+    '{count} pasted lines were not added: a slide has at most {max} lines.',
+    '{count} ta joylashtirilgan qator qo‘shilmadi: slaydda ko‘pi bilan {max} ta qator bo‘ladi.',
+    'Не добавлено {count} вставленных строк: на слайде не больше {max} строк.',
+  ],
+  deckPasteLinesLeft_other: [
+    '{count} pasted lines were not added: a slide has at most {max} lines.',
+    '{count} ta joylashtirilgan qator qo‘shilmadi: slaydda ko‘pi bilan {max} ta qator bo‘ladi.',
+    'Не добавлено {count} вставленной строки: на слайде не больше {max} строк.',
+  ],
+  deckPasteLineCut: [
+    'The end of a pasted line was not added: a line holds up to {max} characters.',
+    'Joylashtirilgan qator oxiri qo‘shilmadi: bir qatorga ko‘pi bilan {max} ta belgi sig‘adi.',
+    'Конец вставленной строки не добавлен: в строке не больше {max} символов.',
+  ],
+  // Both at once: lines past the last row and the end of a long one.
+  deckPasteSomeLeft: [
+    'Some of what was pasted was not added: a slide holds {lines} lines of up to {max} characters.',
+    'Joylashtirilgan matnning bir qismi qo‘shilmadi: slaydga {max} belgigacha {lines} ta qator sig‘adi.',
+    'Часть вставленного текста не добавлена: на слайде не больше {lines} строк по {max} символов.',
+  ],
+  // Any other field: the headline, notes, a cover line, a question. {max} is 80 to 2000, all tens.
+  deckPasteCut: [
+    'The end of what was pasted was not added: up to {max} characters fit here.',
+    'Joylashtirilgan matnning oxiri qo‘shilmadi: bu yerga ko‘pi bilan {max} ta belgi sig‘adi.',
+    'Конец вставленного текста не добавлен: сюда помещается не больше {max} символов.',
+  ],
+  // The same for what the keyboard put in by itself (voice typing, its clipboard strip, a word
+  // typed at the limit) or a drop: it may not have been pasted.
+  deckInsertCut: [
+    'The end was not added: up to {max} characters fit here.',
+    'Oxiri qo‘shilmadi: bu yerga ko‘pi bilan {max} ta belgi sig‘adi.',
+    'Конец не добавлен: сюда помещается не больше {max} символов.',
+  ],
+  // Under a slide or in its lines: the server’s count of words that would not show.
+  deckTooLong_one: [
+    'Too long for this slide: {count} word won’t show',
+    'Slayd uchun uzun: {count} ta so‘z ko‘rinmaydi',
+    'Слишком длинно для слайда: не поместится {count} слово',
+  ],
+  deckTooLong_few: [
+    'Too long for this slide: {count} words won’t show',
+    'Slayd uchun uzun: {count} ta so‘z ko‘rinmaydi',
+    'Слишком длинно для слайда: не поместятся {count} слова',
+  ],
+  deckTooLong_many: [
+    'Too long for this slide: {count} words won’t show',
+    'Slayd uchun uzun: {count} ta so‘z ko‘rinmaydi',
+    'Слишком длинно для слайда: не поместятся {count} слов',
+  ],
+  deckTooLong_other: [
+    'Too long for this slide: {count} words won’t show',
+    'Slayd uchun uzun: {count} ta so‘z ko‘rinmaydi',
+    'Слишком длинно для слайда: не поместятся {count} слова',
+  ],
+  deckTooLongSome: [
+    'Too long for this slide: some words won’t show',
+    'Slayd uchun uzun: baʼzi so‘zlar ko‘rinmaydi',
+    'Слишком длинно для слайда: не все слова поместятся',
+  ],
+  deckSplit: ['Split into two slides', 'Ikki slaydga bo‘lish', 'Разделить на два слайда'],
+  deckSplitNeedsLines: ['Needs at least two lines', 'Kamida ikki qator kerak', 'Нужно хотя бы две строки'],
+  // Beside Split and Duplicate when the deck has the plan’s count of slides.
+  deckSlidesFull: [
+    'The deck already has {max} slides, the most it can have. Delete one to make room.',
+    'Taqdimotda allaqachon {max} ta slayd bor, bundan ko‘p bo‘lmaydi. Joy bo‘shatish uchun bittasini o‘chiring.',
+    'Слайдов уже {max}, больше в презентации быть не может. Удалите один, чтобы освободить место.',
+  ],
+  deckSplitDone: [
+    'Split into slides {a} and {b}.',
+    '{a}- va {b}-slaydlarga bo‘lindi.',
+    'Разделено на слайды {a} и {b}.',
+  ],
+  deckPickLayout: ['Pick another layout', 'Boshqa joylashuvni tanlash', 'Выбрать другое расположение'],
+  deckLayout: ['Layout', 'Joylashuv', 'Расположение'],
+  deckLayoutQuote: ['A person’s words', 'Shaxs so‘zlari', 'Высказывание'],
+  deckLayoutsChecking: [
+    'Checking which layouts hold it…',
+    'Qaysi joylashuvlarga sig‘ishi tekshirilmoqda…',
+    'Проверяем, в какие расположения помещается…',
+  ],
+  deckNoLayoutFits: [
+    'No layout found that holds all of it right now. Split it or make it shorter.',
+    'Hozircha hammasini sig‘diradigan joylashuv topilmadi. Bo‘ling yoki qisqartiring.',
+    'Сейчас не нашлось расположения, где всё поместится. Разделите или сократите.',
+  ],
+  deckCoverFirst: [
+    'The title slide stays first',
+    'Sarlavha slaydi doim birinchi',
+    'Титульный слайд всегда первый',
+  ],
+  deckUntitled: ['Untitled slide', 'Sarlavhasiz slayd', 'Слайд без заголовка'],
+  deckPutHere: ['Put slide {n} here', '{n}-slaydni shu yerga qo‘yish', 'Поставить слайд {n} сюда'],
+  deckChooseSpot: [
+    'Choose where slide {n} goes',
+    '{n}-slayd qayerga borishini tanlang',
+    'Выберите, куда поставить слайд {n}',
+  ],
+  deckMovedTo: [
+    'Slide moved to place {n}.',
+    'Slayd {n}-o‘ringa ko‘chirildi.',
+    'Слайд перемещён на место {n}.',
+  ],
+  deckQuestions: ['Questions · {count}', 'Savollar · {count}', 'Вопросы · {count}'],
+  deckFewerQuestions: ['Fewer questions', 'Kamroq savol', 'Меньше вопросов'],
+  deckRemoveQuiz: ['Remove quiz', 'Testni olib tashlash', 'Убрать тест'],
+  deckQuizRemoved: ['Quiz removed.', 'Test olib tashlandi.', 'Тест убран.'],
+  deckQuestionsLeft: ['Questions left: {count}.', 'Qolgan savollar: {count}.', 'Вопросов осталось: {count}.'],
+  deckQuestionsTitle: ['Questions', 'Savollar', 'Вопросы'],
+  deckQuestionsLead: [
+    'Questions come after the slides, 5 to a slide.',
+    'Savollar slaydlardan keyin, har slaydda 5 tadan.',
+    'Вопросы идут после слайдов, по 5 на слайд.',
+  ],
+  deckQuestion: ['Question {n}', '{n}-savol', 'Вопрос {n}'],
+  deckQuestionOption: ['Option {letter}', '{letter} variant', 'Вариант {letter}'],
+  deckQuestionAnswer: ['Correct answer', 'To‘g‘ri javob', 'Правильный ответ'],
+  deckRemoveQuestion: ['Remove question', 'Savolni olib tashlash', 'Убрать вопрос'],
+  // The title slide’s lines; “Remember” keeps the role lines on the account for new decks.
+  // deckCoverDetails starts with deckCoverShort: it names the button that shows the short one.
+  deckCoverDetails: ['Cover details', 'Muqova maʼlumotlari', 'Титул: данные слайда'],
+  deckCoverShort: ['Cover', 'Muqova', 'Титул'],
+  deckCoverTopic: ['Topic', 'Mavzu', 'Тема'],
+  // Also the label a new line gets on the slide itself (useDeckCover labelsFor): no “(а)”,
+  // which the platform never writes either (title_lines.py keeps the customer’s “Выполнила:”).
+  // Both are read back as a role, here and by title_lines.ROLES (avtor, rukovod).
+  deckCoverPreparedBy: ['Prepared by', 'Tayyorladi', 'Автор'],
+  deckCoverCheckedBy: ['Checked by', 'Qabul qildi', 'Руководитель'],
+  deckCoverGroup: ['Group/Class', 'Guruh/Sinf', 'Группа/класс'],
+  deckCoverGroupExample: ['e.g. 9-B class', 'masalan, 9-B sinf', 'например, 9-Б класс'],
+  deckCoverSchool: ['School', 'Maktab', 'Школа'],
+  deckCoverSchoolExample: ['e.g. School No. 21', 'masalan, 21-maktab', 'например, школа № 21'],
+  deckCoverOther: ['Other line', 'Boshqa qator', 'Другая строка'],
+  deckCoverRemember: [
+    'Remember for my next decks',
+    'Keyingi taqdimotlar uchun eslab qolish',
+    'Запомнить для следующих презентаций',
+  ],
+  deckCoverRememberHint: [
+    'Kept on your account until you tap Forget. New decks put them on their title slide.',
+    'Unutish tugmasini bosmaguningizcha hisobingizda saqlanadi. Yangi taqdimotlar ularni sarlavha slaydiga qo‘yadi.',
+    'Хранятся в вашем аккаунте, пока вы не нажмёте «Забыть». Новые презентации добавляют их на титульный слайд.',
+  ],
+  deckCoverFilled: [
+    'Filled in from your last deck.',
+    'Oxirgi taqdimotingizdan to‘ldirildi.',
+    'Заполнено из вашей прошлой презентации.',
+  ],
+  deckCoverForgotten: ['Forgotten.', 'Unutildi.', 'Забыто.'],
+  // Under the cover's fields once it has the eight lines a title slide draws.
+  deckCoverFull: [
+    'A title slide holds {max} lines. Remove one to add another.',
+    'Muqovaga {max} ta qator sig‘adi. Yangisini qo‘shish uchun bittasini olib tashlang.',
+    'На титульный слайд помещается {max} строк. Чтобы добавить новую, удалите одну.',
+  ],
+  // An Uzbek deck typed in Cyrillic: offered once per commit, never behind Send.
+  deckLatinTitle: [
+    'Cyrillic letters in an Uzbek deck',
+    'O‘zbekcha taqdimotda kirill harflari',
+    'Кириллица в узбекской презентации',
+  ],
+  deckLatinSwitch: ['Switch to Latin letters', 'Lotinga o‘girish', 'Перевести на латиницу'],
+  deckLatinKeep: ['Keep as typed', 'O‘zgarishsiz qoldirish', 'Оставить как есть'],
+  // Review before the files are made.
+  deckReviewBoth: ['PowerPoint and PDF', 'PowerPoint va PDF', 'PowerPoint и PDF'],
+  deckReviewPptx: ['PowerPoint', 'PowerPoint', 'PowerPoint'],
+  deckReviewSlides: ['Slides: {count}', 'Slaydlar: {count}', 'Слайдов: {count}'],
+  deckArrives: ['Arrives as {format}', '{format} ko‘rinishida keladi', 'Придёт в формате {format}'],
+  deckChanges: ['Changes', 'O‘zgarishlar', 'Изменения'],
+  deckNoChanges: [
+    'No changes since you opened it',
+    'Ochganingizdan beri o‘zgarish yo‘q',
+    'С момента открытия изменений нет',
+  ],
+  deckChangeRow: ['Slide {n} · {what}', '{n}-slayd · {what}', 'Слайд {n} · {what}'],
+  deckChangeAdded: ['added', 'qo‘shildi', 'добавлен'],
+  deckChangeMoved: ['moved', 'ko‘chirildi', 'перемещён'],
+  deckChangeText: ['words changed', 'so‘zlar o‘zgardi', 'текст изменён'],
+  deckChangeNotes: ['speaker notes', 'taqdimotchi qaydlari', 'заметки докладчика'],
+  deckChangeLayout: ['layout', 'joylashuv', 'расположение'],
+  deckChangeRemoved: ['Removed: {heading}', 'Olib tashlandi: {heading}', 'Удалён: {heading}'],
+  deckChangeQuestions: ['Questions changed', 'Savollar o‘zgardi', 'Вопросы изменены'],
+  deckSlidesCount: ['Slides {a} → {b}', 'Slaydlar: {a} → {b}', 'Слайды: {a} → {b}'],
+  deckReviewFixFirst: [
+    'Fix these slides first: their words would not all show.',
+    'Avval bu slaydlarni tuzating: so‘zlari to‘liq ko‘rinmaydi.',
+    'Сначала исправьте эти слайды: не все слова будут видны.',
+  ],
+  deckReviewSlideWords_one: [
+    'Slide {n}: {count} word won’t show',
+    '{n}-slayd: {count} ta so‘z ko‘rinmaydi',
+    'Слайд {n}: не поместится {count} слово',
+  ],
+  deckReviewSlideWords_few: [
+    'Slide {n}: {count} words won’t show',
+    '{n}-slayd: {count} ta so‘z ko‘rinmaydi',
+    'Слайд {n}: не поместятся {count} слова',
+  ],
+  deckReviewSlideWords_many: [
+    'Slide {n}: {count} words won’t show',
+    '{n}-slayd: {count} ta so‘z ko‘rinmaydi',
+    'Слайд {n}: не поместятся {count} слов',
+  ],
+  deckReviewSlideWords_other: [
+    'Slide {n}: {count} words won’t show',
+    '{n}-slayd: {count} ta so‘z ko‘rinmaydi',
+    'Слайд {n}: не поместятся {count} слова',
+  ],
+  deckPptxOnly: [
+    'A PDF can’t be made right now, so it comes as PowerPoint.',
+    'Hozir PDF tayyorlab bo‘lmaydi, shuning uchun PowerPoint bo‘lib keladi.',
+    'Сейчас PDF сделать нельзя, поэтому придёт PowerPoint.',
+  ],
+  deckAccepted: [
+    'Accepted: the files will arrive in the chat.',
+    'Qabul qilindi: fayllar chatga keladi.',
+    'Принято: файлы придут в чат.',
+  ],
+  deckDownloadPptx: ['Download PowerPoint', 'PowerPoint yuklab olish', 'Скачать PowerPoint'],
+  deckDownloadPdf: ['Download PDF', 'PDF yuklab olish', 'Скачать PDF'],
+  // A warning in Review and on the task: the logo was deleted after the deck was made.
+  logo_left_out: [
+    'The logo is no longer stored, so the file comes without it.',
+    'Logotip endi saqlanmagan, shuning uchun fayl usiz keladi.',
+    'Логотип больше не хранится, поэтому файл придёт без него.',
+  ],
 }
 /**
  * One line of plain description per generation feature. `extendedToolNames`
@@ -2380,4 +2760,6 @@ export const extendedToolNames: Record<string, [string, string, string]> = {
   'editor.form_templates': ['Reusable form templates', 'Qayta foydalaniladigan shakllar', 'Шаблоны форм'],
   'editor.batch_forms': ['Batch form filling', 'Shakllarni guruhlab to‘ldirish', 'Пакетное заполнение форм'],
   'editor.export': ['Make the edited PDF', 'Tahrirlangan PDF yaratish', 'Создание изменённого PDF'],
+  // Slides sent from the deck editor; the bot names it the same (telegram/ux_copy.py).
+  'export.generated_pptx': ['Edited slides', 'Tahrirlangan slaydlar', 'Изменённые слайды'],
 }

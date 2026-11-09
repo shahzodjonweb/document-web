@@ -4,7 +4,10 @@ const props = defineProps<{ jobId: string }>()
 const { t, count, path, date, timeZone } = useLocale()
 const ws = useWorkspace()
 const { name, destination } = useTools()
-const nextRoute = computed(() => destination(job.value?.feature_id || ''))
+/** Slides sent from the deck editor are not a tool of their own: a new one is a new deck. */
+const nextRoute = computed(() =>
+  destination(job.value?.feature_id === 'export.generated_pptx' ? 'ai.pptx' : job.value?.feature_id || ''),
+)
 const job = ref<Job | null>(null)
 const error = ref('')
 let timer: ReturnType<typeof setTimeout> | undefined
@@ -57,6 +60,50 @@ watch(reviseDraftId, async (id) => {
     // Whole-document changes retain the existing path if this optional read fails.
   }
 })
+/**
+ * A finished deck, or slides sent from the deck editor, reopen in the deck editor
+ * while its draft is live and drawn. The ai.pptx draft is already read above. A send
+ * from the editor that did not make its files goes back there too, once it has ended:
+ * that is where it is fixed and sent again.
+ */
+const studio = useStudio()
+const deckSend = computed(() => job.value?.feature_id === 'export.generated_pptx')
+const deckDraftId = computed(() =>
+  (success.value || (deckSend.value && !active.value)) &&
+  ['ai.pptx', 'export.generated_pptx'].includes(job.value?.feature_id || '') &&
+  studio.config.value?.limits?.editor?.deck_editor === true
+    ? String((job.value as any)?.parameters?.generation_draft_id || '')
+    : '',
+)
+const exportDraft = ref<any>(null)
+watch(
+  deckDraftId,
+  async (id) => {
+    exportDraft.value = null
+    if (!id || job.value?.feature_id !== 'export.generated_pptx') return
+    try {
+      const draft = await ws.api(`/generation/drafts/${id}`)
+      if (deckDraftId.value === id) exportDraft.value = draft
+    } catch {
+      // Without the draft the files stay downloadable; only Edit is left out.
+    }
+  },
+  { immediate: true },
+)
+/**
+ * The draft is also changed by "Review draft", which would undo a drawn deck's edits: one
+ * writer only. Slides sent from the editor never offer it.
+ */
+const deckEditable = computed(
+  () =>
+    !!deckDraftId.value &&
+    !!(job.value?.feature_id === 'ai.pptx' ? revisionSource.value?.render : exportDraft.value?.render),
+)
+/** Edit under the deck's PowerPoint and its PDF both open the slides. */
+const deckOf = (artifact: any) =>
+  deckEditable.value && /presentationml|application\/pdf/.test(artifact.mime_type || '')
+    ? deckDraftId.value
+    : ''
 const retryAvailable = computed(
   () =>
     job.value?.status === 'failed' &&
@@ -275,6 +322,7 @@ function downloadUrl(url: string | undefined, id: string) {
           :key="`actions-${artifact.id}`"
           :artifact="artifact"
           :source="editorSource"
+          :deck="deckOf(artifact)"
         />
         <p v-if="job.expires_at || outputs[0]?.expires_at" class="retention-note">
           <AppIcon name="clock" :size="15" />{{ t('expires') }}
@@ -372,7 +420,18 @@ function downloadUrl(url: string | undefined, id: string) {
       </section>
       <div class="result-actions">
         <NuxtLink
-          v-if="job.parameters?.generation_draft_id && job.feature_id !== 'ai.images'"
+          v-if="deckSend && deckEditable && !success"
+          :to="path(`/app/editor/deck/${deckDraftId}`)"
+          class="button primary"
+          data-testid="job-deck-edit"
+          ><AppIcon name="edit" :size="17" />{{ t('editorEdit') }}</NuxtLink
+        ><NuxtLink
+          v-else-if="
+            job.parameters?.generation_draft_id &&
+            job.feature_id !== 'ai.images' &&
+            !deckSend &&
+            !deckEditable
+          "
           :to="path(`/app/create/${job.parameters.generation_draft_id}`)"
           class="button primary"
           ><AppIcon name="edit" :size="17" />{{ t('reviewDraft') }}</NuxtLink

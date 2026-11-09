@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // `source` is the editor draft this file was sent from, if it was: Edit goes back to it.
-const props = defineProps<{ artifact: any; source?: string }>()
+// `deck` is the slide deck this file was made from, when the deck editor can open it.
+const props = defineProps<{ artifact: any; source?: string; deck?: string }>()
 const { t, path, date } = useLocale()
 const ws = useWorkspace()
 const editorV2 = useEditorV2()
@@ -11,13 +12,21 @@ const telegram = useTelegramApp()
  */
 const editable = computed(
   () =>
-    editorV2.value &&
-    props.artifact.mime_type === 'application/pdf' &&
-    !props.artifact.encrypted &&
-    !!(props.source || props.artifact.file_id),
+    !!props.deck ||
+    (editorV2.value &&
+      props.artifact.mime_type === 'application/pdf' &&
+      !props.artifact.encrypted &&
+      !!(props.source || props.artifact.file_id)),
 )
+// A deck's PDF opens the deck too: changing its slides is what remakes that PDF.
 const editLink = computed(() =>
-  path(props.source ? `/app/editor/${props.source}` : `/app/editor?file_id=${props.artifact.file_id}`),
+  path(
+    props.deck
+      ? `/app/editor/deck/${props.deck}`
+      : props.source
+        ? `/app/editor/${props.source}`
+        : `/app/editor?file_id=${props.artifact.file_id}`,
+  ),
 )
 /** Inside Telegram the bot is the chat this app was opened from. */
 const inChat = computed(() => editorV2.value && telegram.isMiniApp.value)

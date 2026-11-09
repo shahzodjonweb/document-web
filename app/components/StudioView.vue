@@ -17,6 +17,13 @@ const submissionKey = ref('')
 const submissionPending = ref(false)
 const contentEdited = ref(false)
 const reviewHandoff = useState<any>('studio-review-handoff', () => null)
+// Make again from a deck that is gone brings its description here, never through the URL.
+const promptHandoff = useState<string>('studio-prompt-handoff', () => '')
+function takePromptHandoff() {
+  const prompt = promptHandoff.value
+  promptHandoff.value = ''
+  return prompt
+}
 const quoteStage = ref<'document' | 'outline'>('document')
 const files = ref<any[]>([])
 const promptExamples = usePromptExamples()
@@ -27,7 +34,7 @@ const form = reactive({
   title: '',
   // The description is the whole brief: pages, tone, audience and questions are
   // all read out of it server-side, so there is nothing else to collect.
-  prompt: String(route.query.prompt || ''),
+  prompt: String(route.query.prompt || takePromptHandoff() || ''),
   source_text: '',
   output_locale: String(ws.user.value?.preferences?.output_locale || locale.value),
   // The service decides the format; this is only what to show before the

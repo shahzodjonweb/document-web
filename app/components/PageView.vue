@@ -54,6 +54,7 @@ const titles: [string, string][] = [
   ['/app/tools', 'navTools'],
   ['/tools', 'navTools'],
   ['/app/jobs', 'navTasks'],
+  ['/app/editor/deck', 'deckEditorTitle'],
   ['/app/editor', 'editor'],
   ['/app/billing', 'navBilling'],
   ['/pricing', 'pricing'],
@@ -97,6 +98,9 @@ useHead(() => ({
     :draft-id="view.split('/')[3]"
   /><GuideView v-else-if="view === '/app/guide' || view === '/guide'" /><WorkflowsView
     v-else-if="view === '/app/workflows'"
+  /><LazyDeckEditor
+    v-else-if="view === '/app/editor/deck' || view.startsWith('/app/editor/deck/')"
+    :draft-id="view.split('/')[4] || ''"
   /><LazyEditorShell
     v-else-if="view === '/app/editor' || view.startsWith('/app/editor/')"
     :document-id="view.split('/')[3]"
