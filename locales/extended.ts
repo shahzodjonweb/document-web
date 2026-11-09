@@ -385,7 +385,7 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   editor: ['PDF editor', 'PDF muharriri', 'Редактор PDF'],
   workflows: ['Saved workflows', 'Saqlangan jarayonlar', 'Сохранённые процессы'],
   templates: ['Templates', 'Shablonlar', 'Шаблоны'],
-  referrals: ['Invite friends', 'Takliflar', 'Приглашения'],
+  referrals: ['Invite friends', 'Do‘stlarni taklif qilish', 'Пригласить друзей'],
   studioTitle: [
     'From a good idea to a useful document.',
     'Yaxshi g‘oyadan foydali hujjatgacha.',
