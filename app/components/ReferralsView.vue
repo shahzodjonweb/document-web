@@ -45,6 +45,7 @@ async function apply() {
   }
 }
 const months = (value: number) => count('referralMonths', value)
+const ladder = ['referralLadderFirst', 'referralLadderNext', 'referralLadderAfter']
 const share = computed(() =>
   data.value?.url
     ? `https://t.me/share/url?url=${encodeURIComponent(data.value.url)}&text=${encodeURIComponent(t('referralShareText'))}`
@@ -119,9 +120,6 @@ const nextMonth = computed(() => (data.value?.next_month ? dayLabel(data.value.n
             <strong class="tabular">{{ noTaskYet }}</strong><span>{{ t('referralNoTaskYet') }}</span>
           </div>
         </div>
-        <p class="field-hint" data-testid="referral-rules">
-          {{ t('referralRules', { step: data.step, cap: data.monthly_cap }) }}
-        </p>
       </section>
       <section v-if="data.rewards?.length" class="panel referral-rewards-panel" data-testid="referral-rewards">
         <h2>{{ t('referralEarned') }}</h2>
@@ -131,6 +129,24 @@ const nextMonth = computed(() => (data.value?.next_month ? dayLabel(data.value.n
             <span>{{ date(reward.starts_at || undefined) }} – {{ date(reward.ends_at || undefined) }}</span>
           </li>
         </ul>
+      </section>
+      <!-- The rules as three steps and the gifts growing a month each time (months_for in referrals.py). -->
+      <section v-if="data.next_reward" class="panel referral-how-panel" data-testid="referral-rules">
+        <h2>{{ t('referralHow') }}</h2>
+        <ol class="referral-steps">
+          <li>{{ t('referralStepShare') }}</li>
+          <li>{{ t('referralStepTask') }}</li>
+          <li>{{ t('referralStepReward', { step: data.step }) }}</li>
+        </ol>
+        <ul class="referral-ladder">
+          <li v-for="(label, index) in ladder" :key="label">
+            <span>{{ t(label, { step: data.step }) }}</span>
+            <strong>{{ t('referralRewardRow', { months: months(index + 1) }) }}</strong>
+          </li>
+        </ul>
+        <p class="field-hint">
+          {{ t('referralLadderMore', { step: data.step }) }} {{ t('referralCapNote', { cap: data.monthly_cap }) }}
+        </p>
       </section>
       <details class="panel referral-code-panel">
         <summary>{{ t('haveCode') }}</summary>
