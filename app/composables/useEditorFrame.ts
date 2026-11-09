@@ -71,10 +71,12 @@ export function useEditorFrame() {
       /\/app\/editor\/[^/]+/.test(route.path) ||
       (/\/app\/editor\/?$/.test(route.path) && !!route.query.file_id),
   )
+  /** The deck editor has no older frame to fall back to, so it never waits on the switch. */
+  const onDeck = computed(() => /\/app\/editor\/deck(\/|$)/.test(route.path))
   /** The server's answer, or until it comes the last one this device saw. */
-  const expected = computed(() => (known.value ? v2.value : remembered()))
+  const expected = computed(() => onDeck.value || (known.value ? v2.value : remembered()))
   /** The frame alone on screen, with no app menus: there is no room for them, or Telegram has its own. */
   const bare = computed(() => onDocument.value && expected.value && (telegram.isMiniApp.value || !wide.value))
 
-  return { v2, known, expected, onDocument, bare, wide: computed(() => wide.value) }
+  return { v2, known, expected, onDocument, onDeck, bare, wide: computed(() => wide.value) }
 }

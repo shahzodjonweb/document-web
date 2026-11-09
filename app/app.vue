@@ -56,6 +56,8 @@ watch(user, (value) => {
   else if (!value) studio.config.value = null
 })
 const title = computed(() => {
+  // Under the editor's menu entry, but slides, not a PDF.
+  if (editorFrame.onDeck.value) return t('deckEditorTitle')
   const item = [...workNav.value, ...accountNav.value]
     .sort((a, b) => b.url.length - a.url.length)
     .find((entry) => current(entry.url))

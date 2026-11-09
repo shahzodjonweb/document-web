@@ -5,6 +5,12 @@ export interface EditorSnack {
   onAction?: () => void
   /** The history step its Undo takes back: once another step follows, it would take that one, so it goes. */
   step?: number
+  /**
+   * Its buttons leave focus in the field being typed in: the field giving it up would change the
+   * layout under the finger and the tap land elsewhere. Only for an action that saves what is typed
+   * itself (leaving the deck does); an Undo needs the words in first, so it takes the focus.
+   */
+  keepFocus?: boolean
 }
 
 export const SNACK_TIME = 6000

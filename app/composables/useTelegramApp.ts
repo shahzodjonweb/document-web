@@ -179,6 +179,16 @@ function applyKeyboard() {
   keyboardInset.value = covered >= KEYBOARD_MIN ? Math.round(covered) : 0
   document.documentElement.style.setProperty('--editor-keyboard', `${keyboardInset.value}px`)
 }
+function onViewport(event?: { isStateStable?: boolean }) {
+  // Mid-drag values are not worth laying the page out for.
+  if (event?.isStateStable !== false) applyViewport()
+  applyKeyboard()
+}
+/**
+ * The frames up now. The next one (another deck's, opened from this one) sets up before
+ * this one goes: only the last to go stops listening and takes the heights away.
+ */
+let viewportUsers = 0
 
 export function useTelegramApp() {
   miniApp.value = !!webApp()?.initData
@@ -282,24 +292,22 @@ export function useTelegramApp() {
   function useViewport() {
     if (!import.meta.client) return
     const app = webApp()
-    const onViewport = (event?: { isStateStable?: boolean }) => {
-      // Mid-drag values are not worth laying the page out for.
-      if (event?.isStateStable !== false) applyViewport()
-      applyKeyboard()
-    }
     const view = window.visualViewport
     viewportTracked = true
     applyViewport()
     applyKeyboard()
-    app?.onEvent?.('viewportChanged', onViewport)
-    if (isVersionAtLeast(SAFE_AREAS)) {
-      app?.onEvent?.('safeAreaChanged', applyViewport)
-      app?.onEvent?.('contentSafeAreaChanged', applyViewport)
+    if (++viewportUsers === 1) {
+      app?.onEvent?.('viewportChanged', onViewport)
+      if (isVersionAtLeast(SAFE_AREAS)) {
+        app?.onEvent?.('safeAreaChanged', applyViewport)
+        app?.onEvent?.('contentSafeAreaChanged', applyViewport)
+      }
+      if (isVersionAtLeast(FULLSCREEN)) app?.onEvent?.('fullscreenChanged', applyViewport)
+      view?.addEventListener('resize', applyKeyboard)
+      view?.addEventListener('scroll', applyKeyboard)
     }
-    if (isVersionAtLeast(FULLSCREEN)) app?.onEvent?.('fullscreenChanged', applyViewport)
-    view?.addEventListener('resize', applyKeyboard)
-    view?.addEventListener('scroll', applyKeyboard)
     onScopeDispose(() => {
+      if (--viewportUsers > 0) return
       viewportTracked = false
       app?.offEvent?.('viewportChanged', onViewport)
       if (isVersionAtLeast(SAFE_AREAS)) {

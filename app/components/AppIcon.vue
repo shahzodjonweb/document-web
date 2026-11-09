@@ -83,6 +83,7 @@ import {
   BringToFront,
   SendToBack,
   SquareCheck,
+  Ellipsis,
 } from 'lucide-vue-next'
 const props = withDefaults(defineProps<{ name: string; size?: number }>(), { size: 20 })
 const icons: Record<string, any> = {
@@ -170,6 +171,7 @@ const icons: Record<string, any> = {
   bringForward: BringToFront,
   sendBack: SendToBack,
   tick: SquareCheck,
+  more: Ellipsis,
 }
 </script>
 <template>

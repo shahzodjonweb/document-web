@@ -1130,6 +1130,25 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/studio/cover-lines": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The cover lines this account asked to keep for its next decks, their language and the row of each; [], null and [] when none. New decks in that language also carry them on their title slide for what neither their description nor their own cover says (who made it, who checks it, the class, the school), in the room the description leaves: a line with a row says that row, one without says what its words do. `feature_unavailable` with the deck editor off. */
+        get: operations["getCoverLines"];
+        put?: never;
+        /** @description Keep these 1–8 lines of ≤160 characters (packed at rest) for the next decks, with the language of the deck they were written for and the row of each. `invalid_parameters` otherwise, for a language not listed, or for roles that are not one per line or not one of those. */
+        post: operations["rememberCoverLines"];
+        /** @description Forget the kept cover lines: answers as a GET with none kept, `{"lines": [], "locale": null, "roles": []}`. */
+        delete: operations["forgetCoverLines"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/studio/cv-reads": {
         parameters: {
             query?: never;
@@ -1210,6 +1229,23 @@ export interface paths {
         get: operations["getDeckDesignPreview"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/studio/latin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Each text in Uzbek Latin letters as a send keeps it (scripts.to_script), at most 12 000 characters in all. Saves nothing. */
+        post: operations["previewLatin"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1438,6 +1474,14 @@ export interface components {
             /** Format: uuid */
             id: string;
             status: string;
+        };
+        CoverLines: {
+            /** @description Lines as they go on a title slide, label and all ("Tayyorladi: …"). */
+            lines: string[];
+            /** @description The language of the deck the lines were written for; null when the client did not say. */
+            locale: ("en" | "uz" | "ru") | null;
+            /** @description One per line, in step with `lines`: the Cover sheet row it was kept from, null where the client did not say. */
+            roles: (("made" | "checked" | "group" | "school") | null)[];
         };
         CvRead: {
             /** @description Reads that finish before this one is read: 0 once it is being read. */
@@ -1926,6 +1970,10 @@ export interface components {
             /** @enum {unknown} */
             status: "queued" | "running" | "finalizing" | "succeeded" | "failed" | "canceled" | "expired" | "no_op";
             warnings: string[];
+        };
+        LatinPreview: {
+            changed: boolean;
+            texts: string[];
         };
         ManualPayment: {
             /** Format: date-time */
@@ -6232,6 +6280,17 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description `payload_too_large`: a deck draft body over 128 KiB (other drafts: `invalid_request` over 32 KiB). Nothing is saved. */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
         };
     };
     quoteDeckExport: {
@@ -8073,6 +8132,180 @@ export interface operations {
             };
         };
     };
+    getCoverLines: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CoverLines"];
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    rememberCoverLines: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRFToken": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @description Lines as they go on a title slide, label and all ("Tayyorladi: …"). */
+                    lines: string[];
+                    /**
+                     * @description The language of the deck the lines were written for: their labels are in it.
+                     * @enum {unknown}
+                     */
+                    locale?: "en" | "uz" | "ru";
+                    /** @description The Cover sheet row of each line: who made it, who checks it, the class or group, the school; null for a line it does not say. One per line given, a blank line's included (it goes with its line); all null without it. */
+                    roles?: (("made" | "checked" | "group" | "school") | null)[];
+                };
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CoverLines"];
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    forgetCoverLines: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRFToken": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CoverLines"];
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     listCvReads: {
         parameters: {
             query: {
@@ -8403,6 +8636,66 @@ export interface operations {
                 };
                 content: {
                     "image/png": string;
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    previewLatin: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRFToken": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    texts: string[];
+                };
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LatinPreview"];
                 };
             };
             /** @description Invalid request */

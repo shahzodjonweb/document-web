@@ -231,7 +231,7 @@ const hostile=['Men '.repeat(3000),'2019 '.repeat(2400),'universitet '.repeat(10
 const slowest=Math.max(...hostile.map(text=>Math.min(...[0,1,2].map(()=>{const started=performance.now();cvFactTicks(text);return performance.now()-started}))))
 assert.ok(slowest<(process.env.CI?60:20),`a 12,000-character description is read in under 20 ms (the slowest took ${slowest.toFixed(1)} ms)`)
 // Telegram's object has one reader, so every version gate is in one place.
-for(const dir of ['app/components','app/components/editor','app/composables','app','app/pages']){
+for(const dir of ['app/components','app/components/editor','app/components/deck','app/composables','app','app/pages']){
  let names=[]
  try{names=await fs.readdir(new URL(`../${dir}/`,import.meta.url))}catch{continue}
  for(const name of names.filter(item=>/\.(vue|ts)$/.test(item)&&item!=='useTelegramApp.ts'))

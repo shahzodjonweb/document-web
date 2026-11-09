@@ -26,6 +26,8 @@
     "test:guide": "node tests/prompt-guide.mjs",
     "test:editor": "node --experimental-strip-types tests/editor-workspace.mjs",
     "test:editor-phone": "node --experimental-strip-types tests/editor-phone.mjs",
+    "test:deck-editor": "node --experimental-strip-types tests/deck-editor.mjs",
+    "test:deck-editor-live": "node --experimental-strip-types tests/deck-editor-live.mjs",
     "test:payments": "node tests/manual-payment.mjs",
     "test:channels": "node tests/channel-gate.mjs",
     "test:frame": "node tests/app-frame.mjs",

@@ -25,6 +25,8 @@ const POLL_FOR = 10 * 60_000
 /** Three unanswered looks in a row and the hold lets go: an edit then fails the job, not the person. */
 const POLL_MISSES = 3
 const UPLOAD_WAIT = 60_000
+/** A job request that hangs ends as one with no answer, so Try again (the same key) is offered. */
+const SEND_TIMEOUT = 30_000
 /** At this share of the week's file tasks used, the app stays open after a send. */
 const STAY_OPEN_AT = 0.8
 const TERMINAL = ['succeeded', 'failed', 'canceled', 'expired', 'no_op']
@@ -346,6 +348,7 @@ export function useEditorSend() {
         method: 'POST',
         headers: { 'Idempotency-Key': keys.get(made.id)! },
         body: { quote_id: made.id, ...(deliver.value === 'chat' ? { deliver_to_chat: true } : {}) },
+        timeout: SEND_TIMEOUT,
       })
       // The send was let go meanwhile: what came after it is not closed on its answer.
       if (run !== runs) return

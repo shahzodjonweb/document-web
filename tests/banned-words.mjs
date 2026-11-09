@@ -16,7 +16,8 @@ export const BANNED = {
 const sources = []
 for (const [dir, match] of [
   ['app/components/editor', /\.vue$/],
-  ['app/composables', /^useEditor|^useTelegramApp/],
+  ['app/components/deck', /\.vue$/],
+  ['app/composables', /^useEditor|^useTelegramApp|^useDeck/],
 ]) {
   for (const name of await fs.readdir(new URL(`../${dir}/`, import.meta.url))) {
     if (match.test(name)) sources.push(await fs.readFile(new URL(`../${dir}/${name}`, import.meta.url), 'utf8'))

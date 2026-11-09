@@ -18,11 +18,18 @@ watch(session.steps, (step) => {
         type="button"
         class="text-link"
         data-testid="editor-snackbar-action"
+        @mousedown="snack.keepFocus && $event.preventDefault()"
         @click="act"
       >
         {{ snack.actionLabel }}
       </button>
-      <button type="button" class="icon-button" :aria-label="t('editorDismiss')" @click="dismiss">
+      <button
+        type="button"
+        class="icon-button"
+        :aria-label="t('editorDismiss')"
+        @mousedown="snack.keepFocus && $event.preventDefault()"
+        @click="dismiss"
+      >
         <AppIcon name="x" :size="16" />
       </button>
     </div>

@@ -2957,3 +2957,1027 @@
     font-size: 11px;
   }
 }
+
+/* ------------------------------------------------------------ editor: slide deck */
+
+/* The deck editor stands in `.editor-frame`, whose rules load after these
+   (frame.css is last): anything here that changes an `.editor-*` rule is
+   written at 0,2,0 or more under `.deck-edit`. */
+
+/* The stage scrolls on its own; it is never positioned, so the snackbar and
+   the sheets keep the canvas as their box. Isolated, nothing in it (the hint,
+   the chip, the pinned strip) paints over a sheet. 16 px sides keep Android's
+   edge swipe (Back) off the slide. */
+.deck-edit-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  overflow: auto;
+  overscroll-behavior: contain;
+  isolation: isolate;
+}
+.deck-edit-stage > * {
+  flex: none;
+}
+.deck-edit.typing .deck-edit-stage {
+  padding-bottom: calc(var(--editor-keyboard, 0px) + 24px);
+}
+
+/* The slide: the server's picture, with its parts as invisible buttons over it. */
+.deck-edit-slide {
+  position: relative;
+  isolation: isolate;
+  container: deck-slide / inline-size;
+  width: 100%;
+  max-width: 908px;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--hairline);
+  touch-action: pan-y pinch-zoom;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+/* Pinched in, a finger sideways looks along the slide (SlideView then leaves it alone). */
+.deck-edit-slide.zoomed {
+  touch-action: pan-x pan-y pinch-zoom;
+}
+/* The first-use line over the slide's foot, as over a PDF page, at its words' width. */
+.deck-edit .deck-edit-slide > .editor-hint {
+  width: fit-content;
+  max-width: calc(100% - 2 * var(--space-2));
+  margin: 0 auto;
+}
+/* A slide made small by a notice on the smallest phones has no room for it. */
+@container deck-slide (max-width: 239px) {
+  .deck-edit .deck-edit-slide > .editor-hint {
+    display: none;
+  }
+}
+.deck-edit-slide img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: inherit;
+  -webkit-user-drag: none;
+  transition: opacity var(--duration) var(--ease);
+}
+.deck-edit-slide[data-state='dim'] img {
+  opacity: 0.45;
+}
+/* A finger is routed by the slide's own hit test; these answer the keyboard and screen readers. */
+.deck-edit-regions {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.deck-edit-region {
+  position: absolute;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  pointer-events: none;
+  outline: 1px dashed transparent;
+  outline-offset: 0;
+  transition:
+    outline-color var(--duration) var(--ease),
+    box-shadow var(--duration) var(--ease);
+}
+/* Dashed ink with a white halo reads on a light slide and a dark one alike. */
+.outlined .deck-edit-region,
+.deck-edit-region:focus-visible {
+  outline: 1px dashed var(--page-ring);
+  outline-offset: 0;
+  box-shadow: 0 0 0 1px var(--page-halo);
+}
+/* A slide not drawn yet: its words as buttons, so it can be changed meanwhile. */
+.deck-edit-blank {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: 5% 6%;
+  overflow: hidden;
+  border-radius: inherit;
+  background: var(--surface);
+}
+.deck-edit-blank-heading,
+.deck-edit-blank-lines {
+  flex: none;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  overflow: hidden;
+  border: 1px dashed var(--hairline-strong);
+  border-radius: var(--radius-sm);
+  text-align: start;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.deck-edit-blank-heading {
+  color: var(--ink);
+  font: 600 var(--text-lg) / 1.3 var(--font-display);
+}
+.deck-edit-blank-lines {
+  flex: 1 1 auto;
+  color: var(--muted);
+  font-size: 14px;
+}
+.deck-edit-blank > p {
+  flex: none;
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+.deck-edit-chip {
+  position: absolute;
+  z-index: 2;
+  top: var(--space-2);
+  right: var(--space-2);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+}
+/* Always there for the screen reader; empty, it gives back the stage's gap. */
+.deck-edit-over {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1) var(--space-2);
+  width: 100%;
+  max-width: 908px;
+  color: var(--error-ink);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+.deck-edit-over:empty {
+  margin-top: calc(-1 * var(--space-2));
+}
+
+/* ‹ Slide n of N › and the slide's own button, one row: at 1.3 text the counter's words wrap
+   instead, so the row stays one control high above the pinned strip. No gap: the icon
+   buttons pad themselves, and uz's counter and Muqova need all of 288 px. */
+.deck-edit-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  width: 100%;
+  max-width: 908px;
+  min-height: 44px;
+}
+.deck-edit-counter {
+  min-width: 0;
+  padding: 0 var(--space-1);
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  text-wrap: balance;
+}
+.deck-edit-row > :nth-child(4) {
+  margin-inline-start: var(--space-2);
+}
+
+/* Thumbnails: a row pinned above the bar on a phone, the left rail at 980 px and over. */
+.deck-edit-strip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  align-self: stretch;
+  margin: 0 calc(-1 * var(--space-4));
+  padding: 6px var(--space-4);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+.deck-edit-strip::-webkit-scrollbar {
+  display: none;
+}
+.deck-edit-thumb {
+  position: relative;
+  flex: none;
+  width: 96px;
+  height: 54px;
+  padding: 0;
+  border-radius: 6px;
+  background: var(--surface);
+  box-shadow: 0 0 0 1px var(--hairline);
+  scroll-snap-align: center;
+}
+.deck-edit-thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  -webkit-user-drag: none;
+}
+/* --page-ring is paper's ink in both themes, and goes unseen on the dark strip; the action blue reads on both. */
+.deck-edit-thumb[aria-current='true'] {
+  box-shadow: 0 0 0 2px var(--action);
+}
+.deck-edit-thumb[data-fits='false']::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--danger);
+  box-shadow: 0 0 0 2px var(--surface);
+}
+.deck-edit-thumb-number {
+  position: absolute;
+  left: 4px;
+  bottom: 4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: var(--radius-pill);
+  /* On the slide's paper, which stays light in the dark theme: paper's ink, not the theme's. */
+  background: var(--page-ring);
+  color: var(--page-halo);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.deck-edit-add {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 54px;
+  border: 1px dashed var(--hairline-strong);
+  border-radius: 6px;
+  color: var(--link);
+  scroll-snap-align: center;
+}
+/* Only ever drawn at 980 px and over (the frame renders the rail when wide). */
+.deck-edit-strip.rail {
+  flex: none;
+  flex-direction: column;
+  align-self: stretch;
+  width: 132px;
+  margin: 0;
+  padding: var(--space-3) var(--space-2);
+  overflow: hidden auto;
+  scroll-snap-type: y proximity;
+  border-right: 1px solid var(--hairline);
+}
+
+/* One tab, Slides: a pill of its own size, not the whole bar (frame.css stretches one). */
+.editor-tabbar.deck-edit-single .editor-toolpill {
+  flex: 0 1 200px;
+}
+
+/* The field dock, where the top bar was: everything in it stays above the keyboard. */
+.editor-dock.deck-edit-dock {
+  max-height: calc(var(--tg-stable-h, 100dvh) - var(--editor-keyboard, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-bottom: var(--space-1);
+}
+.deck-edit-dock .editor-dock-head {
+  flex: none;
+  min-height: 44px;
+}
+.deck-edit-dock .editor-dock-head > strong {
+  text-align: start;
+}
+.deck-edit-budget {
+  flex: none;
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+  color: var(--text);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.deck-edit-budget[data-level='near'] {
+  background: var(--warning-tint);
+  color: var(--warning-ink);
+}
+.deck-edit-budget[data-level='over'] {
+  background: var(--error-tint);
+  color: var(--error-ink);
+}
+.deck-edit-mini {
+  flex: none;
+  width: 64px;
+  height: 36px;
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px var(--hairline);
+  object-fit: cover;
+}
+/* What a paste or the keyboard left out: in the dock's head in the title's place, or under the
+   field in a form, never under a group of them. Its colour outranks .editor-dock-message
+   (frame.css, which loads later) and .field-hint. */
+.deck-edit-dock .editor-dock-head > .deck-edit-paste-note {
+  flex: 1;
+  min-width: 0;
+}
+.deck-edit-dock .editor-dock-head > .deck-edit-paste-note,
+.field-hint.deck-edit-paste-note {
+  color: var(--error-ink);
+  font-weight: 600;
+}
+.deck-edit-cover > .deck-edit-paste-note {
+  margin-top: calc(-1 * var(--space-2));
+}
+/* A line's note starts where its words do; an item's takes a row of the item. */
+.deck-edit-line > .deck-edit-paste-note {
+  grid-column: 1 / -1;
+  padding-inline-start: 28px;
+}
+.deck-edit-item > .deck-edit-paste-note {
+  flex-basis: 100%;
+}
+/* Columns and options: the note follows its own field and spans the grid. Packed densely, the
+   fields after it still fill that field's row, so it stands under the row it is about. */
+.deck-edit-columns > .deck-edit-paste-note,
+.deck-edit-question > div > .deck-edit-paste-note {
+  grid-column: 1 / -1;
+}
+.deck-edit-dock-body {
+  flex: 1 1 auto;
+  min-height: 44px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.deck-edit-dock-body > * {
+  flex: none;
+}
+.deck-edit-dock-body > .editor-dock-message {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  gap: var(--space-1) var(--space-2);
+  background: var(--surface);
+  color: var(--error-ink);
+}
+/* With the keyboard up the body is a line or two high: stuck, the message would cover the
+   line being typed. It scrolls away instead; the head's budget still says too long. */
+.deck-edit.keyboard-up .deck-edit-dock-body > .editor-dock-message {
+  position: static;
+}
+.deck-edit-dock-body > .editor-dock-message:empty {
+  margin-bottom: calc(-1 * var(--space-2));
+}
+/* The hairline makes a line cut by the body's edge read as one that scrolls. */
+.deck-edit-dock-foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: 44px;
+  box-shadow: 0 -1px 0 var(--hairline);
+}
+
+/* Fields typed in the deck. :where keeps `.form-field`'s own look wherever that is used. */
+.deck-edit :where(input:not([type='checkbox']):not([type='radio']), textarea) {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--ink);
+  line-height: 1.35;
+}
+.deck-edit :where(input:not([type='checkbox']):not([type='radio']), textarea):focus {
+  border-color: var(--action);
+  box-shadow: 0 0 0 3px var(--blue-100);
+  outline: none;
+}
+.deck-edit :where(input, textarea)::placeholder {
+  color: var(--muted);
+  opacity: 0.85;
+}
+.deck-edit :where(textarea) {
+  resize: vertical;
+}
+.deck-edit-line {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) 44px;
+  align-items: center;
+  gap: var(--space-1);
+}
+.deck-edit-line > :first-child:not(input) {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.deck-edit-line-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  padding-inline-start: 28px;
+}
+.deck-edit-line > .deck-edit-line-actions {
+  grid-column: 1 / -1;
+}
+/* Label, words and value side by side while they fit; one under another below 360 px. */
+.deck-edit-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--hairline);
+}
+.deck-edit-item > :is(input, textarea, label) {
+  flex: 1 1 120px;
+  min-width: 0;
+}
+.deck-edit-item > .deck-edit-procon {
+  flex: 1 1 auto;
+}
+.deck-edit-item > .deck-edit-item-hint {
+  flex-basis: 100%;
+}
+.deck-edit-procon {
+  display: flex;
+  gap: var(--space-1);
+}
+.deck-edit-procon > button {
+  flex: 1 1 0;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+}
+.deck-edit-procon > button:first-child[aria-pressed='true'] {
+  border-color: var(--success-border);
+  background: var(--success-tint);
+  color: var(--success-ink);
+}
+.deck-edit-procon > button:last-child[aria-pressed='true'] {
+  border-color: var(--error-border);
+  background: var(--error-tint);
+  color: var(--error-ink);
+}
+.deck-edit-item-hint {
+  margin: 0;
+  color: var(--warning-ink);
+  font-size: var(--text-xs);
+}
+.deck-edit-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-auto-flow: row dense;
+  gap: var(--space-1);
+}
+.deck-edit-add-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 44px;
+  border: 1px dashed var(--hairline-strong);
+  border-radius: var(--radius-md);
+  color: var(--link);
+  font-weight: 600;
+}
+
+/* The slides list: a row to pick, then the gaps it can go to. */
+.deck-edit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.deck-edit-list-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 64px auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 56px;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  font-size: 14px;
+  text-align: start;
+}
+.deck-edit-list-row > * {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.deck-edit-list-row > :first-child {
+  width: 64px;
+  height: 36px;
+  border-radius: 4px;
+  background: var(--surface-sunken);
+  box-shadow: 0 0 0 1px var(--hairline);
+  object-fit: cover;
+}
+.deck-edit-list-row > :nth-child(2) {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.deck-edit-list-row > :nth-child(4) {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--muted);
+  font-size: var(--text-xs);
+  white-space: normal;
+}
+/* The title slide's note goes under its heading: beside it, it left the heading a few letters. */
+.deck-edit-list-row.cover {
+  row-gap: 0;
+}
+.deck-edit-list-row.cover > :is(:first-child, :nth-child(2)) {
+  grid-row: span 2;
+}
+.deck-edit-list-row.cover > :nth-child(3) {
+  grid-column: 3 / -1;
+  align-self: end;
+}
+.deck-edit-list-row.cover > :nth-child(4) {
+  grid-column: 3 / -1;
+  grid-row: 2;
+  align-self: start;
+}
+.deck-edit-list-row[aria-pressed='true'] {
+  background: var(--info-tint);
+  box-shadow: inset 0 0 0 2px var(--action);
+}
+.deck-edit-list-row[data-fits='false']::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 66px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--danger);
+  box-shadow: 0 0 0 2px var(--surface);
+}
+.deck-edit-put {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+  border: 1px dashed var(--action);
+  border-radius: var(--radius-md);
+  color: var(--link);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+/* Held at the sheet's foot, over its bottom padding, as Review's foot is. Two to a row
+   (one row from 600 px on a phone): ru and uz words in one row put Delete out of sight. */
+.deck-edit-list-actions {
+  position: sticky;
+  bottom: calc(-1 * (var(--space-3) + var(--editor-safe-bottom, env(safe-area-inset-bottom))));
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-2) 0 calc(var(--space-3) + var(--editor-safe-bottom, env(safe-area-inset-bottom)));
+  border-top: 1px solid var(--hairline);
+  background: var(--surface);
+}
+.deck-edit-list-actions > * {
+  flex: 1 1 calc(50% - var(--space-2));
+  min-height: 44px;
+}
+.deck-edit-quiz {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: var(--surface-sunken);
+  color: var(--ink);
+}
+.deck-edit-quiz > :first-child {
+  flex: 1 1 100%;
+  font-weight: 600;
+}
+
+/* Cover details: a label over each field. */
+.deck-edit-cover {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.deck-edit-cover label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+.deck-edit-remember {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--hairline);
+}
+.deck-edit-remember label {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+}
+.deck-edit-remember input[type='checkbox'] {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  accent-color: var(--action);
+}
+.deck-edit-remember .field-hint {
+  margin: 0;
+}
+.deck-edit-remember .text-link {
+  align-self: flex-start;
+}
+.deck-edit-cover > .button {
+  align-self: flex-start;
+}
+.deck-edit-cover > .info-banner {
+  margin: 0;
+}
+/* Another line of the cover with its remove button beside the field, not the label. */
+.deck-edit-cover-other {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
+  align-items: end;
+  gap: var(--space-1);
+}
+/* While a field of a sheet is in use the keyboard hides the sheet's close, and what is
+   left above it has no room for a head and a Done row both: Done takes the head's place. */
+.deck-edit.keyboard-up .editor-sheet:has(.deck-edit-sheet-done) .sheet-head {
+  display: none;
+}
+.deck-edit-sheet-done {
+  position: sticky;
+  top: calc(-1 * var(--space-2));
+  z-index: 1;
+  display: flex;
+  justify-content: flex-end;
+  /* Thin, so a field and its name still fit under it above a 253 px keyboard at 320x426. */
+  padding: 2px 0;
+  background: var(--surface);
+  box-shadow: 0 1px 0 var(--hairline);
+}
+/* A panel field's name over its input; the Lines name holds the budget at its end. */
+.deck-edit-field-name {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+/* Questions: one box each, the options two to a row. */
+.deck-edit-question {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0 0 var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+}
+.deck-edit-question > legend {
+  padding: 0 var(--space-1);
+  color: var(--ink);
+  font-weight: 700;
+}
+.deck-edit-question > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-flow: row dense;
+  gap: var(--space-2);
+}
+.deck-edit-question label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  color: var(--ink);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+.deck-edit-question > .button {
+  align-self: flex-start;
+}
+
+/* Notices: a wrapper always there for the screen reader, its banner styled as a notice row. */
+.editor-frame-notices > .deck-edit-notice {
+  padding: 0;
+  border: 0;
+}
+.editor-frame-notices .deck-edit-notice > * {
+  align-items: center;
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+  border-width: 0 0 1px;
+  border-radius: 0;
+  font-size: 13px;
+}
+.deck-edit-latin {
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-2);
+}
+.deck-edit-latin > div {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+.deck-edit-latin p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.deck-edit-latin > span {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* Review: slides to fix first, and what changed. */
+.deck-edit-fix {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--hairline);
+}
+.deck-edit-fix > li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  min-height: 44px;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--hairline);
+  color: var(--ink);
+  font-size: 14px;
+}
+.deck-edit-fix > li > :first-child {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+.deck-edit-changes {
+  display: flex;
+  flex-direction: column;
+}
+.deck-edit-changes > strong {
+  padding-bottom: var(--space-1);
+  color: var(--ink);
+}
+.deck-edit-changes :is(ul, ol) {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.deck-edit-changes li,
+.deck-edit-changes > p {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: 44px;
+  margin: 0;
+  border-bottom: 1px solid var(--hairline);
+  color: var(--ink);
+  font-size: 14px;
+}
+
+/* Layouts that hold the slide's words, as plain rows. */
+.deck-edit-layouts {
+  display: flex;
+  flex-direction: column;
+}
+.deck-edit-layouts > button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 48px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-md);
+  color: var(--ink);
+  font-size: var(--text-base);
+  font-weight: 500;
+  text-align: start;
+}
+.deck-edit-layouts > button > span {
+  flex: 1;
+  min-width: 0;
+}
+.deck-edit-layouts > button[aria-current='true'] {
+  background: var(--info-tint);
+  color: var(--info-ink);
+  font-weight: 600;
+}
+/* Why a row under it is refused (Split at the plan's count of slides), under the row's words:
+   past the row's padding, its 19 px icon and its gap (frame.css, .editor-more-row). */
+.deck-edit-row-note {
+  margin: 0;
+  padding: 0 var(--space-2) var(--space-2) calc(var(--space-2) + 19px + var(--space-3));
+}
+
+/* Under the deck's name in the top bar: until when it is kept, amber in its last 3 hours.
+   Too long for one line (320 px with the back button) it takes a second, which the 52 px
+   bar holds beside the name, rather than give the time or the day to an ellipsis. */
+.deck-edit-until {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--muted);
+  font: 500 var(--text-xs) / 1.3 var(--font-body);
+  white-space: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.deck-edit-until[data-soon='true'] {
+  color: var(--warning-ink);
+}
+
+@media (max-width: 979px) {
+  /* Typing in the dock, the slide alone stays: the counter and strip would sit under the keyboard. */
+  .deck-edit.typing .deck-edit-row,
+  .deck-edit.typing .deck-edit-strip,
+  .deck-edit[data-panel] .deck-edit-strip:not(.rail) {
+    display: none;
+  }
+  /* Typing in a sheet: what is under the keyboard gives way, the slide first. */
+  .deck-edit.sheet-typing .editor-frame-work {
+    padding-bottom: var(--editor-keyboard, 0px);
+  }
+  .deck-edit.sheet-typing .editor-tabbar {
+    display: none;
+  }
+  .deck-edit.sheet-typing .editor-sheet[data-size='compact'].more-sheet[open] {
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 1;
+    min-height: 0;
+  }
+  .deck-edit.sheet-typing .editor-sheet[data-size='compact'] > .sheet-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+  }
+  .deck-edit.sheet-typing .editor-sheet[data-size='tall'].more-sheet {
+    bottom: var(--editor-keyboard, 0px);
+    max-height: calc((var(--tg-stable-h, 100dvh) - var(--editor-keyboard, 0px)) * 0.95);
+  }
+  /* The strip is pinned above the bar, over the stage's foot padding; what does not fit
+     scrolls under it, past a hairline, and a focused control stops above it. */
+  .deck-edit-stage {
+    container-type: size;
+    scroll-padding-bottom: calc(66px + var(--space-2));
+  }
+  .deck-edit-stage > .deck-edit-strip {
+    position: sticky;
+    bottom: calc(-1 * var(--space-2));
+    z-index: 1;
+    margin-top: auto;
+    background: var(--soft);
+    box-shadow: 0 -1px 0 var(--hairline);
+  }
+  /* The slide gives up width, down to half, before the counter row (44) and the strip (66)
+     leave the screen: only on the smallest phones with a notice up. Not while typing or
+     with a panel open, when they are hidden and the stage is short for a moment. */
+  .deck-edit:not(.typing):not(.sheet-typing):not([data-panel]) .deck-edit-slide {
+    max-width: max(50%, min(908px, calc((100cqh - 44px - 66px - 2 * var(--space-2)) * 16 / 9)));
+  }
+  /* A slide over its room (DeckEditor marks the stage): the too-long words, Split and Pick
+     another layout stand where the strip was pinned, and the slide leaves room for their row,
+     whose height SlideView measures. The strip follows them, a scroll away. */
+  .deck-edit-stage.over-budget {
+    scroll-padding-bottom: 0;
+  }
+  .deck-edit-stage.over-budget > .deck-edit-strip {
+    position: static;
+    box-shadow: none;
+  }
+  .deck-edit:not(.typing):not(.sheet-typing):not([data-panel])
+    .deck-edit-stage.over-budget
+    > .deck-edit-slide {
+    max-width: max(
+      50%,
+      min(908px, calc((100cqh - 44px - var(--deck-edit-over, 0px) - 2 * var(--space-2)) * 16 / 9))
+    );
+  }
+}
+/* A phone on its side: the slide and the counter row fill the height, the strip follows. */
+@media (max-width: 979px) and (orientation: landscape) and (max-height: 500px) {
+  .deck-edit-stage {
+    scroll-padding-bottom: 0;
+  }
+  .deck-edit-stage > .deck-edit-strip {
+    position: static;
+    margin-top: 0;
+    box-shadow: none;
+  }
+  .deck-edit:not(.typing):not(.sheet-typing):not([data-panel]) .deck-edit-slide {
+    max-width: min(908px, calc((100cqh - 44px - var(--space-2)) * 16 / 9));
+  }
+  .deck-edit:not(.typing):not(.sheet-typing):not([data-panel])
+    .deck-edit-stage.over-budget
+    > .deck-edit-slide {
+    max-width: min(908px, calc((100cqh - 44px - var(--deck-edit-over, 0px) - 2 * var(--space-2)) * 16 / 9));
+  }
+}
+/* On a phone held upright the two fixes share a row under the words, each wrapping its own. */
+@media (max-width: 599px) {
+  .deck-edit-over > span {
+    flex-basis: 100%;
+  }
+  .deck-edit-over > .button {
+    flex: 1 1 0;
+    align-self: stretch;
+    min-width: 0;
+    max-width: 240px;
+  }
+}
+@media (min-width: 600px) and (max-width: 979px) {
+  .deck-edit-list-actions > * {
+    flex-basis: 0;
+  }
+}
+@media (max-width: 359px) {
+  .deck-edit-mini {
+    display: none;
+  }
+  .deck-edit-item > * {
+    flex-basis: 100%;
+  }
+  .deck-edit-item > .icon-button {
+    flex-basis: auto;
+    margin-inline-start: auto;
+  }
+  .deck-edit-question > div {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (min-width: 980px) {
+  .deck-edit-stage {
+    padding: var(--space-4) var(--space-6);
+  }
+  /* The panel's head has no close button to give it height: the first field keeps its distance. */
+  .deck-edit .editor-sheet.permanent .sheet-head {
+    min-height: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .deck-edit-region,
+  .deck-edit-slide img {
+    transition: none;
+  }
+}
