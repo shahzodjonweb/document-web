@@ -59,7 +59,7 @@ const noTaskYet = computed(() =>
   data.value ? Math.max(0, data.value.pending_count - data.value.waiting_next_month) : 0,
 )
 // The first day of next month in Tashkent, as the plans write a day: "1 Dec", "1-dekabr", "1 декабря".
-const nextMonth = computed(() => (data.value ? dayLabel(data.value.next_month.slice(0, 10)) : ''))
+const nextMonth = computed(() => (data.value?.next_month ? dayLabel(data.value.next_month.slice(0, 10)) : ''))
 </script>
 <template>
   <div class="referrals-page">
@@ -89,7 +89,8 @@ const nextMonth = computed(() => (data.value ? dayLabel(data.value.next_month.sl
           <AppIcon name="share" :size="16" />{{ t('referralShare') }}
         </a>
       </section>
-      <section class="panel referral-progress-panel" data-testid="referral-progress">
+      <!-- A server from before invitations earned Plus says none of this: the link alone. -->
+      <section v-if="data.next_reward" class="panel referral-progress-panel" data-testid="referral-progress">
         <h2>{{ t('referralNext', { months: months(data.next_reward.months) }) }}</h2>
         <p class="referral-progress-count">
           <strong class="tabular">{{ t('referralProgress', { have: data.next_reward.have, step: data.step }) }}</strong>
@@ -122,7 +123,7 @@ const nextMonth = computed(() => (data.value ? dayLabel(data.value.next_month.sl
           {{ t('referralRules', { step: data.step, cap: data.monthly_cap }) }}
         </p>
       </section>
-      <section v-if="data.rewards.length" class="panel referral-rewards-panel" data-testid="referral-rewards">
+      <section v-if="data.rewards?.length" class="panel referral-rewards-panel" data-testid="referral-rewards">
         <h2>{{ t('referralEarned') }}</h2>
         <ul>
           <li v-for="reward in data.rewards" :key="reward.tier">
