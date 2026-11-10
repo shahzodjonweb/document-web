@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DocMaster logo concepts</title>
+<link rel="stylesheet" href="../../../../app/assets/css/tokens.css">
+<link rel="stylesheet" href="../mockups/site.css">
+<style>
+  .site-concepts { padding-block: 48px 80px; }
+  .site-concepts-intro { max-width: 68ch; margin-bottom: 40px; }
+  .site-concepts-intro h1 { font: 700 clamp(30px, 4vw, 44px)/1.1 var(--font-display); letter-spacing: -0.02em; color: var(--ink); margin: 0 0 12px; }
+  .site-concepts-intro p { color: var(--text); font-size: 17px; line-height: 1.6; margin: 0 0 8px; }
+  .site-concept-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+  @media (max-width: 1100px) { .site-concept-grid { grid-template-columns: 1fr; } }
+  .site-concept { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-xl); overflow: hidden; display: flex; flex-direction: column; }
+  .site-concept.is-recommended { border-color: var(--action); box-shadow: 0 0 0 1px var(--action); }
+  .site-concept-head { padding: 20px 24px 0; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .site-concept-head h2 { font: 700 22px/1.2 var(--font-display); color: var(--ink); margin: 0; }
+  .site-pick { font: 600 13px/1 var(--font-body); color: var(--on-action); background: var(--action); padding: 6px 10px; border-radius: var(--radius-pill); }
+  .site-stage { margin: 16px 24px 0; border-radius: var(--radius-lg); display: grid; place-items: center; padding: 32px 20px; }
+  .site-stage img { width: 100%; max-width: 280px; height: auto; }
+  .site-stage.is-light { background: #ffffff; border: 1px solid #e3e8ef; }
+  .site-stage.is-dark { background: #0b111c; }
+  .site-row { display: flex; gap: 16px; margin: 16px 24px 0; flex-wrap: wrap; }
+  .site-tab { flex: 1 1 200px; border-radius: var(--radius-md); padding: 10px 12px; display: flex; align-items: center; gap: 8px; font: 500 13px/1 var(--font-body); }
+  .site-tab.is-light { background: #e9edf2; color: #3b4859; }
+  .site-tab.is-dark { background: #202124; color: #e8eaed; }
+  .site-tab img { width: 16px; height: 16px; }
+  .site-avatar-row { margin: 16px 24px 0; border-radius: var(--radius-md); padding: 12px; display: flex; align-items: center; gap: 12px; background: #ffffff; border: 1px solid #e3e8ef; }
+  .site-avatar-row.is-dark { background: #17212b; border-color: #17212b; }
+  .site-avatar-row img { width: 54px; height: 54px; border-radius: 50%; }
+  .site-avatar-row b { display: block; font: 600 15px/1.3 var(--font-body); color: #000; }
+  .site-avatar-row span { font: 400 14px/1.3 var(--font-body); color: #707579; }
+  .site-avatar-row.is-dark b { color: #fff; }
+  .site-avatar-row.is-dark span { color: #7f91a4; }
+  .site-sizes { margin: 16px 24px 0; display: flex; align-items: end; gap: 18px; }
+  .site-sizes img:nth-child(1) { width: 16px; } .site-sizes img:nth-child(2) { width: 24px; }
+  .site-sizes img:nth-child(3) { width: 32px; } .site-sizes img:nth-child(4) { width: 48px; }
+  .site-sizes img:nth-child(5) { width: 24px; } .site-sizes img:nth-child(6) { width: 40px; }
+  .site-concept-body { padding: 20px 24px 24px; color: var(--text); font-size: 15px; line-height: 1.6; }
+  .site-concept-body h3 { font: 600 15px/1.3 var(--font-body); color: var(--ink); margin: 16px 0 4px; }
+  .site-concept-body p { margin: 0; }
+  .site-concept-body ul { margin: 4px 0 0; padding-left: 18px; }
+  .site-red-note { margin-top: 48px; max-width: 72ch; color: var(--text); line-height: 1.6; }
+  .site-red-note h2 { font: 700 24px/1.2 var(--font-display); color: var(--ink); margin: 0 0 8px; }
+</style>
+</head>
+<body class="site-body">
+<main class="site-container site-concepts">
+  <header class="site-concepts-intro">
+    <h1>DocMaster logo: three directions</h1>
+    <p>Each concept is a wordmark plus a standalone icon, outlined from the self-hosted Manrope and DM Sans fonts, so the files carry no font dependency. The same three are shown in the browser tab at 16 px, on light and dark, and as a Telegram avatar, which is where most people in Uzbekistan will meet the brand first.</p>
+    <p>The recommended concept, A, already has its full asset set in <code>public/brand/docmaster-*</code>. It can be swapped after review: the generator rebuilds everything for any concept.</p>
+    <p><button class="site-theme-toggle" type="button" onclick="siteToggleTheme()">Switch page theme</button></p>
+  </header>
+
+  <div class="site-concept-grid">
+    <!-- A -->
+    <article class="site-concept is-recommended">
+      <div class="site-concept-head"><h2>A. Folded corner</h2><span class="site-pick">Recommended</span></div>
+      <div class="site-stage is-light"><img src="parts/a-logo.svg" alt="DocMaster logo, concept A, on white"></div>
+      <div class="site-stage is-dark"><img src="parts/a-logo-dark.svg" alt="DocMaster logo, concept A, on dark"></div>
+      <div class="site-row">
+        <div class="site-tab is-light"><img src="parts/a-tile.svg" alt="">DocMaster: PDF vositalari</div>
+        <div class="site-tab is-dark"><img src="parts/a-tile.svg" alt="">DocMaster: PDF vositalari</div>
+      </div>
+      <div class="site-avatar-row"><img src="parts/a-tile.svg" alt=""><div><b>DocMaster</b><span>Hujjatingiz tayyor: hisobot.pdf</span></div></div>
+      <div class="site-avatar-row is-dark"><img src="parts/a-tile.svg" alt=""><div><b>DocMaster</b><span>Hujjatingiz tayyor: hisobot.pdf</span></div></div>
+      <div class="site-sizes" aria-label="Icon at 16, 24, 32 and 48 px; bare mark at 24 and 40 px">
+        <img src="parts/a-tile.svg" alt=""><img src="parts/a-tile.svg" alt=""><img src="parts/a-tile.svg" alt=""><img src="parts/a-tile.svg" alt=""><img src="parts/a-mark.svg" alt=""><img src="parts/a-mark.svg" alt="">
+      </div>
+      <div class="site-concept-body">
+        <h3>Idea</h3>
+        <p>A geometric D whose top-right corner is folded down like the corner of a page. One shape says both "D" and "document". The fold is the only red in the mark.</p>
+        <h3>Why it is the pick</h3>
+        <ul>
+          <li>Holds up at 16 px: the D silhouette and the red corner both survive.</li>
+          <li>Keeps both brand colours, with red as a small accent instead of half the mark. That matches the UI rule that red means danger.</li>
+          <li>Ownable. It is a letter, not a generic file glyph, so it doesn't look like other file apps.</li>
+          <li>Manrope 700 wordmark, tightened, matches the site's display type.</li>
+        </ul>
+        <h3>Watch</h3>
+        <p>The red corner sits next to blue on the app tile. It reads fine at icon sizes, but never set the mark on a red or busy photo background.</p>
+      </div>
+    </article>
+
+    <!-- B -->
+    <article class="site-concept">
+      <div class="site-concept-head"><h2>B. Two sheets</h2></div>
+      <div class="site-stage is-light"><img src="parts/b-logo.svg" alt="DocMaster logo, concept B, on white"></div>
+      <div class="site-stage is-dark"><img src="parts/b-logo-dark.svg" alt="DocMaster logo, concept B, on dark"></div>
+      <div class="site-row">
+        <div class="site-tab is-light"><img src="parts/b-tile.svg" alt="">DocMaster: PDF vositalari</div>
+        <div class="site-tab is-dark"><img src="parts/b-tile.svg" alt="">DocMaster: PDF vositalari</div>
+      </div>
+      <div class="site-avatar-row"><img src="parts/b-tile.svg" alt=""><div><b>DocMaster</b><span>Hujjatingiz tayyor: hisobot.pdf</span></div></div>
+      <div class="site-avatar-row is-dark"><img src="parts/b-tile.svg" alt=""><div><b>DocMaster</b><span>Hujjatingiz tayyor: hisobot.pdf</span></div></div>
+      <div class="site-sizes" aria-label="Icon at 16, 24, 32 and 48 px; bare mark at 24 and 40 px">
+        <img src="parts/b-tile.svg" alt=""><img src="parts/b-tile.svg" alt=""><img src="parts/b-tile.svg" alt=""><img src="parts/b-tile.svg" alt=""><img src="parts/b-mark.svg" alt=""><img src="parts/b-mark.svg" alt="">
+      </div>
+      <div class="site-concept-body">
+        <h3>Idea</h3>
+        <p>The PDF Master icon's two connected pages, redrawn as two clean overlapping sheets. Blue and ink only. Red leaves the identity and stays in the UI for errors.</p>
+        <h3>Strengths</h3>
+        <ul>
+          <li>Smallest jump for existing bot users: it still looks like "the two pages".</li>
+          <li>Calmest of the three and very legible at every size.</li>
+        </ul>
+        <h3>Weaknesses</h3>
+        <p>Stacked pages are the stock metaphor for "copy" and "files", used by many apps. Nothing in it says DocMaster, so recognition depends entirely on the wordmark.</p>
+      </div>
+    </article>
+
+    <!-- C -->
+    <article class="site-concept">
+      <div class="site-concept-head"><h2>C. Seal</h2></div>
+      <div class="site-stage is-light"><img src="parts/c-logo.svg" alt="DocMaster logo, concept C, on white"></div>
+      <div class="site-stage is-dark"><img src="parts/c-logo-dark.svg" alt="DocMaster logo, concept C, on dark"></div>
+      <div class="site-row">
+        <div class="site-tab is-light"><img src="parts/c-tile.svg" alt="">DocMaster: PDF vositalari</div>
+        <div class="site-tab is-dark"><img src="parts/c-tile.svg" alt="">DocMaster: PDF vositalari</div>
+      </div>
+      <div class="site-avatar-row"><img src="parts/c-mark.svg" alt=""><div><b>DocMaster</b><span>Hujjatingiz tayyor: hisobot.pdf</span></div></div>
+      <div class="site-avatar-row is-dark"><img src="parts/c-mark.svg" alt=""><div><b>DocMaster</b><span>Hujjatingiz tayyor: hisobot.pdf</span></div></div>
+      <div class="site-sizes" aria-label="Icon at 16, 24, 32 and 48 px; bare mark at 24 and 40 px">
+        <img src="parts/c-tile.svg" alt=""><img src="parts/c-tile.svg" alt=""><img src="parts/c-tile.svg" alt=""><img src="parts/c-tile.svg" alt=""><img src="parts/c-mark.svg" alt=""><img src="parts/c-mark.svg" alt="">
+      </div>
+      <div class="site-concept-body">
+        <h3>Idea</h3>
+        <p>A round seal (muhr) with a lowercase "dm" monogram: a nod to the stamp on official Uzbek paperwork. The wordmark is lowercase DM Sans, the friendliest of the three.</p>
+        <h3>Strengths</h3>
+        <ul>
+          <li>Already circular, so it fills a Telegram avatar perfectly.</li>
+          <li>The local stamp reference gives a sense of trust.</li>
+        </ul>
+        <h3>Weaknesses</h3>
+        <p>"dm" gets muddy at 16 px. The red dot reads as an unread badge in Telegram's chat list. Lowercase loses the capital M that separates "Doc" from "Master".</p>
+      </div>
+    </article>
+  </div>
+
+  <section class="site-red-note">
+    <h2>How red changes</h2>
+    <p>In PDF Master, red (#FA3331) filled half of the icon. In concept A it shrinks to one folded corner, about 8% of the mark, and stays out of the interface except for errors and destructive actions. Prices, discounts and buttons never use it. Red text on white measures 3.8:1, which is fine for a graphic but not for body text, so red is never used for type. Brand blue #0275FC stays in the logo. Buttons keep the darker <code>--action</code> #0062D6 (5.7:1 with white text). On dark surfaces the mark's blue is raised to #3D91FF so it doesn't sink into the background.</p>
+  </section>
+</main>
+<script>
+  function siteToggleTheme() {
+    var r = document.documentElement
+    r.setAttribute('data-theme', r.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')
+  }
+</script>
+</body>
+</html>

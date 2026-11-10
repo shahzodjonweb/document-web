@@ -1,0 +1,463 @@
+[
+  {
+    "from": "/uz/tools/pdf.merge",
+    "to": "/uz/tools/merge-pdf",
+    "status": 301
+  },
+  {
+    "from": "/uz/tools/pdf.compress",
+    "to": "/uz/tools/compress-pdf",
+    "status": 301
+  },
+  {
+    "from": "/uz/tools/pdf.split",
+    "to": "/uz/tools/split-pdf",
+    "status": 301
+  },
+  {
+    "from": "/uz/tools/pdf.extract_pages",
+    "to": "/uz/tools/extract-pdf-pages",
+    "status": 301
+  },
+  {
+    "from": "/uz/tools/pdf.delete_pages",
+    "to": "/uz/tools/delete-pdf-pages",
+    "status": 301
+  },
+  {
+    "from": "/uz/tools/pdf.reorder",
+    "to": "/uz/tools/reorder-pdf-pages",
+    "status": 301
+  },
+  {
+    "from": "/uz/tools/pdf.rotate",
+    "to": "/uz/tools/rotate-pdf",
+    "status": 301
+  },
+  {
+    "from": "/uz/tools/pdf.images_to_pdf",
+    "to": "/uz/tools/jpg-to-pdf",
+    "status": 301
+  },
+  {
+    "from": "/uz/tools/pdf.to_images",
+    "to": "/uz/tools/pdf-to-jpg",
+    "status": 301
+  },
+  {
+    "from": "/uz/tools/convert.word_to_pdf",
+    "to": "/uz/tools/word-to-pdf",
+    "status": 301
+  },
+  {
+    "from": "/uz/tools/convert.pptx_to_pdf",
+    "to": "/uz/tools/powerpoint-to-pdf",
+    "status": 301
+  },
+  {
+    "from": "/uz/tools/convert.pdf_to_docx",
+    "to": "/uz/tools/pdf-to-word",
+    "status": 301
+  },
+  {
+    "from": "/uz/tools/convert.pdf_to_xlsx",
+    "to": "/uz/tools/pdf-to-excel",
+    "status": 301
+  },
+  {
+    "from": "/uz/tools/ocr.extract_text",
+    "to": "/uz/tools/ocr-pdf",
+    "status": 301
+  },
+  {
+    "from": "/uz/tools/ocr.searchable_pdf",
+    "to": "/uz/tools/searchable-pdf",
+    "status": 301
+  },
+  {
+    "from": "/uz/tools/pdf.protect",
+    "to": "/uz/tools/protect-pdf",
+    "status": 301
+  },
+  {
+    "from": "/uz/tools/pdf.unlock_known",
+    "to": "/uz/tools/unlock-pdf",
+    "status": 301
+  },
+  {
+    "from": "/ru/tools/pdf.merge",
+    "to": "/ru/tools/merge-pdf",
+    "status": 301
+  },
+  {
+    "from": "/ru/tools/pdf.compress",
+    "to": "/ru/tools/compress-pdf",
+    "status": 301
+  },
+  {
+    "from": "/ru/tools/pdf.split",
+    "to": "/ru/tools/split-pdf",
+    "status": 301
+  },
+  {
+    "from": "/ru/tools/pdf.extract_pages",
+    "to": "/ru/tools/extract-pdf-pages",
+    "status": 301
+  },
+  {
+    "from": "/ru/tools/pdf.delete_pages",
+    "to": "/ru/tools/delete-pdf-pages",
+    "status": 301
+  },
+  {
+    "from": "/ru/tools/pdf.reorder",
+    "to": "/ru/tools/reorder-pdf-pages",
+    "status": 301
+  },
+  {
+    "from": "/ru/tools/pdf.rotate",
+    "to": "/ru/tools/rotate-pdf",
+    "status": 301
+  },
+  {
+    "from": "/ru/tools/pdf.images_to_pdf",
+    "to": "/ru/tools/jpg-to-pdf",
+    "status": 301
+  },
+  {
+    "from": "/ru/tools/pdf.to_images",
+    "to": "/ru/tools/pdf-to-jpg",
+    "status": 301
+  },
+  {
+    "from": "/ru/tools/convert.word_to_pdf",
+    "to": "/ru/tools/word-to-pdf",
+    "status": 301
+  },
+  {
+    "from": "/ru/tools/convert.pptx_to_pdf",
+    "to": "/ru/tools/powerpoint-to-pdf",
+    "status": 301
+  },
+  {
+    "from": "/ru/tools/convert.pdf_to_docx",
+    "to": "/ru/tools/pdf-to-word",
+    "status": 301
+  },
+  {
+    "from": "/ru/tools/convert.pdf_to_xlsx",
+    "to": "/ru/tools/pdf-to-excel",
+    "status": 301
+  },
+  {
+    "from": "/ru/tools/ocr.extract_text",
+    "to": "/ru/tools/ocr-pdf",
+    "status": 301
+  },
+  {
+    "from": "/ru/tools/ocr.searchable_pdf",
+    "to": "/ru/tools/searchable-pdf",
+    "status": 301
+  },
+  {
+    "from": "/ru/tools/pdf.protect",
+    "to": "/ru/tools/protect-pdf",
+    "status": 301
+  },
+  {
+    "from": "/ru/tools/pdf.unlock_known",
+    "to": "/ru/tools/unlock-pdf",
+    "status": 301
+  },
+  {
+    "from": "/en/tools/pdf.merge",
+    "to": "/en/tools/merge-pdf",
+    "status": 301
+  },
+  {
+    "from": "/en/tools/pdf.compress",
+    "to": "/en/tools/compress-pdf",
+    "status": 301
+  },
+  {
+    "from": "/en/tools/pdf.split",
+    "to": "/en/tools/split-pdf",
+    "status": 301
+  },
+  {
+    "from": "/en/tools/pdf.extract_pages",
+    "to": "/en/tools/extract-pdf-pages",
+    "status": 301
+  },
+  {
+    "from": "/en/tools/pdf.delete_pages",
+    "to": "/en/tools/delete-pdf-pages",
+    "status": 301
+  },
+  {
+    "from": "/en/tools/pdf.reorder",
+    "to": "/en/tools/reorder-pdf-pages",
+    "status": 301
+  },
+  {
+    "from": "/en/tools/pdf.rotate",
+    "to": "/en/tools/rotate-pdf",
+    "status": 301
+  },
+  {
+    "from": "/en/tools/pdf.images_to_pdf",
+    "to": "/en/tools/jpg-to-pdf",
+    "status": 301
+  },
+  {
+    "from": "/en/tools/pdf.to_images",
+    "to": "/en/tools/pdf-to-jpg",
+    "status": 301
+  },
+  {
+    "from": "/en/tools/convert.word_to_pdf",
+    "to": "/en/tools/word-to-pdf",
+    "status": 301
+  },
+  {
+    "from": "/en/tools/convert.pptx_to_pdf",
+    "to": "/en/tools/powerpoint-to-pdf",
+    "status": 301
+  },
+  {
+    "from": "/en/tools/convert.pdf_to_docx",
+    "to": "/en/tools/pdf-to-word",
+    "status": 301
+  },
+  {
+    "from": "/en/tools/convert.pdf_to_xlsx",
+    "to": "/en/tools/pdf-to-excel",
+    "status": 301
+  },
+  {
+    "from": "/en/tools/ocr.extract_text",
+    "to": "/en/tools/ocr-pdf",
+    "status": 301
+  },
+  {
+    "from": "/en/tools/ocr.searchable_pdf",
+    "to": "/en/tools/searchable-pdf",
+    "status": 301
+  },
+  {
+    "from": "/en/tools/pdf.protect",
+    "to": "/en/tools/protect-pdf",
+    "status": 301
+  },
+  {
+    "from": "/en/tools/pdf.unlock_known",
+    "to": "/en/tools/unlock-pdf",
+    "status": 301
+  },
+  {
+    "from": "/uz/legal/terms",
+    "to": "/uz/legal/offer",
+    "status": 301
+  },
+  {
+    "from": "/uz/legal/cookies",
+    "to": "/uz/legal/privacy#cookies",
+    "status": 301
+  },
+  {
+    "from": "/uz/contacts",
+    "to": "/uz/about",
+    "status": 301
+  },
+  {
+    "from": "/ru/legal/terms",
+    "to": "/ru/legal/offer",
+    "status": 301
+  },
+  {
+    "from": "/ru/legal/cookies",
+    "to": "/ru/legal/privacy#cookies",
+    "status": 301
+  },
+  {
+    "from": "/ru/contacts",
+    "to": "/ru/about",
+    "status": 301
+  },
+  {
+    "from": "/en/legal/terms",
+    "to": "/en/legal/offer",
+    "status": 301
+  },
+  {
+    "from": "/en/legal/cookies",
+    "to": "/en/legal/privacy#cookies",
+    "status": 301
+  },
+  {
+    "from": "/en/contacts",
+    "to": "/en/about",
+    "status": 301
+  },
+  {
+    "from": "/tools/pdf.merge",
+    "to": "/uz/tools/merge-pdf",
+    "status": 301,
+    "note": "locale-less safety net"
+  },
+  {
+    "from": "/tools/pdf.compress",
+    "to": "/uz/tools/compress-pdf",
+    "status": 301,
+    "note": "locale-less safety net"
+  },
+  {
+    "from": "/tools/pdf.split",
+    "to": "/uz/tools/split-pdf",
+    "status": 301,
+    "note": "locale-less safety net"
+  },
+  {
+    "from": "/tools/pdf.extract_pages",
+    "to": "/uz/tools/extract-pdf-pages",
+    "status": 301,
+    "note": "locale-less safety net"
+  },
+  {
+    "from": "/tools/pdf.delete_pages",
+    "to": "/uz/tools/delete-pdf-pages",
+    "status": 301,
+    "note": "locale-less safety net"
+  },
+  {
+    "from": "/tools/pdf.reorder",
+    "to": "/uz/tools/reorder-pdf-pages",
+    "status": 301,
+    "note": "locale-less safety net"
+  },
+  {
+    "from": "/tools/pdf.rotate",
+    "to": "/uz/tools/rotate-pdf",
+    "status": 301,
+    "note": "locale-less safety net"
+  },
+  {
+    "from": "/tools/pdf.images_to_pdf",
+    "to": "/uz/tools/jpg-to-pdf",
+    "status": 301,
+    "note": "locale-less safety net"
+  },
+  {
+    "from": "/tools/pdf.to_images",
+    "to": "/uz/tools/pdf-to-jpg",
+    "status": 301,
+    "note": "locale-less safety net"
+  },
+  {
+    "from": "/tools/convert.word_to_pdf",
+    "to": "/uz/tools/word-to-pdf",
+    "status": 301,
+    "note": "locale-less safety net"
+  },
+  {
+    "from": "/tools/convert.pptx_to_pdf",
+    "to": "/uz/tools/powerpoint-to-pdf",
+    "status": 301,
+    "note": "locale-less safety net"
+  },
+  {
+    "from": "/tools/convert.pdf_to_docx",
+    "to": "/uz/tools/pdf-to-word",
+    "status": 301,
+    "note": "locale-less safety net"
+  },
+  {
+    "from": "/tools/convert.pdf_to_xlsx",
+    "to": "/uz/tools/pdf-to-excel",
+    "status": 301,
+    "note": "locale-less safety net"
+  },
+  {
+    "from": "/tools/ocr.extract_text",
+    "to": "/uz/tools/ocr-pdf",
+    "status": 301,
+    "note": "locale-less safety net"
+  },
+  {
+    "from": "/tools/ocr.searchable_pdf",
+    "to": "/uz/tools/searchable-pdf",
+    "status": 301,
+    "note": "locale-less safety net"
+  },
+  {
+    "from": "/tools/pdf.protect",
+    "to": "/uz/tools/protect-pdf",
+    "status": 301,
+    "note": "locale-less safety net"
+  },
+  {
+    "from": "/tools/pdf.unlock_known",
+    "to": "/uz/tools/unlock-pdf",
+    "status": 301,
+    "note": "locale-less safety net"
+  },
+  {
+    "from": "/legal/terms",
+    "to": "/uz/legal/offer",
+    "status": 301,
+    "note": "locale-less safety net"
+  },
+  {
+    "from": "/legal/cookies",
+    "to": "/uz/legal/privacy#cookies",
+    "status": 301,
+    "note": "locale-less safety net"
+  },
+  {
+    "from": "/contacts",
+    "to": "/uz/about",
+    "status": 301,
+    "note": "locale-less safety net"
+  },
+  {
+    "from": "https://www.docmaster.live/*",
+    "to": "https://docmaster.live/*",
+    "status": 301,
+    "scope": "host",
+    "note": "www to apex, path and query kept"
+  },
+  {
+    "from": "http://docmaster.live/*",
+    "to": "https://docmaster.live/*",
+    "status": 301,
+    "scope": "host",
+    "note": "HTTP to HTTPS; add HSTS once stable"
+  },
+  {
+    "from": "https://pdfmaster.orderdesk.live/*",
+    "to": "https://docmaster.live/*",
+    "status": 301,
+    "scope": "host",
+    "except": [
+      "/api/*"
+    ],
+    "note": "Path and query kept. Apply the path rules above in the same hop (old host /uz/tools/pdf.merge -> https://docmaster.live/uz/tools/merge-pdf), never a 2-hop chain. /api/* keeps serving on the old host until the bot, Mini App, OAuth callbacks and payment webhooks are moved. Keep this rule for at least 12 months (Google asks for 180+ days; Yandex move can take months)."
+  },
+  {
+    "from": "http://pdfmaster.orderdesk.live/*",
+    "to": "https://docmaster.live/*",
+    "status": 301,
+    "scope": "host",
+    "except": [
+      "/api/*"
+    ],
+    "note": "same as above for plain HTTP"
+  },
+  {
+    "from": "https://pdfmaster.orderdesk.live/robots.txt",
+    "to": "https://docmaster.live/robots.txt",
+    "status": 301,
+    "scope": "host",
+    "note": "Yandex accepts a redirected robots.txt during a move as long as the rules suit both hosts"
+  }
+]

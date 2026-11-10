@@ -1,0 +1,859 @@
+{
+  "home": {
+    "title": [
+      "DocMaster: PDF vositalari va sunʼiy intellekt",
+      "DocMaster: PDF-инструменты и нейросеть для документов",
+      "DocMaster: PDF tools and AI documents online"
+    ],
+    "description": [
+      "PDF birlashtirish, siqish, Word ga aylantirish, tahrirlash hamda AI bilan taqdimot, referat va rezyume. Brauzerda va Telegramʼda, o‘rnatishsiz.",
+      "Объединяйте, сжимайте и конвертируйте PDF, редактируйте файлы и создавайте с ИИ презентации, рефераты и резюме. В браузере и в Telegram.",
+      "Merge, compress, convert and edit PDFs, and create AI documents, slides and CVs. Works in the browser and in Telegram, nothing to install. Start free."
+    ],
+    "h1": [
+      "PDF bilan ishlash, hujjat, taqdimot va rezyume tayyorlash bir joyda",
+      "PDF-инструменты, презентации, рефераты и резюме с ИИ в одном месте",
+      "PDF tools, AI documents, slides and CVs in one place"
+    ],
+    "primaryKeyword": [
+      "pdf bilan ishlash",
+      "pdf онлайн",
+      "pdf tools online"
+    ],
+    "ogTitle": [
+      "DocMaster: PDF vositalari, AI taqdimot, referat va rezyume",
+      "DocMaster: PDF-инструменты, презентации и резюме с ИИ",
+      "DocMaster: PDF tools, AI slides, documents and CVs"
+    ]
+  },
+  "tools-index": {
+    "title": [
+      "Barcha PDF vositalari onlayn | DocMaster",
+      "Все PDF-инструменты онлайн | DocMaster",
+      "All PDF tools online | DocMaster"
+    ],
+    "description": [
+      "PDF birlashtirish, ajratish, siqish, Word, Excel va JPG ga aylantirish, OCR va parol. Barcha vositalar bir sahifada, brauzerda va Telegramʼda.",
+      "Объединение, разделение и сжатие PDF, конвертация в Word, Excel и JPG, OCR и пароль. Все инструменты на одной странице, онлайн и в Telegram.",
+      "Merge, split and compress PDFs, convert to Word, Excel or JPG, run OCR and add passwords. Every PDF tool on one page, in the browser and in Telegram."
+    ],
+    "h1": [
+      "PDF vositalari",
+      "Инструменты для PDF",
+      "PDF tools"
+    ],
+    "primaryKeyword": [
+      "pdf vositalari",
+      "pdf инструменты онлайн",
+      "pdf tools"
+    ]
+  },
+  "merge-pdf": {
+    "slug": "merge-pdf",
+    "title": [
+      "PDF birlashtirish onlayn, bepul boshlang | DocMaster",
+      "Объединить PDF онлайн в один файл | DocMaster",
+      "Merge PDF files online | DocMaster"
+    ],
+    "description": [
+      "Bir nechta PDF faylni bitta faylga birlashtiring: tartibini tanlang va yuklab oling. Brauzerda yoki Telegram botda, fayllar 24 soatda o‘chiriladi.",
+      "Объедините несколько PDF в один файл: расставьте порядок и скачайте результат. В браузере или в Telegram-боте, файлы удаляются через 24 часа.",
+      "Combine several PDF files into one: set the order and download. Works in the browser or the Telegram bot; files are deleted after 24 hours. Start free."
+    ],
+    "h1": [
+      "PDF fayllarni birlashtirish",
+      "Объединить PDF-файлы в один",
+      "Merge PDF files into one"
+    ],
+    "primaryKeyword": [
+      "pdf birlashtirish",
+      "объединить pdf",
+      "merge pdf"
+    ]
+  },
+  "compress-pdf": {
+    "slug": "compress-pdf",
+    "title": [
+      "PDF siqish: hajmini kichraytirish onlayn | DocMaster",
+      "Сжать PDF онлайн: уменьшить размер | DocMaster",
+      "Compress PDF: reduce file size online | DocMaster"
+    ],
+    "description": [
+      "PDF fayl hajmini kamaytiring: yuboring, siqilgan nusxani yuklab oling. Brauzerda 200 MB gacha, Telegram botda 20 MB gacha. Fayllar 24 soatda o‘chadi.",
+      "Уменьшите размер PDF для почты и порталов: загрузите файл и скачайте сжатую копию. Онлайн до 200 МБ, в Telegram-боте до 20 МБ. Удаление через 24 ч.",
+      "Reduce PDF file size for email and upload portals. Upload, compress, download. Up to 200 MB in the browser, 20 MB in the Telegram bot. Deleted in 24 h."
+    ],
+    "h1": [
+      "PDF hajmini kichraytirish",
+      "Сжать PDF-файл",
+      "Compress a PDF file"
+    ],
+    "primaryKeyword": [
+      "pdf siqish",
+      "сжать pdf",
+      "compress pdf"
+    ]
+  },
+  "split-pdf": {
+    "slug": "split-pdf",
+    "title": [
+      "PDF ajratish: faylni qismlarga bo‘lish | DocMaster",
+      "Разделить PDF на части онлайн | DocMaster",
+      "Split PDF into separate files | DocMaster"
+    ],
+    "description": [
+      "Katta PDF faylni bir nechta qismga yoki alohida sahifalarga ajrating. O‘rnatish shart emas: brauzerda yoki Telegramʼda. Fayllar 24 soatda o‘chiriladi.",
+      "Разделите большой PDF на несколько файлов или отдельные страницы. Без установки программ: в браузере или в Telegram. Файлы удаляются через 24 часа.",
+      "Split a large PDF into several files or single pages. No install: use it in the browser or in Telegram. Uploaded and result files are deleted after 24 h."
+    ],
+    "h1": [
+      "PDF faylni ajratish",
+      "Разделить PDF-файл",
+      "Split a PDF file"
+    ],
+    "primaryKeyword": [
+      "pdf ajratish",
+      "разделить pdf",
+      "split pdf"
+    ]
+  },
+  "extract-pdf-pages": {
+    "slug": "extract-pdf-pages",
+    "title": [
+      "PDF sahifalarini ajratib olish onlayn | DocMaster",
+      "Извлечь страницы из PDF онлайн | DocMaster",
+      "Extract pages from PDF online | DocMaster"
+    ],
+    "description": [
+      "PDF fayldan faqat kerakli sahifalarni tanlab, yangi faylga saqlang. Brauzerda 1000 sahifagacha ishlaydi, o‘rnatishsiz. Fayllar 24 soatda o‘chiriladi.",
+      "Выберите нужные страницы PDF и сохраните их отдельным файлом. Онлайн, без установки, до 1000 страниц в одной задаче. Файлы удаляются через 24 часа.",
+      "Pick the pages you need from a PDF and save them as a new file. Online, no install, up to 1000 pages per task. Uploaded files are deleted after 24 hours."
+    ],
+    "h1": [
+      "PDF dan kerakli sahifalarni ajratib olish",
+      "Извлечь нужные страницы из PDF",
+      "Extract pages from a PDF"
+    ],
+    "primaryKeyword": [
+      "pdf sahifalarini ajratib olish",
+      "извлечь страницы из pdf",
+      "extract pages from pdf"
+    ]
+  },
+  "delete-pdf-pages": {
+    "slug": "delete-pdf-pages",
+    "title": [
+      "PDF sahifalarini o‘chirish onlayn | DocMaster",
+      "Удалить страницы из PDF онлайн | DocMaster",
+      "Delete pages from PDF online | DocMaster"
+    ],
+    "description": [
+      "Keraksiz sahifalarni PDF fayldan olib tashlang va toza nusxani yuklab oling. Brauzerda yoki Telegramʼda, o‘rnatishsiz. Fayllar 24 soatda o‘chiriladi.",
+      "Уберите лишние страницы из PDF и скачайте чистую копию. Онлайн в браузере или в Telegram, без установки программ. Файлы удаляются через 24 часа.",
+      "Remove unwanted pages from a PDF and download a clean copy. Works in the browser or Telegram, nothing to install. Your files are deleted after 24 hours."
+    ],
+    "h1": [
+      "PDF dan sahifalarni olib tashlash",
+      "Удалить лишние страницы из PDF",
+      "Remove pages from a PDF"
+    ],
+    "primaryKeyword": [
+      "pdf sahifalarini olib tashlash",
+      "удалить страницы из pdf",
+      "delete pages from pdf"
+    ]
+  },
+  "reorder-pdf-pages": {
+    "slug": "reorder-pdf-pages",
+    "title": [
+      "PDF sahifalari tartibini o‘zgartirish | DocMaster",
+      "Поменять страницы местами в PDF | DocMaster",
+      "Reorder PDF pages online | DocMaster"
+    ],
+    "description": [
+      "PDF sahifalarini kerakli tartibda joylashtiring va yangi faylni yuklab oling. Brauzerda yoki Telegramʼda, o‘rnatishsiz. Fayllar 24 soatda o‘chiriladi.",
+      "Поменяйте страницы PDF местами и сохраните файл в нужном порядке. Онлайн или в Telegram, без установки программ. Файлы удаляются через 24 часа.",
+      "Put PDF pages in the order you need and download the new file. Online or in Telegram, no software to install. Uploaded files are deleted after 24 hours."
+    ],
+    "h1": [
+      "PDF sahifalarini qayta tartiblash",
+      "Изменить порядок страниц PDF",
+      "Rearrange PDF pages"
+    ],
+    "primaryKeyword": [
+      "pdf sahifalarini almashtirish",
+      "поменять страницы местами pdf",
+      "reorder pdf pages"
+    ]
+  },
+  "rotate-pdf": {
+    "slug": "rotate-pdf",
+    "title": [
+      "PDF aylantirish: sahifalarni burish | DocMaster",
+      "Повернуть PDF онлайн и сохранить | DocMaster",
+      "Rotate PDF pages online | DocMaster"
+    ],
+    "description": [
+      "Teskari yoki yonbosh skanerlangan PDF sahifalarini 90 yoki 180 darajaga buring va saqlang. Brauzerda yoki Telegramʼda. Fayllar 24 soatda o‘chiriladi.",
+      "Поверните перевёрнутые или боковые страницы PDF на 90 или 180 градусов и сохраните. В браузере или в Telegram. Файлы удаляются через 24 часа.",
+      "Turn sideways or upside-down PDF pages by 90 or 180 degrees and save the file. Works in the browser or Telegram. Uploaded files are deleted after 24 hours."
+    ],
+    "h1": [
+      "PDF sahifalarini burish",
+      "Повернуть страницы PDF",
+      "Rotate PDF pages"
+    ],
+    "primaryKeyword": [
+      "pdf aylantirish",
+      "повернуть pdf",
+      "rotate pdf"
+    ]
+  },
+  "jpg-to-pdf": {
+    "slug": "jpg-to-pdf",
+    "title": [
+      "Rasmni PDF qilish: JPG dan PDF ga | DocMaster",
+      "JPG в PDF: фото в PDF онлайн | DocMaster",
+      "JPG to PDF: convert photos to PDF | DocMaster"
+    ],
+    "description": [
+      "Telefonda olingan rasm va JPG fayllarni bitta PDF qiling. Hujjat suratlari avtomatik tekislanadi. Telegram botda yoki brauzerda, o‘rnatishsiz.",
+      "Соберите фото и JPG в один PDF. Снимки документов с телефона автоматически выравниваются. В Telegram-боте или в браузере, без установки программ.",
+      "Turn photos and JPG images into one PDF. Phone shots of paper documents are straightened automatically. Use the Telegram bot or the browser, no install."
+    ],
+    "h1": [
+      "Rasmlarni PDF ga aylantirish",
+      "Конвертировать фото и JPG в PDF",
+      "Convert images to PDF"
+    ],
+    "primaryKeyword": [
+      "rasmni pdf qilish",
+      "jpg в pdf",
+      "jpg to pdf"
+    ]
+  },
+  "pdf-to-jpg": {
+    "slug": "pdf-to-jpg",
+    "title": [
+      "PDF ni rasmga aylantirish: PDF dan JPG | DocMaster",
+      "PDF в JPG онлайн: страницы в картинки | DocMaster",
+      "PDF to JPG: convert pages to images | DocMaster"
+    ],
+    "description": [
+      "PDF faylning har bir sahifasini JPG rasm sifatida saqlang: taqdimot, ijtimoiy tarmoq yoki chat uchun. Brauzerda, o‘rnatishsiz. Fayllar 24 soatda o‘chadi.",
+      "Сохраните каждую страницу PDF как изображение JPG для презентации, соцсетей или мессенджера. Онлайн, без установки. Файлы удаляются через 24 часа.",
+      "Save every page of a PDF as a JPG image for slides, social posts or chats. Online, nothing to install. Uploaded and result files are deleted after 24 h."
+    ],
+    "h1": [
+      "PDF sahifalarini JPG rasmga aylantirish",
+      "Конвертировать PDF в JPG",
+      "Convert PDF to JPG images"
+    ],
+    "primaryKeyword": [
+      "pdf ni rasmga aylantirish",
+      "pdf в jpg",
+      "pdf to jpg"
+    ]
+  },
+  "word-to-pdf": {
+    "slug": "word-to-pdf",
+    "title": [
+      "Word ni PDF ga aylantirish onlayn | DocMaster",
+      "Word в PDF онлайн: конвертер DOCX | DocMaster",
+      "Word to PDF converter online | DocMaster"
+    ],
+    "description": [
+      "DOC va DOCX hujjatlarni PDF formatiga o‘tkazing: yuboring va tayyor PDF ni yuklab oling. Brauzerda yoki Telegram botda. Fayllar 24 soatda o‘chadi.",
+      "Конвертируйте документы DOC и DOCX в PDF: загрузите файл и скачайте готовый PDF. В браузере или в Telegram-боте. Файлы удаляются через 24 часа.",
+      "Convert DOC and DOCX documents to PDF: upload the file and download the PDF. Works in the browser or the Telegram bot. Files are deleted after 24 hours."
+    ],
+    "h1": [
+      "Word faylni PDF ga o‘tkazish",
+      "Конвертировать Word в PDF",
+      "Convert Word to PDF"
+    ],
+    "primaryKeyword": [
+      "word ni pdf ga aylantirish",
+      "word в pdf",
+      "word to pdf"
+    ]
+  },
+  "powerpoint-to-pdf": {
+    "slug": "powerpoint-to-pdf",
+    "title": [
+      "PowerPoint ni PDF ga aylantirish | DocMaster",
+      "PPT в PDF: презентацию в PDF онлайн | DocMaster",
+      "PowerPoint to PDF converter | DocMaster"
+    ],
+    "description": [
+      "PPT va PPTX taqdimotlarni PDF ga o‘tkazing: o‘qituvchiga yuborish va chop etish uchun qulay. Brauzerda yoki Telegramʼda. Fayllar 24 soatda o‘chadi.",
+      "Конвертируйте презентации PPT и PPTX в PDF, чтобы отправить преподавателю или распечатать. В браузере или в Telegram. Файлы удаляются через 24 часа.",
+      "Convert PPT and PPTX presentations to PDF to share or print them. Works in the browser or in Telegram. Uploaded and result files are deleted after 24 h."
+    ],
+    "h1": [
+      "Taqdimotni PDF ga o‘tkazish",
+      "Конвертировать презентацию PowerPoint в PDF",
+      "Convert PowerPoint to PDF"
+    ],
+    "primaryKeyword": [
+      "powerpoint ni pdf ga aylantirish",
+      "ppt в pdf",
+      "powerpoint to pdf"
+    ]
+  },
+  "pdf-to-word": {
+    "slug": "pdf-to-word",
+    "title": [
+      "PDF ni Word ga aylantirish onlayn | DocMaster",
+      "PDF в Word онлайн: конвертер в DOCX | DocMaster",
+      "PDF to Word converter online | DocMaster"
+    ],
+    "description": [
+      "PDF faylni tahrirlanadigan Word (DOCX) hujjatiga aylantiring. Brauzerda 200 MB va 1000 sahifagacha, o‘rnatishsiz. Fayllar 24 soatda o‘chiriladi.",
+      "Превратите PDF в редактируемый документ Word (DOCX). Онлайн, без установки программ, до 200 МБ и 1000 страниц. Файлы удаляются через 24 часа.",
+      "Turn a PDF into an editable Word (DOCX) document. Online, nothing to install, up to 200 MB and 1000 pages per task. Your files are deleted after 24 hours."
+    ],
+    "h1": [
+      "PDF faylni Word ga o‘tkazish",
+      "Конвертировать PDF в Word",
+      "Convert PDF to Word"
+    ],
+    "primaryKeyword": [
+      "pdf ni wordga aylantirish",
+      "pdf в word",
+      "pdf to word"
+    ]
+  },
+  "pdf-to-excel": {
+    "slug": "pdf-to-excel",
+    "title": [
+      "PDF ni Excel ga aylantirish onlayn | DocMaster",
+      "PDF в Excel онлайн: таблицы в XLSX | DocMaster",
+      "PDF to Excel converter online | DocMaster"
+    ],
+    "description": [
+      "PDF dagi jadvallarni Excel (XLSX) fayliga o‘tkazing va hisob-kitobni davom ettiring. Brauzerda, o‘rnatishsiz, 200 MB gacha. Fayllar 24 soatda o‘chadi.",
+      "Перенесите таблицы из PDF в Excel (XLSX) и продолжайте работать с данными. Онлайн, без установки, до 200 МБ на задачу. Файлы удаляются через 24 часа.",
+      "Move tables from a PDF into an Excel (XLSX) file and keep working with the data. Online, no install, up to 200 MB. Files are deleted after 24 hours."
+    ],
+    "h1": [
+      "PDF jadvallarini Excel ga o‘tkazish",
+      "Конвертировать PDF в Excel",
+      "Convert PDF to Excel"
+    ],
+    "primaryKeyword": [
+      "pdf ni excelga aylantirish",
+      "pdf в excel",
+      "pdf to excel"
+    ]
+  },
+  "ocr-pdf": {
+    "slug": "ocr-pdf",
+    "title": [
+      "Rasmdan matn olish: OCR onlayn | DocMaster",
+      "Распознать текст с фото и PDF онлайн | DocMaster",
+      "OCR online: extract text from PDF | DocMaster"
+    ],
+    "description": [
+      "Skanerlangan PDF yoki rasmdagi matnni taniydi: o‘zbek, rus va ingliz tillarida. Natijani nusxalang va tahrirlang. Brauzerda, fayllar 24 soatda o‘chadi.",
+      "Распознаёт текст на сканах PDF и фото на узбекском, русском и английском. Копируйте и редактируйте результат. Онлайн, файлы удаляются через 24 часа.",
+      "Recognise text in scanned PDFs and images in Uzbek, Russian and English, then copy and edit it. In the browser; uploaded files are deleted after 24 h."
+    ],
+    "h1": [
+      "Skaner va rasmdan matnni ajratib olish",
+      "Распознавание текста (OCR) из PDF и фото",
+      "Extract text from scans and images (OCR)"
+    ],
+    "primaryKeyword": [
+      "rasmdan matn olish",
+      "распознать текст",
+      "ocr pdf"
+    ]
+  },
+  "searchable-pdf": {
+    "slug": "searchable-pdf",
+    "title": [
+      "Skanerlangan PDF ni qidiriladigan qilish | DocMaster",
+      "PDF с распознаванием текста онлайн | DocMaster",
+      "Make a scanned PDF searchable | DocMaster"
+    ],
+    "description": [
+      "Skanerlangan PDF ga o‘zbek, rus va ingliz tilidagi matn qatlami qo‘shiladi: qidirish va nusxalash mumkin bo‘ladi, ko‘rinishi o‘zgarmaydi.",
+      "Добавим к скану PDF текстовый слой на узбекском, русском или английском: по документу можно искать и копировать текст, а вид скана не меняется.",
+      "Add a text layer to a scanned PDF in Uzbek, Russian or English so you can search and copy the text, while the scan looks exactly the same. Start free."
+    ],
+    "h1": [
+      "Skaner PDF ga matn qatlamini qo‘shish",
+      "Сделать скан PDF с поиском по тексту",
+      "Make scanned PDFs searchable"
+    ],
+    "primaryKeyword": [
+      "skanerlangan pdf ni matnga aylantirish",
+      "pdf с распознаванием текста",
+      "searchable pdf"
+    ]
+  },
+  "protect-pdf": {
+    "slug": "protect-pdf",
+    "title": [
+      "PDF ga parol qo‘yish onlayn | DocMaster",
+      "Поставить пароль на PDF онлайн | DocMaster",
+      "Password protect PDF online | DocMaster"
+    ],
+    "description": [
+      "PDF faylga parol o‘rnating: uni faqat parolni bilgan kishi ocha oladi. Brauzerda, o‘rnatishsiz, 200 MB gacha. Yuklangan fayllar 24 soatda o‘chiriladi.",
+      "Установите пароль на PDF, чтобы файл открывал только тот, кто знает пароль. Онлайн, без установки, до 200 МБ. Загруженные файлы удаляются через 24 часа.",
+      "Set a password on a PDF so only people who know it can open the file. Online, nothing to install, up to 200 MB. Uploaded files are deleted after 24 hours."
+    ],
+    "h1": [
+      "PDF faylni parol bilan himoyalash",
+      "Защитить PDF паролем",
+      "Protect a PDF with a password"
+    ],
+    "primaryKeyword": [
+      "pdf ga parol qo‘yish",
+      "поставить пароль на pdf",
+      "password protect pdf"
+    ]
+  },
+  "unlock-pdf": {
+    "slug": "unlock-pdf",
+    "title": [
+      "PDF parolini olib tashlash onlayn | DocMaster",
+      "Снять пароль с PDF онлайн | DocMaster",
+      "Remove PDF password online | DocMaster"
+    ],
+    "description": [
+      "Parolni bilsangiz, PDF dan himoyani olib tashlang va oddiy nusxani yuklab oling. Nomaʼlum parollarni buzmaydi. Brauzerda, fayllar 24 soatda o‘chadi.",
+      "Если вы знаете пароль, снимите защиту с PDF и скачайте копию без пароля. Неизвестные пароли не взламываем. Онлайн, файлы удаляются через 24 часа.",
+      "If you know the password, remove it from your PDF and download an unlocked copy. We do not crack unknown passwords. Online; files are deleted after 24 h."
+    ],
+    "h1": [
+      "PDF qulfini ochish (parol maʼlum bo‘lsa)",
+      "Снять защиту с PDF, если вы знаете пароль",
+      "Unlock a PDF you have the password for"
+    ],
+    "primaryKeyword": [
+      "pdf qulfini ochish",
+      "снять пароль с pdf",
+      "unlock pdf"
+    ]
+  },
+  "sign-pdf": {
+    "slug": "sign-pdf",
+    "title": [
+      "PDF ga imzo qo‘yish onlayn | DocMaster",
+      "Подписать PDF онлайн: вставить подпись | DocMaster",
+      "Sign PDF online: add your signature | DocMaster"
+    ],
+    "description": [
+      "Imzo rasmini PDF hujjatning kerakli joyiga qo‘ying va yuklab oling. Brauzerda yoki Telegramʼda. Bu ERI emas, imzo tasviri. Fayllar 24 soatda o‘chadi.",
+      "Вставьте изображение подписи в нужное место PDF и скачайте документ. В браузере или в Telegram Mini App. Это не ЭЦП, а изображение подписи.",
+      "Place an image of your signature anywhere on a PDF and download it. In the browser or Telegram. It is a signature image, not a qualified e-signature."
+    ],
+    "h1": [
+      "PDF hujjatga imzo qo‘yish",
+      "Поставить подпись на PDF",
+      "Sign a PDF"
+    ],
+    "primaryKeyword": [
+      "pdf ga imzo qo‘yish",
+      "подписать pdf",
+      "sign pdf"
+    ]
+  },
+  "fill-pdf-form": {
+    "slug": "fill-pdf-form",
+    "title": [
+      "PDF formani to‘ldirish onlayn | DocMaster",
+      "Заполнить PDF-форму онлайн | DocMaster",
+      "Fill PDF forms online | DocMaster"
+    ],
+    "description": [
+      "PDF ariza, anketa va blankalarni chop etmasdan to‘ldiring: matn qo‘shing, belgilang, imzo qo‘ying. Brauzerda yoki Telegramʼda. Fayllar 24 soatda o‘chadi.",
+      "Заполняйте PDF-анкеты, заявления и бланки без печати: добавьте текст, отметки и подпись. В браузере или в Telegram. Файлы удаляются через 24 часа.",
+      "Fill in PDF applications and forms without printing: add text, tick boxes and a signature. In the browser or Telegram. Files are deleted after 24 hours."
+    ],
+    "h1": [
+      "PDF ariza va formalarni to‘ldirish",
+      "Заполнить PDF-документ онлайн",
+      "Fill in a PDF form"
+    ],
+    "primaryKeyword": [
+      "pdf formani to‘ldirish",
+      "заполнить pdf онлайн",
+      "fill pdf form"
+    ]
+  },
+  "pdf-editor": {
+    "slug": "pdf-editor",
+    "title": [
+      "PDF tahrirlash onlayn: PDF muharriri | DocMaster",
+      "Редактировать PDF онлайн: PDF-редактор | DocMaster",
+      "Edit PDF online: PDF editor in your browser | DocMaster"
+    ],
+    "description": [
+      "PDF dagi matnni o‘zgartiring, matn va rasm qo‘shing, belgilang, imzo qo‘ying, maxfiy joylarni yashiring. Brauzerda va Telegram Mini Appʼda, o‘rnatishsiz.",
+      "Меняйте текст в PDF, добавляйте надписи и картинки, выделяйте, подписывайте и скрывайте данные. В браузере и в Telegram Mini App, без установки.",
+      "Edit existing text, add text and images, highlight, sign and redact. A PDF editor in the browser and as a Telegram Mini App, nothing to install."
+    ],
+    "h1": [
+      "PDF faylni onlayn tahrirlash",
+      "Онлайн-редактор PDF",
+      "Edit PDF files online"
+    ],
+    "primaryKeyword": [
+      "pdf tahrirlash",
+      "редактировать pdf",
+      "pdf editor"
+    ]
+  },
+  "ai-hub": {
+    "title": [
+      "AI yordamida hujjat, taqdimot va rezyume | DocMaster",
+      "Нейросеть для документов, презентаций и резюме | DocMaster",
+      "AI document, slide and CV generator | DocMaster"
+    ],
+    "description": [
+      "Mavzuni yozing: sunʼiy intellekt PDF hujjat (35 sahifagacha), PowerPoint taqdimot (60 slaydgacha) yoki rezyume tayyorlaydi. O‘zbek, rus, ingliz tilida.",
+      "Опишите тему, и нейросеть подготовит PDF-документ до 35 страниц, презентацию PowerPoint до 60 слайдов или резюме. На узбекском, русском, английском.",
+      "Describe a topic and AI writes a PDF document up to 35 pages, an editable PowerPoint deck up to 60 slides or a CV. In English, Uzbek or Russian."
+    ],
+    "h1": [
+      "Sunʼiy intellekt bilan hujjat tayyorlash",
+      "Документы, презентации и резюме с ИИ",
+      "Create documents with AI"
+    ],
+    "primaryKeyword": [
+      "sunʼiy intellekt hujjat tayyorlash",
+      "нейросеть для документов",
+      "ai document generator"
+    ],
+    "ogTitle": [
+      "DocMaster AI: hujjat, taqdimot va rezyume bir necha daqiqada",
+      "DocMaster: документы, презентации и резюме с ИИ",
+      "DocMaster AI: documents, slides and CVs"
+    ]
+  },
+  "ai-documents": {
+    "title": [
+      "AI bilan hujjat yozish: mavzu bo‘yicha PDF | DocMaster",
+      "Нейросеть напишет документ: доклад и эссе в PDF | DocMaster",
+      "AI document generator: topic to PDF | DocMaster"
+    ],
+    "description": [
+      "Mavzu va tilni yozing: AI 35 sahifagacha tuzilgan PDF hujjat tayyorlaydi, keyin uni AI tahrirlari bilan aniqlashtirasiz. O‘zbek, rus yoki ingliz tilida.",
+      "Укажите тему и язык: нейросеть подготовит структурированный PDF до 35 страниц, а правки с ИИ помогут его доработать. На узбекском, русском или английском.",
+      "Give a topic and language, and AI writes a structured PDF document of up to 35 pages that you can refine with AI edits. English, Uzbek or Russian."
+    ],
+    "h1": [
+      "Sunʼiy intellekt bilan hujjat tayyorlash",
+      "Документ по теме с помощью ИИ",
+      "AI document generator"
+    ],
+    "primaryKeyword": [
+      "ai bilan hujjat tayyorlash",
+      "нейросеть для написания текста",
+      "ai document generator"
+    ]
+  },
+  "ai-referat": {
+    "slug": "ai/referat",
+    "title": [
+      "Referat va mustaqil ish tayyorlash AI bilan | DocMaster",
+      "Реферат с помощью нейросети онлайн | DocMaster",
+      "AI report and essay writer | DocMaster"
+    ],
+    "description": [
+      "Mavzuni yozing: AI reja, kirish, bo‘limlar va xulosadan iborat referat yoki mustaqil ish qoralamasini PDF qilib beradi. O‘zbek, rus yoki ingliz tilida.",
+      "Напишите тему: нейросеть подготовит черновик реферата с планом, введением, главами и заключением в PDF до 35 страниц. На русском, узбекском, английском.",
+      "Enter a topic and AI drafts a report with an outline, introduction, sections and conclusion as a PDF of up to 35 pages. English, Uzbek or Russian."
+    ],
+    "h1": [
+      "Sunʼiy intellekt yordamida referat tayyorlash",
+      "Написать реферат с помощью ИИ",
+      "Write a report with AI"
+    ],
+    "primaryKeyword": [
+      "referat tayyorlash",
+      "реферат нейросеть",
+      "ai report writer"
+    ],
+    "proposed": true
+  },
+  "ai-slides": {
+    "title": [
+      "Taqdimot tayyorlash AI bilan: PowerPoint | DocMaster",
+      "Сделать презентацию с помощью нейросети | DocMaster",
+      "AI presentation maker: PowerPoint | DocMaster"
+    ],
+    "description": [
+      "Mavzuni yozing va dizayn tanlang: AI 60 slaydgacha tahrirlanadigan PowerPoint taqdimot tayyorlaydi. 110 dizayn, uch tilda, Telegramʼda ham.",
+      "Укажите тему и выберите дизайн: нейросеть сделает редактируемую презентацию PowerPoint до 60 слайдов. 110 дизайнов, три языка, работает и в Telegram.",
+      "Enter a topic, pick one of 110 designs and AI builds an editable PowerPoint deck of up to 60 slides. English, Uzbek or Russian, in the browser or Telegram."
+    ],
+    "h1": [
+      "Sunʼiy intellekt bilan prezentatsiya tayyorlash",
+      "Презентация с помощью ИИ за несколько минут",
+      "AI presentation maker"
+    ],
+    "primaryKeyword": [
+      "prezentatsiya tayyorlash",
+      "сделать презентацию нейросеть",
+      "ai presentation maker"
+    ],
+    "ogTitle": [
+      "AI taqdimot: 110 dizayn, 60 slaydgacha, tahrirlanadigan PPTX",
+      "Презентация с ИИ: 110 дизайнов, до 60 слайдов, PPTX",
+      "AI slides: 110 designs, up to 60 slides, editable PPTX"
+    ]
+  },
+  "ai-cv": {
+    "title": [
+      "Rezyume tayyorlash AI bilan: 50 ta shablon | DocMaster",
+      "Создать резюме с помощью нейросети | DocMaster",
+      "AI CV maker: 50 resume templates | DocMaster"
+    ],
+    "description": [
+      "O‘zingiz haqingizda yozing, LinkedIn PDF yoki eski CV yuboring: AI 50 shablondan birida rezyume tayyorlaydi. O‘zbek, rus yoki ingliz tilida.",
+      "Расскажите о себе, загрузите PDF из LinkedIn или старое резюме: нейросеть оформит CV в одном из 50 шаблонов. На русском, узбекском или английском.",
+      "Describe yourself, upload a LinkedIn PDF or an old CV, and AI builds your resume in one of 50 templates. In English, Uzbek or Russian."
+    ],
+    "h1": [
+      "Sunʼiy intellekt bilan rezyume (CV) yaratish",
+      "Конструктор резюме с ИИ",
+      "AI CV builder"
+    ],
+    "primaryKeyword": [
+      "rezyume tayyorlash",
+      "создать резюме",
+      "ai cv maker"
+    ],
+    "ogTitle": [
+      "AI rezyume: 50 shablon, LinkedIn yoki eski CVʼdan",
+      "Резюме с ИИ: 50 шаблонов, из LinkedIn или старого CV",
+      "AI CV: 50 templates, from LinkedIn or an old CV"
+    ]
+  },
+  "guide": {
+    "title": [
+      "AI uchun so‘rov yozish bo‘yicha qo‘llanma | DocMaster",
+      "Как составить запрос для нейросети: гайд | DocMaster",
+      "AI prompt guide for documents and slides | DocMaster"
+    ],
+    "description": [
+      "AI hujjat, taqdimot va rezyume uchun so‘rovni qanday yozish kerak: mavzu, auditoriya, hajm, til va tuzilma. Misollar bilan qisqa qo‘llanma.",
+      "Как написать запрос для документа, презентации или резюме: тема, аудитория, объём, язык и структура. Короткое руководство с примерами запросов.",
+      "How to write a request for an AI document, slide deck or CV: topic, audience, length, language and structure. A short guide with example prompts."
+    ],
+    "h1": [
+      "Yaxshi natija uchun so‘rovni qanday yozish kerak",
+      "Как писать запросы для документов и презентаций",
+      "How to write a good AI request"
+    ],
+    "primaryKeyword": [
+      "ai uchun so‘rov yozish",
+      "как составить запрос для нейросети",
+      "ai prompt guide"
+    ]
+  },
+  "pricing": {
+    "title": [
+      "Tariflar: Free, Plus va Premium narxlari | DocMaster",
+      "Тарифы и цены: Free, Plus и Premium | DocMaster",
+      "Pricing: Free, Plus and Premium plans | DocMaster"
+    ],
+    "description": [
+      "Bepul tarif: haftasiga 5 AI hujjat va 15 fayl vazifasi. Plus 30 kunga 20 000 so‘m, Premium 60 000 so‘m. Avtomatik yangilanmaydi. Uzcard, Humo, Visa.",
+      "Бесплатный тариф: 5 документов с ИИ и 15 задач с файлами в неделю. Plus 20 000 сум, Premium 60 000 сум за 30 дней, без автопродления.",
+      "Free plan: 5 AI documents and 15 file tasks a week. Plus is 20,000 so'm and Premium 60,000 so'm for 30 days, with no auto-renewal. Uzcard, Humo, Visa."
+    ],
+    "h1": [
+      "DocMaster tariflari va narxlari",
+      "Тарифы DocMaster",
+      "DocMaster plans and prices"
+    ],
+    "primaryKeyword": [
+      "docmaster narxlari",
+      "docmaster тарифы",
+      "docmaster pricing"
+    ]
+  },
+  "telegram": {
+    "title": [
+      "DocMaster Telegram bot: PDF va AI hujjatlar | DocMaster",
+      "Telegram-бот для PDF и документов с ИИ | DocMaster",
+      "DocMaster Telegram bot for PDF and AI | DocMaster"
+    ],
+    "description": [
+      "Rasmni PDF qilish, PDF birlashtirish, siqish va AI taqdimot Telegram botda. Mini Appʼda PDF tahrirlash. Bitta akkaunt bot va saytda, faylga 20 MB gacha.",
+      "Фото в PDF, объединение и сжатие PDF, презентации с ИИ прямо в Telegram-боте, редактор PDF в Mini App. Один аккаунт для бота и сайта, до 20 МБ на файл.",
+      "Photos to PDF, merge and compress PDFs and AI slides right in the Telegram bot, plus a PDF editor Mini App. One account for bot and web, 20 MB per file."
+    ],
+    "h1": [
+      "PDF bot Telegramʼda",
+      "PDF-бот в Telegram",
+      "PDF bot in Telegram"
+    ],
+    "primaryKeyword": [
+      "pdf bot telegram",
+      "pdf бот телеграм",
+      "pdf telegram bot"
+    ]
+  },
+  "invite": {
+    "title": [
+      "Do‘stlarni taklif qiling va Plus oling | DocMaster",
+      "Пригласите друзей и получите Plus | DocMaster",
+      "Invite friends and earn Plus | DocMaster"
+    ],
+    "description": [
+      "Har 5 ta yangi taklif qilingan do‘st uchun Plus tarifi: avval 1 oy, keyin 2, keyin 3 oy. Oyiga 5 tagacha do‘st hisoblanadi. Havola bot va saytda.",
+      "За каждые 5 новых приглашённых друзей тариф Plus: сначала 1 месяц, затем 2, затем 3. В месяц учитывается до 5 друзей. Ссылка есть в боте и на сайте.",
+      "Every 5 new friends you invite earn Plus: 1 month for the first 5, then 2, then 3 months. Up to 5 friends count per month. Your link is in the bot and app."
+    ],
+    "h1": [
+      "Do‘stlarni taklif qilish dasturi",
+      "Приглашайте друзей в DocMaster",
+      "Invite friends to DocMaster"
+    ],
+    "primaryKeyword": [
+      "do‘stlarni taklif qilish",
+      "пригласить друзей",
+      "invite friends"
+    ]
+  },
+  "help": {
+    "title": [
+      "Yordam markazi va savollarga javoblar | DocMaster",
+      "Помощь и ответы на частые вопросы | DocMaster",
+      "Help centre and FAQ | DocMaster"
+    ],
+    "description": [
+      "Fayl hajmi, tariflar, to‘lov, Telegram bot, AI hujjatlar va maxfiylik bo‘yicha javoblar. Topilmasa, qo‘llab-quvvatlash xizmatiga yozing.",
+      "Ответы о размерах файлов, тарифах, оплате, Telegram-боте, документах с ИИ и конфиденциальности. Не нашли ответ? Напишите в службу поддержки.",
+      "Answers about file limits, plans, payment, the Telegram bot, AI documents and privacy. Can't find what you need? Contact our support team for help."
+    ],
+    "h1": [
+      "Qanday yordam bera olamiz?",
+      "Чем мы можем помочь?",
+      "How can we help?"
+    ],
+    "primaryKeyword": [
+      "docmaster yordam",
+      "docmaster помощь",
+      "docmaster help"
+    ]
+  },
+  "about": {
+    "title": [
+      "Kompaniya va kontaktlar | DocMaster",
+      "О компании и контакты | DocMaster",
+      "About us and contacts | DocMaster"
+    ],
+    "description": [
+      "DocMaster xizmatini \"ARCANIUM TECHNOLOGIES\" MChJ ko‘rsatadi. Rekvizitlar, STIR, manzil va qo‘llab-quvvatlash bilan bog‘lanish usullari shu sahifada.",
+      "Сервис DocMaster предоставляет ООО «ARCANIUM TECHNOLOGIES». Реквизиты, ИНН, адрес и способы связи со службой поддержки собраны на этой странице.",
+      "DocMaster is operated by ARCANIUM TECHNOLOGIES LLC, Uzbekistan. Company details, taxpayer number, address and ways to reach support are on this page."
+    ],
+    "h1": [
+      "DocMaster haqida",
+      "О DocMaster",
+      "About DocMaster"
+    ],
+    "primaryKeyword": [
+      "docmaster kontaktlar",
+      "docmaster контакты",
+      "docmaster contacts"
+    ]
+  },
+  "legal-offer": {
+    "title": [
+      "Ommaviy oferta | DocMaster",
+      "Публичная оферта | DocMaster",
+      "Public offer (Terms of Service) | DocMaster"
+    ],
+    "description": [
+      "DocMaster xizmatidan foydalanish shartlari: ro‘yxatdan o‘tish, bepul va pullik tariflar, to‘lov, faollashtirish, javobgarlik. Asosiy matn o‘zbek tilida.",
+      "Условия использования DocMaster: регистрация, бесплатный и платные тарифы, оплата, активация, ответственность сторон. Основной текст — на узбекском языке.",
+      "Terms for using DocMaster: sign-up, free and paid plans, payment, plan activation and liability. The Uzbek text is authoritative; this is a translation."
+    ],
+    "h1": [
+      "Ommaviy oferta",
+      "Публичная оферта",
+      "Public offer"
+    ],
+    "primaryKeyword": [
+      "ommaviy oferta",
+      "публичная оферта",
+      "terms of service"
+    ]
+  },
+  "legal-privacy": {
+    "title": [
+      "Maxfiylik siyosati | DocMaster",
+      "Политика конфиденциальности | DocMaster",
+      "Privacy policy | DocMaster"
+    ],
+    "description": [
+      "Qanday maʼlumotlarni yig‘amiz, qayerda saqlaymiz va qachon o‘chiramiz: fayllar 24 soatda o‘chiriladi. Cookie va shaxsiy maʼlumotlar bo‘yicha qoidalar.",
+      "Какие данные мы собираем, где храним и когда удаляем: файлы удаляются через 24 часа. Правила обработки персональных данных и файлов cookie.",
+      "What data we collect, where it is stored and when it is deleted: files are removed after 24 hours. Rules for personal data and cookies on DocMaster."
+    ],
+    "h1": [
+      "Maxfiylik siyosati",
+      "Политика конфиденциальности",
+      "Privacy policy"
+    ],
+    "primaryKeyword": [
+      "maxfiylik siyosati",
+      "политика конфиденциальности",
+      "privacy policy"
+    ]
+  },
+  "legal-refunds": {
+    "title": [
+      "Pulni qaytarish siyosati | DocMaster",
+      "Политика возврата средств | DocMaster",
+      "Refund policy | DocMaster"
+    ],
+    "description": [
+      "Plus va Premium tariflari uchun to‘lovni qaytarish shartlari: qaysi hollarda, qanday muddatda va qaysi usulda pul qaytariladi. Asosiy matn o‘zbek tilida.",
+      "Условия возврата оплаты за тарифы Plus и Premium: в каких случаях, в какие сроки и каким способом возвращаются деньги. Основной текст — на узбекском.",
+      "When and how payments for the Plus and Premium plans are refunded: eligible cases, deadlines and the refund method. The Uzbek text is authoritative."
+    ],
+    "h1": [
+      "To‘lovni qaytarish va bekor qilish",
+      "Возврат средств и отмена",
+      "Refunds and cancellation"
+    ],
+    "primaryKeyword": [
+      "pulni qaytarish",
+      "возврат средств",
+      "refund policy"
+    ]
+  },
+  "not-found": {
+    "title": [
+      "Sahifa topilmadi | DocMaster",
+      "Страница не найдена | DocMaster",
+      "Page not found | DocMaster"
+    ],
+    "description": [
+      "Bu manzilda sahifa yo‘q. Asosiy sahifaga qayting yoki kerakli vositani tanlang: PDF birlashtirish, siqish, Word ga aylantirish va AI hujjatlar.",
+      "По этому адресу страницы нет. Вернитесь на главную или выберите инструмент: объединить, сжать и конвертировать PDF, документы и презентации с ИИ.",
+      "There is no page at this address. Go back to the home page or pick a tool: merge, compress or convert PDFs, or create AI documents, slides and CVs."
+    ],
+    "h1": [
+      "Bu sahifa topilmadi",
+      "Такой страницы нет",
+      "We couldn't find that page"
+    ],
+    "primaryKeyword": [
+      "",
+      "",
+      ""
+    ],
+    "noindex": true
+  }
+}

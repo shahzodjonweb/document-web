@@ -1,0 +1,65 @@
+/*
+ * DocMaster public site: token additions.
+ *
+ * Load after app/assets/css/tokens.css. Nothing here renames or overrides an
+ * existing token; every new name starts with --site- so it cannot collide with
+ * the app's sheets. Values were checked for WCAG 2.1 AA against the surfaces
+ * they sit on (ratios in the comments).
+ */
+:root {
+  /* Brand marks (artwork only, never text) */
+  --site-mark-blue: #0275fc;          /* logo D, light theme */
+  --site-mark-red: #fa3331;           /* logo fold only; 3.8:1 on white = graphic use only */
+
+  /* Display type: fluid between the 390 and 1440 breakpoints */
+  --site-display-1: clamp(36px, 2.4vw + 26px, 60px);  /* hero H1 */
+  --site-display-2: clamp(28px, 1.3vw + 23px, 40px);  /* section H2 */
+  --site-display-3: clamp(20px, 0.6vw + 18px, 26px);  /* card and step titles */
+  --site-lead: clamp(17px, 0.3vw + 16px, 20px);       /* hero and section intros */
+  --site-body: 16px;                                   /* marketing body (app body stays 15px) */
+  --site-small: 14px;
+  --site-leading-display: 1.08;
+  --site-leading-heading: 1.18;
+  --site-leading-body: 1.6;
+  --site-tracking-display: -0.022em;
+  --site-measure: 64ch;               /* prose line length */
+  --site-measure-lead: 52ch;
+
+  /* Layout */
+  --site-container: 1200px;           /* content width at 1440 -> 120px margins */
+  --site-container-narrow: 760px;     /* legal and help prose */
+  --site-gutter: clamp(20px, 3.2vw, 40px); /* side inset: 20 at 390, ~25 at 768, 40 max */
+  --site-grid-gap: clamp(16px, 2vw, 24px);
+  --site-section: clamp(64px, 6vw + 40px, 120px);   /* vertical rhythm between sections */
+  --site-header-h: 72px;
+
+  /* Surfaces specific to the site */
+  --site-band: var(--surface-sunken);  /* alternating bands */
+  --site-ink-band: #0e1726;            /* final CTA band, light theme */
+  --site-on-ink-band: #eef3fa;         /* 16.1:1 on #0e1726 */
+  --site-on-ink-band-muted: #a9b6c8;   /* 8.7:1 on #0e1726 */
+  --site-fold: #dce6f3;                /* underside of a folded page corner */
+  --site-fold-size: 22px;
+  --site-highlight: #fff1a8;           /* highlighter; --ink on it 15.7:1 */
+
+  /* Motion */
+  --site-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --site-duration-menu: 180ms;
+  --site-duration-reveal: 420ms;
+}
+
+:root[data-theme='dark'] {
+  --site-mark-blue: #3d91ff;          /* 6.0:1 on --paper #0b111c */
+  --site-ink-band: #18233a;            /* = --surface-raised; stays a step above the page */
+  --site-on-ink-band: #eef3fa;         /* 14.1:1 */
+  --site-on-ink-band-muted: #a9b6c8;   /* 7.6:1 */
+  --site-fold: #22324d;
+  --site-highlight: #4a3f0c;          /* --text on it 6.5:1 */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --site-duration-menu: 0ms;
+    --site-duration-reveal: 0ms;
+  }
+}

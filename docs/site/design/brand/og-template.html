@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<title>DocMaster OG image template</title>
+<!-- Renders public/og/docmaster-{uz,ru,en}.png at 1200x630: og-template.html?lang=ru -->
+<style>
+  @font-face { font-family: 'Manrope'; src: url('../../../../public/fonts/manrope-variable.ttf'); font-weight: 200 800; }
+  @font-face { font-family: 'DM Sans'; src: url('../../../../public/fonts/dm-sans-variable.ttf'); font-weight: 100 1000; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body { background: #f5f7fa; font-family: 'DM Sans', sans-serif; color: #0e1726; position: relative; }
+  .logo { position: absolute; left: 72px; top: 64px; height: 44px; }
+  h1 { position: absolute; left: 72px; top: 170px; width: 640px; margin: 0; font: 700 64px/1.06 'Manrope', sans-serif; letter-spacing: -0.025em; text-wrap: balance; }
+  p { position: absolute; left: 72px; bottom: 64px; margin: 0; font-size: 26px; color: #3b4859; display: flex; gap: 14px; align-items: center; }
+  p b { color: #0062d6; font-weight: 600; }
+  p i { width: 6px; height: 6px; border-radius: 50%; background: #ccd4df; display: inline-block; }
+  .sheet { position: absolute; left: 780px; top: 92px; width: 360px; height: 600px; background: #fff; border: 1px solid #e3e8ef; border-radius: 16px; box-shadow: 0 2px 6px rgba(14,23,38,.05), 0 18px 48px rgba(14,23,38,.12); padding: 44px 36px; transform: rotate(3deg); }
+  .sheet::before { content: ''; position: absolute; top: -1px; right: -1px; width: 64px; height: 64px; background: linear-gradient(225deg, #f5f7fa 50%, #fa3331 50%); border-bottom-left-radius: 6px; }
+  .row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid #e3e8ef; border-radius: 12px; margin-bottom: 12px; font-size: 18px; }
+  .row span { width: 22px; height: 28px; border: 2px solid #93a2b7; border-radius: 4px; flex: none; }
+  .row.done { background: #edf4ff; border-color: #b9d6ff; }
+  .row.done span { border-color: #0062d6; }
+  .line { height: 10px; border-radius: 5px; background: #e3e8ef; margin: 18px 0; }
+  .line.s { width: 60%; }
+  .t { font: 700 24px/1.2 'Manrope'; margin: 0 0 28px; }
+</style>
+</head>
+<body>
+  <img class="logo" src="../../../../public/brand/docmaster-logo.svg" alt="DocMaster">
+  <h1 id="h"></h1>
+  <p id="p"></p>
+  <div class="sheet" aria-hidden="true">
+    <div class="t" id="t"></div>
+    <div class="row"><span></span>hisobot.pdf</div>
+    <div class="row"><span></span>ilova.pdf</div>
+    <div class="row done"><span></span>hisobot-toliq.pdf</div>
+    <div class="line"></div><div class="line"></div><div class="line s"></div><div class="line"></div><div class="line s"></div>
+  </div>
+<script>
+  var copy = {
+    uz: ['PDF vositalari, muharrir va AI hujjatlar bir joyda', 'Veb-saytda', 'Telegramda', 'PDF birlashtirish'],
+    ru: ['PDF‑инструменты, редактор и AI‑документы в одном месте', 'На сайте', 'В Telegram', 'Объединить PDF'],
+    en: ['PDF tools, an editor and AI documents in one place', 'On the web', 'In Telegram', 'Merge PDF'],
+  }
+  var l = new URLSearchParams(location.search).get('lang') || 'uz', c = copy[l]
+  document.documentElement.lang = l
+  document.getElementById('h').textContent = c[0]
+  document.getElementById('t').textContent = c[3]
+  document.getElementById('p').innerHTML = '<b>docmaster.live</b><i></i>' + c[1] + '<i></i>' + c[2]
+</script>
+</body>
+</html>
