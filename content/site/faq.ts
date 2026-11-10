@@ -5,7 +5,7 @@ export const faq = [
 
   // ── Home (6) ──
   {
-    id: 'home-free', group: 'plans', pages: ['home', 'pricing', 'help'],
+    id: 'home-free', group: 'plans', pages: ['home', 'pricing', 'help', 'tools-index'],
     q: ['Can I use {brand} without paying?', '{brand} dan to‘lovsiz foydalansa bo‘ladimi?', 'Можно ли пользоваться {brand} без оплаты?'],
     a: [
       'Yes, within the Free plan limits: every tool, {freeAi} AI documents and {freeFiles} file tasks a week, and 3 AI edits per file. Free asks you to join our Telegram channels. Plus and Premium give more each week.',
@@ -14,7 +14,7 @@ export const faq = [
     ],
   },
   {
-    id: 'home-files-safe', group: 'files', pages: ['home', 'help'],
+    id: 'home-files-safe', group: 'files', pages: ['home', 'help', 'tools-index'],
     q: ['What happens to my files?', 'Fayllarim bilan nima bo‘ladi?', 'Что происходит с моими файлами?'],
     a: [
       'They are used only to run your task. Uploaded files and results are deleted after 24 hours, so download what you need before then. We use no analytics or advertising trackers.',
@@ -32,7 +32,7 @@ export const faq = [
     ],
   },
   {
-    id: 'home-telegram-vs-web', group: 'telegram', pages: ['home', 'telegram', 'help'],
+    id: 'home-telegram-vs-web', group: 'telegram', pages: ['home', 'telegram', 'help', 'tools-index'],
     q: ['Is the Telegram bot different from the website?', 'Telegram bot saytdan farq qiladimi?', 'Чем Telegram-бот отличается от сайта?'],
     a: [
       'It is the same account, plan and weekly limits. The bot takes files up to 20 MB; the website takes up to 200 MB and 1,000 pages per task. PDF to Word, PDF to Excel, OCR, searchable PDF and passwords are on the website only.',
@@ -97,7 +97,7 @@ export const faq = [
     ],
   },
   {
-    id: 'pricing-premium-speed', group: 'plans', pages: ['pricing', 'help'],
+    id: 'pricing-premium-speed', group: 'plans', pages: ['pricing', 'help', 'tools-index'],
     q: ['Is Premium faster or does it have more tools?', 'Premium tezroqmi yoki vositalari ko‘pmi?', 'Premium быстрее или в нём больше функций?'],
     a: [
       'Neither. Every plan has every tool, the same file limits and the same speed. Premium removes the weekly limits and the channel requirement; that is the whole difference.',

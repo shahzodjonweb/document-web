@@ -7,7 +7,8 @@
 /* ── Tool page: hero ── */
 .site-tool-chips { list-style: none; margin: 0; padding: 0; }
 .site-tool-chips .site-chip { max-width: 100%; white-space: normal; }
-.site-toolhero .site-h1 { overflow-wrap: anywhere; hyphens: auto; }
+/* Headings break between words only; a very long word may still wrap rather than overflow. */
+.site-toolhero .site-h1 { overflow-wrap: break-word; hyphens: manual; }
 .site-drop .site-h3 { margin: 0; text-wrap: balance; }
 .site-drop-ico .site-icon { width: 28px; height: 28px; }
 

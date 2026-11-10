@@ -688,3 +688,9 @@ html { -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--site-heade
 }
 /* FAQ questions and answers never end on one lone word. */
 .site-faq summary, .site-faq details > div p { text-wrap: pretty; }
+/* Stacked comparison rows on a phone: the label keeps its words, the value takes the rest. */
+@media (max-width: 600px) {
+  .site-compare td { align-items: baseline; }
+  .site-compare td::before { flex: 0 0 auto; max-width: 42%; }
+  .site-compare td { text-align: right; }
+}

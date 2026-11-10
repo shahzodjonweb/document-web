@@ -2,6 +2,7 @@
 // A live admin discount, above the header on every public page (the app's
 // DiscountBanner wording, the site's look). On a phone it is one short line:
 // each plan's percentage and the last day, the prices on the pricing page.
+// Two plans ending the same day name that day once, after both.
 const { t, path } = useLocale()
 const { active, money, untilLabel } = usePricing()
 const ends = computed(() => {
@@ -18,7 +19,7 @@ const ends = computed(() => {
         <s><span class="site-visually-hidden">{{ t('regularPrice') + ' ' }}</span>{{ money(discount.regular) }}</s>
         <b>{{ money(discount.price) }}</b>
         <span class="site-badge">−{{ discount.percent }}%</span>
-        <span v-if="!ends">{{ untilLabel(discount) }}</span>
+        <span v-if="!ends || active.length === 1">{{ untilLabel(discount) }}</span>
       </p>
       <p v-if="ends && active.length > 1" class="site-banner-line">{{ ends }}</p>
       <p class="site-banner-short" aria-hidden="true">
