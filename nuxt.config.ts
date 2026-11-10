@@ -49,7 +49,16 @@ export default defineNuxtConfig({
   // `apiOrigin` is where the server reads the public plans, catalog and contacts
   // for a server-rendered page; NUXT_API_ORIGIN overrides it at run time. The
   // `/api/**` proxy below is fixed at build time.
-  runtimeConfig: { apiOrigin, public: { productName: 'PDF Master' } },
+  runtimeConfig: {
+    apiOrigin,
+    public: {
+      productName: 'PDF Master',
+      // The address pages call canonical; NUXT_PUBLIC_SITE_ORIGIN sets it in production.
+      siteOrigin: 'https://pdfmaster.orderdesk.live',
+      // Until launch every page says noindex and robots.txt keeps crawlers out.
+      siteIndexable: false,
+    },
+  },
   nitro: {
     routeRules: { '/api/**': { proxy: `${apiOrigin}/api/**` }, ...browserOnly },
     publicAssets: [...pdfjsAssets('cmaps'), ...pdfjsAssets('standard_fonts'), ...pdfjsAssets('wasm')],
@@ -72,6 +81,7 @@ export default defineNuxtConfig({
         { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/brand/pdf-master-icon-32.png' },
         { rel: 'icon', type: 'image/png', sizes: '64x64', href: '/brand/pdf-master-icon-64.png' },
         { rel: 'apple-touch-icon', sizes: '256x256', href: '/brand/pdf-master-icon-256.png' },
+        { rel: 'manifest', href: '/site.webmanifest' },
       ],
     },
   },

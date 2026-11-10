@@ -65,12 +65,12 @@ const titles: [string, string][] = [
   ['/app/referrals', 'referrals'],
   ['/help', 'help'],
 ]
-useHead(() => ({
-  title:
-    view.value === '/'
-      ? `PDF Master · ${t('heroTitle')}`
-      : `${t(titles.find(([prefix]) => view.value.startsWith(prefix))?.[1] || 'navHome')} · PDF Master`,
-}))
+// The public pages take their titles from useSiteSeo (app.vue); this names the app's own.
+useHead(() =>
+  isCustomer.value || view.value === '/auth/telegram'
+    ? { title: `${t(titles.find(([prefix]) => view.value.startsWith(prefix))?.[1] || 'navHome')} · PDF Master` }
+    : {},
+)
 </script>
 <template>
   <ErrorBanner v-if="callbackError" :message="callbackError" />

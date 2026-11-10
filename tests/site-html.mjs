@@ -38,9 +38,9 @@ await new Promise((resolve) => stub.listen(0, '127.0.0.1', resolve))
 const stubOrigin = `http://127.0.0.1:${stub.address().port}`
 
 const servers = []
-async function serve(port, apiOrigin) {
+async function serve(port, apiOrigin, extra = {}) {
   const child = spawn(process.execPath, ['.output/server/index.mjs'], {
-    env: { ...process.env, NITRO_HOST: '127.0.0.1', NITRO_PORT: String(port), NUXT_API_ORIGIN: apiOrigin },
+    env: { ...process.env, NITRO_HOST: '127.0.0.1', NITRO_PORT: String(port), NUXT_API_ORIGIN: apiOrigin, ...extra },
     stdio: ['ignore', 'ignore', 'inherit'],
   })
   servers.push(child)
@@ -69,7 +69,13 @@ async function check(name, run) {
 }
 
 try {
-  const site = await serve(3191, stubOrigin)
+  // As after launch: the new address, and search engines welcome.
+  const site = await serve(3191, stubOrigin, {
+    NUXT_PUBLIC_SITE_ORIGIN: 'https://docmaster.live',
+    NUXT_PUBLIC_SITE_INDEXABLE: '1',
+  })
+  const head = (html, pattern) => [...html.matchAll(pattern)].map((match) => match[1])
+  const ld = (html) => JSON.parse(head(html, /<script[^>]*application\/ld\+json[^>]*>([^<]*)<\/script>/g)[0] || 'null')
 
   await check('the bare address goes to the browser’s language, temporarily', async () => {
     const ru = await get(site, '/', { 'accept-language': 'ru-RU,ru;q=0.9,en;q=0.8' })
@@ -139,7 +145,78 @@ try {
     }
   })
 
+
+  await check('a page names its canonical address, its languages and its preview', async () => {
+    const html = await (await get(site, '/ru/pricing')).text()
+    assert.deepEqual(head(html, /<link[^>]*rel="canonical"[^>]*href="([^"]+)"/g), ['https://docmaster.live/ru/pricing'])
+    const languages = head(html, /<link[^>]*hreflang="([^"]+)"/g).sort()
+    assert.deepEqual(languages, ['en', 'ru', 'uz', 'x-default'])
+    assert.ok(html.includes('href="https://docmaster.live/en/pricing"'), 'x-default and en name the English page')
+    assert.match(html, /<meta[^>]*name="robots"[^>]*content="index, follow"/)
+    assert.match(html, /<meta[^>]*property="og:image"[^>]*content="https:\/\/docmaster.live\/og\/docmaster-ru.png"/)
+    assert.match(html, /<meta[^>]*name="description"[^>]*content="[^"]{60,}"/)
+    assert.equal(head(html, /<meta[^>]*name="description"/g).length, 1, 'one description')
+    assert.ok(!html.includes('{brand}'), 'the product name is filled in')
+  })
+
+  await check('the home page says who runs it and what the plans cost', async () => {
+    const html = await (await get(site, '/en')).text()
+    assert.ok(html.includes('hreflang="x-default" href="https://docmaster.live/"'), 'x-default is the language chooser')
+    const graph = ld(html)['@graph']
+    const organization = graph.find((item) => item['@type'] === 'Organization')
+    assert.equal(organization.taxID, '313458514')
+    assert.ok(!('telephone' in organization) && !('email' in organization), 'no blank contacts')
+    const offers = graph.find((item) => item['@type'] === 'WebApplication').offers.map((offer) => offer.price)
+    assert.deepEqual(offers, [0, 20000, 60000], 'regular prices')
+    assert.ok(!graph.some((item) => 'aggregateRating' in item), 'no ratings')
+  })
+
+  await check('a tool page has its own title and a breadcrumb', async () => {
+    const html = await (await get(site, '/uz/tools/pdf.merge')).text()
+    assert.match(html, /<title>PDF birlashtirish[^<]*<\/title>/)
+    const crumbs = ld(html)['@graph'].find((item) => item['@type'] === 'BreadcrumbList').itemListElement
+    assert.deepEqual(crumbs.map((crumb) => crumb.item), [
+      'https://docmaster.live/uz', 'https://docmaster.live/uz/tools', 'https://docmaster.live/uz/tools/pdf.merge',
+    ])
+  })
+
+  await check('draft legal pages are kept out of search', async () => {
+    const html = await (await get(site, '/en/legal/privacy')).text()
+    assert.match(html, /<meta[^>]*name="robots"[^>]*content="noindex, follow"/)
+  })
+
+  await check('robots.txt keeps crawlers out of the app and points at the sitemap', async () => {
+    const text = await (await get(site, '/robots.txt')).text()
+    assert.ok(text.includes('Disallow: /*/app') && text.includes('Disallow: /api/'))
+    assert.ok(text.includes('Sitemap: https://docmaster.live/sitemap.xml'))
+    assert.ok(!/^Disallow: \/$/m.test(text))
+  })
+
+  await check('the sitemap lists every public page in three languages, and nothing else', async () => {
+    const response = await get(site, '/sitemap.xml')
+    assert.match(response.headers.get('content-type'), /xml/)
+    const xml = await response.text()
+    const urls = head(xml, /<loc>([^<]+)<\/loc>/g)
+    assert.equal(urls.length, 3 * 22, `${urls.length} addresses`)
+    assert.ok(urls.includes('https://docmaster.live/ru/tools/pdf.merge'))
+    assert.ok(!urls.some((url) => /\/(app|auth|legal)(\/|$)/.test(url)), 'no app, sign-in or draft pages')
+    assert.equal((xml.match(/hreflang="x-default"/g) || []).length, urls.length)
+  })
+
+  await check('the web manifest names the product', async () => {
+    const manifest = await (await get(site, '/site.webmanifest')).json()
+    assert.equal(manifest.name, 'PDF Master')
+    assert.equal(manifest.icons.length, 3)
+  })
+
+  // As before launch: the defaults keep search engines away.
   const lonely = await serve(3192, 'http://127.0.0.1:9')
+  await check('before launch every page says noindex and robots.txt shuts the door', async () => {
+    const html = await (await get(lonely, '/en/pricing')).text()
+    assert.match(html, /<meta[^>]*name="robots"[^>]*content="noindex, follow"/)
+    assert.equal((await (await get(lonely, '/robots.txt')).text()).trim(), 'User-agent: *\nDisallow: /')
+  })
+
   await check('with the API unreachable, a page still renders, quickly', async () => {
     const started = Date.now()
     const response = await get(lonely, '/en')
