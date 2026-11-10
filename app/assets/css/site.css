@@ -610,3 +610,12 @@ html { -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--site-heade
 .site-requisites dd a { color: inherit; }
 /* Pages that keep their app-styled content inside the site frame (guide, draft legal). */
 .site-legacy { font-size: var(--text-md); }
+/* Pricing (pages/[locale]/pricing.vue) */
+.site-pricing-intro { padding-bottom: 32px; }
+.site-pricing-head { display: grid; gap: 16px; justify-items: start; }
+.site-pricing-head .site-h1 { max-width: 20ch; }
+.site-pricing-plans { padding-top: 0; }
+.site-pricing-steps { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.site-pricing-cards { margin-top: 28px; }
+.site-pricing-tiles { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.site-pricing-tiles dt { display: flex; align-items: center; gap: 6px; }

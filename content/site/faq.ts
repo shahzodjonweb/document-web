@@ -8,9 +8,9 @@ export const faq = [
     id: 'home-free', group: 'plans', pages: ['home', 'pricing', 'help'],
     q: ['Can I use {brand} without paying?', '{brand} dan to‘lovsiz foydalansa bo‘ladimi?', 'Можно ли пользоваться {brand} без оплаты?'],
     a: [
-      'Yes, within the Free plan limits: every tool, 5 AI documents and 15 file tasks a week, and 3 AI edits per file. Free asks you to join our Telegram channels. Plus and Premium give more each week.',
-      'Ha, Free tarifi doirasida: barcha vositalar, haftasiga 5 ta AI hujjat va 15 ta fayl vazifasi, har bir faylga 3 ta AI tahrir. Free tarifida Telegram kanallarimizga obuna bo‘lish kerak. Plus va Premium haftasiga ko‘proq beradi.',
-      'Да, в пределах тарифа Free: все инструменты, 5 документов с ИИ и 15 задач с файлами в неделю, 3 правки с ИИ на файл. На Free нужно подписаться на наши Telegram-каналы. Plus и Premium дают больше в неделю.',
+      'Yes, within the Free plan limits: every tool, {freeAi} AI documents and {freeFiles} file tasks a week, and 3 AI edits per file. Free asks you to join our Telegram channels. Plus and Premium give more each week.',
+      'Ha, Free tarifi doirasida: barcha vositalar, haftasiga {freeAi} ta AI hujjat va {freeFiles} ta fayl vazifasi, har bir faylga 3 ta AI tahrir. Free tarifida Telegram kanallarimizga obuna bo‘lish kerak. Plus va Premium haftasiga ko‘proq beradi.',
+      'Да, в пределах тарифа Free: все инструменты, документы с ИИ ({freeAi} в неделю) и задачи с файлами ({freeFiles} в неделю), 3 правки с ИИ на файл. На Free нужно подписаться на наши Telegram-каналы. Plus и Premium дают больше в неделю.',
     ],
   },
   {
@@ -138,9 +138,9 @@ export const faq = [
     id: 'editor-plan', group: 'editor', pages: ['pdf-editor', 'help'],
     q: ['Does the editor use my weekly limit?', 'Muharrir haftalik limitni sarflaydimi?', 'Расходует ли редактор недельный лимит?'],
     a: [
-      'Editing itself doesn’t. On the Free plan, downloading the edited PDF uses one file task from your 15 a week. Plus and Premium have no weekly file-task limit.',
-      'Tahrirlashning o‘zi sarflamaydi. Free tarifida tahrirlangan PDF ni yuklab olish haftalik 15 ta fayl vazifasidan birini sarflaydi. Plus va Premiumʼda haftalik fayl vazifalari cheklanmagan.',
-      'Сама правка — нет. На тарифе Free скачивание отредактированного PDF расходует одну из 15 задач с файлами в неделю. На Plus и Premium недельного лимита задач нет.',
+      'Editing itself doesn’t. On the Free plan, downloading the edited PDF uses one file task from your {freeFiles} a week. Plus and Premium have no weekly file-task limit.',
+      'Tahrirlashning o‘zi sarflamaydi. Free tarifida tahrirlangan PDF ni yuklab olish haftalik {freeFiles} ta fayl vazifasidan birini sarflaydi. Plus va Premiumʼda haftalik fayl vazifalari cheklanmagan.',
+      'Сама правка — нет. На тарифе Free скачивание отредактированного PDF расходует одну задачу с файлами из недельного лимита ({freeFiles}). На Plus и Premium недельного лимита задач нет.',
     ],
   },
   {
@@ -203,9 +203,9 @@ export const faq = [
     id: 'ai-docs-count', group: 'ai', pages: ['ai-documents', 'ai-hub', 'help'],
     q: ['How many AI documents can I make a week?', 'Haftasiga nechta AI hujjat tayyorlash mumkin?', 'Сколько документов с ИИ можно сделать в неделю?'],
     a: [
-      '5 on Free, 20 on Plus and unlimited on Premium. Documents, presentations and CVs all count. Planning an outline doesn’t, and a task that fails gives its place back. The week starts Monday 00:00 Tashkent time.',
-      'Free tarifida 5 ta, Plus tarifida 20 ta, Premiumʼda cheklanmagan. Hujjat, taqdimot va rezyume — barchasi hisoblanadi. Reja tuzish hisoblanmaydi, xato bilan tugagan vazifa esa limitni qaytaradi. Hafta dushanba soat 00:00 da (Toshkent vaqti) boshlanadi.',
-      '5 на Free, 20 на Plus и без лимита на Premium. Считаются документы, презентации и резюме. Составление плана не считается, а неудачная задача возвращает лимит. Неделя начинается в понедельник в 00:00 по Ташкенту.',
+      '{freeAi} on Free, {plusAi} on Plus and unlimited on Premium. Documents, presentations and CVs all count. Planning an outline doesn’t, and a task that fails gives its place back. The week starts Monday 00:00 Tashkent time.',
+      'Free tarifida {freeAi} ta, Plus tarifida {plusAi} ta, Premiumʼda cheklanmagan. Hujjat, taqdimot va rezyume — barchasi hisoblanadi. Reja tuzish hisoblanmaydi, xato bilan tugagan vazifa esa limitni qaytaradi. Hafta dushanba soat 00:00 da (Toshkent vaqti) boshlanadi.',
+      '{freeAi} на Free, {plusAi} на Plus и без лимита на Premium. Считаются документы, презентации и резюме. Составление плана не считается, а неудачная задача возвращает лимит. Неделя начинается в понедельник в 00:00 по Ташкенту.',
     ],
   },
 
@@ -306,9 +306,9 @@ export const faq = [
     id: 'slides-count', group: 'ai', pages: ['ai-slides'],
     q: ['Does a presentation use my weekly limit?', 'Taqdimot haftalik limitni sarflaydimi?', 'Расходует ли презентация недельный лимит?'],
     a: [
-      'Yes, it counts as one AI document: 5 a week on Free, 20 on Plus, unlimited on Premium. AI edits are counted per file instead.',
-      'Ha, u bitta AI hujjat sifatida hisoblanadi: Free tarifida haftasiga 5 ta, Plus tarifida 20 ta, Premiumʼda cheklanmagan. AI tahrirlar esa har bir fayl uchun alohida hisoblanadi.',
-      'Да, она считается одним документом с ИИ: 5 в неделю на Free, 20 на Plus, без лимита на Premium. Правки с ИИ считаются отдельно для каждого файла.',
+      'Yes, it counts as one AI document: {freeAi} a week on Free, {plusAi} on Plus, unlimited on Premium. AI edits are counted per file instead.',
+      'Ha, u bitta AI hujjat sifatida hisoblanadi: Free tarifida haftasiga {freeAi} ta, Plus tarifida {plusAi} ta, Premiumʼda cheklanmagan. AI tahrirlar esa har bir fayl uchun alohida hisoblanadi.',
+      'Да, она считается одним документом с ИИ: {freeAi} в неделю на Free, {plusAi} на Plus, без лимита на Premium. Правки с ИИ считаются отдельно для каждого файла.',
     ],
   },
 
@@ -581,9 +581,9 @@ export const faq = [
     id: 'tool-merge-pdf-4', group: 'tools', pages: ['merge-pdf'],
     q: ['Does merging count against my weekly limit?', 'Birlashtirish haftalik limitdan hisoblanadimi?', 'Засчитывается ли объединение в недельный лимит?'],
     a: [
-      'On the Free plan one merge uses one of your 15 file tasks a week, whatever the number of files. Plus and Premium have no weekly file-task limit.',
-      'Free tarifida bitta birlashtirish fayllar sonidan qatʼi nazar haftalik 15 ta fayl vazifasidan bittasini sarflaydi. Plus va Premium tariflarida fayl vazifalari uchun haftalik cheklov yo‘q.',
-      'На тарифе Free одно объединение расходует одну из 15 задач в неделю, сколько бы файлов в нём ни было. На Plus и Premium недельного лимита на задачи с файлами нет.',
+      'On the Free plan one merge uses one of your {freeFiles} file tasks a week, whatever the number of files. Plus and Premium have no weekly file-task limit.',
+      'Free tarifida bitta birlashtirish fayllar sonidan qatʼi nazar haftalik {freeFiles} ta fayl vazifasidan bittasini sarflaydi. Plus va Premium tariflarida fayl vazifalari uchun haftalik cheklov yo‘q.',
+      'На тарифе Free одно объединение расходует одну задачу из недельного лимита ({freeFiles}), сколько бы файлов в нём ни было. На Plus и Premium недельного лимита на задачи с файлами нет.',
     ],
   },
   {
@@ -1236,9 +1236,9 @@ export const faq = [
     id: 'tool-sign-pdf-3', group: 'tools', pages: ['sign-pdf'],
     q: ['Does signing use my weekly limit?', 'Imzolash haftalik limitni sarflaydimi?', 'Расходует ли подпись недельный лимит?'],
     a: [
-      'Downloading the edited PDF uses one file task on the Free plan, which has 15 a week. Plus and Premium have no weekly file-task limit.',
-      'Tahrirlangan PDF ni yuklab olish Free tarifida bitta fayl vazifasini sarflaydi, unda haftasiga 15 ta vazifa bor. Plus va Premium tariflarida fayl vazifalari uchun haftalik cheklov yo‘q.',
-      'Скачивание отредактированного PDF расходует одну задачу на тарифе Free, где их 15 в неделю. На Plus и Premium недельного лимита на задачи с файлами нет.',
+      'Downloading the edited PDF uses one file task on the Free plan, which has {freeFiles} a week. Plus and Premium have no weekly file-task limit.',
+      'Tahrirlangan PDF ni yuklab olish Free tarifida bitta fayl vazifasini sarflaydi, unda haftasiga {freeFiles} ta vazifa bor. Plus va Premium tariflarida fayl vazifalari uchun haftalik cheklov yo‘q.',
+      'Скачивание отредактированного PDF расходует одну задачу на тарифе Free, где их {freeFiles} в неделю. На Plus и Premium недельного лимита на задачи с файлами нет.',
     ],
   },
   {
@@ -1256,9 +1256,9 @@ export const faq = [
     id: 'tool-fill-pdf-form-1', group: 'tools', pages: ['fill-pdf-form'],
     q: ['Does filling a form use my weekly limit?', 'Formani to‘ldirish haftalik limitni sarflaydimi?', 'Расходует ли заполнение формы недельный лимит?'],
     a: [
-      'Downloading the filled PDF uses one file task on the Free plan: 15 a week, counted from Monday 00:00 Tashkent time. Plus and Premium have no weekly file-task limit.',
-      'To‘ldirilgan PDF ni yuklab olish Free tarifida bitta fayl vazifasini sarflaydi: haftasiga 15 ta, hafta dushanba 00:00 dan (Toshkent vaqti) boshlanadi. Plus va Premium tariflarida haftalik cheklov yo‘q.',
-      'Скачивание заполненного PDF расходует одну задачу на тарифе Free: 15 в неделю, отсчёт с понедельника 00:00 по Ташкенту. На Plus и Premium недельного лимита на задачи с файлами нет.',
+      'Downloading the filled PDF uses one file task on the Free plan: {freeFiles} a week, counted from Monday 00:00 Tashkent time. Plus and Premium have no weekly file-task limit.',
+      'To‘ldirilgan PDF ni yuklab olish Free tarifida bitta fayl vazifasini sarflaydi: haftasiga {freeFiles} ta, hafta dushanba 00:00 dan (Toshkent vaqti) boshlanadi. Plus va Premium tariflarida haftalik cheklov yo‘q.',
+      'Скачивание заполненного PDF расходует одну задачу на тарифе Free: {freeFiles} в неделю, отсчёт с понедельника 00:00 по Ташкенту. На Plus и Premium недельного лимита на задачи с файлами нет.',
     ],
   },
   {

@@ -43,9 +43,11 @@ export function useSite() {
   }))
   /** Owner details in; '' when one is still missing. */
   const fill = (text: string) => {
+    const numbers = planNumbers()
     const done = text
       .replaceAll('{brand}', brand)
       .replaceAll('{formerBrand}', 'PDF Master')
+      .replace(/\{(freeAi|freeFiles|plusAi)\}/g, (_match, field) => numbers[field]!)
       .replace(/\{\{([a-z_.]+)\}\}/g, (match, token) => known.value[token] || match)
     return done.includes('{{') ? '' : done
   }

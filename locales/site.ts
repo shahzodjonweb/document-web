@@ -470,9 +470,9 @@ export const site = {
   siteEditorChanAccountSame: ['The same', 'Bir xil', 'Те же'],
   siteEditorPlansTitle: ['The editor and your plan', 'Muharrir va tarifingiz', 'Редактор и ваш тариф'],
   siteEditorPlansBody: [
-    'The editor is on every plan. On the Free plan, downloading an edited PDF uses a file task from your 15 a week. Plus and Premium have no weekly file-task limit.',
-    'Muharrir barcha tariflarda bor. Free tarifida tahrirlangan PDF ni yuklab olish haftalik 15 ta fayl vazifasidan birini sarflaydi. Plus va Premiumʼda haftalik fayl vazifalari cheklanmagan.',
-    'Редактор есть на всех тарифах. На тарифе Free скачивание отредактированного PDF расходует одну из 15 задач с файлами в неделю. На Plus и Premium недельного лимита задач нет.',
+    'The editor is on every plan. On the Free plan, downloading an edited PDF uses a file task from your {freeFiles} a week. Plus and Premium have no weekly file-task limit.',
+    'Muharrir barcha tariflarda bor. Free tarifida tahrirlangan PDF ni yuklab olish haftalik {freeFiles} ta fayl vazifasidan birini sarflaydi. Plus va Premiumʼda haftalik fayl vazifalari cheklanmagan.',
+    'Редактор есть на всех тарифах. На тарифе Free скачивание отредактированного PDF расходует одну задачу с файлами из недельного лимита ({freeFiles}). На Plus и Premium недельного лимита задач нет.',
   ],
   siteEditorPrivacyNote: [
     'Files are deleted after 24 hours. Redaction removes the selected content from the file itself; it doesn’t just cover it.',

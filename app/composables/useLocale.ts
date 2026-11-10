@@ -8,6 +8,23 @@ export const deviceTimeZone = () => {
     return ''
   }
 }
+/**
+ * The weekly limits copy names, from the live plans (the admin can change them
+ * at /ops/plans): `{freeAi}`, `{freeFiles}`, `{plusAi}`. Until the plans are
+ * known, the shipped defaults (docs/product/plan_seed.json) stand in.
+ */
+export function planNumbers(): Record<string, string> {
+  const plans = useState<any[]>('plans', () => [])
+  const limit = (id: string, field: string, fallback: number) => {
+    const value = plans.value.find((plan) => plan?.id === id)?.limits?.[field]
+    return String(typeof value === 'number' ? value : fallback)
+  }
+  return {
+    freeAi: limit('free', 'weekly_ai_documents', 5),
+    freeFiles: limit('free', 'weekly_file_jobs', 15),
+    plusAi: limit('plus', 'weekly_ai_documents', 20),
+  }
+}
 export function useLocale() {
   const route = useRoute()
   const locale = computed<Locale>(() =>
@@ -23,9 +40,12 @@ export function useLocale() {
   }
   const t = (key: string | null | undefined, values: Record<string, string | number> = {}) => {
     const name = String(key ?? '')
-    return (dictionaries[locale.value][name] || dictionaries.en[name] || name).replace(
+    const text = dictionaries[locale.value][name] || dictionaries.en[name] || name
+    if (!text.includes('{')) return text
+    const numbers = /\{(freeAi|freeFiles|plusAi)\}/.test(text) ? planNumbers() : {}
+    return text.replace(
       /\{(\w+)\}/g,
-      (_match, field) => String(values[field] ?? names[field] ?? `{${field}}`),
+      (_match, field) => String(values[field] ?? names[field] ?? numbers[field] ?? `{${field}}`),
     )
   }
   const count = (key: string, amount: number) =>
