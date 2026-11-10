@@ -32,7 +32,7 @@ const limits = computed(() =>
       const edits = plan.limits?.edits_per_file
       return {
         id: plan.id as string,
-        label: amount ? `${t(plan.id)}, ${figure(amount)} so‘m` : t(plan.id),
+        label: amount ? `${t(plan.id)}, ${figure(amount)} so'm` : t(plan.id),
         value: docs == null ? t('sitePlanAiDocsUnlimited') : t('sitePlanAiDocs', { count: figure(Number(docs)) }),
         note: edits == null ? t('sitePlanEditsUnlimited') : t('sitePlanEdits', { count: figure(Number(edits)) }),
       }

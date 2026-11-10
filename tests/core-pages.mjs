@@ -323,7 +323,7 @@ try {
   assert.match(await cards.first().innerText(), /5 AI documents a week/)
   assert.match(await cards.first().innerText(), /15 file tasks a week/)
   // Plus on discount: the regular price named and struck, today's price, the percentage.
-  assert.match(await cards.nth(1).locator('.site-plan-price').innerText(), /Regular price 20 000 so‘m[\s\S]*15 000/)
+  assert.match(await cards.nth(1).locator('.site-plan-price').innerText(), /Regular price 20 000 so'm[\s\S]*15 000/)
   assert.equal(await cards.nth(1).locator('.site-badge').innerText(), '−25%')
   assert.equal(await cards.nth(2).locator('.site-badge').count(), 0)
   assert.match(await page.locator('.site-faq details').first().innerText(), /5 AI documents and 15 file tasks a week/)

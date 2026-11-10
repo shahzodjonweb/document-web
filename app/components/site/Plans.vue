@@ -49,8 +49,8 @@ const card = (plan: any) => {
         <span v-if="plan.percent" class="site-badge">−{{ plan.percent }}%</span>
       </div>
       <div class="site-plan-price">
-        <s v-if="plan.regular">{{ t('sitePlanRegular', { price: `${plan.regular} so‘m` }) }}</s>
-        <strong>{{ plan.price }}<small>so‘m</small></strong><span>{{ plan.period }}</span>
+        <s v-if="plan.regular">{{ t('sitePlanRegular', { price: `${plan.regular} so'm` }) }}</s>
+        <strong>{{ plan.price }}<small>so'm</small></strong><span>{{ plan.period }}</span>
       </div>
       <ul>
         <li class="is-note"><AppIcon name="info" class="site-icon" />{{ plan.body }}</li>

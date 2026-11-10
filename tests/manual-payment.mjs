@@ -94,6 +94,10 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   if (endpoint === '/me') return json(account)
   if (endpoint === '/catalog') return json({ features: [], draft: false })
   if (endpoint === '/plans') return json({ plans: served, currency: 'UZS', period_seconds: 2592000, draft: true })
+  // The public site's footer shows the seller's details on every page.
+  if (endpoint === '/contacts')
+    return json({ support: { username: '', url: '' }, ads: { username: '', url: '' }, bot: { username: '', url: '' },
+      company: { name: '"ARCANIUM TECHNOLOGIES" MCHJ', tin: '313458514', address: 'Toshkent', phone: '', email: '' } })
   if (endpoint === '/usage')
     return json({ plan: 'free', week: { starts_at: '2026-10-11T19:00:00Z', resets_at: '2026-10-18T19:00:00Z', time_zone: 'Asia/Tashkent' },
       ai_documents: { limit: 5, used: 0, remaining: 5 }, file_jobs: { limit: 15, used: 0, remaining: 15 }, edits_per_file: 3,
@@ -237,24 +241,27 @@ try {
   checks.push('An older platform without top-level prices or discounts still prices the cards')
 
   signedIn = false
+  // The public pricing page (the site's): prices and the discount, and the paid
+  // plans send people into the app to pay; no card number for anyone signed out.
   await page.goto(`${origin}/en/pricing`, { waitUntil: 'domcontentloaded' })
-  await page.getByRole('link', { name: 'Sign in to pay' }).first().waitFor()
+  await page.locator('.site-plan').nth(2).waitFor()
   assert.equal(await page.getByTestId('manual-payment').count(), 0, 'no card shown to someone signed out')
+  assert.equal(await page.locator('.site-plan').nth(1).getByRole('link').getAttribute('href'), '/en/app/billing')
   assert.match(await page.getByTestId('discount-banner').innerText(), /Plus on discount/)
   await audit('pricing')
-  checks.push('Signed out: prices, the discount banner, and a sign-in link instead of the card')
+  checks.push('Signed out: the public pricing page shows prices and the discount banner and sends paid plans to the app to pay; no card shown')
 
   // Uzbek and Russian write the last day as the bot does: "31-oktabrgacha"
   // (the affix joined to the day), "до 31 октября"; the struck price is named
   // in each language.
   for (const locale of ['uz', 'ru']) {
     await page.goto(`${origin}/${locale}/pricing`, { waitUntil: 'domcontentloaded' })
-    await page.locator('.plan-card').nth(2).waitFor()
-    const card = await page.locator('.plan-card').nth(1).innerText()
-    assert.ok(card.includes(`${perThirtyDays[locale]} · ${untilLabel[locale]}`), `${locale} card: ${JSON.stringify(card)}`)
-    assert.match(await page.getByTestId('regular-plus').innerText(), new RegExp(`^${regularPrice[locale]}\\s+20 000 so'm$`))
+    await page.locator('.site-plan').nth(2).waitFor()
+    const card = await page.locator('.site-plan').nth(1).innerText()
+    assert.ok(card.includes(untilLabel[locale]), `${locale} card: ${JSON.stringify(card)}`)
+    assert.ok(card.includes(`${regularPrice[locale]} 20 000 so'm`), `${locale} card names the struck price`)
     assert.match(await page.getByTestId('discount-banner').innerText(),
-      new RegExp(`${regularPrice[locale]}\\s+20 000 so'm\\s+15 000 so'm\\s+−25%\\s+· ${untilLabel[locale]}`))
+      new RegExp(`${regularPrice[locale]}\\s+20 000 so'm\\s+15 000 so'm\\s+−25%\\s+${untilLabel[locale]}`))
   }
   checks.push('Uzbek and Russian write the last day as the bot does (31-oktabrgacha, до 31 октября) and name the struck price')
 

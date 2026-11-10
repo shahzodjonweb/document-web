@@ -31,6 +31,7 @@ export function useSite() {
   const { contacts } = contactsState()
   const { destination } = useTools()
   const brand = String(useRuntimeConfig().public.productName)
+  const plans = useState<any[]>('plans', () => [])
   const index = computed(() => (['en', 'uz', 'ru'] as const).indexOf(locale.value))
 
   const bot = computed(() => contacts.value?.bot ?? null)
@@ -43,7 +44,7 @@ export function useSite() {
   }))
   /** Owner details in; '' when one is still missing. */
   const fill = (text: string) => {
-    const numbers = planNumbers()
+    const numbers = planNumbers(plans.value)
     const done = text
       .replaceAll('{brand}', brand)
       .replaceAll('{formerBrand}', 'PDF Master')

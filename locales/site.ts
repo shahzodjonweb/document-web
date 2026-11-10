@@ -201,7 +201,7 @@ export const site = {
   sitePlanPeriod: ['for 30 days', '30 kunga', 'за 30 дней'],
   sitePlanFreePeriod: ['no payment needed', 'to‘lov talab qilinmaydi', 'оплата не нужна'],
   sitePlanDiscountPeriod: ['for 30 days. Offer ends {date}', '30 kunga. Taklif {date}gacha', 'за 30 дней. Предложение до {date}'],
-  sitePlanRegular: ['Regular price {price}', 'Odatiy narx {price}', 'Обычная цена {price}'],
+  sitePlanRegular: ['Regular price {price}', 'Odatdagi narx {price}', 'Обычная цена {price}'],
   sitePlanAiDocs: ['{count} AI documents a week', 'Haftasiga {count} ta AI hujjat', '{count} документов с ИИ в неделю'],
   sitePlanAiDocsUnlimited: ['Unlimited AI documents', 'AI hujjatlar cheklanmagan', 'Документы с ИИ без лимита'],
   sitePlanFileTasks: ['{count} file tasks a week', 'Haftasiga {count} ta fayl vazifasi', '{count} задач с файлами в неделю'],
