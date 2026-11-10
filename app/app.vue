@@ -185,6 +185,7 @@ onMounted(async () => {
   }
 })
 useHead({ htmlAttrs: { lang: locale } })
+useSiteSeo()
 // A page rendered on the server carries its prices, tools and contacts; the
 // app's own pages render in the browser and load them as they always have.
 if (import.meta.server) await loadPublicData()
