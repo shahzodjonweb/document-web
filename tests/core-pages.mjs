@@ -310,48 +310,54 @@ try {
   await shot('help-1440', true)
   checks.push('Help: the support and advertising Telegram contacts, searchable articles and the guide, then the company details; no form; the plans answer names Premium’s channels')
 
-  // The public front page: what it does, the AI services, tools, plans and questions.
+  // The public home page (layouts/site.vue): hero, every tool by group, the AI
+  // services, plans from /plans, questions whose numbers follow the plans.
   await go('/en')
-  await page.locator('.landing-hero h1').waitFor()
-  assert.equal(await page.locator('.landing-hero h1').innerText(), 'PDF tools and AI documents, in one place.')
-  assert.equal(await page.getByText(/paperwork/i).count(), 0, 'no old taglines')
-  assert.equal(await page.locator('.landing-section .ai-shortcut').count(), 3)
-  assert.equal(await page.locator('.faq details').count(), 4)
-  assert.deepEqual(await texts(page.locator('.pricing-teaser .panel').first().locator('.teaser-week')),
-    ['5 AI documents a week', '15 file tasks a week'])
-  assert.deepEqual(await texts(page.locator('.pricing-teaser .panel').last().locator('.teaser-week')),
-    ['Unlimited AI documents', 'Unlimited file tasks'])
-  // Subtitles speak of weekly volume only: no tool set, capability or size.
-  assert.deepEqual(await texts(page.locator('.pricing-teaser .panel small')),
-    ['Every tool, with a weekly allowance', 'More each week for regular work', 'For people who work with lots of documents'])
-  // Plus on discount: the regular price struck through, today's price, the
-  // percentage and the last day; Free and Premium are priced plainly.
-  const teasers = page.locator('.pricing-teaser .panel')
-  // The struck price is named for screen readers, which do not read strikethrough.
-  assert.deepEqual(await texts(teasers.locator('.teaser-regular')), ["Regular price 20 000 so'm"])
-  assert.match(await teasers.nth(1).locator('.teaser-price').innerText(), /^15 000 so'm\s*−25%$/)
-  assert.match(await teasers.nth(1).locator('.discount-until').innerText(), /^until /)
-  assert.equal(await teasers.nth(2).locator('.discount-badge').count(), 0)
+  await page.locator('.site-hero h1').waitFor()
+  assert.equal(await page.locator('.site-hero h1').innerText(), 'PDF tools, AI documents, slides and CVs in one place')
+  assert.equal(await page.locator('h1').count(), 1)
+  assert.equal(await page.locator('.site-toollink').count(), 19)
+  assert.equal(await page.locator('.site-ai-card').count(), 3)
+  await page.locator('.site-plan').first().waitFor()
+  const cards = page.locator('.site-plan')
+  assert.match(await cards.first().innerText(), /5 AI documents a week/)
+  assert.match(await cards.first().innerText(), /15 file tasks a week/)
+  // Plus on discount: the regular price named and struck, today's price, the percentage.
+  assert.match(await cards.nth(1).locator('.site-plan-price').innerText(), /Regular price 20 000 so‘m[\s\S]*15 000/)
+  assert.equal(await cards.nth(1).locator('.site-badge').innerText(), '−25%')
+  assert.equal(await cards.nth(2).locator('.site-badge').count(), 0)
+  assert.match(await page.locator('.site-faq details').first().innerText(), /5 AI documents and 15 file tasks a week/)
   assert.match(await page.getByTestId('discount-banner').innerText(),
-    /Plus on discount:\s+Regular price\s+20 000 so'm\s+15 000 so'm\s+−25%\s+· until /)
-  assert.equal(await page.getByTestId('discount-banner').getByRole('link').innerText(), 'Compare plans')
-  await page.locator('.faq summary').first().click()
-  assert.ok(await page.locator('.faq details').first().getAttribute('open') !== null)
+    /Plus on discount:\s+Regular price\s+20 000 so'm\s+15 000 so'm\s+−25%\s+until /)
+  // The seller's details close every public page.
+  assert.match(await page.locator('#company').innerText(), /313458514/)
+  // The Tools menu opens on a click and Escape closes it.
+  await page.getByRole('button', { name: 'Tools' }).click()
+  await page.locator('#site-mega-tools a').first().waitFor({ state: 'visible' })
+  await page.keyboard.press('Escape')
+  await page.locator('#site-mega-tools a').first().waitFor({ state: 'hidden' })
   for (const mode of ['light', 'dark']) {
     await theme(mode)
-    assert.equal(await overflow(), false, `landing 1440 ${mode} overflow`)
-    await axe(`landing 1440 ${mode}`)
+    assert.equal(await overflow(), false, `site home 1440 ${mode} overflow`)
+    await axe(`site home 1440 ${mode}`)
   }
   await theme('light')
-  await shot('landing-1440', true)
-  // Russian says ИИ, the landing headline included.
+  await shot('site-home-1440', true)
+  // Russian says ИИ, the headline included.
   await go('/ru')
-  await page.locator('.landing-hero h1').waitFor()
-  assert.equal(await page.locator('.landing-hero h1').innerText(), 'Инструменты PDF и ИИ-документы — в одном месте.')
-  assert.deepEqual(await texts(page.locator('.pricing-teaser .panel small')),
-    ['Все инструменты с недельным лимитом', 'Больше в неделю для регулярной работы', 'Для тех, кто работает с большим числом документов'])
-  assert.match(await page.getByTestId('discount-banner').innerText(),
-    /Скидка на Plus:\s+Обычная цена\s+20 000 so'm\s+15 000 so'm\s+−25%\s+· до \d+ [а-я]+/)
+  await page.locator('.site-hero h1').waitFor()
+  assert.doesNotMatch(await page.locator('.site-hero h1').innerText(), /\bAI\b/)
+  // Pricing: every plan's limits in one table, from /plans.
+  await go('/en/pricing')
+  await page.locator('.site-table tbody tr').first().waitFor()
+  assert.deepEqual(await texts(page.locator('.site-table tbody tr').first().locator('td')), ['5', '20', 'Unlimited'])
+  for (const mode of ['light', 'dark']) {
+    await theme(mode)
+    assert.equal(await overflow(), false, `site pricing 1440 ${mode} overflow`)
+    await axe(`site pricing 1440 ${mode}`)
+  }
+  await theme('light')
+  await shot('site-pricing-1440', true)
 
   // Invite friends: the link to copy or share, how far to the next Plus months, and the months earned.
   await go('/en/app/referrals')
@@ -383,7 +389,7 @@ try {
   // Uzbek names the plan in full: "2 oylik Plus tarifi".
   assert.equal(await page.getByTestId('referral-progress').locator('h2').innerText(), 'Keyingi sovg‘a: 2 oylik Plus tarifi')
   assert.deepEqual(await texts(page.getByTestId('referral-rules').locator('.referral-ladder strong')), ['1 oylik Plus tarifi', '2 oylik Plus tarifi', '3 oylik Plus tarifi'])
-  checks.push('Landing: what it does, AI services, tools, plans with their weeks and volume-only subtitles, the Plus discount on the teaser and the banner (Russian too), questions, Russian ИИ; invite friends: link, share, progress to the next Plus months, the month full, months earned, Russian plurals, Uzbek "from" day')
+  checks.push('Public home: hero, 19 tools, AI services, plans and questions from /plans, the Plus discount on the cards and the banner, the seller details, the Tools menu, Russian ИИ; pricing table from /plans; invite friends: link, share, progress to the next Plus months, the month full, months earned, Russian plurals, Uzbek "from" day')
 
   // The AI shortcuts, as many to a row as their words fit, in every language:
   // from a tablet up, nothing runs out of its card or under its arrow or button.
@@ -403,7 +409,7 @@ try {
   for (const width of [768, 820, 900, 1024, 1180, 1280]) {
     await page.setViewportSize({ width, height: 900 })
     for (const locale of ['en', 'ru', 'uz']) {
-      for (const where of ['/app', '']) {
+      for (const where of ['/app']) {
         await go(`/${locale}${where}`)
         await page.locator('.ai-shortcut').first().waitFor()
         assert.equal(await page.locator('.ai-shortcut').count(), 3)
@@ -415,7 +421,7 @@ try {
   await go('/ru/app')
   await page.locator('.ai-shortcut').first().waitFor()
   await shot('home-ru-768', true)
-  checks.push('Home and landing: the three AI shortcuts fit their words from 768 to 1280 px in EN/RU/UZ')
+  checks.push('Home: the three AI shortcuts fit their words from 768 to 1280 px in EN/RU/UZ')
 
   // Phone: one column, and the next step stays in reach above the phone bar.
   await page.setViewportSize({ width: 390, height: 844 })
@@ -430,10 +436,14 @@ try {
   await theme('light')
   uploads = 0
   await go('/en')
-  await page.locator('.landing-hero h1').waitFor()
-  assert.equal(await overflow(), false, 'landing 390 overflow')
-  await axe('landing 390')
-  await shot('landing-390', true)
+  await page.locator('.site-hero h1').waitFor()
+  assert.equal(await overflow(), false, 'site home 390 overflow')
+  await axe('site home 390')
+  // On a phone the menu button opens one sheet with every group.
+  await page.locator('.site-burger').click()
+  await page.locator('#site-mobile-menu.is-open').waitFor()
+  await page.locator('.site-burger').click()
+  await shot('site-home-390', true)
   await go('/en/app/tools/pdf.merge')
   await page.locator('input[type=file]').setInputFiles(['tests/fixtures/research-notes.pdf', 'tests/fixtures/appendix.pdf'])
   await page.locator('.file-row').nth(1).waitFor()

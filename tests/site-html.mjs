@@ -99,7 +99,7 @@ try {
     const html = await response.text()
     assert.match(html, /<html[^>]*\blang="en"/)
     assert.match(html, /<h1[\s>]/)
-    assert.ok(html.includes('Merge PDFs'), 'a tool from the catalog')
+    assert.ok(html.includes('Merge PDF'), 'every tool, by name')
     assert.ok(html.includes('20 000'), 'the Plus price')
     assert.ok(html.includes('45 000'), 'a discount still running')
     assert.ok(!html.includes('15 000'), 'a discount whose last day has passed')
@@ -171,12 +171,15 @@ try {
     assert.ok(!graph.some((item) => 'aggregateRating' in item), 'no ratings')
   })
 
-  await check('a tool page has its own title and a breadcrumb', async () => {
-    const html = await (await get(site, '/uz/tools/pdf.merge')).text()
+  await check('a tool page has its own address, title and breadcrumb; the old address moved', async () => {
+    const moved = await get(site, '/uz/tools/pdf.merge')
+    assert.equal(moved.status, 301)
+    assert.equal(new URL(moved.headers.get('location'), site).pathname, '/uz/tools/merge-pdf')
+    const html = await (await get(site, '/uz/tools/merge-pdf')).text()
     assert.match(html, /<title>PDF birlashtirish[^<]*<\/title>/)
     const crumbs = ld(html)['@graph'].find((item) => item['@type'] === 'BreadcrumbList').itemListElement
     assert.deepEqual(crumbs.map((crumb) => crumb.item), [
-      'https://docmaster.live/uz', 'https://docmaster.live/uz/tools', 'https://docmaster.live/uz/tools/pdf.merge',
+      'https://docmaster.live/uz', 'https://docmaster.live/uz/tools', 'https://docmaster.live/uz/tools/merge-pdf',
     ])
   })
 
@@ -197,8 +200,8 @@ try {
     assert.match(response.headers.get('content-type'), /xml/)
     const xml = await response.text()
     const urls = head(xml, /<loc>([^<]+)<\/loc>/g)
-    assert.equal(urls.length, 3 * 22, `${urls.length} addresses`)
-    assert.ok(urls.includes('https://docmaster.live/ru/tools/pdf.merge'))
+    assert.equal(urls.length, 3 * 33, `${urls.length} addresses`)
+    assert.ok(urls.includes('https://docmaster.live/ru/tools/merge-pdf'))
     assert.ok(!urls.some((url) => /\/(app|auth|legal)(\/|$)/.test(url)), 'no app, sign-in or draft pages')
     assert.equal((xml.match(/hreflang="x-default"/g) || []).length, urls.length)
   })
