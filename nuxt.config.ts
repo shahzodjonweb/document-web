@@ -52,7 +52,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     apiOrigin,
     public: {
-      productName: 'PDF Master',
+      productName: 'DocMaster',
       // The address pages call canonical; NUXT_PUBLIC_SITE_ORIGIN sets it in production.
       siteOrigin: 'https://pdfmaster.orderdesk.live',
       // Until launch every page says noindex and robots.txt keeps crawlers out.
@@ -67,7 +67,7 @@ export default defineNuxtConfig({
     head: {
       // Telegram's script is added only to the app's pages, by server/plugins/telegram-script.ts.
       script: [{ innerHTML: themeBeforePaint }],
-      title: 'PDF Master — PDF tools and AI documents',
+      title: 'DocMaster — PDF tools and AI documents',
       meta: [
         {
           name: 'description',
@@ -77,10 +77,10 @@ export default defineNuxtConfig({
         { name: 'theme-color', content: '#f5f7fa' },
       ],
       link: [
-        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg?v=pdf-master-2026' },
-        { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/brand/pdf-master-icon-32.png' },
-        { rel: 'icon', type: 'image/png', sizes: '64x64', href: '/brand/pdf-master-icon-64.png' },
-        { rel: 'apple-touch-icon', sizes: '256x256', href: '/brand/pdf-master-icon-256.png' },
+        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg?v=docmaster-2026' },
+        { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/brand/docmaster-icon-32.png' },
+        { rel: 'icon', type: 'image/png', sizes: '64x64', href: '/brand/docmaster-icon-64.png' },
+        { rel: 'apple-touch-icon', sizes: '180x180', href: '/brand/docmaster-icon-180.png' },
         { rel: 'manifest', href: '/site.webmanifest' },
       ],
     },

@@ -77,7 +77,7 @@
   padding: var(--space-1) var(--space-3) var(--space-4);
 }
 .sidebar-brand .brand-logo-surface {
-  width: 152px;
+  height: 28px;
 }
 .side-nav {
   flex: 1;
@@ -320,7 +320,7 @@
   border-bottom: 1px solid var(--hairline);
 }
 .public-topbar .brand-logo-surface {
-  width: 152px;
+  height: 30px;
 }
 .public-nav {
   display: flex;
@@ -368,7 +368,7 @@
   background: var(--surface);
 }
 .footer-brand .brand-logo-surface {
-  width: 136px;
+  height: 26px;
 }
 .public-footer p {
   margin-top: var(--space-2);
@@ -663,7 +663,7 @@
     display: inline-flex;
   }
   .mobile-brand .brand-logo-surface {
-    width: 128px;
+    height: 24px;
   }
   .main-content {
     padding: var(--space-6) var(--space-4)
@@ -726,7 +726,7 @@
     padding: 0 var(--space-4);
   }
   .public-topbar .brand-logo-surface {
-    width: 128px;
+    height: 24px;
   }
   .public-nav {
     display: none;

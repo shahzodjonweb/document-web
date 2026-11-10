@@ -205,7 +205,7 @@ try {
 
   await check('the web manifest names the product', async () => {
     const manifest = await (await get(site, '/site.webmanifest')).json()
-    assert.equal(manifest.name, 'PDF Master')
+    assert.equal(manifest.name, 'DocMaster')
     assert.equal(manifest.icons.length, 3)
   })
 

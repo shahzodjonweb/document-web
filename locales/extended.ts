@@ -2011,9 +2011,9 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Или выберите Premium, где каналы не нужны',
   ],
   channelsBanner: [
-    'Join our Telegram channel to keep using PDF Master.',
-    'PDF Master’dan foydalanishda davom etish uchun Telegram kanalimizga qo‘shiling.',
-    'Подпишитесь на наш Telegram-канал, чтобы и дальше пользоваться PDF Master.',
+    'Join our Telegram channel to keep using DocMaster.',
+    'DocMaster’dan foydalanishda davom etish uchun Telegram kanalimizga qo‘shiling.',
+    'Подпишитесь на наш Telegram-канал, чтобы и дальше пользоваться DocMaster.',
   ],
   channelsBannerAction: ['Join', 'Qo‘shilish', 'Подписаться'],
   unlimitedCount: ['Unlimited', 'Cheksiz', 'Без ограничений'],

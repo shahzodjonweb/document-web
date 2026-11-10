@@ -2,6 +2,7 @@
 const route = useRoute()
 const { t } = useLocale()
 const ws = useWorkspace()
+const brand = String(useRuntimeConfig().public.productName)
 const view = computed(() => route.path.replace(/^\/(en|uz|ru)/, '').replace(/\/$/, '') || '/')
 // Statuses grouped the way people think of a task: done, still going, or not finished.
 const STATUS_GROUPS: Record<string, string[] | null> = {
@@ -68,7 +69,7 @@ const titles: [string, string][] = [
 // The public pages take their titles from useSiteSeo (app.vue); this names the app's own.
 useHead(() =>
   isCustomer.value || view.value === '/auth/telegram'
-    ? { title: `${t(titles.find(([prefix]) => view.value.startsWith(prefix))?.[1] || 'navHome')} · PDF Master` }
+    ? { title: `${t(titles.find(([prefix]) => view.value.startsWith(prefix))?.[1] || 'navHome')} · ${brand}` }
     : {},
 )
 </script>
