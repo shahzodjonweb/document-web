@@ -13,10 +13,26 @@ const pdfjsAssets = (name: string) => {
   return existsSync(dir) ? [{ baseURL: `pdfjs/${name}`, dir, maxAge: 60 * 60 * 24 * 365 }] : []
 }
 
+const apiOrigin = process.env.API_ORIGIN || 'http://127.0.0.1:8000'
+const locales = ['en', 'uz', 'ru']
+// The signed-in app and its sign-in hand-off render in the browser only, as
+// they always have: they read the device, Telegram and the session from the
+// first line. Every other page is rendered on the server, so search engines and
+// link previews get the page itself. Nitro takes `**` only at the end of a rule.
+const browserOnly = Object.fromEntries(
+  locales.flatMap((locale) =>
+    [`/${locale}/app`, `/${locale}/app/**`, `/${locale}/auth/**`].map((rule) => [rule, { ssr: false }]),
+  ),
+)
+// Before the first paint, so a dark-theme visitor never sees a server-rendered
+// page flash white. The app frame applies the same choice again once it mounts.
+const themeBeforePaint =
+  "try{var s=localStorage.getItem('pdf-master-theme');if(s==='dark'||(s==='system'&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}"
+
 export default defineNuxtConfig({
   compatibilityDate: '2026-02-01',
   devtools: { enabled: false },
-  ssr: false,
+  ssr: true,
   // Tokens first, so every sheet reads the palette; the shared components and
   // the app frame last, so they are the canonical look of a button, a card, a
   // field and the menus around every screen.
@@ -30,14 +46,18 @@ export default defineNuxtConfig({
     '~/assets/css/screens.css',
     '~/assets/css/frame.css',
   ],
-  runtimeConfig: { public: { productName: 'PDF Master' } },
+  // `apiOrigin` is where the server reads the public plans, catalog and contacts
+  // for a server-rendered page; NUXT_API_ORIGIN overrides it at run time. The
+  // `/api/**` proxy below is fixed at build time.
+  runtimeConfig: { apiOrigin, public: { productName: 'PDF Master' } },
   nitro: {
-    routeRules: { '/api/**': { proxy: `${process.env.API_ORIGIN || 'http://127.0.0.1:8000'}/api/**` } },
+    routeRules: { '/api/**': { proxy: `${apiOrigin}/api/**` }, ...browserOnly },
     publicAssets: [...pdfjsAssets('cmaps'), ...pdfjsAssets('standard_fonts'), ...pdfjsAssets('wasm')],
   },
   app: {
     head: {
-      script: [{ src: 'https://telegram.org/js/telegram-web-app.js', defer: true }],
+      // Telegram's script is added only to the app's pages, by server/plugins/telegram-script.ts.
+      script: [{ innerHTML: themeBeforePaint }],
       title: 'PDF Master — PDF tools and AI documents',
       meta: [
         {

@@ -44,6 +44,8 @@ const MONTHS: Record<'en' | 'uz' | 'ru', string[]> = {
  * exact and no zone table is needed.
  */
 export const tashkentYear = (now: number = Date.now()) => new Date(now + 5 * 3600_000).getUTCFullYear()
+/** Today in Tashkent as YYYY-MM-DD, the form a discount's last day comes in. */
+export const tashkentToday = (now: number = Date.now()) => new Date(now + 5 * 3600_000).toISOString().slice(0, 10)
 /**
  * A YYYY-MM-DD day as the language writes it: "31 Oct", "31-oktabr",
  * "31 октября". The year is added only when it is not the current Tashkent
@@ -90,6 +92,8 @@ export function usePricing() {
     const price = Number(raw.price)
     const percent = Math.floor(Number(raw.percent))
     if (!(price > 0 && price < full) || !(percent >= 1) || typeof raw.until !== 'string') return null
+    // A page or an answer kept from before the last day ended must not still offer the deal.
+    if (/^\d{4}-\d{2}-\d{2}$/.test(raw.until) && raw.until < tashkentToday()) return null
     return { price, regular: full, percent, until: raw.until }
   }
   /** What a plan costs today. */

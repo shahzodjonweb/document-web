@@ -24,6 +24,7 @@ jobs:
       - run: npm run check:fonts
       - run: npm run typecheck
       - run: npm run build
+      - run: npm run test:site
       - run: python3 -m unittest discover -s scripts/deploy/tests -v
   package:
     # Builds and smoke-tests the image while the checks run. Deploy still
