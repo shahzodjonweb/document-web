@@ -1,4 +1,4 @@
-/* Supplied PDF Master artwork stays unchanged on every surface. */
+/* The DocMaster wordmark: sized by height, with its own artwork for dark surfaces. */
 .brand-lockup {
   display: inline-flex;
   flex-direction: column;
@@ -8,15 +8,22 @@
 }
 .brand-logo-surface {
   display: inline-flex;
-  width: 178px;
+  height: 30px;
   max-width: 100%;
   align-items: center;
-  border-radius: 9px;
 }
 .brand-logo {
   display: block;
-  width: 100%;
-  height: auto;
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+}
+.brand-logo-dark,
+[data-theme='dark'] .brand-logo-light {
+  display: none;
+}
+[data-theme='dark'] .brand-logo-dark {
+  display: block;
 }
 .brand-symbol {
   display: block;
@@ -24,10 +31,6 @@
   width: 40px;
   height: 40px;
   object-fit: contain;
-}
-[data-theme='dark'] .brand-logo-surface {
-  background: #fff;
-  padding: 5px 8px;
 }
 .bot-chat-heading .brand-symbol {
   width: 32px;
@@ -54,12 +57,12 @@ body {
 }
 @media (max-width: 760px) {
   .brand-logo-surface {
-    width: 154px;
+    height: 26px;
   }
 }
 @media (max-width: 360px) {
   .brand-logo-surface {
-    width: 132px;
+    height: 22px;
   }
 }
 

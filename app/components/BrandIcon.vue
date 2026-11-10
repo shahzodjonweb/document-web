@@ -1,9 +1,9 @@
 <template>
   <img
-    src="/brand/pdf-master-icon.svg"
+    src="/brand/docmaster-icon.svg"
     alt=""
-    width="512"
-    height="512"
+    width="380"
+    height="480"
     class="brand-symbol"
     aria-hidden="true"
   />

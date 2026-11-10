@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const brand = String(useRuntimeConfig().public.productName)
 const { t, path, date } = useLocale()
 const ws = useWorkspace()
 const messages = ref<any[]>([])
@@ -112,7 +113,7 @@ async function clear() {
       <div class="bot-chat-heading">
         <span class="avatar guest-avatar"><BrandIcon /></span>
         <div>
-          <strong>PDF Master</strong><small>aiogram · {{ t('localBot') }}</small>
+          <strong>{{ brand }}</strong><small>aiogram · {{ t('localBot') }}</small>
         </div>
         <span class="status-badge">LOCAL</span>
       </div>

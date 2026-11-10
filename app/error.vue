@@ -3,10 +3,11 @@ import type { NuxtError } from '#app'
 
 const props = defineProps<{ error: NuxtError }>()
 const { t, path, locale } = useLocale()
+const brand = String(useRuntimeConfig().public.productName)
 const missing = computed(() => props.error.statusCode === 404)
 useHead({
   htmlAttrs: { lang: locale },
-  title: () => `${t(missing.value ? 'notFoundTitle' : 'pageErrorTitle')} · PDF Master`,
+  title: () => `${t(missing.value ? 'notFoundTitle' : 'pageErrorTitle')} · ${brand}`,
   meta: [{ name: 'robots', content: 'noindex' }],
 })
 </script>
