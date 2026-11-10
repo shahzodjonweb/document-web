@@ -127,7 +127,7 @@ const life = [
 
 const related = computed(() =>
   s.value.related.map((id): RelatedLink | null => {
-    if (id === 'guide') return { id, icon: 'book', name: t('siteMenuGuide'), to: path('/guide') }
+    if (id === 'guide') return { id, icon: 'sparkle', name: t('siteMenuGuide'), to: path('/guide') }
     if (id === 'editor') return { id, icon: 'edit', name: t('siteNavEditor'), to: path('/pdf-editor') }
     if (id === 'powerpoint-to-pdf') {
       const item = tool(id)
@@ -200,7 +200,8 @@ const limitsTitle = computed(() => (s.value.key === 'Cv' ? t('siteAiLimitsTitle'
               <div v-for="n in 5" :key="n" class="site-doc-line" :class="{ 'is-s': n % 2 === 0 }"></div>
             </div>
             <div class="site-aisvc-cv-main">
-              <div v-for="n in 14" :key="n" class="site-doc-line" :class="{ 'is-h': n === 1 || n === 6 || n === 11, 'is-s': n % 3 === 0 }"></div>
+              <b class="site-aisvc-cv-name"></b><i class="site-aisvc-cv-role"></i>
+              <div v-for="n in 16" :key="n" class="site-doc-line" :class="{ 'is-h': n === 1 || n === 7 || n === 12, 'is-s': n % 3 === 0 }"></div>
             </div>
           </div>
           <div class="site-aisvc-picker site-panel">
@@ -210,20 +211,23 @@ const limitsTitle = computed(() => (s.value.key === 'Cv' ? t('siteAiLimitsTitle'
 
         <div v-else class="site-aisvc-stage" aria-hidden="true">
           <div class="site-aisvc-page site-sheet is-inner">
-            <template v-if="s.stage === 'referat'">
-              <p class="site-doc-title">{{ t('siteAiReferatPartPlan') }}</p>
-              <ol class="site-aisvc-toc">
-                <li v-for="part in referatParts.slice(1)" :key="part">{{ t(`siteAiReferatPart${part}`) }}</li>
-              </ol>
-              <div v-for="n in 6" :key="n" class="site-doc-line" :class="{ 'is-h': n === 3, 'is-s': n % 3 === 0 }"></div>
-            </template>
-            <div v-for="n in 14" v-else :key="n" class="site-doc-line" :class="{ 'is-h': n === 1 || n === 8, 'is-s': n % 4 === 3 }"></div>
+            <div v-for="n in 16" :key="n" class="site-doc-line" :class="{ 'is-h': n === 1 || n === 9, 'is-s': n % 4 === 3 }"></div>
           </div>
           <div class="site-aisvc-page site-sheet is-cover">
             <span class="site-aisvc-cover-band"></span>
             <p class="site-doc-title">{{ sample }}</p>
             <div class="site-doc-meta">PDF</div>
-            <div v-for="n in 4" :key="n" class="site-doc-line" :class="{ 'is-s': n % 2 === 0 }"></div>
+            <!-- the referat cover carries its plan; the document cover reads as an opening page -->
+            <template v-if="s.stage === 'referat'">
+              <p class="site-aisvc-toc-head">{{ t('siteAiReferatPartPlan') }}</p>
+              <ol class="site-aisvc-toc">
+                <li v-for="part in referatParts.slice(1)" :key="part"><span>{{ t(`siteAiReferatPart${part}`) }}</span><i></i></li>
+              </ol>
+              <div v-for="n in 6" :key="n" class="site-doc-line" :class="{ 'is-s': n === 3 || n === 6 }"></div>
+            </template>
+            <template v-else>
+              <div v-for="n in 9" :key="n" class="site-doc-line" :class="{ 'is-h': n === 5, 'is-s': n % 4 === 0 }"></div>
+            </template>
           </div>
         </div>
       </div>
@@ -316,10 +320,30 @@ const limitsTitle = computed(() => (s.value.key === 'Cv' ? t('siteAiLimitsTitle'
             <h2 id="ai-editable" class="site-h2">{{ t('siteAiSlidesEditableTitle') }}</h2>
             <p class="site-lead">{{ t('siteAiSlidesEditableBody') }}</p>
           </div>
-          <div class="site-aisvc-pills">
-            <span class="site-file-pill"><span class="site-file-ext">PPTX</span><b>{{ t('siteAiSlidesPillFile') }}</b></span>
-            <span class="site-file-pill"><AppIcon name="edit" class="site-icon" /><span>{{ t('siteAiSlidesPillEdit') }}</span></span>
-            <span class="site-file-pill"><AppIcon name="sparkle" class="site-icon" /><span>{{ t('siteAiSlidesPillAi') }}</span></span>
+          <!-- the deck editor in miniature: the .pptx open, a title selected for editing, an AI edit typed below -->
+          <div class="site-aisvc-deck site-panel" aria-hidden="true">
+            <div class="site-aisvc-deck-bar">
+              <span class="site-file-ext">PPTX</span><b>{{ t('siteAiSlidesPillFile') }}</b>
+              <span class="site-aisvc-deck-tools"><AppIcon name="undo" class="site-icon is-sm" /><AppIcon name="redo" class="site-icon is-sm" /><AppIcon name="download" class="site-icon is-sm" /></span>
+            </div>
+            <div class="site-aisvc-deck-body">
+              <ol class="site-aisvc-deck-thumbs">
+                <li v-for="n in 4" :key="n" :class="{ 'is-on': n === 2 }"><i></i></li>
+              </ol>
+              <div class="site-aisvc-deck-canvas">
+                <div class="site-aisvc-deck-slide">
+                  <div class="site-aisvc-deck-sel">
+                    <b>{{ sample }}</b>
+                    <span class="site-aisvc-deck-tip"><AppIcon name="edit" class="site-icon is-sm" />{{ t('siteAiSlidesPillEdit') }}</span>
+                  </div>
+                  <div class="site-slide-bars"><i style="height: 34%"></i><i style="height: 52%"></i><i style="height: 66%"></i><i style="height: 90%"></i></div>
+                </div>
+              </div>
+            </div>
+            <div class="site-aisvc-deck-ask">
+              <AppIcon name="sparkle" class="site-icon" /><span>{{ t('siteAiSlidesPillAi') }}</span
+              ><span class="site-aisvc-deck-send"><AppIcon name="up" class="site-icon is-sm" /></span>
+            </div>
           </div>
         </div>
       </section>
@@ -356,7 +380,7 @@ const limitsTitle = computed(() => (s.value.key === 'Cv' ? t('siteAiLimitsTitle'
               <i class="site-aisvc-tpl-accent"></i>
               <div>
                 <b></b>
-                <div v-for="m in 7" :key="m" class="site-doc-line" :class="{ 'is-s': m % 3 === 0 }"></div>
+                <div v-for="m in 15" :key="m" class="site-doc-line" :class="{ 'is-h': m === 5 || m === 11, 'is-s': m % 3 === 0 }"></div>
               </div>
             </div>
           </div>
@@ -394,7 +418,7 @@ const limitsTitle = computed(() => (s.value.key === 'Cv' ? t('siteAiLimitsTitle'
       <section v-else-if="id === 'guide'" class="site-section" :class="{ 'is-band': band(index) }" aria-labelledby="ai-guide">
         <div class="site-container">
           <div class="site-aisvc-guide">
-            <span class="site-tool-ico"><AppIcon name="book" class="site-icon" /></span>
+            <span class="site-tool-ico"><AppIcon name="sparkle" class="site-icon" /></span>
             <div>
               <h2 id="ai-guide" class="site-h3">{{ t('siteAiGuideTitle') }}</h2>
               <p>{{ t('siteAiGuideLine') }}</p>

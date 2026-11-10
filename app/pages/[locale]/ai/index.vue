@@ -60,9 +60,12 @@ const limits = computed(() =>
         <div class="site-aihub-stage" aria-hidden="true">
           <div class="site-mini-doc site-sheet site-aihub-doc">
             <p class="site-doc-title">{{ sample }}</p>
-            <div v-for="n in 9" :key="n" class="site-doc-line" :class="{ 'is-h': n === 3, 'is-s': n % 4 === 3 }"></div>
+            <div v-for="n in 15" :key="n" class="site-doc-line" :class="{ 'is-h': n === 3 || n === 10, 'is-s': n % 4 === 3 }"></div>
           </div>
-          <div class="site-mini-slide site-aihub-slide"><b>{{ t('siteAiCardSlidesTitle') }}</b><i></i></div>
+          <div class="site-mini-slide site-aihub-slide">
+            <b>{{ t('siteAiCardSlidesTitle') }}</b>
+            <div class="site-slide-bars"><i style="height: 38%"></i><i style="height: 58%"></i><i style="height: 74%"></i><i style="height: 96%"></i></div>
+          </div>
           <div class="site-mini-cv site-sheet site-aihub-cv">
             <div><span></span><div class="site-doc-line"></div><div class="site-doc-line is-s"></div></div>
             <div><div v-for="n in 9" :key="n" class="site-doc-line" :class="{ 'is-h': n === 1 || n === 5 }"></div></div>
@@ -148,7 +151,7 @@ const limits = computed(() =>
     <section class="site-section" aria-labelledby="ai-guide">
       <div class="site-container">
         <div class="site-aisvc-guide">
-          <span class="site-tool-ico"><AppIcon name="book" class="site-icon" /></span>
+          <span class="site-tool-ico"><AppIcon name="sparkle" class="site-icon" /></span>
           <div>
             <h2 id="ai-guide" class="site-h3">{{ t('siteAiGuideTitle') }}</h2>
             <p>{{ t('siteAiGuideLine') }}</p>

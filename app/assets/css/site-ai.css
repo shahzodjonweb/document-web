@@ -1,21 +1,33 @@
 /* The public site: AI hub and AI service pages. Classes start with site-; shared ones live in site.css. */
 
+/* hero headings on these pages break between words, never inside one ("docu-ments", "presenta-tion") */
+.site-aihub .site-toolhero .site-h1, .site-aisvc .site-toolhero .site-h1 { hyphens: manual; overflow-wrap: break-word; }
+/* limit cards and notes: no lone last word ("3 AI documents a / week", "… after 24 / hours.") */
+.site-aihub .site-kv dd, .site-aisvc .site-kv dd { text-wrap: balance; }
+.site-aihub .site-note p, .site-aisvc .site-note p { text-wrap: pretty; }
+
 /* ---------------------------------------------------------------- hub hero: three previews in one stage */
-.site-aihub-stage { position: relative; min-height: 400px; display: grid; place-items: center; }
+/* the document sits left, the deck behind on the right with its title clear of the page, the CV in front */
+.site-aihub-stage { position: relative; min-height: 420px; display: grid; place-items: center; }
 .site-aihub-stage > * { position: absolute; }
-.site-aihub-doc { width: 200px; height: 270px; padding: 22px 20px; transform: translate(-46%, -6%) rotate(-4deg); z-index: 2; }
-.site-aihub-doc .site-doc-title { font-size: 13px; }
-.site-aihub-slide { width: 300px; transform: translate(22%, -38%) rotate(3deg); z-index: 1; background: #0f2f57; }
+.site-aihub-doc { width: 200px; height: 270px; padding: 22px 20px; transform: translate(-66%, -2%) rotate(-4deg); z-index: 2; }
+.site-aihub-doc .site-doc-title { font-size: 13px; padding-right: 16px; overflow-wrap: break-word; }
+.site-aihub-slide { width: 290px; transform: translate(44%, -50%) rotate(3deg); z-index: 1; background: #0f2f57; }
 .site-aihub-slide b { font-size: 16px; }
-.site-aihub-cv { width: 170px; height: 226px; transform: translate(38%, 30%) rotate(2deg); z-index: 3; }
-@media (max-width: 900px) { .site-aihub-stage { min-height: 360px; max-width: 560px; width: 100%; justify-self: center; } }
+.site-aihub-doc { overflow: hidden; }
+/* the bars sit on the slide's right half, the part the CV leaves uncovered */
+.site-aihub-slide .site-slide-bars { justify-self: end; width: 46%; height: 52px; gap: 5px; }
+.site-aihub-slide .site-slide-bars i { margin: 0; width: auto; height: auto; background: rgba(255, 255, 255, 0.85); border-radius: 3px 3px 0 0; }
+.site-aihub-cv { width: 170px; height: 226px; transform: translate(42%, 30%) rotate(2deg); z-index: 3; }
+@media (max-width: 900px) { .site-aihub-stage { min-height: 380px; max-width: 560px; width: 100%; justify-self: center; } }
 @media (max-width: 520px) {
-  .site-aihub-stage { min-height: 260px; }
-  .site-aihub-doc { width: 140px; height: 190px; padding: 14px 12px; transform: translate(-58%, -4%) rotate(-4deg); }
+  .site-aihub-stage { min-height: 270px; }
+  .site-aihub-doc { width: 136px; height: 184px; padding: 14px 12px; transform: translate(-70%, 0) rotate(-4deg); }
   .site-aihub-doc .site-doc-title { font-size: 10px; }
-  .site-aihub-slide { width: 200px; transform: translate(18%, -46%) rotate(3deg); }
+  .site-aihub-slide { width: 184px; padding: 10px 12px; transform: translate(40%, -54%) rotate(3deg); }
   .site-aihub-slide b { font-size: 12px; }
-  .site-aihub-cv { width: 116px; height: 156px; transform: translate(52%, 32%) rotate(2deg); }
+  .site-aihub-slide .site-slide-bars { height: 30px; gap: 3px; }
+  .site-aihub-cv { width: 112px; height: 150px; transform: translate(46%, 34%) rotate(2deg); }
 }
 
 .site-aihub-referat { margin: 24px 0 0; display: flex; gap: 10px; align-items: flex-start; font-size: 16px; }
@@ -45,13 +57,22 @@
 .site-aisvc-page.is-inner { transform: translate(24%, 4%) rotate(4deg); }
 .site-aisvc-page.is-cover { transform: translate(-22%, -2%) rotate(-3deg); box-shadow: var(--shadow-lg); z-index: 2; display: grid; align-content: start; }
 .site-aisvc-cover-band { display: block; height: clamp(44px, 6vw, 80px); margin: -28px -24px 22px; background: linear-gradient(135deg, var(--action), var(--blue-200)); }
-.site-aisvc-page .site-doc-title { font-size: 17px; max-width: none; overflow-wrap: anywhere; }
-.site-aisvc-toc { margin: 0 0 14px; padding-left: 18px; display: grid; gap: 4px; font-size: 12px; color: var(--text); }
+.site-aisvc-page .site-doc-title { font-size: 17px; max-width: none; overflow-wrap: anywhere; text-wrap: balance; }
+.site-aisvc-page.is-cover .site-doc-line.is-h { margin-top: 14px; }
+.site-aisvc-toc-head { margin: 2px 0 8px; font: 700 11px/1.2 var(--font-body); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.site-aisvc-toc { list-style: none; margin: 0 0 16px; padding: 0; display: grid; gap: 7px; counter-reset: site-aisvc-toc; }
+.site-aisvc-toc li { counter-increment: site-aisvc-toc; display: flex; align-items: baseline; gap: 6px; font-size: 12px; line-height: 1.3; color: var(--ink); min-width: 0; }
+.site-aisvc-toc li::before { content: counter(site-aisvc-toc) '.'; color: var(--link); font-weight: 700; flex: none; }
+.site-aisvc-toc li span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.site-aisvc-toc li i { flex: 1; min-width: 12px; border-bottom: 1.5px dotted var(--hairline-strong); }
 .site-aisvc-stage.is-cv { grid-template-columns: auto; }
 .site-aisvc-cv { width: min(64%, 300px); aspect-ratio: 1 / 1.41; display: grid; grid-template-columns: 36% 1fr; overflow: hidden; box-shadow: var(--shadow-lg); padding: 0; position: relative; }
 .site-aisvc-cv-side { background: var(--blue-100); padding: 22px 12px; display: grid; align-content: start; gap: 4px; }
 .site-aisvc-cv-side span { width: 54px; height: 54px; border-radius: 50%; background: var(--blue-200); margin-bottom: 12px; }
+.site-aisvc-cv-side .site-doc-line { background: color-mix(in srgb, var(--blue-200) 70%, var(--hairline-strong)); }
 .site-aisvc-cv-main { padding: 22px 16px; }
+.site-aisvc-cv-name { display: block; height: 11px; width: 70%; border-radius: 3px; background: var(--ink); opacity: 0.85; margin: 2px 0 7px; }
+.site-aisvc-cv-role { display: block; height: 6px; width: 44%; border-radius: 3px; background: var(--link); opacity: 0.7; }
 .site-aisvc-picker { position: absolute; bottom: 4%; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; padding: 10px; z-index: 2; }
 .site-aisvc-picker span { width: 40px; aspect-ratio: 1 / 1.41; border-radius: 4px; background: #fff; border: 1px solid var(--hairline); display: grid; overflow: hidden; position: relative; }
 .site-aisvc-picker span.is-on { outline: 2px solid var(--action); outline-offset: 2px; }
@@ -92,13 +113,18 @@
 
 /* ---------------------------------------------------------------- languages */
 .site-aisvc-langs { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--site-grid-gap); }
-.site-aisvc-langs li { padding: 22px 22px 14px; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-lg); display: grid; gap: 12px; align-content: start; justify-items: start; min-width: 0; }
-.site-aisvc-langs p { margin: 0 0 4px; font: 700 19px/1.3 var(--font-display); color: var(--ink); overflow-wrap: anywhere; }
+/* heading rows stretch, so the two text lines sit at the same height in every card */
+.site-aisvc-langs li { padding: 22px 22px 20px; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-lg); display: grid; grid-template-rows: auto 1fr auto auto; gap: 12px; justify-items: start; min-width: 0; }
+.site-aisvc-langs p { margin: 0 0 4px; font: 700 19px/1.3 var(--font-display); color: var(--ink); overflow-wrap: break-word; text-wrap: balance; min-width: 0; }
 .site-aisvc-langs .site-doc-line { width: 100%; margin: 0; }
 .site-aisvc-langs .site-doc-line.is-s { width: 72%; }
 .site-aisvc-after { margin-top: 20px; }
 .site-aisvc-before { margin-bottom: 32px; }
-@media (max-width: 760px) { .site-aisvc-langs { grid-template-columns: 1fr; } }
+@media (max-width: 900px) {
+  .site-aisvc-langs { grid-template-columns: 1fr; gap: 12px; }
+  .site-aisvc-langs li { grid-template-rows: none; }
+  .site-aisvc-langs p { font-size: 18px; }
+}
 
 /* ---------------------------------------------------------------- slides: design swatches, file pills */
 .site-aisvc-swatch { align-content: start; gap: 5px; }
@@ -108,10 +134,45 @@
 .site-aisvc-swatch:nth-child(3n + 2) { align-content: end; }
 .site-aisvc-swatch:nth-child(3n) .site-aisvc-swatch-title { width: 80%; }
 @media (max-width: 560px) { .site-aisvc-swatch:nth-child(n + 9) { display: none; } }
-.site-aisvc-pills { display: grid; gap: 12px; justify-items: start; min-width: 0; }
-.site-aisvc-pills .site-file-pill { max-width: 100%; }
-.site-aisvc-pills .site-file-pill > span:last-child, .site-aisvc-pills .site-file-pill b { overflow-wrap: anywhere; }
-.site-aisvc-pills .site-icon { color: var(--link); flex: none; }
+
+/* slides hero: the slide title wraps evenly; the counter sits on the slide's corner, not below it */
+.site-aisvc .site-slide b { text-wrap: balance; }
+.site-aisvc .site-slides-stage { min-height: 0; padding-block: 52px 40px; }
+.site-aisvc .site-slides-stage .site-slide-count { right: calc((100% - min(100%, 520px)) / 2 + 16px); bottom: 26px; box-shadow: var(--shadow-md); }
+@media (max-width: 560px) { .site-aisvc .site-slides-stage { padding-block: 36px 32px; } .site-aisvc .site-slides-stage .site-slide-count { right: 12px; bottom: 18px; } }
+
+/* editable deck: a miniature of the deck editor, same panel language as the home page's editor */
+.site-aisvc-deck { padding: 0; overflow: hidden; min-width: 0; width: 100%; max-width: 600px; justify-self: center; }
+.site-aisvc-deck-bar { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--hairline); background: var(--surface); min-width: 0; }
+.site-aisvc-deck-bar b { color: var(--ink); font: 600 14px/1.2 var(--font-body); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.site-aisvc-deck-tools { margin-left: auto; display: flex; gap: 4px; flex: none; }
+.site-aisvc-deck-tools .site-icon { width: 30px; height: 30px; padding: 7px; border-radius: 8px; color: var(--text); }
+.site-aisvc-deck-tools .site-icon:last-child { background: var(--blue-50); color: var(--link); }
+.site-aisvc-deck-body { display: grid; grid-template-columns: 76px minmax(0, 1fr); background: var(--surface-sunken); }
+.site-aisvc-deck-thumbs { list-style: none; margin: 0; padding: 14px 12px; display: grid; gap: 10px; align-content: start; background: var(--surface); border-right: 1px solid var(--hairline); counter-reset: site-aisvc-thumb; }
+.site-aisvc-deck-thumbs li { counter-increment: site-aisvc-thumb; position: relative; aspect-ratio: 16 / 9; border-radius: 4px; background: #0f2f57; padding: 6px; display: grid; align-content: start; outline: 1px solid var(--hairline); }
+.site-aisvc-deck-thumbs li:nth-child(odd) { background: #1f4f86; }
+.site-aisvc-deck-thumbs li i { display: block; height: 3px; width: 70%; border-radius: 2px; background: rgba(255, 255, 255, 0.7); }
+.site-aisvc-deck-thumbs li.is-on { outline: 2px solid var(--action); outline-offset: 2px; }
+.site-aisvc-deck-canvas { padding: clamp(18px, 3vw, 30px) clamp(14px, 2.6vw, 28px) clamp(26px, 3.4vw, 40px); display: grid; place-items: center; min-width: 0; }
+.site-aisvc-deck-slide { width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; padding: clamp(14px, 2.4vw, 24px); display: grid; align-content: space-between; background: #0f2f57; color: #fff; box-shadow: var(--shadow-md); min-width: 0; }
+.site-aisvc-deck-sel { position: relative; justify-self: start; max-width: 66%; padding: 4px 6px; margin: -4px -6px; outline: 1.5px dashed rgba(255, 255, 255, 0.85); outline-offset: 2px; border-radius: 2px; }
+.site-aisvc-deck-sel b { display: block; font: 700 clamp(14px, 2.4vw, 20px)/1.2 var(--font-display); text-wrap: balance; }
+.site-aisvc-deck-tip { position: absolute; left: 0; top: calc(100% + 12px); z-index: 2; display: inline-flex; align-items: center; gap: 6px; padding: 7px 11px; border-radius: var(--radius-pill); background: var(--surface-raised); color: var(--ink); border: 1px solid var(--hairline); box-shadow: var(--shadow-lg); font: 600 12.5px/1.2 var(--font-body); white-space: nowrap; }
+.site-aisvc-deck-tip .site-icon { color: var(--link); flex: none; }
+.site-aisvc-deck-slide .site-slide-bars { height: clamp(34px, 5vw, 64px); gap: clamp(5px, 0.8vw, 8px); width: 62%; justify-self: end; }
+.site-aisvc-deck-ask { display: flex; align-items: center; gap: 10px; margin: 0; padding: 10px 10px 10px 16px; border-top: 1px solid var(--hairline); background: var(--surface); color: var(--ink); font-size: 15px; min-width: 0; }
+.site-aisvc-deck-ask > .site-icon { color: var(--link); flex: none; }
+.site-aisvc-deck-ask > span:first-of-type { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.site-aisvc-deck-send { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--action); color: var(--on-action, #fff); }
+@media (max-width: 520px) {
+  .site-aisvc-deck-body { grid-template-columns: 54px minmax(0, 1fr); }
+  .site-aisvc-deck-thumbs { padding: 12px 8px; gap: 8px; }
+  .site-aisvc-deck-thumbs li { padding: 4px; }
+  .site-aisvc-deck-tools .site-icon:not(:last-child) { display: none; }
+  .site-aisvc-deck-tip { font-size: 11.5px; padding: 6px 9px; top: calc(100% + 8px); }
+  .site-aisvc-deck-ask { font-size: 14px; }
+}
 
 /* ---------------------------------------------------------------- CV: start modes, templates */
 .site-aisvc-modes { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--site-grid-gap); }
@@ -133,19 +194,35 @@
 .site-aisvc-oldcv { --site-behind: var(--surface-sunken); width: 92px; height: 118px; padding: 14px 12px; box-shadow: var(--shadow-md); }
 .site-aisvc-oldcv .site-doc-line { height: 4px; margin-bottom: 6px; }
 .site-aisvc-oldcv .site-doc-line.is-h { height: 6px; margin: 0 0 10px; }
-@media (max-width: 900px) { .site-aisvc-modes { grid-template-columns: 1fr; } }
+/* stacked on tablets the cards turn sideways, picture left, so they don't become wide empty strips */
+@media (max-width: 900px) {
+  .site-aisvc-modes { grid-template-columns: 1fr; gap: 12px; }
+  .site-aisvc-modes li { grid-template-columns: 220px minmax(0, 1fr); grid-template-rows: auto 1fr; gap: 8px 0; padding: 0; align-content: stretch; }
+  .site-aisvc-modes .site-aisvc-mode-pic { grid-row: 1 / -1; height: auto; min-height: 140px; margin: 0; }
+  .site-aisvc-modes li > :not(.site-aisvc-mode-pic) { margin: 0 22px; }
+  .site-aisvc-modes li > .site-h3 { align-self: end; margin-top: 22px; }
+  .site-aisvc-modes li > p { margin-bottom: 22px; }
+}
+@media (max-width: 600px) {
+  .site-aisvc-modes li { grid-template-columns: 1fr; grid-template-rows: none; gap: 10px; padding-bottom: 22px; }
+  .site-aisvc-modes .site-aisvc-mode-pic { grid-row: auto; height: 140px; min-height: 0; margin-bottom: 8px; }
+  .site-aisvc-modes li > .site-h3 { margin-top: 0; }
+  .site-aisvc-modes li > p { margin-bottom: 0; }
+}
 
 .site-aisvc-templates { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; }
 .site-aisvc-tpl { aspect-ratio: 1 / 1.41; border-radius: 6px; background: #ffffff; border: 1px solid var(--hairline); box-shadow: var(--shadow-sm, 0 1px 2px rgba(14, 23, 38, 0.06)); overflow: hidden; display: grid; position: relative; }
 .site-aisvc-tpl > div { padding: 12% 10%; display: grid; align-content: start; }
 .site-aisvc-tpl b { display: block; height: 7px; width: 60%; border-radius: 2px; background: var(--site-tpl); margin-bottom: 10px; }
 .site-aisvc-tpl .site-doc-line { height: 3px; margin-bottom: 6px; background: #dfe4ec; }
+.site-aisvc-tpl .site-doc-line.is-h { height: 4px; width: 40%; margin: 8px 0 7px; background: #b9c2cf; }
 .site-aisvc-tpl-accent { display: block; background: var(--site-tpl); }
 .site-aisvc-tpl.is-sidebar { grid-template-columns: 32% 1fr; }
 .site-aisvc-tpl.is-sidebar b { background: #2a3442; }
 .site-aisvc-tpl.is-header { grid-template-rows: 22% 1fr; }
-.site-aisvc-tpl.is-single .site-aisvc-tpl-accent { position: absolute; left: 10%; right: 10%; bottom: 9%; height: 3px; }
-.site-aisvc-tpl.is-single > div { padding-top: 10%; }
+/* single-column layouts: a coloured rule across the top, the name in the accent colour */
+.site-aisvc-tpl.is-single .site-aisvc-tpl-accent { position: absolute; left: 0; right: 0; top: 0; height: 5px; }
+.site-aisvc-tpl.is-single > div { padding-top: 14%; }
 @media (max-width: 1000px) { .site-aisvc-templates { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .site-aisvc-templates { grid-template-columns: repeat(2, minmax(0, 1fr)); } .site-aisvc-tpl:nth-child(n + 9) { display: none; } }
 
@@ -159,11 +236,15 @@
 .site-aisvc-fine { margin: 16px 0 0; color: var(--muted); font-size: 14px; }
 .site-aisvc-guide { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px 24px; align-items: center; padding: clamp(22px, 3vw, 32px); background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-xl); }
 .site-aisvc-guide p { margin: 6px 0 0; color: var(--text); }
-@media (max-width: 760px) {
-  .site-aisvc-guide { grid-template-columns: auto minmax(0, 1fr); }
-  .site-aisvc-guide .site-btn { grid-column: 1 / -1; justify-self: start; }
+@media (max-width: 900px) {
+  .site-aisvc-guide { grid-template-columns: auto minmax(0, 1fr); align-items: start; }
+  .site-aisvc-guide .site-btn { grid-column: 2; justify-self: start; }
 }
-@media (max-width: 520px) { .site-aisvc-guide .site-btn { justify-self: stretch; } }
+/* phones: icon above the heading, so the text uses the full width instead of a narrow indented column */
+@media (max-width: 520px) {
+  .site-aisvc-guide { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .site-aisvc-guide .site-btn { grid-column: 1; justify-self: stretch; }
+}
 
 /* the sample sheets stay paper-white in the dark theme, like a real file */
 :root[data-theme='dark'] .site-aisvc-tpl { border-color: transparent; }
@@ -175,3 +256,5 @@
   .site-aihub-result { gap: 8px; width: 100%; justify-content: center; }
   .site-aihub-result .site-mini-slide { padding: 10px 12px; }
 }
+/* phones: the hero buttons always span the column, even when both short labels would fit on one line */
+@media (max-width: 520px) { .site-aihub .site-toolhero .site-actions, .site-aisvc .site-toolhero .site-actions { justify-self: stretch; } }
