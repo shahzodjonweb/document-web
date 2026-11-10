@@ -53,7 +53,7 @@ const related = computed(() =>
               <p><strong>{{ t('siteHomeVignetteDocTitle') }}</strong></p>
               <div class="site-doc-line"></div>
               <div class="site-doc-line is-s"></div>
-              <p><mark>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</mark></p>
+              <div class="site-doc-line site-pe-hl"></div>
               <div class="site-doc-line"></div>
               <div class="site-pe-redact"></div>
               <div class="site-doc-line is-s"></div>
@@ -131,18 +131,16 @@ const related = computed(() =>
     </section>
 
     <section class="site-section" aria-labelledby="pe-plans">
-      <div class="site-container site-pe-plans">
-        <h2 id="pe-plans" class="site-h3">{{ t('siteEditorPlansTitle') }}</h2>
-        <p>{{ t('siteEditorPlansBody') }}</p>
-        <NuxtLink class="site-link-arrow" :to="path('/pricing')"
-          >{{ t('siteLinkComparePlans') }}<AppIcon name="right" class="site-icon is-sm"
-        /></NuxtLink>
-      </div>
-    </section>
-
-    <div class="site-section is-tight">
       <div class="site-container">
-        <div class="site-note">
+        <div class="site-pe-plans">
+          <span class="site-tool-ico" aria-hidden="true"><AppIcon name="billing" class="site-icon" /></span>
+          <div>
+            <h2 id="pe-plans" class="site-h3">{{ t('siteEditorPlansTitle') }}</h2>
+            <p>{{ t('siteEditorPlansBody') }}</p>
+          </div>
+          <NuxtLink class="site-btn is-secondary" :to="path('/pricing')">{{ t('siteLinkComparePlans') }}</NuxtLink>
+        </div>
+        <div class="site-note site-pe-note">
           <AppIcon name="shield" class="site-icon" />
           <p>
             {{ t('siteEditorPrivacyNote') }}
@@ -150,7 +148,7 @@ const related = computed(() =>
           </p>
         </div>
       </div>
-    </div>
+    </section>
 
     <SiteFaq page="pdf-editor" :title="t('siteEditorFaqTitle')" :to="path('/help')" :link="t('siteFooterHelpCentre')" open />
 
