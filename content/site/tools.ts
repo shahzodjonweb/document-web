@@ -29,16 +29,16 @@ export const tools = [
   { id: 'pdf.compress', slug: 'compress-pdf', category: 'optimize', icon: 'compress', related: ['merge-pdf', 'jpg-to-pdf', 'pdf-to-jpg', 'split-pdf', 'protect-pdf'], channels: ['web', 'bot'], copyKeyPrefix: 'siteToolCompressPdf' },
   { id: 'pdf.images_to_pdf', slug: 'jpg-to-pdf', category: 'to-pdf', icon: 'image', related: ['pdf-to-jpg', 'searchable-pdf', 'merge-pdf', 'compress-pdf', 'telegram'], channels: ['web', 'bot'], copyKeyPrefix: 'siteToolJpgToPdf' },
   { id: 'convert.word_to_pdf', slug: 'word-to-pdf', category: 'to-pdf', icon: 'word', related: ['pdf-to-word', 'powerpoint-to-pdf', 'merge-pdf', 'compress-pdf', 'ai-documents'], channels: ['web', 'bot'], copyKeyPrefix: 'siteToolWordToPdf' },
-  { id: 'convert.pptx_to_pdf', slug: 'powerpoint-to-pdf', category: 'to-pdf', icon: 'files', related: ['word-to-pdf', 'ai-slides', 'compress-pdf', 'merge-pdf'], channels: ['web', 'bot'], copyKeyPrefix: 'siteToolPowerpointToPdf' },
+  { id: 'convert.pptx_to_pdf', slug: 'powerpoint-to-pdf', category: 'to-pdf', icon: 'slides', related: ['word-to-pdf', 'ai-slides', 'compress-pdf', 'merge-pdf'], channels: ['web', 'bot'], copyKeyPrefix: 'siteToolPowerpointToPdf' },
   { id: 'pdf.to_images', slug: 'pdf-to-jpg', category: 'from-pdf', icon: 'image', related: ['jpg-to-pdf', 'compress-pdf', 'split-pdf', 'powerpoint-to-pdf'], channels: ['web', 'bot'], copyKeyPrefix: 'siteToolPdfToJpg' },
   { id: 'convert.pdf_to_docx', slug: 'pdf-to-word', category: 'from-pdf', icon: 'word', related: ['word-to-pdf', 'ocr-pdf', 'pdf-to-excel', 'pdf-editor'], channels: ['web'], copyKeyPrefix: 'siteToolPdfToWord' },
-  { id: 'convert.pdf_to_xlsx', slug: 'pdf-to-excel', category: 'from-pdf', icon: 'tools', related: ['pdf-to-word', 'ocr-pdf', 'compress-pdf'], channels: ['web'], copyKeyPrefix: 'siteToolPdfToExcel' },
-  { id: 'ocr.extract_text', slug: 'ocr-pdf', category: 'ocr', icon: 'type', related: ['searchable-pdf', 'pdf-to-word', 'jpg-to-pdf'], channels: ['web'], copyKeyPrefix: 'siteToolOcrPdf' },
+  { id: 'convert.pdf_to_xlsx', slug: 'pdf-to-excel', category: 'from-pdf', icon: 'table', related: ['pdf-to-word', 'ocr-pdf', 'compress-pdf'], channels: ['web'], copyKeyPrefix: 'siteToolPdfToExcel' },
+  { id: 'ocr.extract_text', slug: 'ocr-pdf', category: 'ocr', icon: 'scan', related: ['searchable-pdf', 'pdf-to-word', 'jpg-to-pdf'], channels: ['web'], copyKeyPrefix: 'siteToolOcrPdf' },
   { id: 'ocr.searchable_pdf', slug: 'searchable-pdf', category: 'ocr', icon: 'search', related: ['ocr-pdf', 'jpg-to-pdf', 'compress-pdf'], channels: ['web'], copyKeyPrefix: 'siteToolSearchablePdf' },
   { id: 'pdf.protect', slug: 'protect-pdf', category: 'security', icon: 'lock', related: ['unlock-pdf', 'compress-pdf', 'sign-pdf'], channels: ['web'], copyKeyPrefix: 'siteToolProtectPdf' },
   { id: 'pdf.unlock_known', slug: 'unlock-pdf', category: 'security', icon: 'unlock', related: ['protect-pdf', 'merge-pdf', 'pdf-editor'], channels: ['web'], copyKeyPrefix: 'siteToolUnlockPdf' },
   { id: 'editor.signature_image', slug: 'sign-pdf', category: 'edit', icon: 'signature', related: ['pdf-editor', 'fill-pdf-form', 'protect-pdf'], channels: ['web', 'mini_app'], copyKeyPrefix: 'siteToolSignPdf' },
-  { id: 'editor.fill_forms', slug: 'fill-pdf-form', category: 'edit', icon: 'edit', related: ['pdf-editor', 'sign-pdf', 'word-to-pdf'], channels: ['web', 'mini_app'], copyKeyPrefix: 'siteToolFillPdfForm' },
+  { id: 'editor.fill_forms', slug: 'fill-pdf-form', category: 'edit', icon: 'form', related: ['pdf-editor', 'sign-pdf', 'word-to-pdf'], channels: ['web', 'mini_app'], copyKeyPrefix: 'siteToolFillPdfForm' },
 ] as const satisfies readonly SiteTool[]
 
 // Category → section heading key in locales/site.ts (tools index groups and mega-menu filters).

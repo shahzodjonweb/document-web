@@ -1,11 +1,12 @@
+import { movedTo, sitePage } from '../../content/site/routes'
+
 const LOCALES = ['en', 'uz', 'ru'] as const
 /**
- * Every page that exists, after its locale. Anything else is a real 404, which
- * search engines need; it used to fall through to the landing page. The app's
- * own pages under `/app` keep deciding for themselves, as they always have.
+ * The app's own pages under `/app`, and the sign-in hand-off, decide for
+ * themselves; every public page is in content/site/routes.ts. Anything else is
+ * a real 404, which search engines need.
  */
-const KNOWN =
-  /^(\/(app(\/.*)?|auth\/telegram|tools(\/[^/]+)?|pricing|help(\/.*)?|guide|legal\/(privacy|terms)))?\/?$/
+const APP = /^\/(app(\/.*)?|auth\/telegram)\/?$/
 
 /** The first of our languages the visitor's browser asks for, else English. */
 function preferred(header: string): string {
@@ -33,9 +34,12 @@ export default defineNuxtRouteMiddleware((to) => {
     }
     return navigateTo(`/en${to.fullPath}`, { replace: true, redirectCode: 301 })
   }
+  const view = to.path.slice(match[0].length) || '/'
+  const moved = movedTo(view)
+  if (moved) return navigateTo(`${match[0]}${moved}`, { replace: true, redirectCode: 301 })
   // On the server any error renders the error page; "fatal" would only add a stack
   // trace to the log for every crawler's guess. In the browser it is what shows the page.
-  if (!KNOWN.test(to.path.slice(match[0].length)))
+  if (!APP.test(view) && !sitePage(view))
     return abortNavigation(
       createError({ statusCode: 404, statusMessage: 'Page not found', fatal: import.meta.client }),
     )

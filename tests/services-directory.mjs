@@ -84,6 +84,10 @@ await page.route('**/*', async (route) => {
     })
   }
   if (endpoint === '/plans') return json({ plans: [], draft: false })
+  // The public site's footer shows the seller's details on every page.
+  if (endpoint === '/contacts')
+    return json({ support: { username: '', url: '' }, ads: { username: '', url: '' }, bot: { username: '', url: '' },
+      company: { name: '"ARCANIUM TECHNOLOGIES" MCHJ', tin: '313458514', address: 'Toshkent', phone: '', email: '' } })
   if (endpoint === '/usage')
     return json({ plan: 'free', week: { starts_at: '2026-10-11T19:00:00Z', resets_at: '2026-10-18T19:00:00Z', time_zone: 'Asia/Tashkent' }, resets_at: '2026-10-18T19:00:00Z',
       ai_documents: { limit: 5, used: 0, remaining: 5 }, file_jobs: { limit: 15, used: 5, remaining: 10 }, edits_per_file: 3 })
@@ -162,15 +166,16 @@ try {
   await page.screenshot({ path: path.join(output, 'dashboard-popular.png'), fullPage: true })
   checks.push('Home offers the AI services as shortcuts, then the file staples in directory order')
 
-  // 6. Signed out, generation is not offered: it needs an account and
-  //    `/tools/<id>` has no page for a studio feature.
+  // 6. Signed out, the public tools page lists the file tools by their own
+  //    pages; generation has its own AI pages, not a tool card.
   signedIn = false
   await context.clearCookies()
   await page.goto(`${origin}/en/tools`, { waitUntil: 'domcontentloaded' })
-  await page.locator('.tool-card').first().waitFor()
-  const publicIds = (await cardIds()).map(idFromHref)
-  assert.deepEqual(publicIds, catalogIds, 'The public directory is file tools only')
-  checks.push('Signed-out visitors are offered only the tools they can actually use')
+  await page.locator('.site-toollink').first().waitFor()
+  const publicLinks = await page.$$eval('.site-toollink', (nodes) => nodes.map((node) => node.getAttribute('href')))
+  assert.ok(publicLinks.length > 0 && publicLinks.every((href) => /^\/en\/tools\/[a-z-]+$/.test(href)), 'Every link is a tool page')
+  assert.ok(!publicLinks.some((href) => href.includes('ai.')), 'No AI service among the file tools')
+  checks.push('Signed-out visitors get the file tools, each on its own page')
 
   // 7. The new cards and tab survive three locales, two widths, both themes.
   signedIn = true

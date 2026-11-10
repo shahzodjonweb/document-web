@@ -8,6 +8,24 @@ export const deviceTimeZone = () => {
     return ''
   }
 }
+/**
+ * The weekly limits copy names, from the live plans (the admin can change them
+ * at /ops/plans): `{freeAi}`, `{freeFiles}`, `{plusAi}`. Until the plans are
+ * known, the shipped defaults (docs/product/plan_seed.json) stand in. Callers
+ * pass the plans state they took during setup: text is also made later, in a
+ * head or a computed, where no Nuxt context exists to look it up.
+ */
+export function planNumbers(plans: readonly any[]): Record<string, string> {
+  const limit = (id: string, field: string, fallback: number) => {
+    const value = plans.find((plan) => plan?.id === id)?.limits?.[field]
+    return String(typeof value === 'number' ? value : fallback)
+  }
+  return {
+    freeAi: limit('free', 'weekly_ai_documents', 5),
+    freeFiles: limit('free', 'weekly_file_jobs', 15),
+    plusAi: limit('plus', 'weekly_ai_documents', 20),
+  }
+}
 export function useLocale() {
   const route = useRoute()
   const locale = computed<Locale>(() =>
@@ -15,11 +33,21 @@ export function useLocale() {
   )
   // Keys often come straight from API data (a plan, a status, a warning code). A
   // missing one renders as nothing instead of taking the whole section down.
+  // The product's name is never typed in a string: `{brand}` is filled here, and
+  // `{formerBrand}` names it as it was called before.
+  const plans = useState<any[]>('plans', () => [])
+  const names: Record<string, string> = {
+    brand: String(useRuntimeConfig().public.productName),
+    formerBrand: 'PDF Master',
+  }
   const t = (key: string | null | undefined, values: Record<string, string | number> = {}) => {
     const name = String(key ?? '')
-    return (dictionaries[locale.value][name] || dictionaries.en[name] || name).replace(
+    const text = dictionaries[locale.value][name] || dictionaries.en[name] || name
+    if (!text.includes('{')) return text
+    const numbers = /\{(freeAi|freeFiles|plusAi)\}/.test(text) ? planNumbers(plans.value) : {}
+    return text.replace(
       /\{(\w+)\}/g,
-      (_match, field) => String(values[field] ?? `{${field}}`),
+      (_match, field) => String(values[field] ?? names[field] ?? numbers[field] ?? `{${field}}`),
     )
   }
   const count = (key: string, amount: number) =>

@@ -65,6 +65,7 @@ export const site = {
   siteCrumbHelp: ['Help', 'Yordam', 'Помощь'],
   siteCrumbAbout: ['Company and contacts', 'Kompaniya va aloqa', 'Компания и контакты'],
   siteCrumbLegal: ['Legal', 'Huquqiy hujjatlar', 'Правовые документы'],
+  siteCrumbReferat: ['Reports (referat)', 'Referat', 'Реферат'],
 
   // ── Footer (spec §10) ──
   siteFooterBlurb: [
@@ -200,7 +201,7 @@ export const site = {
   sitePlanPeriod: ['for 30 days', '30 kunga', 'за 30 дней'],
   sitePlanFreePeriod: ['no payment needed', 'to‘lov talab qilinmaydi', 'оплата не нужна'],
   sitePlanDiscountPeriod: ['for 30 days. Offer ends {date}', '30 kunga. Taklif {date}gacha', 'за 30 дней. Предложение до {date}'],
-  sitePlanRegular: ['Regular price {price}', 'Odatiy narx {price}', 'Обычная цена {price}'],
+  sitePlanRegular: ['Regular price {price}', 'Odatdagi narx {price}', 'Обычная цена {price}'],
   sitePlanAiDocs: ['{count} AI documents a week', 'Haftasiga {count} ta AI hujjat', '{count} документов с ИИ в неделю'],
   sitePlanAiDocsUnlimited: ['Unlimited AI documents', 'AI hujjatlar cheklanmagan', 'Документы с ИИ без лимита'],
   sitePlanFileTasks: ['{count} file tasks a week', 'Haftasiga {count} ta fayl vazifasi', '{count} задач с файлами в неделю'],
@@ -469,9 +470,9 @@ export const site = {
   siteEditorChanAccountSame: ['The same', 'Bir xil', 'Те же'],
   siteEditorPlansTitle: ['The editor and your plan', 'Muharrir va tarifingiz', 'Редактор и ваш тариф'],
   siteEditorPlansBody: [
-    'The editor is on every plan. On the Free plan, downloading an edited PDF uses a file task from your 15 a week. Plus and Premium have no weekly file-task limit.',
-    'Muharrir barcha tariflarda bor. Free tarifida tahrirlangan PDF ni yuklab olish haftalik 15 ta fayl vazifasidan birini sarflaydi. Plus va Premiumʼda haftalik fayl vazifalari cheklanmagan.',
-    'Редактор есть на всех тарифах. На тарифе Free скачивание отредактированного PDF расходует одну из 15 задач с файлами в неделю. На Plus и Premium недельного лимита задач нет.',
+    'The editor is on every plan. On the Free plan, downloading an edited PDF uses a file task from your {freeFiles} a week. Plus and Premium have no weekly file-task limit.',
+    'Muharrir barcha tariflarda bor. Free tarifida tahrirlangan PDF ni yuklab olish haftalik {freeFiles} ta fayl vazifasidan birini sarflaydi. Plus va Premiumʼda haftalik fayl vazifalari cheklanmagan.',
+    'Редактор есть на всех тарифах. На тарифе Free скачивание отредактированного PDF расходует одну задачу с файлами из недельного лимита ({freeFiles}). На Plus и Premium недельного лимита задач нет.',
   ],
   siteEditorPrivacyNote: [
     'Files are deleted after 24 hours. Redaction removes the selected content from the file itself; it doesn’t just cover it.',

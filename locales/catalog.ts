@@ -1,5 +1,6 @@
 import { authenticationEntries } from './authentication.ts'
 import { extendedEntries, extendedToolDescriptions, extendedToolNames } from './extended.ts'
+import { site } from './site.ts'
 export type Locale = 'en' | 'uz' | 'ru'
 const entries: Record<string, [string, string, string]> = {
   preview: ['Preview', 'Ko‘rib chiqish', 'Предпросмотр'],
@@ -838,6 +839,10 @@ const toolEntries: Record<string, [string, string, string, string, string, strin
 Object.assign(entries, authenticationEntries)
 for (const [key, value] of Object.entries(extendedEntries)) {
   if (!(key in entries)) entries[key] = value
+}
+// The public site's copy (docs/site): every key starts with `site`, so none replaces the app's.
+for (const [key, value] of Object.entries(site)) {
+  if (!(key in entries)) entries[key] = value as [string, string, string]
 }
 const dictionaries = {} as Record<Locale, Record<string, string>>
 for (const [index, locale] of (['en', 'uz', 'ru'] as const).entries()) {

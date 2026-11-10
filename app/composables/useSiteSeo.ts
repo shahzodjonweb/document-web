@@ -1,9 +1,7 @@
 import { pageSeo, type SeoText } from '../../content/site/seo'
-import { LOCALES, localized, sitePage } from '../../content/site/routes'
+import { LOCALES, localized } from '../../content/site/routes'
 
 const OG_LOCALE: Record<string, string> = { en: 'en_US', uz: 'uz_UZ', ru: 'ru_RU' }
-/** Parent pages' names in a breadcrumb. */
-const SECTION: Record<string, string> = { '/': 'navHome', '/tools': 'navTools', '/help': 'help' }
 
 /**
  * The head of a public page: title, description, canonical, its three
@@ -12,19 +10,16 @@ const SECTION: Record<string, string> = { '/': 'navHome', '/tools': 'navTools', 
  * address that is not a public page say `noindex` and nothing else.
  */
 export function useSiteSeo() {
-  const route = useRoute()
   const { t, locale } = useLocale()
-  const { name: toolName } = useTools()
   const ws = useWorkspace()
   const { regular } = usePricing()
   const { contacts } = contactsState()
+  const { view, page, crumbs } = useSitePage()
   const config = useRuntimeConfig().public
   const brand = String(config.productName)
   const origin = String(config.siteOrigin).replace(/\/$/, '')
   const indexable = ['1', 'true', 1, true].includes(config.siteIndexable as never)
 
-  const view = computed(() => route.path.replace(/^\/(en|uz|ru)/, '').replace(/\/$/, '') || '/')
-  const page = computed(() => sitePage(view.value))
   const at = (l: string, path = view.value) => origin + localized(l, path)
   const text = (value: SeoText | undefined) =>
     (value?.[LOCALES.indexOf(locale.value)] || value?.[0] || '').replaceAll('{brand}', brand)
@@ -34,15 +29,9 @@ export function useSiteSeo() {
     const seo = current ? pageSeo[current.seo] : undefined
     if (!current || !seo) return { meta: [{ key: 'robots', name: 'robots', content: 'noindex' }] }
     const url = at(locale.value)
-    // A tool without its own entry yet takes the tool's name over the directory's title.
-    const title =
-      current.tool && current.seo === 'tools-index' ? `${toolName(current.tool)} · ${brand}` : text(seo.title)
+    const title = text(seo.title)
     const description = text(seo.description)
     const image = `${origin}/og/docmaster-${locale.value}.png`
-    const crumbs = [...current.parents, view.value].map((path) => ({
-      name: path === view.value ? (current.tool ? toolName(current.tool) : title) : t(SECTION[path] || 'navHome'),
-      url: at(locale.value, path),
-    }))
     const offers =
       current.seo === 'home' || current.seo === 'pricing'
         ? ws.plans.value
@@ -97,7 +86,7 @@ export function useSiteSeo() {
             name: title,
             description,
             home: current.seo === 'home',
-            crumbs,
+            crumbs: crumbs.value.map((crumb) => ({ name: crumb.name, url: origin + crumb.path })),
             offers,
             company: contacts.value?.company ?? null,
           }),

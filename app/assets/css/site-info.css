@@ -1,0 +1,160 @@
+/* The public site: Telegram, invite, help and about pages. Classes start with site-; shared ones live in site.css. */
+
+/* ---------------------------------------------------------------- Telegram: hero chat vignette */
+.site-tg-stage { display: grid; justify-items: center; }
+.site-tg-phone { width: min(100%, 360px); border-radius: 32px; padding: 10px; overflow: hidden; }
+.site-tg-bar { display: flex; align-items: center; gap: 10px; padding: 10px 12px 12px; border-bottom: 1px solid var(--hairline); }
+.site-tg-avatar img { width: 32px; height: 32px; border-radius: 50%; }
+.site-tg-name { min-width: 0; }
+.site-tg-name b { display: block; color: var(--ink); font-size: 15px; overflow-wrap: anywhere; }
+.site-tg-chat { display: grid; gap: 10px; padding: 18px 8px 10px; min-height: 280px; align-content: end; background: var(--surface-sunken); border-radius: 0 0 24px 24px; }
+.site-tg-msg { justify-self: start; max-width: 86%; display: grid; gap: 8px; padding: 10px 12px; border-radius: 16px 16px 16px 4px; background: var(--surface); border: 1px solid var(--hairline); font-size: 14px; color: var(--ink); }
+.site-tg-msg p { margin: 0; }
+.site-tg-msg.is-out { justify-self: end; border-radius: 16px 16px 4px 16px; background: var(--blue-50); border-color: var(--blue-200); }
+.site-tg-file { display: flex; align-items: center; gap: 8px; min-width: 0; font-weight: 600; }
+.site-tg-file .site-icon { color: var(--link); }
+.site-tg-keys { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.site-tg-keys span { text-align: center; padding: 9px 8px; border-radius: 10px; background: var(--surface); border: 1px solid var(--hairline); color: var(--link); font-size: 13px; font-weight: 600; }
+@media (max-width: 520px) { .site-tg-chat { min-height: 260px; } }
+
+/* ---------------------------------------------------------------- Telegram: what the bot does */
+.site-tg-cols { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: var(--site-grid-gap); }
+.site-tg-col { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-lg); padding: 20px; display: grid; gap: 16px; align-content: start; min-width: 0; }
+.site-tg-col h3 { display: flex; align-items: center; gap: 12px; }
+.site-tg-col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.site-tg-col:first-child ul { grid-template-columns: 1fr 1fr; column-gap: 16px; }
+.site-tg-col li { display: flex; align-items: flex-start; gap: 8px; font-size: 15px; color: var(--ink); line-height: 1.4; min-width: 0; }
+.site-tg-col li > .site-icon, .site-tg-col a .site-icon { color: var(--link); margin-top: 2px; }
+.site-tg-col a { display: inline-flex; align-items: flex-start; gap: 8px; color: var(--ink); text-decoration: none; }
+.site-tg-col a:hover { color: var(--link); text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 1000px) { .site-tg-cols { grid-template-columns: 1fr 1fr; } .site-tg-col:first-child { grid-column: 1 / -1; } .site-tg-col:first-child ul { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 680px) { .site-tg-cols { grid-template-columns: 1fr; } .site-tg-col:first-child ul { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 400px) { .site-tg-col:first-child ul { grid-template-columns: 1fr; } }
+
+/* ---------------------------------------------------------------- Telegram: bot or website */
+.site-tg-limits { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--site-grid-gap); align-items: start; }
+.site-tg-webonly { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-lg); padding: 8px; }
+.site-tg-webonly h3 { padding: 12px 12px 8px; color: var(--muted); font-size: 14px; }
+.site-tg-webonly ul { list-style: none; margin: 0; padding: 0; }
+@media (max-width: 900px) { .site-tg-limits { grid-template-columns: 1fr; } }
+
+/* ---------------------------------------------------------------- Telegram: one account, two devices */
+.site-tg-devices { display: grid; grid-template-columns: minmax(0, 1.6fr) auto minmax(0, 0.8fr); align-items: center; gap: 0; max-width: 520px; width: 100%; justify-self: center; }
+.site-tg-device { position: relative; padding: 22px 18px; display: grid; align-content: start; }
+.site-tg-device.is-web { aspect-ratio: 16 / 10; }
+.site-tg-device.is-phone { aspect-ratio: 9 / 16; border-radius: 22px; padding: 26px 14px; }
+.site-tg-dots { display: flex; gap: 5px; margin-bottom: 10px; }
+.site-tg-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--hairline-strong); }
+.site-tg-device-ico { position: absolute; right: 12px; bottom: 12px; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--blue-50); color: var(--link); }
+.site-tg-link { position: relative; width: 72px; height: 44px; display: grid; place-items: center; }
+.site-tg-link::before { content: ''; position: absolute; inset: 50% 0 auto; height: 2px; background: var(--action); transform: translateY(-1px); }
+.site-tg-link .site-icon { position: relative; width: 36px; height: 36px; padding: 8px; border-radius: 50%; background: var(--surface); border: 2px solid var(--action); color: var(--link); }
+@media (max-width: 520px) { .site-tg-link { width: 44px; } .site-tg-device.is-phone { padding: 20px 10px; } }
+
+.site-tg-channel-title { margin-bottom: 20px; }
+
+/* ---------------------------------------------------------------- invite */
+.site-invite-head { display: grid; gap: 24px; }
+.site-invite-head .site-h1 { max-width: 20ch; }
+.site-invite-track { margin-top: 16px; }
+.site-invite-ladder { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(0, 0.6fr); position: relative; counter-reset: site-rung; }
+.site-invite-ladder::before { content: ''; position: absolute; left: 22px; right: 22px; top: 21px; height: 2px; background: linear-gradient(90deg, var(--action) 0 80%, var(--hairline-strong) 80%); }
+.site-invite-ladder li { position: relative; display: grid; gap: 4px; align-content: start; padding-right: 16px; min-width: 0; }
+.site-invite-ladder b { font: 700 var(--site-display-3) / 1.2 var(--font-display); color: var(--ink); margin-top: 12px; }
+.site-invite-ladder li > span:last-child { color: var(--text); font-size: 15px; }
+.site-invite-ladder li.is-more > span:last-child { color: var(--muted); margin-top: 12px; }
+.site-invite-rung { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); border: 2px solid var(--action); color: var(--link); }
+.site-invite-ladder li:first-child .site-invite-rung { background: var(--action); color: var(--on-action); }
+.site-invite-ladder li.is-more .site-invite-rung { border-color: var(--hairline-strong); color: var(--muted); }
+.site-invite-notes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
+.site-invite-notes .site-note { margin: 0; }
+.site-invite-cta { margin-top: clamp(32px, 4vw, 48px); }
+/* Tablet: the ladder scrolls inside its own track, with a fade at the edge; the page never does. */
+@media (max-width: 1000px) {
+  .site-invite-track { overflow-x: auto; scroll-snap-type: x mandatory; -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); padding-bottom: 8px; }
+  .site-invite-ladder { grid-template-columns: repeat(5, 200px); width: max-content; padding-right: 64px; }
+  .site-invite-ladder li { scroll-snap-align: start; }
+}
+/* Phone: a vertical list. */
+@media (max-width: 600px) {
+  .site-invite-track { overflow: visible; -webkit-mask-image: none; mask-image: none; padding-bottom: 0; }
+  .site-invite-ladder { grid-template-columns: 1fr; width: auto; padding-right: 0; gap: 20px; }
+  .site-invite-ladder::before { left: 21px; right: auto; top: 22px; bottom: 22px; width: 2px; height: auto; background: linear-gradient(180deg, var(--action) 0 80%, var(--hairline-strong) 80%); }
+  .site-invite-ladder li { grid-template-columns: 44px minmax(0, 1fr); column-gap: 16px; padding-right: 0; align-items: center; }
+  .site-invite-rung { grid-row: span 2; }
+  .site-invite-ladder b { margin-top: 0; }
+  .site-invite-ladder li.is-more > span:last-child { margin-top: 0; }
+  .site-invite-notes { grid-template-columns: 1fr; }
+}
+
+/* ---------------------------------------------------------------- help: search */
+.site-help-hero { padding-bottom: clamp(32px, 4vw, 56px); }
+.site-help-head { display: grid; gap: 16px; }
+.site-help-search { position: relative; max-width: 760px; margin: clamp(28px, 3vw, 40px) auto 0; }
+.site-help-search > .site-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+.site-help-search input { width: 100%; height: 56px; padding: 0 20px 0 52px; border-radius: var(--radius-pill); border: 1px solid var(--hairline-strong); background: var(--surface); color: var(--ink); font: 400 17px/1 var(--font-body); box-shadow: var(--shadow-sm); }
+.site-help-search input::placeholder { color: var(--muted); }
+.site-help-search input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-color: var(--action); }
+.site-help-count { max-width: 760px; margin: 12px auto 0; min-height: 1.5em; color: var(--muted); font-size: 14px; padding-left: 20px; }
+
+/* ---------------------------------------------------------------- help: topics */
+.site-help-topics-wrap { padding-top: 0; }
+.site-help-topics { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.site-help-topic { display: flex; align-items: center; gap: 14px; height: 100%; padding: 16px 18px; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-lg); color: var(--ink); text-decoration: none; }
+.site-help-topic:hover { border-color: var(--action); }
+.site-help-topic > span:last-child { display: grid; gap: 2px; min-width: 0; }
+.site-help-topic b { font-weight: 600; font-size: 15.5px; line-height: 1.3; overflow-wrap: break-word; }
+.site-help-topic small { color: var(--muted); font-size: 13.5px; }
+@media (max-width: 1000px) { .site-help-topics { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) {
+  .site-help-topics { grid-template-columns: 1fr; gap: 8px; }
+  .site-help-topic { padding: 10px 14px; }
+  .site-help-topic .site-tool-ico { width: 32px; height: 32px; border-radius: 8px; }
+}
+
+/* ---------------------------------------------------------------- help: questions */
+.site-help-topics-wrap + .site-help-body { padding-top: clamp(40px, 4vw, 64px); }
+.site-help-grid { display: grid; grid-template-columns: 220px minmax(0, 760px); gap: clamp(32px, 5vw, 72px); align-items: start; justify-content: center; }
+.site-help-grid.is-searching { grid-template-columns: minmax(0, 760px); }
+.site-help-list { display: grid; gap: clamp(40px, 4vw, 56px); min-width: 0; }
+.site-help-group { display: grid; gap: 16px; scroll-margin-top: calc(var(--site-header-h) + 16px); }
+.site-help-group .site-faq details { scroll-margin-top: calc(var(--site-header-h) + 16px); }
+.site-help-life { margin: 8px 0 8px; }
+.site-help-life b { font-size: 15px; }
+.site-help-list > .site-note { margin: 0; }
+@media (max-width: 900px) { .site-help-grid { grid-template-columns: minmax(0, 1fr); } .site-help-toc { display: none; } }
+
+/* ---------------------------------------------------------------- help + about: contact tiles */
+.site-help-contacts { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.site-help-contacts a { display: flex; align-items: flex-start; gap: 14px; height: 100%; padding: 18px; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-lg); color: var(--ink); text-decoration: none; }
+.site-help-contacts a:hover { border-color: var(--action); }
+.site-help-contacts a > span:last-child { display: grid; gap: 2px; min-width: 0; }
+.site-help-contacts b { font-weight: 600; }
+.site-help-contacts small { color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
+.site-help-contacts small:first-of-type { color: var(--link); font-size: 15px; }
+.site-help-contacts small:only-of-type { color: var(--muted); font-size: 14px; }
+.site-help-hours { display: flex; align-items: center; gap: 8px; margin: 16px 0 0; color: var(--muted); font-size: 14px; }
+
+/* ---------------------------------------------------------------- about */
+.site-about-company .site-container { display: grid; gap: 20px; }
+.site-about-company .site-lead { max-width: none; }
+.site-about-requisites { padding-top: 0; }
+.site-about-sheet { padding: clamp(24px, 4vw, 40px); display: grid; gap: 24px; }
+.site-about-sheet dl { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 32px; }
+.site-about-sheet dl > div { display: grid; gap: 4px; align-content: start; min-width: 0; }
+.site-about-sheet dl > div.is-wide { grid-column: 1 / -1; }
+.site-about-sheet dt { color: var(--muted); font-size: 14px; }
+.site-about-sheet dd { margin: 0; color: var(--ink); font-size: 16.5px; overflow-wrap: anywhere; }
+.site-about-copyrow { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 12px; }
+.site-about-copyrow .site-btn { --site-btn-h: 32px; padding-inline: 10px; font-size: 14px; gap: 6px; margin-block: -4px; }
+.site-about-num { font-variant-numeric: tabular-nums; font-weight: 600; letter-spacing: 0.02em; }
+.site-about-h2 { margin-bottom: 24px; }
+.site-about-contacts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.site-about-docs { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.site-about-docs a { display: grid; grid-template-columns: 36px minmax(0, 1fr) 16px; align-items: center; gap: 14px; padding: 16px 18px; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-lg); color: var(--ink); text-decoration: none; }
+.site-about-docs a:hover { border-color: var(--action); }
+.site-about-docs a > span:nth-child(2) { display: grid; gap: 2px; }
+.site-about-docs b { font-weight: 600; }
+.site-about-docs small { color: var(--muted); font-size: 14px; }
+.site-about-docs a > .site-icon { color: var(--muted); }
+@media (max-width: 600px) { .site-about-sheet dl, .site-about-contacts { grid-template-columns: 1fr; } }

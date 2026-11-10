@@ -2,7 +2,8 @@
 export type Contact = { username: string; url: string }
 /** The company behind the service; `phone` and `email` are empty until the admin sets them. */
 export type Company = { name: string; tin: string; address: string; phone: string; email: string }
-export type Contacts = { support: Contact; ads: Contact; company: Company }
+/** `bot` is the bot's public username and link, empty until the admin sets it (absent from an older platform). */
+export type Contacts = { support: Contact; ads: Contact; bot?: Contact; company: Company }
 
 // The contact links and the company details sit on the same pages and mount
 // together: they share one request instead of making two.
