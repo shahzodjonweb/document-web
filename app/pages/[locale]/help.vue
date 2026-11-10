@@ -34,7 +34,11 @@ const fold = (text: string) =>
     .normalize('NFKD')
     .replace(/[̀-ͯ]/g, '')
     .replace(/[‘’ʼʻ`'´]/g, '')
-const items = computed(() => faq('help').map((item) => ({ ...item, group: GROUP.get(item.id) || '', text: fold(`${item.q} ${item.a}`) })))
+// "1 000" and "20 MB" never break across lines.
+const glue = (text: string) => text.replace(/(\d) (?=\d{3}\b|MB|GB|KB|МБ|ГБ)/g, '$1\u00a0')
+const items = computed(() =>
+  faq('help').map((item) => ({ ...item, a: glue(item.a), group: GROUP.get(item.id) || '', text: fold(`${item.q} ${item.a}`) })),
+)
 const words = computed(() => fold(query.value).split(/\s+/).filter(Boolean))
 const matches = computed(() => items.value.filter((item) => words.value.every((word) => item.text.includes(word))))
 const topics = computed(() =>
@@ -53,10 +57,28 @@ const hours = computed(() => st('siteHelpHours'))
 
 // A link to one question opens it.
 const opened = ref('')
+// The topic list marks the topic being read.
+const current = ref('')
+let spy: IntersectionObserver | null = null
 onMounted(() => {
   const hash = decodeURIComponent(location.hash.slice(1))
   if (hash.startsWith('q-')) opened.value = hash
+  spy = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) if (entry.isIntersecting) current.value = entry.target.id
+    },
+    { rootMargin: '-30% 0px -60% 0px' },
+  )
+  watchEffect(() => {
+    if (!spy) return
+    spy.disconnect()
+    for (const topic of topics.value) if (topic.shown.length) {
+      const el = document.getElementById(`topic-${topic.id}`)
+      if (el) spy.observe(el)
+    }
+  }, { flush: 'post' })
 })
+onBeforeUnmount(() => spy?.disconnect())
 function submit(event: Event) {
   // In the browser the list is already filtered; without JavaScript the form reloads with ?q=.
   event.preventDefault()
@@ -114,7 +136,9 @@ useHead(() => ({
           <li v-for="topic in topics" :key="topic.id">
             <a :href="`#topic-${topic.id}`" class="site-help-topic"
               ><span class="site-tool-ico"><AppIcon :name="topic.icon" class="site-icon" /></span
-              ><span><b>{{ topic.title }}</b><small>{{ t('siteHelpTopicCount', { count: topic.all.length }) }}</small></span></a
+              ><b>{{ topic.title }}</b
+              ><span class="site-help-n" aria-hidden="true">{{ topic.all.length }}</span
+              ><span class="site-visually-hidden">{{ t('siteHelpTopicCount', { count: topic.all.length }) }}</span></a
             >
           </li>
         </ul>
@@ -122,10 +146,16 @@ useHead(() => ({
     </nav>
 
     <div class="site-section site-help-body">
-      <div :class="['site-container site-help-grid', { 'is-searching': searching }]">
-        <div v-if="!searching" class="site-toc site-help-toc">
+      <div :class="['site-container site-help-grid', { 'is-empty': !matches.length }]">
+        <div v-if="matches.length" class="site-toc site-help-toc">
           <ol>
-            <li v-for="topic in topics" :key="topic.id"><a :href="`#topic-${topic.id}`">{{ topic.title }}</a></li>
+            <template v-for="topic in topics" :key="topic.id">
+              <li v-if="topic.shown.length">
+                <a :href="`#topic-${topic.id}`" :aria-current="current === `topic-${topic.id}` ? 'true' : undefined"
+                  >{{ topic.title }}<span v-if="searching" class="site-help-n">{{ topic.shown.length }}</span></a
+                >
+              </li>
+            </template>
           </ol>
         </div>
         <div class="site-help-list">
@@ -138,7 +168,9 @@ useHead(() => ({
           </p>
           <template v-for="topic in topics" :key="topic.id">
             <section v-if="topic.shown.length" :id="`topic-${topic.id}`" class="site-help-group" :aria-labelledby="`topic-${topic.id}-title`">
-              <h2 :id="`topic-${topic.id}-title`" class="site-h3">{{ topic.title }}</h2>
+              <h2 :id="`topic-${topic.id}-title`" class="site-h3 site-help-group-title">
+                <span class="site-tool-ico" aria-hidden="true"><AppIcon :name="topic.icon" class="site-icon" /></span>{{ topic.title }}
+              </h2>
               <ol v-if="topic.id === 'files' && !searching" class="site-life site-help-life">
                 <li v-for="[icon, n] in life" :key="n">
                   <span class="site-life-dot"><AppIcon :name="icon" class="site-icon is-sm" /></span>
@@ -147,7 +179,7 @@ useHead(() => ({
                 </li>
               </ol>
               <div class="site-faq">
-                <details v-for="item in topic.shown" :id="`q-${item.id}`" :key="item.id" :open="searching || opened === `q-${item.id}` || undefined">
+                <details v-for="item in topic.shown" :id="`q-${item.id}`" :key="item.id" :open="searching || topic.all.length === 1 || opened === `q-${item.id}` || undefined">
                   <summary>{{ item.q }}<AppIcon name="plus" class="site-icon" /></summary>
                   <div><p>{{ item.a }}</p></div>
                 </details>
@@ -159,35 +191,41 @@ useHead(() => ({
     </div>
 
     <section class="site-section is-band" aria-labelledby="help-contact">
-      <div class="site-container">
-        <SiteSectionHead id="help-contact" :title="t('siteHelpContactTitle')" :intro="t('siteHelpContactLine')" />
+      <div class="site-container site-help-contact">
+        <div class="site-help-contact-head">
+          <SiteSectionHead id="help-contact" :title="t('siteHelpContactTitle')" :intro="t('siteHelpContactLine')" />
+          <p v-if="hours" class="site-help-hours"><AppIcon name="clock" class="site-icon is-sm" />{{ hours }}</p>
+        </div>
         <ul class="site-help-contacts">
           <li v-if="support?.url">
             <a :href="support.url" target="_blank" rel="noopener"
               ><span class="site-tool-ico"><AppIcon name="send" class="site-icon" /></span
-              ><span><b>{{ t('siteContactTelegram') }}</b><small>@{{ support.username }}</small><small>{{ t('siteContactTelegramHint') }}</small></span></a
+              ><span><b>{{ t('siteContactTelegram') }}</b><small>@{{ support.username }}</small><small>{{ t('siteContactTelegramHint') }}</small></span
+              ><AppIcon name="external" class="site-icon is-sm" /></a
             >
           </li>
           <li>
             <NuxtLink :to="path('/app/support')"
               ><span class="site-tool-ico"><AppIcon name="help" class="site-icon" /></span
-              ><span><b>{{ t('siteContactInApp') }}</b><small>{{ t('siteContactInAppHint') }}</small></span></NuxtLink
+              ><span><b>{{ t('siteContactInApp') }}</b><small>{{ t('siteContactInAppHint') }}</small></span
+              ><AppIcon name="chevron" class="site-icon is-sm" /></NuxtLink
             >
           </li>
           <li v-if="company?.email">
             <a :href="`mailto:${company.email}`"
               ><span class="site-tool-ico"><AppIcon name="send" class="site-icon" /></span
-              ><span><b>{{ t('siteContactEmail') }}</b><small>{{ company.email }}</small><small>{{ t('siteContactEmailHint') }}</small></span></a
+              ><span><b>{{ t('siteContactEmail') }}</b><small>{{ company.email }}</small><small>{{ t('siteContactEmailHint') }}</small></span
+              ><AppIcon name="chevron" class="site-icon is-sm" /></a
             >
           </li>
           <li v-if="company?.phone">
             <a :href="`tel:${company.phone.replace(/[^+\d]/g, '')}`"
               ><span class="site-tool-ico"><AppIcon name="phone" class="site-icon" /></span
-              ><span><b>{{ t('siteContactPhone') }}</b><small>{{ company.phone }}</small><small>{{ t('siteContactPhoneHint') }}</small></span></a
+              ><span><b>{{ t('siteContactPhone') }}</b><small>{{ company.phone }}</small><small>{{ t('siteContactPhoneHint') }}</small></span
+              ><AppIcon name="chevron" class="site-icon is-sm" /></a
             >
           </li>
         </ul>
-        <p v-if="hours" class="site-help-hours"><AppIcon name="clock" class="site-icon is-sm" />{{ hours }}</p>
       </div>
     </section>
   </div>
