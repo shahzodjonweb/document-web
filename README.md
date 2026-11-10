@@ -60,7 +60,7 @@ Browser scripts use system Google Chrome via Playwright `channel: 'chrome'`. The
 
 `generated/api/public.openapi.json` is the pinned public schema exported by the platform. `npm run check:catalog` verifies its SHA-256 and excludes staff routes. Regenerate `schema.d.ts` with `npm run generate:api` after copying a new public schema and checksum. The shared CSRF-aware transport powers the base typed client and the extended domain screens.
 
-The Dockerfile pins the Node image manifest and serves the production output as an unprivileged user on port 3000. Its API proxy targets `https://pdfmaster-admin.orderdesk.live`; the web deployment owns a separate Compose project and network. No remote deployment or production purchase has been performed.
+The Dockerfile pins the Node image manifest and serves the production output as an unprivileged user on port 3000. Its API proxy targets `https://api.docmaster.live`; the web deployment owns a separate Compose project and network. No remote deployment or production purchase has been performed.
 
 The [CI/CD guide](docs/cicd.md) documents automatic testing, production image smoke checks and SSH deployment from `main`. Set `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY` and `DEPLOY_KNOWN_HOSTS` as Actions variables or secrets in both repositories. Missing credentials are reported as **Deployment not configured**; the workflow does not attempt a server connection until all four are supplied.
 
