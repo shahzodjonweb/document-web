@@ -15,11 +15,17 @@ export function useLocale() {
   )
   // Keys often come straight from API data (a plan, a status, a warning code). A
   // missing one renders as nothing instead of taking the whole section down.
+  // The product's name is never typed in a string: `{brand}` is filled here, and
+  // `{formerBrand}` names it as it was called before.
+  const names: Record<string, string> = {
+    brand: String(useRuntimeConfig().public.productName),
+    formerBrand: 'PDF Master',
+  }
   const t = (key: string | null | undefined, values: Record<string, string | number> = {}) => {
     const name = String(key ?? '')
     return (dictionaries[locale.value][name] || dictionaries.en[name] || name).replace(
       /\{(\w+)\}/g,
-      (_match, field) => String(values[field] ?? `{${field}}`),
+      (_match, field) => String(values[field] ?? names[field] ?? `{${field}}`),
     )
   }
   const count = (key: string, amount: number) =>

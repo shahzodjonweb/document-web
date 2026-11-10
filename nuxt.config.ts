@@ -45,6 +45,11 @@ export default defineNuxtConfig({
     '~/assets/css/components.css',
     '~/assets/css/screens.css',
     '~/assets/css/frame.css',
+    // The public site last: its classes and tokens are its own (site-, --site-).
+    '~/assets/css/site.css',
+    '~/assets/css/site-tools.css',
+    '~/assets/css/site-ai.css',
+    '~/assets/css/site-info.css',
   ],
   // `apiOrigin` is where the server reads the public plans, catalog and contacts
   // for a server-rendered page; NUXT_API_ORIGIN overrides it at run time. The

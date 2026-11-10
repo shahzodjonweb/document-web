@@ -26,12 +26,10 @@ lines = [
     'export const pageSeo: Record<string, PageSeo> = {',
 ]
 for page, entry in meta.items():
-    if entry.get('proposed'):
-        continue
     parts = [f'{field}: {tuple_of(entry[field])}' for field in FIELDS if field in entry]
     if entry.get('noindex'):
         parts.append('noindex: true')
     lines.append(f'  {json.dumps(page)}: {{ ' + ', '.join(parts) + ' },')
 lines.append('}')
 (root / 'content/site/seo.ts').write_text('\n'.join(lines) + '\n', encoding='utf-8')
-print(f'{sum(1 for e in meta.values() if not e.get("proposed"))} pages written')
+print(f'{len(meta)} pages written')

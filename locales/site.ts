@@ -65,6 +65,7 @@ export const site = {
   siteCrumbHelp: ['Help', 'Yordam', 'Помощь'],
   siteCrumbAbout: ['Company and contacts', 'Kompaniya va aloqa', 'Компания и контакты'],
   siteCrumbLegal: ['Legal', 'Huquqiy hujjatlar', 'Правовые документы'],
+  siteCrumbReferat: ['Reports (referat)', 'Referat', 'Реферат'],
 
   // ── Footer (spec §10) ──
   siteFooterBlurb: [

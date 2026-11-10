@@ -86,6 +86,15 @@ import {
   Ellipsis,
   Gift,
   Share2,
+  Presentation,
+  Table2,
+  ClipboardList,
+  User,
+  Info,
+  ScanText,
+  Receipt,
+  Languages,
+  Smartphone,
 } from 'lucide-vue-next'
 const props = withDefaults(defineProps<{ name: string; size?: number }>(), { size: 20 })
 const icons: Record<string, any> = {
@@ -176,6 +185,16 @@ const icons: Record<string, any> = {
   more: Ellipsis,
   gift: Gift,
   share: Share2,
+  // The public site
+  slides: Presentation,
+  table: Table2,
+  form: ClipboardList,
+  user: User,
+  info: Info,
+  scan: ScanText,
+  receipt: Receipt,
+  languages: Languages,
+  phone: Smartphone,
 }
 </script>
 <template>
