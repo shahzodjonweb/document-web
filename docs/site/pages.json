@@ -1,0 +1,1734 @@
+[
+  {
+    "id": "home",
+    "route": "/{locale}",
+    "status": "upgrade",
+    "purpose": "Explain in one screen that DocMaster does PDF file tasks, PDF editing and AI documents/slides/CV, in uz/ru/en, on the web and in Telegram; route visitors to a tool, an AI service or the bot.",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Value proposition + two primary paths",
+        "content": "H1 naming PDF tools + AI documents; CTA 'Start free' (to /app) and 'Open in Telegram' (to /telegram). Sub-line: works in English, O'zbekcha, Русский."
+      },
+      {
+        "id": "tool-grid",
+        "goal": "Let tool-intent visitors jump straight to a tool",
+        "content": "Cards for the most-used file tools grouped Organize / Convert / Security & OCR, each linking to /tools/{slug}; 'All tools' link. Rendered from catalog."
+      },
+      {
+        "id": "ai-services",
+        "goal": "Introduce the three AI services",
+        "content": "Three cards: AI PDF document on a topic (up to 35 pages), AI slides as editable PowerPoint (up to 60 slides, 110 designs), AI CV (50 templates; from a message, LinkedIn PDF or old CV). Link to /ai/documents, /ai/slides, /ai/cv."
+      },
+      {
+        "id": "editor",
+        "goal": "Show the PDF editor",
+        "content": "Add text, highlight, annotate, fill forms, signature image, edit existing text, insert/replace images, redact; web and Telegram Mini App. Link /pdf-editor."
+      },
+      {
+        "id": "telegram",
+        "goal": "Present the bot as an equal channel",
+        "content": "Same account works in the bot and on the web; bot file limit 20 MB, web 200 MB / 1000 pages. Link /telegram."
+      },
+      {
+        "id": "how-it-works",
+        "goal": "Reduce uncertainty",
+        "content": "Three steps: upload or describe, DocMaster processes, download the result. No install."
+      },
+      {
+        "id": "privacy",
+        "goal": "Trust from facts only",
+        "content": "Files deleted after 24 h; no analytics; sign in with Telegram, Google or email. Link /legal/privacy. No invented user counts, ratings or badges."
+      },
+      {
+        "id": "pricing-teaser",
+        "goal": "Show it starts free",
+        "content": "Free / Plus 20 000 so'm / Premium 60 000 so'm per 30 days, no auto-renewal, discount banner when active. Link /pricing. Data: plans."
+      },
+      {
+        "id": "faq",
+        "goal": "Answer top objections",
+        "content": "5-6 Q&A: is it free, is it safe, which languages, Telegram vs web, how to pay, file size limits."
+      },
+      {
+        "id": "final-cta",
+        "goal": "Close",
+        "content": "Start free / Open in Telegram."
+      }
+    ],
+    "data": [
+      "plans",
+      "catalog"
+    ],
+    "indexable": true,
+    "nav": "header",
+    "priority": 1.0
+  },
+  {
+    "id": "tools-index",
+    "route": "/{locale}/tools",
+    "status": "upgrade",
+    "purpose": "Directory of every file tool, grouped by task, with search; hub for internal links to tool pages.",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Orient",
+        "content": "H1 'All PDF tools' + short line; search/filter box."
+      },
+      {
+        "id": "groups",
+        "goal": "Browse by task",
+        "content": "Groups: Organize (merge, split, extract, delete, reorder, rotate), Optimize (compress), Convert to PDF (images, Word, PowerPoint), Convert from PDF (images, Word, Excel), OCR (text, searchable PDF), Security (add/remove password), Edit (PDF editor, sign, fill form). Each card links /tools/{slug}; web-only badge where the catalog says the tool is not in the bot."
+      },
+      {
+        "id": "limits",
+        "goal": "Set expectations",
+        "content": "Web: 200 MB and 1000 pages per task; bot: 20 MB per file. Free plan: 15 file tasks per week; Plus/Premium unlimited."
+      },
+      {
+        "id": "ai-crosslink",
+        "goal": "Cross-sell",
+        "content": "Banner to /ai."
+      }
+    ],
+    "data": [
+      "catalog",
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "header",
+    "priority": 0.9
+  },
+  {
+    "id": "merge-pdf",
+    "route": "/{locale}/tools/merge-pdf",
+    "status": "upgrade",
+    "purpose": "Rank for and serve 'merge PDF' intents (uz 'pdf birlashtirish', ru 'объединить pdf'). Replaces /tools/pdf.merge (301).",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Match the search intent and start the task",
+        "content": "H1 = localized tool name (Merge PDF); one-line description; primary CTA opens the tool workspace /{locale}/app/tools/pdf.merge (sign-in required there). Accepted input: several PDF files."
+      },
+      {
+        "id": "how-to",
+        "goal": "Three-step instructions (also HowTo-style content)",
+        "content": "Upload PDFs; set their order; download one combined PDF."
+      },
+      {
+        "id": "details",
+        "goal": "Tool-specific facts",
+        "content": "Combines multiple PDFs into one file in the order chosen."
+      },
+      {
+        "id": "limits",
+        "goal": "Limits and plan",
+        "content": "Web: up to 200 MB and 1000 pages per task. Telegram availability and bot limit (20 MB per file) rendered from the catalog. Free plan counts it as a file task (15 per week, week starts Monday 00:00 Tashkent); Plus and Premium unlimited."
+      },
+      {
+        "id": "privacy",
+        "goal": "Reassure",
+        "content": "Uploaded and result files are deleted after 24 hours. Link /legal/privacy."
+      },
+      {
+        "id": "faq",
+        "goal": "Long-tail questions",
+        "content": "How many files can I merge? (state the web task limits) Can I reorder pages after merging? (link reorder) Is it free?"
+      },
+      {
+        "id": "related",
+        "goal": "Internal links",
+        "content": "3-6 related tools: split-pdf, reorder-pdf-pages, compress-pdf, jpg-to-pdf."
+      }
+    ],
+    "data": [
+      "catalog",
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "footer",
+    "priority": 0.9
+  },
+  {
+    "id": "compress-pdf",
+    "route": "/{locale}/tools/compress-pdf",
+    "status": "upgrade",
+    "purpose": "Serve 'compress PDF / reduce PDF size' (uz 'pdf hajmini kichraytirish', ru 'сжать pdf'). Replaces /tools/pdf.compress (301).",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Match the search intent and start the task",
+        "content": "H1 = localized tool name (Compress PDF); one-line description; primary CTA opens the tool workspace /{locale}/app/tools/pdf.compress (sign-in required there). Accepted input: one PDF."
+      },
+      {
+        "id": "how-to",
+        "goal": "Three-step instructions (also HowTo-style content)",
+        "content": "Upload a PDF; compression runs; download the smaller file."
+      },
+      {
+        "id": "details",
+        "goal": "Tool-specific facts",
+        "content": "Reduces file size, e.g. to fit the Telegram bot's 20 MB limit or e-mail attachments. Do not promise a fixed percentage."
+      },
+      {
+        "id": "limits",
+        "goal": "Limits and plan",
+        "content": "Web: up to 200 MB and 1000 pages per task. Telegram availability and bot limit (20 MB per file) rendered from the catalog. Free plan counts it as a file task (15 per week, week starts Monday 00:00 Tashkent); Plus and Premium unlimited."
+      },
+      {
+        "id": "privacy",
+        "goal": "Reassure",
+        "content": "Uploaded and result files are deleted after 24 hours. Link /legal/privacy."
+      },
+      {
+        "id": "faq",
+        "goal": "Long-tail questions",
+        "content": "How much smaller will my file be? (depends on content) Does it reduce quality?"
+      },
+      {
+        "id": "related",
+        "goal": "Internal links",
+        "content": "3-6 related tools: merge-pdf, split-pdf, pdf-to-jpg."
+      }
+    ],
+    "data": [
+      "catalog",
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "footer",
+    "priority": 0.9
+  },
+  {
+    "id": "split-pdf",
+    "route": "/{locale}/tools/split-pdf",
+    "status": "upgrade",
+    "purpose": "Serve 'split PDF' (uz 'pdf ajratish', ru 'разделить pdf'). Replaces /tools/pdf.split (301).",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Match the search intent and start the task",
+        "content": "H1 = localized tool name (Split PDF); one-line description; primary CTA opens the tool workspace /{locale}/app/tools/pdf.split (sign-in required there). Accepted input: one PDF."
+      },
+      {
+        "id": "how-to",
+        "goal": "Three-step instructions (also HowTo-style content)",
+        "content": "Upload a PDF; choose how to split; download the parts."
+      },
+      {
+        "id": "details",
+        "goal": "Tool-specific facts",
+        "content": "Splits one PDF into several files. Link extract-pdf-pages for taking out specific pages."
+      },
+      {
+        "id": "limits",
+        "goal": "Limits and plan",
+        "content": "Web: up to 200 MB and 1000 pages per task. Telegram availability and bot limit (20 MB per file) rendered from the catalog. Free plan counts it as a file task (15 per week, week starts Monday 00:00 Tashkent); Plus and Premium unlimited."
+      },
+      {
+        "id": "privacy",
+        "goal": "Reassure",
+        "content": "Uploaded and result files are deleted after 24 hours. Link /legal/privacy."
+      },
+      {
+        "id": "faq",
+        "goal": "Long-tail questions",
+        "content": "What is the difference between split and extract pages?"
+      },
+      {
+        "id": "related",
+        "goal": "Internal links",
+        "content": "3-6 related tools: extract-pdf-pages, delete-pdf-pages, merge-pdf."
+      }
+    ],
+    "data": [
+      "catalog",
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "footer",
+    "priority": 0.8
+  },
+  {
+    "id": "extract-pdf-pages",
+    "route": "/{locale}/tools/extract-pdf-pages",
+    "status": "upgrade",
+    "purpose": "Serve 'extract pages from PDF' intents. Replaces /tools/pdf.extract_pages (301).",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Match the search intent and start the task",
+        "content": "H1 = localized tool name (Extract PDF pages); one-line description; primary CTA opens the tool workspace /{locale}/app/tools/pdf.extract_pages (sign-in required there). Accepted input: one PDF."
+      },
+      {
+        "id": "how-to",
+        "goal": "Three-step instructions (also HowTo-style content)",
+        "content": "Upload a PDF; pick the pages; download a new PDF with only those pages."
+      },
+      {
+        "id": "details",
+        "goal": "Tool-specific facts",
+        "content": "Creates a new PDF from selected pages; the original is untouched."
+      },
+      {
+        "id": "limits",
+        "goal": "Limits and plan",
+        "content": "Web: up to 200 MB and 1000 pages per task. Telegram availability and bot limit (20 MB per file) rendered from the catalog. Free plan counts it as a file task (15 per week, week starts Monday 00:00 Tashkent); Plus and Premium unlimited."
+      },
+      {
+        "id": "privacy",
+        "goal": "Reassure",
+        "content": "Uploaded and result files are deleted after 24 hours. Link /legal/privacy."
+      },
+      {
+        "id": "faq",
+        "goal": "Long-tail questions",
+        "content": "Can I pick non-consecutive pages?"
+      },
+      {
+        "id": "related",
+        "goal": "Internal links",
+        "content": "3-6 related tools: split-pdf, delete-pdf-pages, reorder-pdf-pages."
+      }
+    ],
+    "data": [
+      "catalog",
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "none",
+    "priority": 0.6
+  },
+  {
+    "id": "delete-pdf-pages",
+    "route": "/{locale}/tools/delete-pdf-pages",
+    "status": "upgrade",
+    "purpose": "Serve 'remove pages from PDF' intents (ru 'удалить страницы из pdf'). Replaces /tools/pdf.delete_pages (301).",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Match the search intent and start the task",
+        "content": "H1 = localized tool name (Delete PDF pages); one-line description; primary CTA opens the tool workspace /{locale}/app/tools/pdf.delete_pages (sign-in required there). Accepted input: one PDF."
+      },
+      {
+        "id": "how-to",
+        "goal": "Three-step instructions (also HowTo-style content)",
+        "content": "Upload a PDF; select pages to remove; download the result."
+      },
+      {
+        "id": "details",
+        "goal": "Tool-specific facts",
+        "content": "Removes selected pages and returns the remaining document."
+      },
+      {
+        "id": "limits",
+        "goal": "Limits and plan",
+        "content": "Web: up to 200 MB and 1000 pages per task. Telegram availability and bot limit (20 MB per file) rendered from the catalog. Free plan counts it as a file task (15 per week, week starts Monday 00:00 Tashkent); Plus and Premium unlimited."
+      },
+      {
+        "id": "privacy",
+        "goal": "Reassure",
+        "content": "Uploaded and result files are deleted after 24 hours. Link /legal/privacy."
+      },
+      {
+        "id": "faq",
+        "goal": "Long-tail questions",
+        "content": "Can I undo? (the original file is not changed)"
+      },
+      {
+        "id": "related",
+        "goal": "Internal links",
+        "content": "3-6 related tools: extract-pdf-pages, reorder-pdf-pages, split-pdf."
+      }
+    ],
+    "data": [
+      "catalog",
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "none",
+    "priority": 0.6
+  },
+  {
+    "id": "reorder-pdf-pages",
+    "route": "/{locale}/tools/reorder-pdf-pages",
+    "status": "upgrade",
+    "purpose": "Serve 'rearrange PDF pages' intents. Replaces /tools/pdf.reorder (301).",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Match the search intent and start the task",
+        "content": "H1 = localized tool name (Reorder PDF pages); one-line description; primary CTA opens the tool workspace /{locale}/app/tools/pdf.reorder (sign-in required there). Accepted input: one PDF."
+      },
+      {
+        "id": "how-to",
+        "goal": "Three-step instructions (also HowTo-style content)",
+        "content": "Upload a PDF; set the new page order; download."
+      },
+      {
+        "id": "details",
+        "goal": "Tool-specific facts",
+        "content": "Changes page order without other changes."
+      },
+      {
+        "id": "limits",
+        "goal": "Limits and plan",
+        "content": "Web: up to 200 MB and 1000 pages per task. Telegram availability and bot limit (20 MB per file) rendered from the catalog. Free plan counts it as a file task (15 per week, week starts Monday 00:00 Tashkent); Plus and Premium unlimited."
+      },
+      {
+        "id": "privacy",
+        "goal": "Reassure",
+        "content": "Uploaded and result files are deleted after 24 hours. Link /legal/privacy."
+      },
+      {
+        "id": "faq",
+        "goal": "Long-tail questions",
+        "content": "Can I also rotate pages? (link rotate-pdf)"
+      },
+      {
+        "id": "related",
+        "goal": "Internal links",
+        "content": "3-6 related tools: rotate-pdf, delete-pdf-pages, merge-pdf."
+      }
+    ],
+    "data": [
+      "catalog",
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "none",
+    "priority": 0.5
+  },
+  {
+    "id": "rotate-pdf",
+    "route": "/{locale}/tools/rotate-pdf",
+    "status": "upgrade",
+    "purpose": "Serve 'rotate PDF' (ru 'повернуть pdf', uz 'pdf aylantirish'). Replaces /tools/pdf.rotate (301).",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Match the search intent and start the task",
+        "content": "H1 = localized tool name (Rotate PDF); one-line description; primary CTA opens the tool workspace /{locale}/app/tools/pdf.rotate (sign-in required there). Accepted input: one PDF."
+      },
+      {
+        "id": "how-to",
+        "goal": "Three-step instructions (also HowTo-style content)",
+        "content": "Upload a PDF; choose rotation; download."
+      },
+      {
+        "id": "details",
+        "goal": "Tool-specific facts",
+        "content": "Rotates pages and saves the result."
+      },
+      {
+        "id": "limits",
+        "goal": "Limits and plan",
+        "content": "Web: up to 200 MB and 1000 pages per task. Telegram availability and bot limit (20 MB per file) rendered from the catalog. Free plan counts it as a file task (15 per week, week starts Monday 00:00 Tashkent); Plus and Premium unlimited."
+      },
+      {
+        "id": "privacy",
+        "goal": "Reassure",
+        "content": "Uploaded and result files are deleted after 24 hours. Link /legal/privacy."
+      },
+      {
+        "id": "faq",
+        "goal": "Long-tail questions",
+        "content": "Is the rotation saved permanently in the file?"
+      },
+      {
+        "id": "related",
+        "goal": "Internal links",
+        "content": "3-6 related tools: reorder-pdf-pages, jpg-to-pdf, compress-pdf."
+      }
+    ],
+    "data": [
+      "catalog",
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "none",
+    "priority": 0.6
+  },
+  {
+    "id": "jpg-to-pdf",
+    "route": "/{locale}/tools/jpg-to-pdf",
+    "status": "upgrade",
+    "purpose": "Serve 'JPG to PDF / photo to PDF' (uz 'rasmni pdf ga o'tkazish', ru 'jpg в pdf'), a high-volume intent. Replaces /tools/pdf.images_to_pdf (301).",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Match the search intent and start the task",
+        "content": "H1 = localized tool name (Images to PDF (JPG to PDF)); one-line description; primary CTA opens the tool workspace /{locale}/app/tools/pdf.images_to_pdf (sign-in required there). Accepted input: photos/images."
+      },
+      {
+        "id": "how-to",
+        "goal": "Three-step instructions (also HowTo-style content)",
+        "content": "Upload images; order them; download one PDF."
+      },
+      {
+        "id": "details",
+        "goal": "Tool-specific facts",
+        "content": "Photos of documents are automatically straightened, so phone shots of paper become clean pages. Mention the Telegram bot as the fastest way from a phone."
+      },
+      {
+        "id": "limits",
+        "goal": "Limits and plan",
+        "content": "Web: up to 200 MB and 1000 pages per task. Telegram availability and bot limit (20 MB per file) rendered from the catalog. Free plan counts it as a file task (15 per week, week starts Monday 00:00 Tashkent); Plus and Premium unlimited."
+      },
+      {
+        "id": "privacy",
+        "goal": "Reassure",
+        "content": "Uploaded and result files are deleted after 24 hours. Link /legal/privacy."
+      },
+      {
+        "id": "faq",
+        "goal": "Long-tail questions",
+        "content": "Does it work with phone photos of documents? Can I make the PDF searchable? (link searchable-pdf)"
+      },
+      {
+        "id": "related",
+        "goal": "Internal links",
+        "content": "3-6 related tools: pdf-to-jpg, searchable-pdf, merge-pdf, compress-pdf."
+      }
+    ],
+    "data": [
+      "catalog",
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "footer",
+    "priority": 0.9
+  },
+  {
+    "id": "pdf-to-jpg",
+    "route": "/{locale}/tools/pdf-to-jpg",
+    "status": "upgrade",
+    "purpose": "Serve 'PDF to JPG' (ru 'pdf в jpg', uz 'pdf ni rasmga'). Replaces /tools/pdf.to_images (301).",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Match the search intent and start the task",
+        "content": "H1 = localized tool name (PDF to images (PDF to JPG)); one-line description; primary CTA opens the tool workspace /{locale}/app/tools/pdf.to_images (sign-in required there). Accepted input: one PDF."
+      },
+      {
+        "id": "how-to",
+        "goal": "Three-step instructions (also HowTo-style content)",
+        "content": "Upload a PDF; conversion runs; download the page images."
+      },
+      {
+        "id": "details",
+        "goal": "Tool-specific facts",
+        "content": "Turns each page into an image. Output image format: confirm from catalog before stating."
+      },
+      {
+        "id": "limits",
+        "goal": "Limits and plan",
+        "content": "Web: up to 200 MB and 1000 pages per task. Telegram availability and bot limit (20 MB per file) rendered from the catalog. Free plan counts it as a file task (15 per week, week starts Monday 00:00 Tashkent); Plus and Premium unlimited."
+      },
+      {
+        "id": "privacy",
+        "goal": "Reassure",
+        "content": "Uploaded and result files are deleted after 24 hours. Link /legal/privacy."
+      },
+      {
+        "id": "faq",
+        "goal": "Long-tail questions",
+        "content": "Which image format do I get? (from catalog)"
+      },
+      {
+        "id": "related",
+        "goal": "Internal links",
+        "content": "3-6 related tools: jpg-to-pdf, compress-pdf, split-pdf."
+      }
+    ],
+    "data": [
+      "catalog",
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "none",
+    "priority": 0.7
+  },
+  {
+    "id": "word-to-pdf",
+    "route": "/{locale}/tools/word-to-pdf",
+    "status": "upgrade",
+    "purpose": "Serve 'Word to PDF' (uz 'word ni pdf ga o'tkazish', ru 'word в pdf'), high volume. Replaces /tools/convert.word_to_pdf (301).",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Match the search intent and start the task",
+        "content": "H1 = localized tool name (Word to PDF); one-line description; primary CTA opens the tool workspace /{locale}/app/tools/convert.word_to_pdf (sign-in required there). Accepted input: a Word document."
+      },
+      {
+        "id": "how-to",
+        "goal": "Three-step instructions (also HowTo-style content)",
+        "content": "Upload a Word file; conversion runs; download the PDF."
+      },
+      {
+        "id": "details",
+        "goal": "Tool-specific facts",
+        "content": "Converts Word documents to PDF. Accepted extensions from catalog."
+      },
+      {
+        "id": "limits",
+        "goal": "Limits and plan",
+        "content": "Web: up to 200 MB and 1000 pages per task. Telegram availability and bot limit (20 MB per file) rendered from the catalog. Free plan counts it as a file task (15 per week, week starts Monday 00:00 Tashkent); Plus and Premium unlimited."
+      },
+      {
+        "id": "privacy",
+        "goal": "Reassure",
+        "content": "Uploaded and result files are deleted after 24 hours. Link /legal/privacy."
+      },
+      {
+        "id": "faq",
+        "goal": "Long-tail questions",
+        "content": "Will my formatting be kept? Which Word formats are accepted? (from catalog)"
+      },
+      {
+        "id": "related",
+        "goal": "Internal links",
+        "content": "3-6 related tools: pdf-to-word, powerpoint-to-pdf, merge-pdf."
+      }
+    ],
+    "data": [
+      "catalog",
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "footer",
+    "priority": 0.9
+  },
+  {
+    "id": "powerpoint-to-pdf",
+    "route": "/{locale}/tools/powerpoint-to-pdf",
+    "status": "upgrade",
+    "purpose": "Serve 'PPT to PDF' (ru 'ppt в pdf', uz 'prezentatsiyani pdf ga'). Replaces /tools/convert.pptx_to_pdf (301).",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Match the search intent and start the task",
+        "content": "H1 = localized tool name (PowerPoint to PDF); one-line description; primary CTA opens the tool workspace /{locale}/app/tools/convert.pptx_to_pdf (sign-in required there). Accepted input: a PowerPoint file."
+      },
+      {
+        "id": "how-to",
+        "goal": "Three-step instructions (also HowTo-style content)",
+        "content": "Upload a presentation; conversion runs; download the PDF."
+      },
+      {
+        "id": "details",
+        "goal": "Tool-specific facts",
+        "content": "Converts slides to a PDF. Cross-link AI slides for making a presentation from a topic."
+      },
+      {
+        "id": "limits",
+        "goal": "Limits and plan",
+        "content": "Web: up to 200 MB and 1000 pages per task. Telegram availability and bot limit (20 MB per file) rendered from the catalog. Free plan counts it as a file task (15 per week, week starts Monday 00:00 Tashkent); Plus and Premium unlimited."
+      },
+      {
+        "id": "privacy",
+        "goal": "Reassure",
+        "content": "Uploaded and result files are deleted after 24 hours. Link /legal/privacy."
+      },
+      {
+        "id": "faq",
+        "goal": "Long-tail questions",
+        "content": "Which PowerPoint formats are accepted? (from catalog)"
+      },
+      {
+        "id": "related",
+        "goal": "Internal links",
+        "content": "3-6 related tools: word-to-pdf, ai-slides (/ai/slides), compress-pdf."
+      }
+    ],
+    "data": [
+      "catalog",
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "footer",
+    "priority": 0.8
+  },
+  {
+    "id": "pdf-to-word",
+    "route": "/{locale}/tools/pdf-to-word",
+    "status": "upgrade",
+    "purpose": "Serve 'PDF to Word' (ru 'pdf в word', uz 'pdf ni word ga o'tkazish'), very high volume. Web-only. Replaces /tools/{feature-id} (301).",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Match the search intent and start the task",
+        "content": "H1 = localized tool name (PDF to Word); one-line description; primary CTA opens the tool workspace /{locale}/app/tools/[catalog id, confirm] (sign-in required there). Accepted input: one PDF."
+      },
+      {
+        "id": "how-to",
+        "goal": "Three-step instructions (also HowTo-style content)",
+        "content": "Upload a PDF; conversion runs; download an editable Word file."
+      },
+      {
+        "id": "details",
+        "goal": "Tool-specific facts",
+        "content": "Web-only tool (not in the Telegram bot). For scanned PDFs, point to OCR tools."
+      },
+      {
+        "id": "limits",
+        "goal": "Limits and plan",
+        "content": "Web: up to 200 MB and 1000 pages per task. Telegram availability and bot limit (20 MB per file) rendered from the catalog. Free plan counts it as a file task (15 per week, week starts Monday 00:00 Tashkent); Plus and Premium unlimited."
+      },
+      {
+        "id": "privacy",
+        "goal": "Reassure",
+        "content": "Uploaded and result files are deleted after 24 hours. Link /legal/privacy."
+      },
+      {
+        "id": "faq",
+        "goal": "Long-tail questions",
+        "content": "Can I edit the result? Does it work on scanned PDFs? (link ocr-pdf)"
+      },
+      {
+        "id": "related",
+        "goal": "Internal links",
+        "content": "3-6 related tools: word-to-pdf, pdf-to-excel, ocr-pdf, pdf-editor (/pdf-editor)."
+      }
+    ],
+    "data": [
+      "catalog",
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "footer",
+    "priority": 0.9
+  },
+  {
+    "id": "pdf-to-excel",
+    "route": "/{locale}/tools/pdf-to-excel",
+    "status": "upgrade",
+    "purpose": "Serve 'PDF to Excel' (ru 'pdf в excel'). Web-only. Replaces /tools/{feature-id} (301).",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Match the search intent and start the task",
+        "content": "H1 = localized tool name (PDF tables to Excel); one-line description; primary CTA opens the tool workspace /{locale}/app/tools/[catalog id, confirm] (sign-in required there). Accepted input: one PDF with tables."
+      },
+      {
+        "id": "how-to",
+        "goal": "Three-step instructions (also HowTo-style content)",
+        "content": "Upload a PDF; tables are extracted; download an Excel file."
+      },
+      {
+        "id": "details",
+        "goal": "Tool-specific facts",
+        "content": "Extracts tables from a PDF into Excel. Web-only."
+      },
+      {
+        "id": "limits",
+        "goal": "Limits and plan",
+        "content": "Web: up to 200 MB and 1000 pages per task. Telegram availability and bot limit (20 MB per file) rendered from the catalog. Free plan counts it as a file task (15 per week, week starts Monday 00:00 Tashkent); Plus and Premium unlimited."
+      },
+      {
+        "id": "privacy",
+        "goal": "Reassure",
+        "content": "Uploaded and result files are deleted after 24 hours. Link /legal/privacy."
+      },
+      {
+        "id": "faq",
+        "goal": "Long-tail questions",
+        "content": "What if my PDF is a scan? What happens to non-table text?"
+      },
+      {
+        "id": "related",
+        "goal": "Internal links",
+        "content": "3-6 related tools: pdf-to-word, ocr-pdf."
+      }
+    ],
+    "data": [
+      "catalog",
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "none",
+    "priority": 0.7
+  },
+  {
+    "id": "ocr-pdf",
+    "route": "/{locale}/tools/ocr-pdf",
+    "status": "upgrade",
+    "purpose": "Serve 'OCR / text from image' (ru 'распознать текст', uz 'rasmdan matn olish'). Web-only. Replaces /tools/{feature-id} (301).",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Match the search intent and start the task",
+        "content": "H1 = localized tool name (OCR: extract text from PDF/scan); one-line description; primary CTA opens the tool workspace /{locale}/app/tools/[catalog id, confirm] (sign-in required there). Accepted input: a scanned PDF or image (confirm from catalog)."
+      },
+      {
+        "id": "how-to",
+        "goal": "Three-step instructions (also HowTo-style content)",
+        "content": "Upload; choose language; get the recognized text."
+      },
+      {
+        "id": "details",
+        "goal": "Tool-specific facts",
+        "content": "Recognizes English, Russian and Uzbek text. Web-only."
+      },
+      {
+        "id": "limits",
+        "goal": "Limits and plan",
+        "content": "Web: up to 200 MB and 1000 pages per task. Telegram availability and bot limit (20 MB per file) rendered from the catalog. Free plan counts it as a file task (15 per week, week starts Monday 00:00 Tashkent); Plus and Premium unlimited."
+      },
+      {
+        "id": "privacy",
+        "goal": "Reassure",
+        "content": "Uploaded and result files are deleted after 24 hours. Link /legal/privacy."
+      },
+      {
+        "id": "faq",
+        "goal": "Long-tail questions",
+        "content": "Which languages are supported? (eng/rus/uzb) Does it handle handwriting? (do not claim)"
+      },
+      {
+        "id": "related",
+        "goal": "Internal links",
+        "content": "3-6 related tools: searchable-pdf, pdf-to-word, jpg-to-pdf."
+      }
+    ],
+    "data": [
+      "catalog",
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "footer",
+    "priority": 0.8
+  },
+  {
+    "id": "searchable-pdf",
+    "route": "/{locale}/tools/searchable-pdf",
+    "status": "upgrade",
+    "purpose": "Serve 'searchable PDF / scanned PDF to text layer' intents. Replaces /tools/{feature-id} (301).",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Match the search intent and start the task",
+        "content": "H1 = localized tool name (Make scanned PDF searchable); one-line description; primary CTA opens the tool workspace /{locale}/app/tools/[catalog id, confirm] (sign-in required there). Accepted input: a scanned PDF."
+      },
+      {
+        "id": "how-to",
+        "goal": "Three-step instructions (also HowTo-style content)",
+        "content": "Upload a scanned PDF; text layer is added; download a searchable PDF."
+      },
+      {
+        "id": "details",
+        "goal": "Tool-specific facts",
+        "content": "Adds a selectable, searchable text layer (eng/rus/uzb) while keeping the scan's look. Bot availability from catalog."
+      },
+      {
+        "id": "limits",
+        "goal": "Limits and plan",
+        "content": "Web: up to 200 MB and 1000 pages per task. Telegram availability and bot limit (20 MB per file) rendered from the catalog. Free plan counts it as a file task (15 per week, week starts Monday 00:00 Tashkent); Plus and Premium unlimited."
+      },
+      {
+        "id": "privacy",
+        "goal": "Reassure",
+        "content": "Uploaded and result files are deleted after 24 hours. Link /legal/privacy."
+      },
+      {
+        "id": "faq",
+        "goal": "Long-tail questions",
+        "content": "How is it different from OCR text? Can I copy text afterwards?"
+      },
+      {
+        "id": "related",
+        "goal": "Internal links",
+        "content": "3-6 related tools: ocr-pdf, jpg-to-pdf, compress-pdf."
+      }
+    ],
+    "data": [
+      "catalog",
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "none",
+    "priority": 0.6
+  },
+  {
+    "id": "protect-pdf",
+    "route": "/{locale}/tools/protect-pdf",
+    "status": "upgrade",
+    "purpose": "Serve 'password protect PDF' (ru 'поставить пароль на pdf'). Web-only. Replaces /tools/pdf.protect (301).",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Match the search intent and start the task",
+        "content": "H1 = localized tool name (Add password to PDF); one-line description; primary CTA opens the tool workspace /{locale}/app/tools/pdf.protect (sign-in required there). Accepted input: one PDF."
+      },
+      {
+        "id": "how-to",
+        "goal": "Three-step instructions (also HowTo-style content)",
+        "content": "Upload a PDF; set a password; download the protected file."
+      },
+      {
+        "id": "details",
+        "goal": "Tool-specific facts",
+        "content": "Encrypts the PDF with a password. Web-only. DocMaster cannot recover a forgotten password."
+      },
+      {
+        "id": "limits",
+        "goal": "Limits and plan",
+        "content": "Web: up to 200 MB and 1000 pages per task. Telegram availability and bot limit (20 MB per file) rendered from the catalog. Free plan counts it as a file task (15 per week, week starts Monday 00:00 Tashkent); Plus and Premium unlimited."
+      },
+      {
+        "id": "privacy",
+        "goal": "Reassure",
+        "content": "Uploaded and result files are deleted after 24 hours. Link /legal/privacy."
+      },
+      {
+        "id": "faq",
+        "goal": "Long-tail questions",
+        "content": "What if I forget the password?"
+      },
+      {
+        "id": "related",
+        "goal": "Internal links",
+        "content": "3-6 related tools: unlock-pdf, compress-pdf."
+      }
+    ],
+    "data": [
+      "catalog",
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "none",
+    "priority": 0.6
+  },
+  {
+    "id": "unlock-pdf",
+    "route": "/{locale}/tools/unlock-pdf",
+    "status": "upgrade",
+    "purpose": "Serve 'remove password from PDF' intents. Web-only. Replaces /tools/pdf.unlock_known (301).",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Match the search intent and start the task",
+        "content": "H1 = localized tool name (Remove PDF password); one-line description; primary CTA opens the tool workspace /{locale}/app/tools/pdf.unlock_known (sign-in required there). Accepted input: a password-protected PDF and its password."
+      },
+      {
+        "id": "how-to",
+        "goal": "Three-step instructions (also HowTo-style content)",
+        "content": "Upload the PDF; enter its current password; download an unlocked copy."
+      },
+      {
+        "id": "details",
+        "goal": "Tool-specific facts",
+        "content": "Removes protection only when the user knows the password. State plainly that it does not crack unknown passwords."
+      },
+      {
+        "id": "limits",
+        "goal": "Limits and plan",
+        "content": "Web: up to 200 MB and 1000 pages per task. Telegram availability and bot limit (20 MB per file) rendered from the catalog. Free plan counts it as a file task (15 per week, week starts Monday 00:00 Tashkent); Plus and Premium unlimited."
+      },
+      {
+        "id": "privacy",
+        "goal": "Reassure",
+        "content": "Uploaded and result files are deleted after 24 hours. Link /legal/privacy."
+      },
+      {
+        "id": "faq",
+        "goal": "Long-tail questions",
+        "content": "Can you open a PDF without the password? (no)"
+      },
+      {
+        "id": "related",
+        "goal": "Internal links",
+        "content": "3-6 related tools: protect-pdf, merge-pdf."
+      }
+    ],
+    "data": [
+      "catalog",
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "none",
+    "priority": 0.6
+  },
+  {
+    "id": "sign-pdf",
+    "route": "/{locale}/tools/sign-pdf",
+    "status": "new",
+    "purpose": "Editor-backed landing page for the 'Sign PDF' search intent (uz 'pdf imzolash', ru 'подписать pdf'); opens the PDF editor.",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Match intent, open editor",
+        "content": "H1 'Sign PDF'; CTA opens the PDF editor in the app; Telegram Mini App mention."
+      },
+      {
+        "id": "how-to",
+        "goal": "Steps",
+        "content": "Upload a PDF; use the editor; download."
+      },
+      {
+        "id": "details",
+        "goal": "Facts",
+        "content": "Place a signature image on the PDF in the editor. Do not call it a qualified/legal e-signature (EDS/ERI); it is an image of a signature."
+      },
+      {
+        "id": "editor-more",
+        "goal": "Upsell the full editor",
+        "content": "Other editor actions: add text, highlight, annotate, edit existing text, insert/replace images, redact. Link /pdf-editor."
+      },
+      {
+        "id": "privacy",
+        "goal": "Reassure",
+        "content": "Files deleted after 24 hours."
+      },
+      {
+        "id": "faq",
+        "goal": "Questions",
+        "content": "Is it free? Does it work on phone / in Telegram?"
+      },
+      {
+        "id": "related",
+        "goal": "Links",
+        "content": "pdf-editor, fill-pdf-form / sign-pdf, protect-pdf."
+      }
+    ],
+    "data": [
+      "catalog"
+    ],
+    "indexable": true,
+    "nav": "none",
+    "priority": 0.7
+  },
+  {
+    "id": "fill-pdf-form",
+    "route": "/{locale}/tools/fill-pdf-form",
+    "status": "new",
+    "purpose": "Editor-backed landing page for the 'Fill PDF form' search intent (ru 'заполнить pdf форму', uz 'pdf formani to'ldirish'); opens the PDF editor.",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Match intent, open editor",
+        "content": "H1 'Fill PDF form'; CTA opens the PDF editor in the app; Telegram Mini App mention."
+      },
+      {
+        "id": "how-to",
+        "goal": "Steps",
+        "content": "Upload a PDF; use the editor; download."
+      },
+      {
+        "id": "details",
+        "goal": "Facts",
+        "content": "Fill form fields in the editor and download the filled PDF."
+      },
+      {
+        "id": "editor-more",
+        "goal": "Upsell the full editor",
+        "content": "Other editor actions: add text, highlight, annotate, edit existing text, insert/replace images, redact. Link /pdf-editor."
+      },
+      {
+        "id": "privacy",
+        "goal": "Reassure",
+        "content": "Files deleted after 24 hours."
+      },
+      {
+        "id": "faq",
+        "goal": "Questions",
+        "content": "Is it free? Does it work on phone / in Telegram?"
+      },
+      {
+        "id": "related",
+        "goal": "Links",
+        "content": "pdf-editor, fill-pdf-form / sign-pdf, protect-pdf."
+      }
+    ],
+    "data": [
+      "catalog"
+    ],
+    "indexable": true,
+    "nav": "none",
+    "priority": 0.6
+  },
+  {
+    "id": "pdf-editor",
+    "route": "/{locale}/pdf-editor",
+    "status": "new",
+    "purpose": "Landing page for the PDF editor (web + Telegram Mini App), targeting 'edit PDF' intents (uz 'pdf tahrirlash', ru 'редактировать pdf').",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Intent + CTA",
+        "content": "H1 'Edit PDF online'; CTA opens the editor in the app; secondary: open in Telegram Mini App."
+      },
+      {
+        "id": "capabilities",
+        "goal": "What you can do",
+        "content": "Add text, highlight, annotate, fill forms, signature image, edit existing text, insert/replace images, redact."
+      },
+      {
+        "id": "how-to",
+        "goal": "Steps",
+        "content": "Upload, edit, download."
+      },
+      {
+        "id": "channels",
+        "goal": "Where it works",
+        "content": "In the browser and as a Telegram Mini App, same account."
+      },
+      {
+        "id": "plans",
+        "goal": "Plan note",
+        "content": "Which plan limits apply to editing: confirm with owner before stating anything beyond 'starts free'."
+      },
+      {
+        "id": "privacy",
+        "goal": "Reassure",
+        "content": "Files deleted after 24 hours; redaction mention."
+      },
+      {
+        "id": "faq",
+        "goal": "Questions",
+        "content": "Can I edit text in a scanned PDF? (link searchable-pdf/ocr) Is a signature image legally binding? (neutral answer: it is an image, not an e-signature)."
+      },
+      {
+        "id": "related",
+        "goal": "Links",
+        "content": "sign-pdf, fill-pdf-form, merge-pdf, compress-pdf."
+      }
+    ],
+    "data": [
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "header",
+    "priority": 0.9
+  },
+  {
+    "id": "ai-hub",
+    "route": "/{locale}/ai",
+    "status": "new",
+    "purpose": "Hub for the three AI services; ranks for generic 'AI document generator' intents and routes to the right service.",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Explain AI offering",
+        "content": "H1 about creating documents, presentations and CVs with AI in uz/ru/en."
+      },
+      {
+        "id": "services",
+        "goal": "Pick a service",
+        "content": "Cards: Documents (PDF on a topic, up to 35 pages), Slides (editable PowerPoint, up to 60 slides, 110 designs), CV (50 templates). Links to sub-pages."
+      },
+      {
+        "id": "ai-edits",
+        "goal": "After generation",
+        "content": "Results can be refined with AI edits: Free 3 per file, Plus 10, Premium unlimited."
+      },
+      {
+        "id": "limits",
+        "goal": "Weekly limits",
+        "content": "Free 5 AI docs/week, Plus 20/week, Premium unlimited; week starts Monday 00:00 Tashkent."
+      },
+      {
+        "id": "guide",
+        "goal": "Better prompts",
+        "content": "Link /guide (prompt guide)."
+      },
+      {
+        "id": "data-note",
+        "goal": "Transparency",
+        "content": "AI requests and results kept 30 days for quality review; processed via OpenAI (link privacy)."
+      }
+    ],
+    "data": [
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "header",
+    "priority": 0.8
+  },
+  {
+    "id": "ai-documents",
+    "route": "/{locale}/ai/documents",
+    "status": "new",
+    "purpose": "Landing for the AI PDF document service (essays, reports, referats/mustaqil ish on a topic); targets uz/ru student and office intents.",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Intent + CTA",
+        "content": "H1 'AI document generator'; CTA to the create flow in the app; Telegram alternative."
+      },
+      {
+        "id": "how-it-works",
+        "goal": "Steps",
+        "content": "Describe the topic (and language), DocMaster writes a PDF up to 35 pages, refine with AI edits, download."
+      },
+      {
+        "id": "languages",
+        "goal": "Language",
+        "content": "Output in English, Uzbek (Latin) or Russian."
+      },
+      {
+        "id": "examples",
+        "goal": "Show output",
+        "content": "Sample covers/pages generated by the product (real outputs only; placeholder until owner supplies)."
+      },
+      {
+        "id": "limits",
+        "goal": "Plan limits",
+        "content": "AI docs per week and AI edits per file by plan."
+      },
+      {
+        "id": "guide",
+        "goal": "Prompt help",
+        "content": "Link /guide."
+      },
+      {
+        "id": "faq",
+        "goal": "Questions",
+        "content": "How long can it be? Which languages? Can I edit it? Is my request stored? (30 days for quality review)."
+      },
+      {
+        "id": "related",
+        "goal": "Links",
+        "content": "/ai/slides, /ai/cv, word-to-pdf, pdf-editor."
+      }
+    ],
+    "data": [
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "header",
+    "priority": 0.8
+  },
+  {
+    "id": "ai-slides",
+    "route": "/{locale}/ai/slides",
+    "status": "new",
+    "purpose": "Landing for AI presentations (editable PowerPoint); targets 'make presentation with AI' (uz 'prezentatsiya tayyorlash', ru 'сделать презентацию').",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Intent + CTA",
+        "content": "H1 'AI presentation maker'; CTA to deck setup in the app."
+      },
+      {
+        "id": "how-it-works",
+        "goal": "Steps",
+        "content": "Give a topic, pick a design, get an editable .pptx up to 60 slides, edit in the deck editor or PowerPoint."
+      },
+      {
+        "id": "designs",
+        "goal": "Show breadth",
+        "content": "Gallery of design thumbnails from the 110 designs (real picker thumbnails)."
+      },
+      {
+        "id": "editable",
+        "goal": "Key differentiator",
+        "content": "Output is an editable PowerPoint file, not an image."
+      },
+      {
+        "id": "limits",
+        "goal": "Plan limits",
+        "content": "Counts as an AI doc in weekly limits; AI edits per plan."
+      },
+      {
+        "id": "faq",
+        "goal": "Questions",
+        "content": "Max slides? Can I change the design later? Which languages?"
+      },
+      {
+        "id": "related",
+        "goal": "Links",
+        "content": "/ai/documents, powerpoint-to-pdf, /guide."
+      }
+    ],
+    "data": [
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "header",
+    "priority": 0.8
+  },
+  {
+    "id": "ai-cv",
+    "route": "/{locale}/ai/cv",
+    "status": "new",
+    "purpose": "Landing for AI CV builder; targets 'rezyume yaratish', 'создать резюме', 'CV maker'.",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Intent + CTA",
+        "content": "H1 'AI CV builder'; CTA to CV setup in the app."
+      },
+      {
+        "id": "start-modes",
+        "goal": "Three ways to start",
+        "content": "From a message describing yourself, from a LinkedIn PDF export, or from an old CV."
+      },
+      {
+        "id": "templates",
+        "goal": "Templates",
+        "content": "Gallery from the 50 templates (real thumbnails)."
+      },
+      {
+        "id": "how-it-works",
+        "goal": "Steps",
+        "content": "Choose a start mode, pick a template, review missing facts DocMaster asks for, download."
+      },
+      {
+        "id": "languages",
+        "goal": "Languages",
+        "content": "CV in English, Uzbek (Latin) or Russian."
+      },
+      {
+        "id": "privacy",
+        "goal": "Sensitive data note",
+        "content": "CV contains personal data: AI requests/results kept 30 days, files deleted after 24 h; link privacy."
+      },
+      {
+        "id": "faq",
+        "goal": "Questions",
+        "content": "Can I use my LinkedIn profile? Can I edit after? Which format do I get? (confirm)"
+      },
+      {
+        "id": "related",
+        "goal": "Links",
+        "content": "/ai/documents, pdf-to-word, pdf-editor."
+      }
+    ],
+    "data": [
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "header",
+    "priority": 0.8
+  },
+  {
+    "id": "guide",
+    "route": "/{locale}/guide",
+    "status": "exists",
+    "purpose": "Prompt guide for AI documents/slides/CV; keeps users succeeding with AI requests. Keep route; link from AI pages.",
+    "sections": [
+      {
+        "id": "intro",
+        "goal": "Why prompts matter",
+        "content": "Short intro."
+      },
+      {
+        "id": "patterns",
+        "goal": "How to write a request",
+        "content": "Existing guide content: topic, audience, length, language, structure."
+      },
+      {
+        "id": "examples",
+        "goal": "Good vs weak requests",
+        "content": "Anonymised examples only."
+      },
+      {
+        "id": "cta",
+        "goal": "Try it",
+        "content": "Links to /ai/documents and /ai/slides."
+      }
+    ],
+    "data": [
+      "none"
+    ],
+    "indexable": true,
+    "nav": "footer",
+    "priority": 0.5
+  },
+  {
+    "id": "pricing",
+    "route": "/{locale}/pricing",
+    "status": "upgrade",
+    "purpose": "Plans, prices and how to pay; also the page payment providers and the public offer reference for prices.",
+    "sections": [
+      {
+        "id": "plans",
+        "goal": "Compare plans",
+        "content": "Free: 5 AI docs/week, 15 file tasks/week, 3 AI edits per file, must join the DocMaster Telegram channel. Plus: 20 000 so'm / 30 days, 20 AI docs/week, unlimited file tasks, 10 edits. Premium: 60 000 so'm / 30 days, unlimited, no channel requirement. Rendered from plans data; discounted price and last day shown when an admin discount is active."
+      },
+      {
+        "id": "table",
+        "goal": "Detailed comparison",
+        "content": "Rows: AI docs/week, file tasks/week, AI edits per file, channel requirement, file limits (web 200 MB/1000 pages, bot 20 MB). All other features the same on every plan."
+      },
+      {
+        "id": "how-to-pay",
+        "goal": "Payment methods and activation",
+        "content": "Today: card transfer (Uzcard, Humo, Visa, Mastercard) with receipt upload in the app; staff approve and the plan activates. Automatic payment: placeholder until the provider integration ships. Period is 30 days; no auto-renewal."
+      },
+      {
+        "id": "week",
+        "goal": "Explain limits",
+        "content": "Weekly limits reset Monday 00:00 Tashkent time."
+      },
+      {
+        "id": "invite",
+        "goal": "Free alternative",
+        "content": "Invite 5 friends to earn Plus; link /invite."
+      },
+      {
+        "id": "refunds",
+        "goal": "Link terms",
+        "content": "Short line + links to /legal/refunds and /legal/offer."
+      },
+      {
+        "id": "faq",
+        "goal": "Billing questions",
+        "content": "Does it renew automatically? (no) What happens when it ends? How long does approval take? (placeholder) Can I upgrade mid-period? (confirm)"
+      }
+    ],
+    "data": [
+      "plans",
+      "contacts"
+    ],
+    "indexable": true,
+    "nav": "both",
+    "priority": 0.9
+  },
+  {
+    "id": "telegram",
+    "route": "/{locale}/telegram",
+    "status": "new",
+    "purpose": "Explain and link the Telegram bot and Mini App; many Uzbek users prefer Telegram.",
+    "sections": [
+      {
+        "id": "hero",
+        "goal": "Open the bot",
+        "content": "CTA t.me link to the bot (placeholder: bot username); QR code for desktop visitors."
+      },
+      {
+        "id": "what-it-does",
+        "goal": "Capabilities",
+        "content": "File tools available in the bot (from catalog), AI documents/slides/CV, PDF editor as Mini App."
+      },
+      {
+        "id": "limits",
+        "goal": "Differences from web",
+        "content": "20 MB per file in the bot vs 200 MB/1000 pages on web; web-only tools listed from catalog."
+      },
+      {
+        "id": "account",
+        "goal": "One account",
+        "content": "Same account and plan across bot and web; sign in to web with Telegram."
+      },
+      {
+        "id": "channel",
+        "goal": "Free-plan requirement",
+        "content": "Free plan requires joining the owner's Telegram channel (placeholder: channel link); Premium removes it."
+      },
+      {
+        "id": "faq",
+        "goal": "Questions",
+        "content": "Is the bot official? How do I send large files? (use web)"
+      }
+    ],
+    "data": [
+      "catalog",
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "header",
+    "priority": 0.7
+  },
+  {
+    "id": "invite",
+    "route": "/{locale}/invite",
+    "status": "new",
+    "purpose": "Explain the invite-rewards programme publicly (also linked from pricing and the bot).",
+    "sections": [
+      {
+        "id": "how",
+        "goal": "Rules",
+        "content": "Every 5 invited friends earn Plus: 1 month for the first 5, then 2, then 3 months…; at most 5 friends counted per month; only new users count."
+      },
+      {
+        "id": "steps",
+        "goal": "How to invite",
+        "content": "Get your link in the app (Referrals) or the bot; share it."
+      },
+      {
+        "id": "cta",
+        "goal": "Act",
+        "content": "Open My referrals in the app."
+      },
+      {
+        "id": "faq",
+        "goal": "Questions",
+        "content": "Who counts as a friend? What if I already have Plus? (confirm)"
+      }
+    ],
+    "data": [
+      "none"
+    ],
+    "indexable": true,
+    "nav": "footer",
+    "priority": 0.4
+  },
+  {
+    "id": "help",
+    "route": "/{locale}/help",
+    "status": "upgrade",
+    "purpose": "Help centre / FAQ by topic, plus support contacts; replaces the current generic help articles.",
+    "sections": [
+      {
+        "id": "search",
+        "goal": "Find answers",
+        "content": "Search box over FAQ."
+      },
+      {
+        "id": "topics",
+        "goal": "Browse",
+        "content": "Topics: Getting started, File tools & limits, PDF editor, AI services, Plans & payment, Invite rewards, Account & sign-in (Telegram, email, Google), Privacy & file deletion."
+      },
+      {
+        "id": "faq",
+        "goal": "Answers",
+        "content": "Q&A per topic built only from verified facts; FAQ structured data."
+      },
+      {
+        "id": "contact",
+        "goal": "Escalate",
+        "content": "Support channels: in-app Support page, Telegram (placeholder), email (placeholder), phone (placeholder)."
+      }
+    ],
+    "data": [
+      "contacts",
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "both",
+    "priority": 0.6
+  },
+  {
+    "id": "about",
+    "route": "/{locale}/about",
+    "status": "new",
+    "purpose": "Company and contacts page: who operates DocMaster, legal requisites, how to reach support. Also the page provider reviewers look for. /contacts redirects here.",
+    "sections": [
+      {
+        "id": "company",
+        "goal": "Who we are",
+        "content": "DocMaster (formerly PDF Master) is operated by \"ARCANIUM TECHNOLOGIES\" MCHJ, Tashkent. Short mission line (owner to approve)."
+      },
+      {
+        "id": "requisites",
+        "goal": "Legal details (required)",
+        "content": "Full legal name, STIR 313458514, legal address (placeholder), bank details if the provider asks (placeholder: bank, account, MFO), director name (placeholder, confirm whether to publish)."
+      },
+      {
+        "id": "contacts",
+        "goal": "Reach us",
+        "content": "Email (placeholder), phone (placeholder), Telegram support (placeholder), working hours (placeholder). Rendered from the admin Contacts setting."
+      },
+      {
+        "id": "legal-links",
+        "goal": "Documents",
+        "content": "Links to offer, privacy, refunds."
+      }
+    ],
+    "data": [
+      "contacts"
+    ],
+    "indexable": true,
+    "nav": "footer",
+    "priority": 0.5
+  },
+  {
+    "id": "legal-offer",
+    "route": "/{locale}/legal/offer",
+    "status": "upgrade",
+    "purpose": "Ommaviy oferta: the public contract for all users (free and paid), accepted on sign-up/payment. Also serves as Terms of Service; /legal/terms redirects here. Authoritative text in Uzbek (state language); en/ru are translations, stated at the top. Version date and 'previous versions' link.",
+    "sections": [
+      {
+        "id": "parties",
+        "goal": "Who contracts",
+        "content": "Seller: \"ARCANIUM TECHNOLOGIES\" MCHJ, STIR 313458514, address (placeholder). Buyer: any user who accepts."
+      },
+      {
+        "id": "subject",
+        "goal": "Services",
+        "content": "File tools, PDF editor, AI documents/slides/CV via web and Telegram bot."
+      },
+      {
+        "id": "acceptance",
+        "goal": "How the contract is concluded",
+        "content": "Acceptance by registration/sign-in and by payment; reference Civil Code provisions on public offer and acceptance (lawyer to cite exact articles)."
+      },
+      {
+        "id": "plans-prices",
+        "goal": "Prices",
+        "content": "Plans and prices as on /pricing in so'm; tax status (placeholder: whether prices include VAT); admin discounts with end date."
+      },
+      {
+        "id": "payment",
+        "goal": "Payment and activation",
+        "content": "Card transfer with receipt, staff approval; provider payments (placeholder); 30-day period; no auto-renewal; service is delivered electronically upon activation."
+      },
+      {
+        "id": "limits-usage",
+        "goal": "Usage rules",
+        "content": "Weekly limits, Free-plan channel requirement, file limits, acceptable use (no illegal content, no attempts to bypass limits)."
+      },
+      {
+        "id": "ai-content",
+        "goal": "AI output",
+        "content": "AI results may contain errors; user responsible for use; requests kept 30 days."
+      },
+      {
+        "id": "refunds",
+        "goal": "Refunds",
+        "content": "Summary + link /legal/refunds."
+      },
+      {
+        "id": "liability",
+        "goal": "Liability and disputes",
+        "content": "Limitation of liability, governing law of Uzbekistan, dispute resolution (lawyer)."
+      },
+      {
+        "id": "language",
+        "goal": "Language of the contract",
+        "content": "States that the Uzbek text prevails."
+      },
+      {
+        "id": "requisites",
+        "goal": "Requisites",
+        "content": "Company block repeated at the end."
+      }
+    ],
+    "data": [
+      "contacts",
+      "plans"
+    ],
+    "indexable": true,
+    "nav": "footer",
+    "priority": 0.4
+  },
+  {
+    "id": "legal-privacy",
+    "route": "/{locale}/legal/privacy",
+    "status": "upgrade",
+    "purpose": "Privacy policy under ZRU-547 (personal data law), incl. cookies section (separate cookies page dropped). Authoritative text in Uzbek (state language); en/ru are translations, stated at the top. Version date and 'previous versions' link.",
+    "sections": [
+      {
+        "id": "operator",
+        "goal": "Data operator",
+        "content": "\"ARCANIUM TECHNOLOGIES\" MCHJ, STIR 313458514, address and contact for data requests (placeholders)."
+      },
+      {
+        "id": "data",
+        "goal": "What we collect",
+        "content": "Account data from Telegram / email+password / Google sign-in; uploaded files; AI requests; payment receipts; technical logs (confirm)."
+      },
+      {
+        "id": "purposes",
+        "goal": "Why",
+        "content": "Providing the service, quality review of AI, payment verification, security (Cloudflare Turnstile anti-bot)."
+      },
+      {
+        "id": "retention",
+        "goal": "How long",
+        "content": "Uploaded and result files: 24 hours. AI requests/results: 30 days. Payment receipts: 90 days. Account data: until deletion (confirm)."
+      },
+      {
+        "id": "processors",
+        "goal": "Third parties",
+        "content": "OpenAI (AI), Pixabay (images), Telegram, Google (sign-in), Cloudflare Turnstile, email provider (placeholder: name), Contabo object storage (EU)."
+      },
+      {
+        "id": "cross-border",
+        "goal": "Storage location and transfers",
+        "content": "Data stored in the EU (Contabo) and processed by US/foreign providers; legal basis for cross-border transfer under the amended Art. 27-1 (lawyer to confirm)."
+      },
+      {
+        "id": "rights",
+        "goal": "Your rights",
+        "content": "Access, correction, deletion, withdraw consent; how to request (placeholder contact); response time per law."
+      },
+      {
+        "id": "cookies",
+        "goal": "Cookies and local storage",
+        "content": "Only what the service needs (sign-in session, language, time zone); no analytics or ad cookies."
+      },
+      {
+        "id": "changes",
+        "goal": "Updates",
+        "content": "Version date; how users are told about changes."
+      }
+    ],
+    "data": [
+      "contacts"
+    ],
+    "indexable": true,
+    "nav": "footer",
+    "priority": 0.4
+  },
+  {
+    "id": "legal-refunds",
+    "route": "/{locale}/legal/refunds",
+    "status": "new",
+    "purpose": "Refund and cancellation policy, a standalone page because payment providers check for it. Authoritative text in Uzbek (state language); en/ru are translations, stated at the top. Version date and 'previous versions' link.",
+    "sections": [
+      {
+        "id": "scope",
+        "goal": "What it covers",
+        "content": "Plus and Premium 30-day plans."
+      },
+      {
+        "id": "no-renewal",
+        "goal": "Cancellation",
+        "content": "No auto-renewal, so nothing to cancel; plan ends after 30 days."
+      },
+      {
+        "id": "when",
+        "goal": "When a refund is possible",
+        "content": "Owner decision placeholder: e.g. payment approved but plan not activated, duplicate payment, technical failure preventing use."
+      },
+      {
+        "id": "how",
+        "goal": "How to request",
+        "content": "Contact support (placeholder) with receipt; deadline (placeholder)."
+      },
+      {
+        "id": "method",
+        "goal": "How money is returned",
+        "content": "To the same card/payment method used; time frame (placeholder)."
+      },
+      {
+        "id": "receipts",
+        "goal": "Receipts",
+        "content": "Receipts kept 90 days."
+      }
+    ],
+    "data": [
+      "contacts"
+    ],
+    "indexable": true,
+    "nav": "footer",
+    "priority": 0.3
+  },
+  {
+    "id": "not-found",
+    "route": "/{locale}/404 (any unknown path)",
+    "status": "new",
+    "purpose": "Friendly 404 in the visitor's locale with ways back; returns HTTP 404.",
+    "sections": [
+      {
+        "id": "message",
+        "goal": "Explain",
+        "content": "Short 'page not found' in uz/ru/en."
+      },
+      {
+        "id": "links",
+        "goal": "Recover",
+        "content": "Links: home, all tools, AI, help; search box over tools."
+      }
+    ],
+    "data": [
+      "catalog"
+    ],
+    "indexable": false,
+    "nav": "none",
+    "priority": 0.1
+  }
+]

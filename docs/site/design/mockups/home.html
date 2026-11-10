@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DocMaster: PDF tools and AI documents</title>
+<link rel="icon" href="../../../../public/favicon-docmaster.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../../../app/assets/css/tokens.css">
+<link rel="stylesheet" href="site.css">
+</head>
+<body class="site-body">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></symbol><symbol id="i-merge" viewBox="0 0 24 24"><path d="m8 6 4-4 4 4"/><path d="M12 2v10.3a4 4 0 0 1-1.17 2.87L4 22"/><path d="m20 22-5-5"/></symbol><symbol id="i-compress" viewBox="0 0 24 24"><path d="M4 14h6v6"/><path d="M20 10h-6V4"/><path d="m14 10 7-7"/><path d="m3 21 7-7"/></symbol><symbol id="i-split" viewBox="0 0 24 24"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88"/><path d="M14.47 14.48 20 20"/><path d="M8.12 8.12 12 12"/></symbol><symbol id="i-rotate" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></symbol><symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"/></symbol><symbol id="i-word" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></symbol><symbol id="i-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol><symbol id="i-unlock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></symbol><symbol id="i-scan" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 8h8"/><path d="M7 12h10"/><path d="M7 16h6"/></symbol><symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol><symbol id="i-reorder" viewBox="0 0 24 24"><path d="M10 6h11"/><path d="M10 12h11"/><path d="M10 18h11"/><path d="M4 6h1v4"/><path d="M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></symbol><symbol id="i-files" viewBox="0 0 24 24"><path d="M15 2H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M15 2v5h5"/><path d="M4 7v13a2 2 0 0 0 2 2h10"/></symbol><symbol id="i-table" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/><path d="M9 3v18"/></symbol><symbol id="i-slides" viewBox="0 0 24 24"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-5 5 5"/></symbol><symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3l1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2z"/></symbol><symbol id="i-send" viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></symbol><symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol><symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></symbol><symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol><symbol id="i-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol><symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol><symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></symbol><symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol><symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol><symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></symbol><symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></symbol><symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.38 3.62a1 1 0 0 1 3 3L7.37 18.64a2 2 0 0 1-.86.5l-2.87.84a.5.5 0 0 1-.62-.62l.84-2.87a2 2 0 0 1 .5-.86z"/></symbol><symbol id="i-signature" viewBox="0 0 24 24"><path d="m21 17-2.16-1.87a.5.5 0 0 0-.84.37v.5a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1c0-2.55-4-3.97-8.5-4a1 1 0 0 0 0 5c4.15 0 4.75-11.3 5.71-13.5a2.5 2.5 0 1 1 3.31 3.28"/><path d="M3 21h18"/></symbol><symbol id="i-highlighter" viewBox="0 0 24 24"><path d="m9 11-6 6v3h9l3-3"/><path d="m22 12-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/></symbol><symbol id="i-type" viewBox="0 0 24 24"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></symbol><symbol id="i-note" viewBox="0 0 24 24"><path d="M15.5 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5z"/><path d="M15 3v6h6"/></symbol><symbol id="i-form" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h4"/><path d="M7 14h10"/><rect x="14" y="7.5" width="3" height="3" rx=".5"/></symbol><symbol id="i-redact" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 10h10v4H7z"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol><symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol><symbol id="i-percent" viewBox="0 0 24 24"><path d="M19 5 5 19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></symbol><symbol id="i-eyeoff" viewBox="0 0 24 24"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.53 13.53 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><path d="m2 2 20 20"/></symbol><symbol id="i-card" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></symbol><symbol id="i-receipt" viewBox="0 0 24 24"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></symbol><symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C10 3 12 8 12 8s2-5 4.5-5a2.5 2.5 0 0 1 0 5"/></symbol><symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></symbol><symbol id="i-languages" viewBox="0 0 24 24"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></symbol><symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 2 10 5-10 5L2 7z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></symbol><symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol><symbol id="i-phone" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></symbol></svg>
+
+
+<a class="site-skip" href="#main">Skip to content</a>
+<header class="site-header">
+  <div class="site-container site-header-row">
+    <a class="site-header-logo" href="home.html" aria-label="DocMaster home">
+      <img class="site-logo-light" src="../../../../public/brand/docmaster-logo.svg" alt="DocMaster" width="150" height="28">
+      <img class="site-logo-dark" src="../../../../public/brand/docmaster-logo-dark.svg" alt="DocMaster" width="150" height="28">
+    </a>
+    <nav class="site-nav" aria-label="Main">
+      <div class="site-nav-item">
+        <button class="site-nav-link" aria-expanded="false" aria-controls="site-mega-tools"><span data-en="Tools" data-uz="Vositalar" data-ru="Инструменты">Tools</span><svg class="site-icon" aria-hidden="true"><use href="#i-down"/></svg></button>
+        <div class="site-mega" id="site-mega-tools"><div><h3>Organize pages</h3><ul><li><a href="tool.html"><svg class="site-icon" aria-hidden="true"><use href="#i-merge"/></svg>Merge PDF</a></li><li><a href="tool.html"><svg class="site-icon" aria-hidden="true"><use href="#i-split"/></svg>Split PDF</a></li><li><a href="tool.html"><svg class="site-icon" aria-hidden="true"><use href="#i-files"/></svg>Extract pages</a></li><li><a href="tool.html"><svg class="site-icon" aria-hidden="true"><use href="#i-trash"/></svg>Delete pages</a></li><li><a href="tool.html"><svg class="site-icon" aria-hidden="true"><use href="#i-reorder"/></svg>Reorder pages</a></li><li><a href="tool.html"><svg class="site-icon" aria-hidden="true"><use href="#i-rotate"/></svg>Rotate PDF</a></li></ul></div><div><h3>Convert and compress</h3><ul><li><a href="tool.html"><svg class="site-icon" aria-hidden="true"><use href="#i-compress"/></svg>Compress PDF</a></li><li><a href="tool.html"><svg class="site-icon" aria-hidden="true"><use href="#i-image"/></svg>JPG to PDF</a></li><li><a href="tool.html"><svg class="site-icon" aria-hidden="true"><use href="#i-word"/></svg>Word to PDF</a></li><li><a href="tool.html"><svg class="site-icon" aria-hidden="true"><use href="#i-slides"/></svg>PowerPoint to PDF</a></li><li><a href="tool.html"><svg class="site-icon" aria-hidden="true"><use href="#i-image"/></svg>PDF to JPG</a></li><li><a href="tool.html"><svg class="site-icon" aria-hidden="true"><use href="#i-word"/></svg>PDF to Word</a></li><li><a href="tool.html"><svg class="site-icon" aria-hidden="true"><use href="#i-table"/></svg>PDF to Excel</a></li></ul></div><div><h3>Text, security and signing</h3><ul><li><a href="tool.html"><svg class="site-icon" aria-hidden="true"><use href="#i-scan"/></svg>OCR PDF</a></li><li><a href="tool.html"><svg class="site-icon" aria-hidden="true"><use href="#i-search"/></svg>Searchable PDF</a></li><li><a href="tool.html"><svg class="site-icon" aria-hidden="true"><use href="#i-lock"/></svg>Protect PDF</a></li><li><a href="tool.html"><svg class="site-icon" aria-hidden="true"><use href="#i-unlock"/></svg>Unlock PDF</a></li><li><a href="tool.html"><svg class="site-icon" aria-hidden="true"><use href="#i-signature"/></svg>Sign PDF</a></li><li><a href="tool.html"><svg class="site-icon" aria-hidden="true"><use href="#i-form"/></svg>Fill PDF form</a></li></ul></div><div><h3>Edit</h3><ul><li><a href="#"><svg class="site-icon" aria-hidden="true"><use href="#i-edit"/></svg>PDF editor</a></li><li><a href="tool.html"><svg class="site-icon" aria-hidden="true"><use href="#i-signature"/></svg>Sign PDF</a></li><li><a href="tool.html"><svg class="site-icon" aria-hidden="true"><use href="#i-form"/></svg>Fill PDF form</a></li></ul></div><div class="site-mega-foot"><span>Web: up to 200 MB and 1000 pages per task. Telegram bot: 20 MB per file.</span><a class="site-link-arrow" href="#">All tools<svg class="site-icon is-sm" aria-hidden="true"><use href="#i-right"/></svg></a></div></div>
+      </div>
+      <div class="site-nav-item"><a class="site-nav-link" href="#"><span data-en="PDF editor" data-uz="PDF muharriri" data-ru="PDF-редактор">PDF editor</span></a></div>
+      <div class="site-nav-item">
+        <button class="site-nav-link" aria-expanded="false" aria-controls="site-mega-ai">AI<svg class="site-icon" aria-hidden="true"><use href="#i-down"/></svg></button>
+        <div class="site-mega is-small" id="site-mega-ai"><ul><li><a href="ai-service.html"><svg class="site-icon" aria-hidden="true"><use href="#i-file"/></svg><div>AI documents<span>A PDF on your topic, up to 35 pages</span></div></a></li><li><a href="ai-service.html"><svg class="site-icon" aria-hidden="true"><use href="#i-slides"/></svg><div>AI slides<span>Editable PowerPoint, up to 60 slides</span></div></a></li><li><a href="ai-service.html"><svg class="site-icon" aria-hidden="true"><use href="#i-user"/></svg><div>AI CV<span>50 templates, from a message or old CV</span></div></a></li><li><a href="ai-service.html"><svg class="site-icon" aria-hidden="true"><use href="#i-note"/></svg><div>Prompt guide<span>How to ask for a good result</span></div></a></li></ul></div>
+      </div>
+      <div class="site-nav-item"><a class="site-nav-link" href="pricing.html"><span data-en="Pricing" data-uz="Narxlar" data-ru="Тарифы">Pricing</span></a></div>
+      <div class="site-nav-item"><a class="site-nav-link" href="#"><span data-en="Telegram bot" data-uz="Telegram bot" data-ru="Telegram-бот">Telegram bot</span></a></div>
+    </nav>
+    <div class="site-header-end">
+      <button class="site-lang" aria-label="Language: English"><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-globe"/></svg><span data-en="English" data-uz="O‘zbekcha" data-ru="Русский">English</span><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-down"/></svg></button>
+      <a class="site-btn is-ghost is-sm site-signin" href="#"><span data-en="Sign in" data-uz="Kirish" data-ru="Войти">Sign in</span></a>
+      <a class="site-btn is-primary is-sm site-header-cta" href="#"><span class="site-cta-long" data-en="Start free" data-uz="Bepul boshlash" data-ru="Начать бесплатно">Start free</span><span class="site-cta-short" data-en="Start" data-uz="Boshlash" data-ru="Начать">Start</span></a>
+      <button class="site-burger" aria-label="Menu" aria-expanded="false" aria-controls="site-mobile-menu" onclick="siteMenu(this)"><svg class="site-icon" aria-hidden="true"><use href="#i-menu"/></svg></button>
+    </div>
+  </div>
+</header>
+<div class="site-mobile-menu" id="site-mobile-menu">
+  <details open><summary><span data-en="Tools" data-uz="Vositalar" data-ru="Инструменты">Tools</span><svg class="site-icon" aria-hidden="true"><use href="#i-down"/></svg></summary>
+    <ul><li><a href="tool.html">Merge PDF</a></li><li><a href="tool.html">Split PDF</a></li><li><a href="tool.html">Extract pages</a></li><li><a href="tool.html">Delete pages</a></li><li><a href="tool.html">Reorder pages</a></li><li><a href="tool.html">Rotate PDF</a></li><li><a href="tool.html">Compress PDF</a></li><li><a href="tool.html">JPG to PDF</a></li><li><a href="tool.html">Word to PDF</a></li><li><a href="tool.html">PowerPoint to PDF</a></li><li><a href="tool.html">PDF to JPG</a></li><li><a href="tool.html">PDF to Word</a></li><li><a href="tool.html">PDF to Excel</a></li><li><a href="tool.html">OCR PDF</a></li><li><a href="tool.html">Searchable PDF</a></li><li><a href="tool.html">Protect PDF</a></li><li><a href="tool.html">Unlock PDF</a></li><li><a href="tool.html">Sign PDF</a></li><li><a href="tool.html">Fill PDF form</a></li><li><a href="#"><b>All tools</b></a></li></ul>
+  </details>
+  <a href="#"><span data-en="PDF editor" data-uz="PDF muharriri" data-ru="PDF-редактор">PDF editor</span><svg class="site-icon" aria-hidden="true"><use href="#i-chev"/></svg></a>
+  <details><summary>AI<svg class="site-icon" aria-hidden="true"><use href="#i-down"/></svg></summary><ul><li><a href="ai-service.html">AI documents</a></li><li><a href="ai-service.html">AI slides</a></li><li><a href="ai-service.html">AI CV</a></li><li><a href="#">Prompt guide</a></li></ul></details>
+  <a href="pricing.html"><span data-en="Pricing" data-uz="Narxlar" data-ru="Тарифы">Pricing</span><svg class="site-icon" aria-hidden="true"><use href="#i-chev"/></svg></a>
+  <a href="#"><span data-en="Telegram bot" data-uz="Telegram bot" data-ru="Telegram-бот">Telegram bot</span><svg class="site-icon" aria-hidden="true"><use href="#i-chev"/></svg></a>
+  <div class="site-mobile-menu-end">
+    <div class="site-mobile-menu-langs" role="group" aria-label="Language"><a href="#">O‘zbekcha</a><a href="#">Русский</a><a href="#" aria-current="true">English</a></div>
+    <a class="site-btn is-secondary" href="#"><span data-en="Sign in" data-uz="Kirish" data-ru="Войти">Sign in</span></a>
+  </div>
+</div>
+<main id="main">
+
+<section class="site-hero">
+  <div class="site-container site-hero-grid">
+    <div class="site-hero-copy">
+      <h1 class="site-h1" data-en="PDF tools, an editor and AI documents in one place" data-uz="PDF vositalari, muharrir va AI hujjatlar bir joyda" data-ru="PDF‑инструменты, редактор и AI‑документы в одном месте">PDF tools, an editor and AI documents in one place</h1>
+      <p class="site-lead" data-en="Merge, compress and convert files, edit PDFs, and create documents, slides and CVs with AI. In your browser or in Telegram, in Uzbek, Russian or English." data-uz="Fayllarni birlashtiring, siqing va aylantiring, PDF’ni tahrirlang, AI yordamida hujjat, taqdimot va rezyume yarating. Brauzerda yoki Telegramda, o‘zbek, rus yoki ingliz tilida." data-ru="Объединяйте, сжимайте и конвертируйте файлы, редактируйте PDF, создавайте документы, презентации и резюме с AI. В браузере или в Telegram, на узбекском, русском или английском.">Merge, compress and convert files, edit PDFs, and create documents, slides and CVs with AI. In your browser or in Telegram, in Uzbek, Russian or English.</p>
+      <div class="site-actions">
+        <a class="site-btn is-primary is-lg" href="#"><span data-en="Start free" data-uz="Bepul boshlash" data-ru="Начать бесплатно">Start free</span></a>
+        <a class="site-btn is-secondary is-lg" href="#"><svg class="site-icon" aria-hidden="true"><use href="#i-send"/></svg><span data-en="Open in Telegram" data-uz="Telegramda ochish" data-ru="Открыть в Telegram">Open in Telegram</span></a>
+      </div>
+      <div class="site-hero-note">
+        <span class="site-chip"><svg class="site-icon" aria-hidden="true"><use href="#i-check"/></svg><span data-en="No install" data-uz="O‘rnatish shart emas" data-ru="Без установки">No install</span></span>
+        <span class="site-chip"><svg class="site-icon" aria-hidden="true"><use href="#i-clock"/></svg><span data-en="Files deleted after 24 hours" data-uz="Fayllar 24 soatdan keyin o‘chiriladi" data-ru="Файлы удаляются через 24 часа">Files deleted after 24 hours</span></span>
+      </div>
+    </div>
+    <div class="site-vignette" aria-hidden="true">
+      <div class="site-doc site-sheet">
+        <p class="site-doc-title">Iqlim o‘zgarishi va qishloq xo‘jaligi</p>
+        <div class="site-doc-meta">Mustaqil ish, 12 bet, O‘zbekcha</div>
+        <div class="site-doc-line"></div><div class="site-doc-line"></div><div class="site-doc-line is-s"></div><div class="site-doc-line"></div><div class="site-doc-line"></div><div class="site-doc-line is-h"></div><div class="site-doc-line"></div><div class="site-doc-line"></div><div class="site-doc-line is-s"></div><div class="site-doc-line"></div><div class="site-doc-line"></div><div class="site-doc-line is-s"></div><div class="site-doc-line is-h"></div><div class="site-doc-line"></div><div class="site-doc-line"></div><div class="site-doc-line is-s"></div><div class="site-doc-line"></div>
+      </div>
+      <div class="site-task site-panel">
+        <div class="site-task-head"><span class="site-tool-ico"><svg class="site-icon" aria-hidden="true"><use href="#i-merge"/></svg></span>Merge PDF</div>
+        <div class="site-filerow"><svg class="site-icon" aria-hidden="true"><use href="#i-file"/></svg><span>shartnoma-2026.pdf</span><small>2.4 MB</small></div>
+        <div class="site-filerow"><svg class="site-icon" aria-hidden="true"><use href="#i-file"/></svg><span>ilova-1-texnik-topshiriq.pdf</span><small>860 KB</small></div>
+        <div class="site-task-result">
+          <div><strong>shartnoma-toliq.pdf</strong><small><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-clock"/></svg>Deleted in 23 h 58 min</small></div>
+          <span class="site-btn is-primary is-sm"><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-download"/></svg>Download</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="site-section" aria-labelledby="tools-h">
+  <div class="site-container">
+    <div class="site-section-head"><div><h2 class="site-h2" data-en="PDF tools for everyday tasks" data-uz="Har kungi ishlar uchun PDF vositalari" data-ru="PDF-инструменты на каждый день" id="tools-h">PDF tools for everyday tasks</h2><p>Open a tool, add your files, download the result. Nineteen tools, all in one account.</p></div><a class="site-link-arrow" href="#">All tools<svg class="site-icon is-sm" aria-hidden="true"><use href="#i-right"/></svg></a></div>
+    <div class="site-toolgroups"><div class="site-toolgroup"><h3>Organize pages</h3><ul><li><a class="site-toollink" href="tool.html"><span class="site-tool-ico"><svg class="site-icon" aria-hidden="true"><use href="#i-merge"/></svg></span><span><b>Merge PDF</b><span>Combine files into one</span></span><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-chev"/></svg></a></li><li><a class="site-toollink" href="tool.html"><span class="site-tool-ico"><svg class="site-icon" aria-hidden="true"><use href="#i-split"/></svg></span><span><b>Split PDF</b><span>Cut one file into several</span></span><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-chev"/></svg></a></li><li><a class="site-toollink" href="tool.html"><span class="site-tool-ico"><svg class="site-icon" aria-hidden="true"><use href="#i-files"/></svg></span><span><b>Extract pages</b><span>Save chosen pages as a new PDF</span></span><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-chev"/></svg></a></li><li><a class="site-toollink" href="tool.html"><span class="site-tool-ico"><svg class="site-icon" aria-hidden="true"><use href="#i-trash"/></svg></span><span><b>Delete pages</b><span>Remove pages you don’t need</span></span><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-chev"/></svg></a></li><li><a class="site-toollink" href="tool.html"><span class="site-tool-ico"><svg class="site-icon" aria-hidden="true"><use href="#i-reorder"/></svg></span><span><b>Reorder pages</b><span>Put pages in the right order</span></span><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-chev"/></svg></a></li><li><a class="site-toollink" href="tool.html"><span class="site-tool-ico"><svg class="site-icon" aria-hidden="true"><use href="#i-rotate"/></svg></span><span><b>Rotate PDF</b><span>Turn sideways pages upright</span></span><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-chev"/></svg></a></li></ul></div><div class="site-toolgroup"><h3>Convert and compress</h3><ul><li><a class="site-toollink" href="tool.html"><span class="site-tool-ico"><svg class="site-icon" aria-hidden="true"><use href="#i-compress"/></svg></span><span><b>Compress PDF</b><span>Make a file smaller to send</span></span><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-chev"/></svg></a></li><li><a class="site-toollink" href="tool.html"><span class="site-tool-ico"><svg class="site-icon" aria-hidden="true"><use href="#i-image"/></svg></span><span><b>JPG to PDF</b><span>Photos and scans into one PDF</span></span><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-chev"/></svg></a></li><li><a class="site-toollink" href="tool.html"><span class="site-tool-ico"><svg class="site-icon" aria-hidden="true"><use href="#i-word"/></svg></span><span><b>Word to PDF</b><span>DOC and DOCX to PDF</span></span><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-chev"/></svg></a></li><li><a class="site-toollink" href="tool.html"><span class="site-tool-ico"><svg class="site-icon" aria-hidden="true"><use href="#i-slides"/></svg></span><span><b>PowerPoint to PDF</b><span>PPT and PPTX to PDF</span></span><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-chev"/></svg></a></li><li><a class="site-toollink" href="tool.html"><span class="site-tool-ico"><svg class="site-icon" aria-hidden="true"><use href="#i-image"/></svg></span><span><b>PDF to JPG</b><span>Every page as an image</span></span><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-chev"/></svg></a></li><li><a class="site-toollink" href="tool.html"><span class="site-tool-ico"><svg class="site-icon" aria-hidden="true"><use href="#i-word"/></svg></span><span><b>PDF to Word</b><span>An editable DOCX</span></span><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-chev"/></svg></a></li><li><a class="site-toollink" href="tool.html"><span class="site-tool-ico"><svg class="site-icon" aria-hidden="true"><use href="#i-table"/></svg></span><span><b>PDF to Excel</b><span>Tables into XLSX</span></span><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-chev"/></svg></a></li></ul></div><div class="site-toolgroup"><h3>Text, security and signing</h3><ul><li><a class="site-toollink" href="tool.html"><span class="site-tool-ico"><svg class="site-icon" aria-hidden="true"><use href="#i-scan"/></svg></span><span><b>OCR PDF</b><span>Read text from scans</span></span><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-chev"/></svg></a></li><li><a class="site-toollink" href="tool.html"><span class="site-tool-ico"><svg class="site-icon" aria-hidden="true"><use href="#i-search"/></svg></span><span><b>Searchable PDF</b><span>Make a scan searchable</span></span><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-chev"/></svg></a></li><li><a class="site-toollink" href="tool.html"><span class="site-tool-ico"><svg class="site-icon" aria-hidden="true"><use href="#i-lock"/></svg></span><span><b>Protect PDF</b><span>Add a password</span></span><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-chev"/></svg></a></li><li><a class="site-toollink" href="tool.html"><span class="site-tool-ico"><svg class="site-icon" aria-hidden="true"><use href="#i-unlock"/></svg></span><span><b>Unlock PDF</b><span>Remove a password you know</span></span><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-chev"/></svg></a></li><li><a class="site-toollink" href="tool.html"><span class="site-tool-ico"><svg class="site-icon" aria-hidden="true"><use href="#i-signature"/></svg></span><span><b>Sign PDF</b><span>Place your signature image</span></span><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-chev"/></svg></a></li><li><a class="site-toollink" href="tool.html"><span class="site-tool-ico"><svg class="site-icon" aria-hidden="true"><use href="#i-form"/></svg></span><span><b>Fill PDF form</b><span>Type into form fields</span></span><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-chev"/></svg></a></li></ul></div></div>
+  </div>
+</section>
+
+<section class="site-section is-band" aria-labelledby="ai-h">
+  <div class="site-container">
+    <div class="site-section-head"><div><h2 class="site-h2" data-en="Create with AI" data-uz="AI bilan yarating" data-ru="Создавайте с AI" id="ai-h">Create with AI</h2><p>Describe what you need. DocMaster writes it in Uzbek, Russian or English, and you can ask for changes afterwards.</p></div><a class="site-link-arrow" href="#">About AI services<svg class="site-icon is-sm" aria-hidden="true"><use href="#i-right"/></svg></a></div>
+    <div class="site-ai-grid">
+      <a class="site-ai-card" href="ai-service.html">
+        <div class="site-ai-stage" aria-hidden="true">
+          <div class="site-mini-doc site-sheet"><p class="site-doc-title">Raqamli iqtisodiyot</p><div class="site-doc-line"></div><div class="site-doc-line"></div><div class="site-doc-line is-s"></div><div class="site-doc-line is-h"></div><div class="site-doc-line"></div><div class="site-doc-line"></div><div class="site-doc-line is-s"></div><div class="site-doc-line"></div><div class="site-doc-line"></div><div class="site-doc-line is-s"></div><div class="site-doc-line"></div></div>
+        </div>
+        <div class="site-ai-body">
+          <h3 class="site-h3">AI documents</h3>
+          <p>A PDF on your topic: essays, reports, coursework.</p>
+          <div class="site-ai-facts"><span class="site-chip">Up to 35 pages</span><span class="site-chip">uz, ru, en</span></div>
+          <span class="site-link-arrow">Create a document<svg class="site-icon is-sm" aria-hidden="true"><use href="#i-right"/></svg></span>
+        </div>
+      </a>
+      <a class="site-ai-card" href="ai-service.html">
+        <div class="site-ai-stage" aria-hidden="true">
+          <div class="site-mini-slide is-back"><b style="color:#2a2118">Bozor tahlili</b><i style="background:#2a2118;opacity:.3"></i></div>
+          <div class="site-mini-slide is-mid"><b>Yashil energiya</b><i></i></div>
+          <div class="site-mini-slide"><b>Startap uchun biznes-reja</b><i></i></div>
+        </div>
+        <div class="site-ai-body">
+          <h3 class="site-h3">AI slides</h3>
+          <p>A presentation you can edit, as a PowerPoint file.</p>
+          <div class="site-ai-facts"><span class="site-chip">Up to 60 slides</span><span class="site-chip">110 designs</span></div>
+          <span class="site-link-arrow">Make a presentation<svg class="site-icon is-sm" aria-hidden="true"><use href="#i-right"/></svg></span>
+        </div>
+      </a>
+      <a class="site-ai-card" href="ai-service.html">
+        <div class="site-ai-stage" aria-hidden="true">
+          <div class="site-mini-cv site-sheet"><div><span></span><div class="site-doc-line"></div><div class="site-doc-line is-s"></div><div class="site-doc-line"></div></div><div><div class="site-doc-line is-h"></div><div class="site-doc-line"></div><div class="site-doc-line"></div><div class="site-doc-line is-s"></div><div class="site-doc-line"></div><div class="site-doc-line is-h"></div><div class="site-doc-line"></div><div class="site-doc-line"></div><div class="site-doc-line is-s"></div><div class="site-doc-line"></div></div></div>
+        </div>
+        <div class="site-ai-body">
+          <h3 class="site-h3">AI CV</h3>
+          <p>From a short message, a LinkedIn PDF or your old CV.</p>
+          <div class="site-ai-facts"><span class="site-chip">50 templates</span><span class="site-chip">uz, ru, en</span></div>
+          <span class="site-link-arrow">Build a CV<svg class="site-icon is-sm" aria-hidden="true"><use href="#i-right"/></svg></span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="site-section" aria-labelledby="ed-h">
+  <div class="site-container site-split">
+    <div class="site-split-copy">
+      <h2 class="site-h2" data-en="Edit the PDF itself" data-uz="PDF’ning o‘zini tahrirlang" data-ru="Редактируйте сам PDF" id="ed-h">Edit the PDF itself</h2>
+      <p class="site-lead">Change the words already on the page, add your own, sign and send. In the browser or as a Telegram Mini App.</p>
+      <ul class="site-caps">
+        <li><svg class="site-icon" aria-hidden="true"><use href="#i-type"/></svg>Edit existing text</li><li><svg class="site-icon" aria-hidden="true"><use href="#i-edit"/></svg>Add text</li>
+        <li><svg class="site-icon" aria-hidden="true"><use href="#i-highlighter"/></svg>Highlight and annotate</li><li><svg class="site-icon" aria-hidden="true"><use href="#i-form"/></svg>Fill forms</li>
+        <li><svg class="site-icon" aria-hidden="true"><use href="#i-signature"/></svg>Place a signature image</li><li><svg class="site-icon" aria-hidden="true"><use href="#i-image"/></svg>Insert or replace images</li>
+        <li><svg class="site-icon" aria-hidden="true"><use href="#i-redact"/></svg>Redact private details</li><li><svg class="site-icon" aria-hidden="true"><use href="#i-send"/></svg>Works inside Telegram</li>
+      </ul>
+      <a class="site-btn is-secondary" href="#">Open the PDF editor</a>
+    </div>
+    <div class="site-editor site-panel" aria-hidden="true">
+      <div class="site-editor-bar"><span><svg class="site-icon" aria-hidden="true"><use href="#i-type"/></svg></span><span class="is-on"><svg class="site-icon" aria-hidden="true"><use href="#i-highlighter"/></svg></span><span><svg class="site-icon" aria-hidden="true"><use href="#i-edit"/></svg></span><span><svg class="site-icon" aria-hidden="true"><use href="#i-signature"/></svg></span><span><svg class="site-icon" aria-hidden="true"><use href="#i-image"/></svg></span><span><svg class="site-icon" aria-hidden="true"><use href="#i-redact"/></svg></span><span><svg class="site-icon" aria-hidden="true"><use href="#i-form"/></svg></span></div>
+      <div class="site-editor-canvas">
+        <div class="site-editor-page site-sheet">
+          <p><strong style="color:var(--ink)">Ijara shartnomasi № 14</strong></p>
+          <p>Ijarachi binoni <mark>2026-yil 1-dekabrdan</mark> boshlab foydalanishga oladi. Oylik to‘lov har oyning 5-sanasigacha amalga oshiriladi.</p>
+          <p>Tomonlar shartnoma shartlarini o‘qib chiqdilar va rozilik bildirdilar.</p>
+          <div class="site-editor-sign"><span>Ijarachi imzosi</span><svg viewBox="0 0 120 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 28c8-14 14-20 18-16s-6 18 0 16 10-18 16-14-4 14 2 12 8-10 14-8 4 8 10 6 10-6 16-4 10 2 20 0"/></svg></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="site-section is-band" aria-labelledby="tg-h">
+  <div class="site-container site-split is-reverse">
+    <div class="site-split-copy">
+      <h2 class="site-h2" data-en="The same account on the web and in Telegram" data-uz="Veb va Telegramda bitta hisob" data-ru="Один аккаунт на сайте и в Telegram" id="tg-h">The same account on the web and in Telegram</h2>
+      <p class="site-lead">Start a task in the bot on your phone and find it on the web later. Your plan and weekly limits are shared.</p>
+      <div class="site-actions"><a class="site-btn is-primary" href="#"><svg class="site-icon" aria-hidden="true"><use href="#i-send"/></svg>Open the bot</a><a class="site-link-arrow" href="#">How the bot works<svg class="site-icon is-sm" aria-hidden="true"><use href="#i-right"/></svg></a></div>
+    </div>
+    <table class="site-compare">
+      <caption class="site-visually-hidden">Web and Telegram compared</caption>
+      <thead><tr><th scope="col"><span class="site-visually-hidden">Feature</span></th><th scope="col">On the web</th><th scope="col">In Telegram</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">File size</th><td data-label="Web">200 MB and 1000 pages per task</td><td data-label="Telegram">20 MB per file</td></tr>
+        <tr><th scope="row">PDF editor</th><td data-label="Web">In the browser</td><td data-label="Telegram">As a Mini App</td></tr>
+        <tr><th scope="row">AI documents, slides, CV</th><td data-label="Web" class="is-yes">Yes</td><td data-label="Telegram" class="is-yes">Yes</td></tr>
+        <tr><th scope="row">Account and plan</th><td data-label="Web">Shared</td><td data-label="Telegram">Shared</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="site-section" aria-labelledby="how-h">
+  <div class="site-container">
+    <div class="site-section-head"><div><h2 class="site-h2" data-en="How it works" data-uz="Qanday ishlaydi" data-ru="Как это работает" id="how-h">How it works</h2></div></div>
+    <ol class="site-steps"><li><h3 class="site-h3">Upload or describe</h3><p>Add a file, or tell DocMaster the topic of the document you need.</p></li><li><h3 class="site-h3">DocMaster does the work</h3><p>Files are processed on our servers. Nothing to install on your phone or computer.</p></li><li><h3 class="site-h3">Download the result</h3><p>Save it, or get it in the Telegram chat. The files are deleted after 24 hours.</p></li></ol>
+  </div>
+</section>
+
+<section class="site-section is-band" aria-labelledby="priv-h">
+  <div class="site-container">
+    <div class="site-section-head"><div><h2 class="site-h2" data-en="Your files don’t stay with us" data-uz="Fayllaringiz bizda qolmaydi" data-ru="Ваши файлы у нас не остаются" id="priv-h">Your files don’t stay with us</h2><p>What happens to a file from the moment you upload it.</p></div><a class="site-link-arrow" href="#">Privacy policy<svg class="site-icon is-sm" aria-hidden="true"><use href="#i-right"/></svg></a></div>
+    <ol class="site-life">
+      <li><span class="site-life-dot"><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-upload"/></svg></span><b>You upload</b><p>Only you can open the file, from your account.</p><span class="site-life-time">0 h</span></li>
+      <li><span class="site-life-dot"><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-download"/></svg></span><b>You download</b><p>The result waits in your history.</p><span class="site-life-time">Any time within 24 h</span></li>
+      <li><span class="site-life-dot"><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-trash"/></svg></span><b>We delete both</b><p>The upload and the result are removed from storage.</p><span class="site-life-time">24 h</span></li>
+    </ol>
+    <dl class="site-facts">
+      <div><dt><svg class="site-icon" aria-hidden="true"><use href="#i-eyeoff"/></svg>No analytics</dt><dd>No ad trackers or analytics scripts. Cookies only keep you signed in and remember your language.</dd></div>
+      <div><dt><svg class="site-icon" aria-hidden="true"><use href="#i-user"/></svg>Your sign-in</dt><dd>Sign in with Telegram, Google or email. No new password needed if you use Telegram.</dd></div>
+      <div><dt><svg class="site-icon" aria-hidden="true"><use href="#i-sparkle"/></svg>AI requests</dt><dd>Kept for 30 days so we can check quality, then deleted.</dd></div>
+    </dl>
+  </div>
+</section>
+
+<section class="site-section" aria-labelledby="price-h">
+  <div class="site-container">
+    <div class="site-section-head"><div><h2 class="site-h2" data-en="Start free, pay in so‘m when you need more" data-uz="Bepul boshlang, ko‘proq kerak bo‘lsa so‘mda to‘lang" data-ru="Начните бесплатно, платите в сумах, когда нужно больше" id="price-h">Start free, pay in so‘m when you need more</h2><p>Every plan has every feature. Plans differ only in weekly limits. Paid plans last 30 days and don’t renew on their own.</p></div><a class="site-link-arrow" href="#">Compare plans<svg class="site-icon is-sm" aria-hidden="true"><use href="#i-right"/></svg></a></div>
+    <div class="site-plans">
+  <article class="site-plan">
+    <div class="site-plan-name"><h3 class="site-h3">Free</h3></div>
+    <div class="site-plan-price"><strong>0<small>so‘m</small></strong><span>no time limit</span></div>
+    <ul><li><svg class="site-icon" aria-hidden="true"><use href="#i-check"/></svg>5 AI documents a week</li><li><svg class="site-icon" aria-hidden="true"><use href="#i-check"/></svg>15 file tasks a week</li><li><svg class="site-icon" aria-hidden="true"><use href="#i-check"/></svg>3 AI edits per file</li><li class="is-note"><svg class="site-icon" aria-hidden="true"><use href="#i-info"/></svg>Join the DocMaster Telegram channel</li></ul>
+    <a class="site-btn is-secondary is-sm" href="#">Start free</a>
+  </article>
+  <article class="site-plan">
+    <div class="site-plan-name"><h3 class="site-h3">Plus</h3></div>
+    <div class="site-plan-price"><strong>20 000<small>so‘m</small></strong><span>for 30 days</span></div>
+    <ul><li><svg class="site-icon" aria-hidden="true"><use href="#i-check"/></svg>20 AI documents a week</li><li><svg class="site-icon" aria-hidden="true"><use href="#i-check"/></svg>Unlimited file tasks</li><li><svg class="site-icon" aria-hidden="true"><use href="#i-check"/></svg>10 AI edits per file</li><li class="is-note"><svg class="site-icon" aria-hidden="true"><use href="#i-info"/></svg>Join the DocMaster Telegram channel</li></ul>
+    <a class="site-btn is-primary is-sm" href="#">Choose Plus</a>
+  </article>
+  <article class="site-plan">
+    <div class="site-plan-name"><h3 class="site-h3">Premium</h3></div>
+    <div class="site-plan-price"><strong>60 000<small>so‘m</small></strong><span>for 30 days</span></div>
+    <ul><li><svg class="site-icon" aria-hidden="true"><use href="#i-check"/></svg>Unlimited AI documents</li><li><svg class="site-icon" aria-hidden="true"><use href="#i-check"/></svg>Unlimited file tasks</li><li><svg class="site-icon" aria-hidden="true"><use href="#i-check"/></svg>Unlimited AI edits</li><li><svg class="site-icon" aria-hidden="true"><use href="#i-check"/></svg>No channel requirement</li></ul>
+    <a class="site-btn is-secondary is-sm" href="#">Choose Premium</a>
+  </article>
+</div>
+  </div>
+</section>
+
+<section class="site-section" aria-labelledby="faq-h">
+  <div class="site-container site-faq-grid">
+    <div><h2 class="site-h2" id="faq-h">Questions</h2><a class="site-link-arrow" href="#">Help centre<svg class="site-icon is-sm" aria-hidden="true"><use href="#i-right"/></svg></a></div>
+    <div class="site-faq"><details open><summary>Is DocMaster free?<svg class="site-icon" aria-hidden="true"><use href="#i-plus"/></svg></summary><div><p>Yes. The Free plan includes 5 AI documents and 15 file tasks a week, and 3 AI edits per file. Plus and Premium raise the limits.</p></div></details><details><summary>Is it safe to upload my files?<svg class="site-icon" aria-hidden="true"><use href="#i-plus"/></svg></summary><div><p>Uploaded files and results are deleted after 24 hours. There are no analytics or ad trackers. AI requests are kept for 30 days for quality review. The privacy policy has the details.</p></div></details><details><summary>Which languages does it work in?<svg class="site-icon" aria-hidden="true"><use href="#i-plus"/></svg></summary><div><p>The site and the bot work in Uzbek, Russian and English. AI documents, slides and CVs can be written in any of the three.</p></div></details><details><summary>Should I use the bot or the website?<svg class="site-icon" aria-hidden="true"><use href="#i-plus"/></svg></summary><div><p>Either: it is the same account and plan. The bot takes files up to 20 MB. On the web a task can be up to 200 MB and 1000 pages.</p></div></details><details><summary>How do I pay?<svg class="site-icon" aria-hidden="true"><use href="#i-plus"/></svg></summary><div><p>By card transfer from Uzcard, Humo, Visa or Mastercard. Upload the receipt in the app and the plan starts once it is approved.</p></div></details><details><summary>Can I change an AI document after it is made?<svg class="site-icon" aria-hidden="true"><use href="#i-plus"/></svg></summary><div><p>Yes, with AI edits: 3 per file on Free, 10 on Plus, unlimited on Premium.</p></div></details></div>
+  </div>
+</section>
+
+<section class="site-cta">
+  <div class="site-container">
+    <div class="site-cta-band">
+      <span class="site-cta-fold" aria-hidden="true"></span>
+      <div><h2 class="site-h2" data-en="Start with a file or a topic" data-uz="Fayl yoki mavzudan boshlang" data-ru="Начните с файла или темы">Start with a file or a topic</h2><p>Free plan, no card needed. Sign in with Telegram, Google or email.</p></div>
+      <div class="site-actions"><a class="site-btn is-primary is-lg" href="#"><span data-en="Start free" data-uz="Bepul boshlash" data-ru="Начать бесплатно">Start free</span></a><a class="site-btn is-secondary is-lg" href="#"><svg class="site-icon" aria-hidden="true"><use href="#i-send"/></svg>Telegram</a></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="site-footer">
+  <div class="site-container">
+    <div class="site-footer-top">
+      <div class="site-footer-brand">
+        <img class="site-logo-light" src="../../../../public/brand/docmaster-logo.svg" alt="DocMaster" width="150" height="28">
+        <img class="site-logo-dark" src="../../../../public/brand/docmaster-logo-dark.svg" alt="DocMaster" width="150" height="28">
+        <p>PDF tools, a PDF editor and AI documents, on the web and in Telegram. DocMaster was called PDF Master until 2026.</p>
+        <div class="site-actions"><a class="site-btn is-secondary is-sm" href="#"><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-send"/></svg>Telegram bot</a><a class="site-btn is-ghost is-sm" href="#">Channel</a></div>
+      </div>
+      <div><h2>Popular tools</h2><ul><li><a href="#">Merge PDF</a></li><li><a href="#">Compress PDF</a></li><li><a href="#">Split PDF</a></li><li><a href="#">JPG to PDF</a></li><li><a href="#">Word to PDF</a></li><li><a href="#">PDF to Word</a></li><li><a href="#">PowerPoint to PDF</a></li><li><a href="#">OCR PDF</a></li><li><a href="#">All tools</a></li></ul></div>
+      <div><h2>Product</h2><ul><li><a href="#">PDF editor</a></li><li><a href="#">AI documents</a></li><li><a href="#">AI slides</a></li><li><a href="#">AI CV</a></li><li><a href="#">Pricing</a></li><li><a href="#">Telegram bot</a></li><li><a href="#">Invite friends</a></li></ul></div>
+      <div><h2>Help</h2><ul><li><a href="#">Help centre</a></li><li><a href="#">Prompt guide</a></li><li><a href="#">Company and contacts</a></li></ul></div>
+      <div><h2>Legal</h2><ul><li><a href="#">Public offer</a></li><li><a href="#">Privacy policy</a></li><li><a href="#">Refund policy</a></li></ul></div>
+    </div>
+    <section class="site-requisites site-sheet" aria-labelledby="site-req-Comp">
+      <h2 id="site-req-Comp">Company details</h2>
+      <dl>
+        <div><dt>Seller</dt><dd>“ARCANIUM TECHNOLOGIES” MCHJ</dd></div>
+        <div><dt>STIR (TIN)</dt><dd>313458514</dd></div>
+        <div><dt>Legal address</dt><dd>Toshkent sh., Yunusobod t., <span class="site-placeholder">street, building</span></dd></div>
+        <div><dt>Support</dt><dd><span class="site-placeholder">phone</span> <span class="site-placeholder">email</span> <span class="site-placeholder">@support</span></dd></div>
+      </dl>
+    </section>
+    <div class="site-footer-bottom">
+      <span>© 2026 “ARCANIUM TECHNOLOGIES” MCHJ</span>
+      <div class="site-cards" aria-label="Accepted cards"><span>Uzcard</span><span>Humo</span><span>Visa</span><span>Mastercard</span></div>
+      <nav class="site-footer-langs" aria-label="Language"><a href="#">O‘zbekcha</a><a href="#">Русский</a><a href="#" aria-current="true">English</a></nav>
+    </div>
+  </div>
+</footer>
+<div class="site-mockbar" aria-label="Mockup controls">
+  <button class="site-theme-toggle" type="button" onclick="siteTheme()"><svg class="site-icon is-sm" aria-hidden="true"><use href="#i-moon"/></svg>Theme</button>
+  <div class="site-mock-langs" role="group" aria-label="Mockup language"><button type="button" onclick="siteLang('en')" aria-pressed="true">EN</button><button type="button" onclick="siteLang('uz')">UZ</button><button type="button" onclick="siteLang('ru')">RU</button></div>
+</div>
+<script>
+/* Mockup-only helpers: theme, language swap, menus. ?theme=dark&lang=uz&menu=tools&shot=1 */
+function siteTheme(v) {
+  var r = document.documentElement
+  r.setAttribute('data-theme', v || (r.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'))
+}
+function siteLang(l) {
+  document.documentElement.lang = l
+  document.querySelectorAll('[data-en]').forEach(function (el) { el.textContent = el.getAttribute('data-' + l) || el.getAttribute('data-en') })
+  document.querySelectorAll('.site-mock-langs button').forEach(function (b) { b.setAttribute('aria-pressed', String(b.textContent.toLowerCase() === l)) })
+}
+function siteMenu(btn) {
+  var m = document.getElementById('site-mobile-menu'), open = !m.classList.contains('is-open')
+  m.classList.toggle('is-open', open); btn.setAttribute('aria-expanded', String(open))
+}
+document.querySelectorAll('.site-nav-item > button').forEach(function (b) {
+  b.addEventListener('click', function () {
+    var item = b.parentElement, open = !item.classList.contains('is-open')
+    document.querySelectorAll('.site-nav-item.is-open').forEach(function (i) { i.classList.remove('is-open'); i.firstElementChild.setAttribute('aria-expanded', 'false') })
+    item.classList.toggle('is-open', open); b.setAttribute('aria-expanded', String(open))
+  })
+})
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') document.querySelectorAll('.site-nav-item.is-open').forEach(function (i) { i.classList.remove('is-open'); i.firstElementChild.setAttribute('aria-expanded', 'false'); i.firstElementChild.focus() })
+})
+var q = new URLSearchParams(location.search)
+if (q.get('theme')) siteTheme(q.get('theme'))
+if (q.get('lang')) siteLang(q.get('lang'))
+if (q.get('shot')) document.body.classList.add('site-shot')
+if (q.get('menu') === 'mobile') siteMenu(document.querySelector('.site-burger'))
+else if (q.get('menu')) { var n = document.querySelector('[aria-controls="site-mega-' + q.get('menu') + '"]'); if (n) n.click() }
+</script>
+</body>
+</html>
