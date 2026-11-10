@@ -18,8 +18,9 @@ const ends = computed(() => {
         <s><span class="site-visually-hidden">{{ t('regularPrice') + ' ' }}</span>{{ money(discount.regular) }}</s>
         <b>{{ money(discount.price) }}</b>
         <span class="site-badge">−{{ discount.percent }}%</span>
-        <span>{{ untilLabel(discount) }}</span>
+        <span v-if="!ends">{{ untilLabel(discount) }}</span>
       </p>
+      <p v-if="ends && active.length > 1" class="site-banner-line">{{ ends }}</p>
       <p class="site-banner-short" aria-hidden="true">
         <span v-for="{ plan, discount } in active" :key="plan.id"
           ><b>{{ t(plan.id) }}</b> <span class="site-badge">−{{ discount.percent }}%</span></span

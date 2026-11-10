@@ -48,6 +48,7 @@
 }
 
 :root[data-theme='dark'] {
+  --site-band: #111a29;               /* between --paper #0b111c and --surface #121a27, so bands read as bands */
   --site-mark-blue: #3d91ff;          /* 6.0:1 on --paper #0b111c */
   --site-ink-band: #18233a;            /* = --surface-raised; stays a step above the page */
   --site-on-ink-band: #eef3fa;         /* 14.1:1 */
@@ -685,3 +686,5 @@ html { -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--site-heade
   .site-mobile-menu.is-open { inset: auto 0 0 0; bottom: 0; z-index: 60; }
   html.site-sheet-open { overflow: hidden; }
 }
+/* FAQ questions and answers never end on one lone word. */
+.site-faq summary, .site-faq details > div p { text-wrap: pretty; }

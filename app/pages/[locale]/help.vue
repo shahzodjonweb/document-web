@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { count } = useLocale()
 import { faq as allFaq } from '../../../content/site/faq'
 // The help centre (docs/site/design/pages/help.md): every help question grouped
 // by topic, a search that narrows them, and the ways to reach a person.
@@ -137,8 +138,7 @@ useHead(() => ({
             <a :href="`#topic-${topic.id}`" class="site-help-topic"
               ><span class="site-tool-ico"><AppIcon :name="topic.icon" class="site-icon" /></span
               ><b>{{ topic.title }}</b
-              ><span class="site-help-n" aria-hidden="true">{{ topic.all.length }}</span
-              ><span class="site-visually-hidden">{{ t('siteHelpTopicCount', { count: topic.all.length }) }}</span></a
+              ><span class="site-help-n">{{ count('siteHelpTopicCount', topic.all.length) }}</span></a
             >
           </li>
         </ul>
@@ -213,7 +213,7 @@ useHead(() => ({
           </li>
           <li v-if="company?.email">
             <a :href="`mailto:${company.email}`"
-              ><span class="site-tool-ico"><AppIcon name="send" class="site-icon" /></span
+              ><span class="site-tool-ico"><AppIcon name="mail" class="site-icon" /></span
               ><span><b>{{ t('siteContactEmail') }}</b><small>{{ company.email }}</small><small>{{ t('siteContactEmailHint') }}</small></span
               ><AppIcon name="chevron" class="site-icon is-sm" /></a
             >

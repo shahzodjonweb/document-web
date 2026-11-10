@@ -89,7 +89,7 @@ const legal = [
           </li>
           <li v-if="company?.email">
             <a :href="`mailto:${company.email}`"
-              ><span class="site-tool-ico"><AppIcon name="send" class="site-icon" /></span
+              ><span class="site-tool-ico"><AppIcon name="mail" class="site-icon" /></span
               ><span><b>{{ t('siteContactEmail') }}</b><small>{{ company.email }}</small><small>{{ t('siteContactEmailHint') }}</small></span
               ><AppIcon name="chevron" class="site-icon is-sm"
             /></a>
