@@ -14,6 +14,8 @@ const ai = [
   ['siteTgColAiSlides', 'slides'],
   ['siteTgColAiCv', 'user'],
 ] as const
+// A one- or two-letter word ("в", "и", "a") never ends a heading line.
+const glue = (text: string) => text.replace(/(^|\s)([\p{L}]{1,2}) /gu, '$1$2\u00a0')
 const compare = [
   ['siteCompareRowSize', 'siteCompareSizeWeb', 'siteCompareSizeBot'],
   ['siteCompareRowTools', 'siteCompareToolsWeb', 'siteCompareToolsBot'],
@@ -65,7 +67,7 @@ const compare = [
       <div class="site-container">
         <SiteSectionHead id="tg-what" :title="t('siteTgWhatTitle')" />
         <div class="site-tg-cols">
-          <div class="site-tg-col">
+          <div class="site-tg-col is-tools">
             <h3 class="site-h4"><span class="site-tool-ico"><AppIcon name="tools" class="site-icon" /></span>{{ t('siteTgColToolsTitle') }}</h3>
             <ul>
               <li v-for="item in botTools" :key="item.slug">
@@ -123,13 +125,17 @@ const compare = [
             </ul>
           </div>
         </div>
+        <div class="site-note site-tg-channel" role="note">
+          <AppIcon name="info" class="site-icon" />
+          <p><b>{{ t('siteTgChannelTitle') }}</b>{{ t('siteTgChannelNote') }}</p>
+        </div>
       </div>
     </section>
 
     <section class="site-section is-band" aria-labelledby="tg-account">
       <div class="site-container site-split">
         <div class="site-split-copy">
-          <h2 id="tg-account" class="site-h2">{{ t('siteTgAccountTitle') }}</h2>
+          <h2 id="tg-account" class="site-h2">{{ glue(t('siteTgAccountTitle')) }}</h2>
           <p class="site-lead">{{ t('siteTgAccountBody') }}</p>
           <NuxtLink class="site-btn is-secondary" :to="path('/app')">{{ t('siteNavSignIn') }}</NuxtLink>
         </div>
@@ -146,18 +152,10 @@ const compare = [
             <div class="site-doc-line is-h"></div>
             <div class="site-doc-line is-s"></div>
             <div class="site-doc-line"></div>
+            <div class="site-tg-bubble"></div>
+            <div class="site-tg-bubble is-in"></div>
             <span class="site-tg-device-ico"><AppIcon name="send" class="site-icon" /></span>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="site-section" aria-labelledby="tg-channel">
-      <div class="site-container">
-        <h2 id="tg-channel" class="site-h2 site-tg-channel-title">{{ t('siteTgChannelTitle') }}</h2>
-        <div class="site-note">
-          <AppIcon name="info" class="site-icon" />
-          <p>{{ t('siteTgChannelNote') }}</p>
         </div>
       </div>
     </section>

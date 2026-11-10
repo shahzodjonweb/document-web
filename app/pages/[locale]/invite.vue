@@ -4,6 +4,8 @@
 // the public page shows no counts of anyone's invitations.
 definePageMeta({ layout: 'site' })
 const { t, path, bot } = useSite()
+// A number stays on the line of the word after it ("5 friends", "30 days").
+const glue = (text: string) => text.replace(/(\d) (?=\p{L})/gu, '$1\u00a0')
 </script>
 <template>
   <div class="site-invite">
@@ -11,7 +13,7 @@ const { t, path, bot } = useSite()
     <section class="site-hero" aria-labelledby="invite-title">
       <div class="site-container site-invite-head">
         <h1 id="invite-title" class="site-h1">{{ t('siteInviteTitle') }}</h1>
-        <p class="site-lead">{{ t('siteInviteLead') }}</p>
+        <p class="site-lead">{{ glue(t('siteInviteLead')) }}</p>
         <div class="site-invite-track">
           <ol class="site-invite-ladder" :aria-label="t('siteInviteLadderLabel')">
             <li v-for="n in 4" :key="n">
@@ -26,8 +28,8 @@ const { t, path, bot } = useSite()
           </ol>
         </div>
         <div class="site-invite-notes">
-          <p class="site-note"><AppIcon name="calendar" class="site-icon" /><span>{{ t('siteInviteCapNote') }}</span></p>
-          <p class="site-note"><AppIcon name="info" class="site-icon" /><span>{{ t('siteInviteNotMoney') }}</span></p>
+          <p class="site-note"><AppIcon name="calendar" class="site-icon" /><span>{{ glue(t('siteInviteCapNote')) }}</span></p>
+          <p class="site-note"><AppIcon name="info" class="site-icon" /><span>{{ glue(t('siteInviteNotMoney')) }}</span></p>
         </div>
       </div>
     </section>
