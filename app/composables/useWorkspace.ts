@@ -4,6 +4,22 @@ let profileWrites: Promise<unknown> = Promise.resolve()
 let zoneSent = ''
 /** Refusals because this week's allowance, or a file's AI edits, ran out. */
 export const LIMIT_CODES = ['weekly_ai_limit', 'weekly_file_limit', 'edit_limit']
+/** The features of a `/catalog` answer that a visitor can use now. */
+export function featuresFrom(data: { features?: Omit<Feature, 'category'>[] } | null | undefined): Feature[] {
+  return (data?.features || [])
+    .map((f) => ({ ...f, category: (f as Partial<Feature>).category || '' }) as Feature)
+    .filter((f: Feature) => f.released !== false && f.enabled !== false && f.available !== false)
+}
+/** The plans of a `/plans` answer, as a list whichever shape the platform sent. */
+export function plansFrom(data: { plans?: unknown } | null | undefined): Plan[] {
+  const p = data?.plans
+  if (!p || typeof p !== 'object') return []
+  return Array.isArray(p)
+    ? p
+    : Object.entries(p)
+        .filter(([, v]) => typeof v === 'object')
+        .map(([id, v]) => ({ id, ...(v as any) }))
+}
 export function useWorkspace() {
   const user = useState<User | null>('account', () => null)
   const sessionReady = useState('session-ready', () => false)
@@ -93,9 +109,7 @@ export function useWorkspace() {
       throw e
     }
     if (user.value?.id !== accountId) return
-    features.value = data.features
-      .map((f) => ({ ...f, category: f.category || '' }))
-      .filter((f: Feature) => f.released !== false && f.enabled !== false && f.available !== false)
+    features.value = featuresFrom(data)
   }
   async function loadPlans() {
     let data
@@ -105,12 +119,7 @@ export function useWorkspace() {
       apiError.value = true
       throw e
     }
-    const p = data.plans
-    plans.value = Array.isArray(p)
-      ? p
-      : Object.entries(p)
-          .filter(([, v]) => typeof v === 'object')
-          .map(([id, v]) => ({ id, ...(v as any) }))
+    plans.value = plansFrom(data)
   }
   async function loadAccount() {
     if (!user.value) return

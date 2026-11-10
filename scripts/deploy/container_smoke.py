@@ -31,7 +31,7 @@ with tempfile.TemporaryDirectory() as temp:
         else:
             services=['web','gateway']
         run(compose+['up','-d','--wait','--wait-timeout','180',*services],env=env)
-        paths=['/en/app'] if args.component=='web' else ['/api/v1/health','/api/v1/plans','/ops/login','/static/ops/main.css']
+        paths=['/en/app','/en','/ru/pricing'] if args.component=='web' else ['/api/v1/health','/api/v1/plans','/ops/login','/static/ops/main.css']
         for path in paths:
             run(compose+['exec','-T','gateway','wget','-q','-O','/dev/null','http://127.0.0.1:8080'+path],env=env)
         if args.component=='platform':

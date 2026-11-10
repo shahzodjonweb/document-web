@@ -78,7 +78,7 @@ const initial = computed(() => (user.value?.display_name || 'P').slice(0, 1).toU
 const framed = computed(() => isApp.value && (!!user.value || !sessionReady.value || miniAppBusy.value))
 // A document on a phone, or inside Telegram, has the whole screen and scrolls only its pages.
 const bare = computed(() => framed.value && editorFrame.bare.value)
-watch(bare, (on) => document.documentElement.classList.toggle('editor-bare', on), { immediate: true })
+watch(bare, (on) => document.documentElement.classList.toggle('editor-bare', on), { immediate: import.meta.client })
 // The frame shows no plans, so a deep link does not wait on them, but the app's menus do once it leaves.
 let plansWaiting = false
 watch(bare, (on) => {
@@ -184,13 +184,10 @@ onMounted(async () => {
     }
   }
 })
-watch(
-  locale,
-  () => {
-    document.documentElement.lang = locale.value
-  },
-  { immediate: import.meta.client },
-)
+useHead({ htmlAttrs: { lang: locale } })
+// A page rendered on the server carries its prices, tools and contacts; the
+// app's own pages render in the browser and load them as they always have.
+if (import.meta.server) await loadPublicData()
 </script>
 <template>
   <a class="skip-link" href="#main-content">{{ t('skipToContent') }}</a>

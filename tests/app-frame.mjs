@@ -119,7 +119,7 @@ try {
   // Free has saved workflows too, now that every plan has every tool.
   assert.deepEqual(await names(sidebar.locator('.side-nav a')), [
     'Home', 'Create with AI', 'Tools', 'PDF editor', 'Tasks', 'Saved workflows',
-    'Plan & billing', 'Settings', 'Help', 'Prompt guide',
+    'Plan & billing', 'Invite friends', 'Settings', 'Help', 'Prompt guide',
   ])
   assert.equal(await page.getByText('Local bot').count(), 0, 'the development bot is not in the customer menu')
   assert.equal(await page.locator('.topbar-title').innerText(), 'Home')
@@ -215,7 +215,7 @@ try {
     const sheet = page.locator('.more-sheet')
     await sheet.waitFor()
     assert.deepEqual(await names(sheet.locator('.sheet-nav a')), [
-      'PDF editor', 'Saved workflows', 'Plan & billing', 'Settings', 'Help', 'Prompt guide',
+      'PDF editor', 'Saved workflows', 'Plan & billing', 'Invite friends', 'Settings', 'Help', 'Prompt guide',
     ])
     assert.equal(
       await sheet.locator('.sheet-prefs .button').innerText(),
