@@ -59,13 +59,20 @@ export default defineNuxtConfig({
     public: {
       productName: 'DocMaster',
       // The address pages call canonical; NUXT_PUBLIC_SITE_ORIGIN sets it in production.
-      siteOrigin: 'https://pdfmaster.orderdesk.live',
+      siteOrigin: 'https://docmaster.live',
       // Until launch every page says noindex and robots.txt keeps crawlers out.
       siteIndexable: false,
     },
   },
   nitro: {
-    routeRules: { '/api/**': { proxy: `${apiOrigin}/api/**` }, ...browserOnly },
+    routeRules: {
+      '/api/**': { proxy: `${apiOrigin}/api/**` },
+      ...browserOnly,
+      // Fonts, logos and share images keep their names, so a month, not forever.
+      ...Object.fromEntries(
+        ['/fonts/**', '/brand/**', '/og/**'].map((rule) => [rule, { headers: { 'cache-control': 'public, max-age=2592000' } }]),
+      ),
+    },
     publicAssets: [...pdfjsAssets('cmaps'), ...pdfjsAssets('standard_fonts'), ...pdfjsAssets('wasm')],
   },
   app: {
@@ -87,6 +94,9 @@ export default defineNuxtConfig({
         { rel: 'icon', type: 'image/png', sizes: '64x64', href: '/brand/docmaster-icon-64.png' },
         { rel: 'apple-touch-icon', sizes: '180x180', href: '/brand/docmaster-icon-180.png' },
         { rel: 'manifest', href: '/site.webmanifest' },
+        // The two typefaces every page uses, fetched with the page rather than after its CSS.
+        { rel: 'preload', as: 'font', type: 'font/woff2', href: '/fonts/dm-sans-variable.woff2', crossorigin: '' },
+        { rel: 'preload', as: 'font', type: 'font/woff2', href: '/fonts/manrope-variable.woff2', crossorigin: '' },
       ],
     },
   },

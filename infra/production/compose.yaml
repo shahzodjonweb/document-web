@@ -5,8 +5,9 @@ services:
     environment:
       NITRO_HOST: 0.0.0.0
       NITRO_PORT: "3000"
-      # Canonical links, hreflang and the sitemap name this origin.
-      NUXT_PUBLIC_SITE_ORIGIN: https://${PUBLIC_DOMAIN:-pdfmaster.orderdesk.live}
+      # Canonical links, hreflang and the sitemap name DocMaster's own domain, whichever
+      # host served the page (the old one keeps working until it redirects).
+      NUXT_PUBLIC_SITE_ORIGIN: ${SITE_ORIGIN:-https://docmaster.live}
       # Search engines are asked to stay away until launch: set SITE_INDEXABLE=1 in .env then.
       NUXT_PUBLIC_SITE_INDEXABLE: ${SITE_INDEXABLE:-0}
     restart: unless-stopped
