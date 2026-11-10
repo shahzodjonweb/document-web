@@ -257,7 +257,8 @@ try {
   for (const locale of ['uz', 'ru']) {
     await page.goto(`${origin}/${locale}/pricing`, { waitUntil: 'domcontentloaded' })
     await page.locator('.site-plan').nth(2).waitFor()
-    const card = await page.locator('.site-plan').nth(1).innerText()
+    // Short Russian words keep a no-break space after them on the site; read it as a space.
+    const card = (await page.locator('.site-plan').nth(1).innerText()).replace(/\u00a0/g, ' ')
     assert.ok(card.includes(untilLabel[locale]), `${locale} card: ${JSON.stringify(card)}`)
     assert.ok(card.includes(`${regularPrice[locale]} 20 000 so'm`), `${locale} card names the struck price`)
     assert.match(await page.getByTestId('discount-banner').innerText(),

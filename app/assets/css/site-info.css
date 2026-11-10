@@ -7,7 +7,7 @@
 .site-tg-avatar img { width: 32px; height: 32px; border-radius: 50%; }
 .site-tg-name { min-width: 0; }
 .site-tg-name b { display: block; color: var(--ink); font-size: 15px; overflow-wrap: anywhere; }
-.site-tg-chat { display: grid; gap: 10px; padding: 18px 8px 10px; min-height: 280px; align-content: end; background: var(--surface-sunken); border-radius: 0 0 24px 24px; }
+.site-tg-chat { display: grid; gap: 10px; padding: 18px 8px 10px; min-height: 240px; align-content: end; background: var(--surface-sunken); border-radius: 0 0 24px 24px; }
 .site-tg-msg { justify-self: start; max-width: 86%; display: grid; gap: 8px; padding: 10px 12px; border-radius: 16px 16px 16px 4px; background: var(--surface); border: 1px solid var(--hairline); font-size: 14px; color: var(--ink); }
 .site-tg-msg p { margin: 0; }
 .site-tg-msg.is-out { justify-self: end; border-radius: 16px 16px 4px 16px; background: var(--blue-50); border-color: var(--blue-200); }
@@ -15,28 +15,33 @@
 .site-tg-file .site-icon { color: var(--link); }
 .site-tg-keys { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .site-tg-keys span { text-align: center; padding: 9px 8px; border-radius: 10px; background: var(--surface); border: 1px solid var(--hairline); color: var(--link); font-size: 13px; font-weight: 600; }
-@media (max-width: 520px) { .site-tg-chat { min-height: 260px; } }
+@media (max-width: 520px) { .site-tg-chat { min-height: 0; padding-top: 24px; } }
 
 /* ---------------------------------------------------------------- Telegram: what the bot does */
-.site-tg-cols { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: var(--site-grid-gap); }
-.site-tg-col { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-lg); padding: 20px; display: grid; gap: 16px; align-content: start; min-width: 0; }
+/* File tools (the long list) across the top, AI and the editor (three lines each) side by side below. */
+.site-tg-cols { display: grid; grid-template-columns: 1fr 1fr; gap: var(--site-grid-gap); }
+.site-tg-col { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-lg); padding: clamp(20px, 2vw, 28px); display: grid; gap: 16px; align-content: start; min-width: 0; }
+.site-tg-col.is-tools { grid-column: 1 / -1; }
 .site-tg-col h3 { display: flex; align-items: center; gap: 12px; }
-.site-tg-col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.site-tg-col:first-child ul { grid-template-columns: 1fr 1fr; column-gap: 16px; }
+.site-tg-col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.site-tg-col.is-tools ul { grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 24px; }
 .site-tg-col li { display: flex; align-items: flex-start; gap: 8px; font-size: 15px; color: var(--ink); line-height: 1.4; min-width: 0; }
-.site-tg-col li > .site-icon, .site-tg-col a .site-icon { color: var(--link); margin-top: 2px; }
+.site-tg-col li > .site-icon, .site-tg-col a .site-icon { color: var(--link); margin-top: 2px; flex: none; }
 .site-tg-col a { display: inline-flex; align-items: flex-start; gap: 8px; color: var(--ink); text-decoration: none; }
 .site-tg-col a:hover { color: var(--link); text-decoration: underline; text-underline-offset: 3px; }
-@media (max-width: 1000px) { .site-tg-cols { grid-template-columns: 1fr 1fr; } .site-tg-col:first-child { grid-column: 1 / -1; } .site-tg-col:first-child ul { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (max-width: 680px) { .site-tg-cols { grid-template-columns: 1fr; } .site-tg-col:first-child ul { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 400px) { .site-tg-col:first-child ul { grid-template-columns: 1fr; } }
+@media (max-width: 1000px) { .site-tg-col.is-tools ul { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 680px) { .site-tg-cols { grid-template-columns: 1fr; } .site-tg-col.is-tools ul { grid-template-columns: 1fr 1fr; column-gap: 16px; } }
+@media (max-width: 400px) { .site-tg-col.is-tools ul { grid-template-columns: 1fr; } }
 
 /* ---------------------------------------------------------------- Telegram: bot or website */
-.site-tg-limits { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--site-grid-gap); align-items: start; }
+.site-tg-limits { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--site-grid-gap); align-items: stretch; }
 .site-tg-webonly { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-lg); padding: 8px; }
 .site-tg-webonly h3 { padding: 12px 12px 8px; color: var(--muted); font-size: 14px; }
 .site-tg-webonly ul { list-style: none; margin: 0; padding: 0; }
-@media (max-width: 900px) { .site-tg-limits { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .site-tg-limits { grid-template-columns: 1fr; } .site-tg-webonly ul { display: grid; grid-template-columns: 1fr 1fr; column-gap: 8px; } }
+@media (max-width: 560px) { .site-tg-webonly ul { grid-template-columns: 1fr; } }
+/* Phone: the stacked compare rows keep the label on one line and the value flush right. */
+@media (max-width: 600px) { .site-tg-limits .site-compare td { text-align: right; } .site-tg-limits .site-compare td::before { flex: none; white-space: nowrap; text-align: left; } }
 
 /* ---------------------------------------------------------------- Telegram: one account, two devices */
 .site-tg-devices { display: grid; grid-template-columns: minmax(0, 1.6fr) auto minmax(0, 0.8fr); align-items: center; gap: 0; max-width: 520px; width: 100%; justify-self: center; }
@@ -46,12 +51,16 @@
 .site-tg-dots { display: flex; gap: 5px; margin-bottom: 10px; }
 .site-tg-dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--hairline-strong); }
 .site-tg-device-ico { position: absolute; right: 12px; bottom: 12px; width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; background: var(--blue-50); color: var(--link); }
+/* Two chat bubbles fill the phone, so it reads as the bot chat rather than an empty frame. */
+.site-tg-bubble { justify-self: end; width: 62%; height: 22px; margin-top: 10px; border-radius: 10px 10px 3px 10px; background: var(--blue-50); border: 1px solid var(--blue-200); }
+.site-tg-bubble.is-in { justify-self: start; width: 74%; height: 34px; border-radius: 10px 10px 10px 3px; background: color-mix(in srgb, var(--hairline) 55%, transparent); border-color: var(--hairline); }
 .site-tg-link { position: relative; width: 72px; height: 44px; display: grid; place-items: center; }
 .site-tg-link::before { content: ''; position: absolute; inset: 50% 0 auto; height: 2px; background: var(--action); transform: translateY(-1px); }
 .site-tg-link .site-icon { position: relative; width: 36px; height: 36px; padding: 8px; border-radius: 50%; background: var(--surface); border: 2px solid var(--action); color: var(--link); }
-@media (max-width: 520px) { .site-tg-link { width: 44px; } .site-tg-device.is-phone { padding: 20px 10px; } }
+@media (max-width: 520px) { .site-tg-link { width: 44px; } .site-tg-device.is-phone { padding: 20px 10px; } .site-tg-bubble.is-in { display: none; } }
 
-.site-tg-channel-title { margin-bottom: 20px; }
+.site-tg-channel { margin-top: var(--site-grid-gap); }
+.site-tg-channel b { display: block; margin-bottom: 2px; }
 
 /* ---------------------------------------------------------------- invite */
 .site-invite-head { display: grid; gap: 24px; }
@@ -62,84 +71,103 @@
 .site-invite-ladder li { position: relative; display: grid; gap: 4px; align-content: start; padding-right: 16px; min-width: 0; }
 .site-invite-ladder b { font: 700 var(--site-display-3) / 1.2 var(--font-display); color: var(--ink); margin-top: 12px; }
 .site-invite-ladder li > span:last-child { color: var(--text); font-size: 15px; }
-.site-invite-ladder li.is-more > span:last-child { color: var(--muted); margin-top: 12px; }
+/* "And so on" sits on the line of the counts, not between the two rows. */
+.site-invite-ladder li.is-more > span:last-child { display: flex; align-items: center; height: calc(var(--site-display-3) * 1.2); margin-top: 12px; color: var(--muted); font-size: 16px; }
 .site-invite-rung { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); border: 2px solid var(--action); color: var(--link); }
 .site-invite-ladder li:first-child .site-invite-rung { background: var(--action); color: var(--on-action); }
 .site-invite-ladder li.is-more .site-invite-rung { border-color: var(--hairline-strong); color: var(--muted); }
 .site-invite-notes { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px; }
 .site-invite-notes .site-note { margin: 0; }
 .site-invite-cta { margin-top: clamp(32px, 4vw, 48px); }
-/* Tablet: the ladder scrolls inside its own track, with a fade at the edge; the page never does. */
+@media (max-width: 520px) { .site-invite-cta .site-btn { flex: 1 1 100%; } }
+/* Tablet: all five rungs still fit, a little tighter. */
 @media (max-width: 1000px) {
-  .site-invite-track { overflow-x: auto; scroll-snap-type: x mandatory; -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); padding-bottom: 8px; }
-  .site-invite-ladder { grid-template-columns: repeat(5, 200px); width: max-content; padding-right: 64px; }
-  .site-invite-ladder li { scroll-snap-align: start; }
+  .site-invite-ladder li { padding-right: 12px; }
+  .site-invite-ladder li > span:last-child { font-size: 14px; }
 }
 /* Phone: a vertical list. */
 @media (max-width: 600px) {
-  .site-invite-track { overflow: visible; -webkit-mask-image: none; mask-image: none; padding-bottom: 0; }
-  .site-invite-ladder { grid-template-columns: 1fr; width: auto; padding-right: 0; gap: 20px; }
+  .site-invite-ladder { grid-template-columns: 1fr; gap: 20px; }
   .site-invite-ladder::before { left: 21px; right: auto; top: 22px; bottom: 22px; width: 2px; height: auto; background: linear-gradient(180deg, var(--action) 0 80%, var(--hairline-strong) 80%); }
   .site-invite-ladder li { grid-template-columns: 44px minmax(0, 1fr); column-gap: 16px; padding-right: 0; align-items: center; }
   .site-invite-rung { grid-row: span 2; }
   .site-invite-ladder b { margin-top: 0; }
-  .site-invite-ladder li.is-more > span:last-child { margin-top: 0; }
+  .site-invite-ladder li.is-more > span:last-child { grid-row: span 2; margin-top: 0; height: auto; font-size: 15px; }
   .site-invite-notes { grid-template-columns: 1fr; }
 }
 
 /* ---------------------------------------------------------------- help: search */
-.site-help-hero { padding-bottom: clamp(32px, 4vw, 56px); }
+.site-help-hero { padding-bottom: clamp(32px, 4vw, 48px); }
 .site-help-head { display: grid; gap: 16px; }
-.site-help-search { position: relative; max-width: 760px; margin: clamp(28px, 3vw, 40px) auto 0; }
+.site-help-search { position: relative; max-width: 760px; margin: clamp(28px, 3vw, 40px) 0 0; }
 .site-help-search > .site-icon { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
 .site-help-search input { width: 100%; height: 56px; padding: 0 20px 0 52px; border-radius: var(--radius-pill); border: 1px solid var(--hairline-strong); background: var(--surface); color: var(--ink); font: 400 17px/1 var(--font-body); box-shadow: var(--shadow-sm); }
 .site-help-search input::placeholder { color: var(--muted); }
+.site-help-search input::-webkit-search-cancel-button { cursor: pointer; opacity: 0.55; }
 .site-help-search input:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-color: var(--action); }
-.site-help-count { max-width: 760px; margin: 12px auto 0; min-height: 1.5em; color: var(--muted); font-size: 14px; padding-left: 20px; }
+.site-help-count { max-width: 760px; margin: 12px 0 0; min-height: 1.5em; color: var(--muted); font-size: 14px; padding-left: 20px; }
+
+/* A quiet count: a number in a small pill, used on topic cards, the topic list and group titles. */
+.site-help-n { flex: none; min-width: 28px; padding: 2px 8px; border-radius: var(--radius-pill); background: var(--surface-sunken); color: var(--muted); font: 600 13px/1.4 var(--font-body); font-variant-numeric: tabular-nums; text-align: center; }
 
 /* ---------------------------------------------------------------- help: topics */
 .site-help-topics-wrap { padding-top: 0; }
 .site-help-topics { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
-.site-help-topic { display: flex; align-items: center; gap: 14px; height: 100%; padding: 16px 18px; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-lg); color: var(--ink); text-decoration: none; }
+.site-help-topic { display: flex; align-items: center; gap: 12px; height: 100%; padding: 16px 16px 16px 18px; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-lg); color: var(--ink); text-decoration: none; transition: border-color var(--duration) var(--ease); }
 .site-help-topic:hover { border-color: var(--action); }
-.site-help-topic > span:last-child { display: grid; gap: 2px; min-width: 0; }
-.site-help-topic b { font-weight: 600; font-size: 15.5px; line-height: 1.3; overflow-wrap: break-word; }
-.site-help-topic small { color: var(--muted); font-size: 13.5px; }
+.site-help-topic:hover .site-help-n { background: var(--blue-50); color: var(--link); }
+.site-help-topic b { flex: 1; min-width: 0; font-weight: 600; font-size: 15.5px; line-height: 1.3; overflow-wrap: break-word; hyphens: auto; }
 @media (max-width: 1000px) { .site-help-topics { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 560px) {
   .site-help-topics { grid-template-columns: 1fr; gap: 8px; }
-  .site-help-topic { padding: 10px 14px; }
+  .site-help-topic { padding: 10px 12px 10px 10px; gap: 12px; }
   .site-help-topic .site-tool-ico { width: 32px; height: 32px; border-radius: 8px; }
 }
 
 /* ---------------------------------------------------------------- help: questions */
+/* Topic list on the container edge, questions beside it: the same grid as the legal pages. */
 .site-help-topics-wrap + .site-help-body { padding-top: clamp(40px, 4vw, 64px); }
-.site-help-grid { display: grid; grid-template-columns: 220px minmax(0, 760px); gap: clamp(32px, 5vw, 72px); align-items: start; justify-content: center; }
-.site-help-grid.is-searching { grid-template-columns: minmax(0, 760px); }
+.site-help-grid { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: clamp(32px, 5vw, 80px); align-items: start; }
+.site-help-grid.is-empty { grid-template-columns: minmax(0, 760px); }
+.site-help-toc a { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.site-help-toc .site-help-n { min-width: 24px; padding: 0 6px; font-size: 12px; background: none; }
+.site-help-toc a[aria-current='true'] .site-help-n { color: var(--link); }
 .site-help-list { display: grid; gap: clamp(40px, 4vw, 56px); min-width: 0; }
 .site-help-group { display: grid; gap: 16px; scroll-margin-top: calc(var(--site-header-h) + 16px); }
+.site-help-group-title { display: flex; align-items: center; gap: 12px; }
+.site-help-group-title .site-tool-ico { width: 32px; height: 32px; border-radius: 8px; }
+.site-help-group-title .site-tool-ico .site-icon { width: 18px; height: 18px; }
 .site-help-group .site-faq details { scroll-margin-top: calc(var(--site-header-h) + 16px); }
-.site-help-life { margin: 8px 0 8px; }
+.site-help-group .site-faq details > div { max-width: 68ch; }
+.site-help-life { margin: 8px 0; padding: 0; }
 .site-help-life b { font-size: 15px; }
 .site-help-list > .site-note { margin: 0; }
 @media (max-width: 900px) { .site-help-grid { grid-template-columns: minmax(0, 1fr); } .site-help-toc { display: none; } }
 
 /* ---------------------------------------------------------------- help + about: contact tiles */
-.site-help-contacts { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
-.site-help-contacts a { display: flex; align-items: flex-start; gap: 14px; height: 100%; padding: 18px; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-lg); color: var(--ink); text-decoration: none; }
+/* The heading on the left, the ways to reach us stacked on the right. */
+.site-help-contact { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: clamp(32px, 5vw, 80px); align-items: start; }
+.site-help-contact-head { display: grid; gap: 16px; }
+.site-help-contact .site-section-head { margin-bottom: 0; }
+.site-help-contacts { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.site-help-contacts a { display: flex; align-items: center; gap: 16px; height: 100%; padding: 18px 20px; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-lg); color: var(--ink); text-decoration: none; transition: border-color var(--duration) var(--ease); }
 .site-help-contacts a:hover { border-color: var(--action); }
-.site-help-contacts a > span:last-child { display: grid; gap: 2px; min-width: 0; }
+.site-help-contacts a > span:nth-child(2) { display: grid; gap: 2px; min-width: 0; flex: 1; }
+.site-help-contacts a > .site-icon { color: var(--muted); flex: none; }
+.site-help-contacts a:hover > .site-icon { color: var(--link); }
 .site-help-contacts b { font-weight: 600; }
 .site-help-contacts small { color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
 .site-help-contacts small:first-of-type { color: var(--link); font-size: 15px; }
 .site-help-contacts small:only-of-type { color: var(--muted); font-size: 14px; }
-.site-help-hours { display: flex; align-items: center; gap: 8px; margin: 16px 0 0; color: var(--muted); font-size: 14px; }
+.site-help-hours { display: flex; align-items: center; gap: 8px; margin: 0; color: var(--muted); font-size: 14px; }
+@media (max-width: 900px) { .site-help-contact { grid-template-columns: minmax(0, 1fr); } }
 
 /* ---------------------------------------------------------------- about */
-.site-about-company .site-container { display: grid; gap: 20px; }
-.site-about-company .site-lead { max-width: none; }
-.site-about-requisites { padding-top: 0; }
-.site-about-sheet { padding: clamp(24px, 4vw, 40px); display: grid; gap: 24px; }
+/* Intro on the left, the company sheet beside it; everything starts on the container edge. */
+.site-about-top { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: clamp(32px, 5vw, 80px); align-items: start; }
+.site-about-top.is-solo { grid-template-columns: minmax(0, 1fr); }
+.site-about-intro { display: grid; gap: 20px; padding-top: clamp(0px, 2vw, 24px); }
+.site-about-sheet { padding: clamp(24px, 3vw, 36px); display: grid; gap: 24px; }
 .site-about-sheet dl { margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 32px; }
 .site-about-sheet dl > div { display: grid; gap: 4px; align-content: start; min-width: 0; }
 .site-about-sheet dl > div.is-wide { grid-column: 1 / -1; }
@@ -148,13 +176,15 @@
 .site-about-copyrow { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 12px; }
 .site-about-copyrow .site-btn { --site-btn-h: 32px; padding-inline: 10px; font-size: 14px; gap: 6px; margin-block: -4px; }
 .site-about-num { font-variant-numeric: tabular-nums; font-weight: 600; letter-spacing: 0.02em; }
-.site-about-h2 { margin-bottom: 24px; }
-.site-about-contacts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.site-about-docs { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
-.site-about-docs a { display: grid; grid-template-columns: 36px minmax(0, 1fr) 16px; align-items: center; gap: 14px; padding: 16px 18px; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-lg); color: var(--ink); text-decoration: none; }
+.site-about-h2 { margin-bottom: clamp(24px, 3vw, 40px); }
+.site-about-docs { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.site-about-docs a { display: grid; grid-template-columns: 36px minmax(0, 1fr) 16px; align-items: center; gap: 16px; height: 100%; padding: 18px 20px; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-lg); color: var(--ink); text-decoration: none; transition: border-color var(--duration) var(--ease); }
 .site-about-docs a:hover { border-color: var(--action); }
 .site-about-docs a > span:nth-child(2) { display: grid; gap: 2px; }
 .site-about-docs b { font-weight: 600; }
 .site-about-docs small { color: var(--muted); font-size: 14px; }
 .site-about-docs a > .site-icon { color: var(--muted); }
-@media (max-width: 600px) { .site-about-sheet dl, .site-about-contacts { grid-template-columns: 1fr; } }
+.site-about-docs a:hover > .site-icon { color: var(--link); }
+@media (max-width: 900px) { .site-about-top { grid-template-columns: minmax(0, 1fr); } .site-about-intro { padding-top: 0; } }
+@media (max-width: 680px) { .site-about-docs { grid-template-columns: 1fr; } }
+@media (max-width: 480px) { .site-about-sheet dl { grid-template-columns: 1fr; } }

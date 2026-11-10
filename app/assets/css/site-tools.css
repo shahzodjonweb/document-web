@@ -7,7 +7,8 @@
 /* ── Tool page: hero ── */
 .site-tool-chips { list-style: none; margin: 0; padding: 0; }
 .site-tool-chips .site-chip { max-width: 100%; white-space: normal; }
-.site-toolhero .site-h1 { overflow-wrap: anywhere; hyphens: auto; }
+/* Headings break between words only; a very long word may still wrap rather than overflow. */
+.site-toolhero .site-h1 { overflow-wrap: break-word; hyphens: manual; }
 .site-drop .site-h3 { margin: 0; text-wrap: balance; }
 .site-drop-ico .site-icon { width: 28px; height: 28px; }
 
@@ -29,12 +30,33 @@
 .site-tool-bar::after { content: ''; position: absolute; inset: 0 auto 0 0; width: var(--site-tool-bar, 100%); background: var(--blue-200); border-radius: inherit; }
 .site-tool-result .site-tool-bar::after { background: var(--action); }
 
-/* Convert: one file chip into another. */
-.site-tool-convert { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 32px 24px; flex-wrap: wrap; }
-.site-tool-convert > .site-icon { color: var(--muted); width: 28px; height: 28px; }
-.site-tool-file { display: inline-flex; align-items: center; gap: 10px; padding: 12px 16px; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-md); color: var(--ink); font-size: 14px; min-width: 0; }
-.site-tool-file.site-tool-result { border-color: var(--action); }
-.site-tool-file b { font: 700 11px/1 var(--font-body); text-transform: uppercase; letter-spacing: 0.04em; color: #fff; border-radius: 4px; padding: 5px 6px; background: #b8401d; }
+/* Convert: one document into another, each a small page above its file name. */
+.site-tool-convert { display: flex; align-items: center; justify-content: center; gap: clamp(14px, 3vw, 28px); padding: 36px 20px; }
+.site-tool-convert > .site-icon { color: var(--muted); width: 26px; height: 26px; flex: none; margin-bottom: 34px; }
+/* A fixed page slot keeps both captions on one line when a slide (landscape) meets a page. */
+.site-tool-doc { --site-tool-slot: 156px; display: grid; grid-template-rows: var(--site-tool-slot) auto; justify-items: center; align-items: center; gap: 14px; min-width: 0; }
+.site-tool-docpage { --site-behind: var(--surface); width: 116px; aspect-ratio: 3 / 4; display: grid; align-content: start; gap: 7px; padding: 18px 14px; box-shadow: var(--shadow-sm); }
+.site-tool-docpage > i { display: block; height: 5px; border-radius: 3px; background: var(--hairline); }
+.site-tool-docpage > i:nth-child(1) { width: 62%; height: 7px; background: var(--hairline-strong); margin-bottom: 4px; }
+.site-tool-docpage > i:nth-child(3n) { width: 78%; }
+.site-tool-doc.is-out .site-tool-docpage { border-color: var(--action); box-shadow: 0 0 0 3px color-mix(in srgb, var(--action) 14%, transparent), var(--shadow-sm); }
+/* A spreadsheet: a header row over a grid of cells. */
+.site-tool-docpage.is-xlsx { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; padding: 22px 12px; }
+.site-tool-docpage.is-xlsx > i, .site-tool-docpage.is-xlsx > i:nth-child(n) { width: auto; height: 11px; margin: 0; border-radius: 2px; background: var(--surface-sunken); outline: 1px solid var(--hairline); }
+.site-tool-docpage.is-xlsx > i:nth-child(-n + 3) { background: color-mix(in srgb, #1d6b3f 30%, var(--surface)); outline-color: transparent; }
+/* A photo of a paper document: a tilted page on a darker ground. */
+.site-tool-docpage.is-jpg { padding: 14px; place-items: center; align-content: center; border-radius: var(--radius-md); background: linear-gradient(160deg, #6f6a62, #3e3b37); border: 1px solid var(--hairline); }
+.site-tool-docpage.is-jpg > span { display: grid; align-content: start; gap: 6px; width: 78%; aspect-ratio: 3 / 4; padding: 12px 9px; background: #f4f1ea; border-radius: 2px; transform: rotate(-6deg); box-shadow: 0 4px 10px rgb(0 0 0 / 0.3); }
+.site-tool-docpage.is-jpg i { display: block; height: 4px; border-radius: 2px; background: #cfc9bd; }
+.site-tool-docpage.is-jpg i:first-child { width: 60%; background: #a9a295; }
+.site-tool-docpage.is-jpg i:nth-child(3) { width: 80%; }
+/* A slide: landscape, a title bar and one block. */
+.site-tool-docpage.is-pptx { width: 148px; aspect-ratio: 4 / 3; padding: 16px; border-radius: var(--radius-md); background: var(--surface); border: 1px solid var(--hairline-strong); gap: 8px; }
+.site-tool-docpage.is-pptx > i:nth-child(1) { width: 70%; height: 8px; background: color-mix(in srgb, #b5471b 55%, var(--surface)); margin: 0; }
+.site-tool-docpage.is-pptx > i:nth-child(2) { width: 50%; }
+.site-tool-docpage.is-pptx > i:nth-child(3) { width: 100%; height: 34px; border-radius: 4px; background: var(--surface-sunken); }
+.site-tool-file { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); font-size: 13.5px; white-space: nowrap; }
+.site-tool-file b { font: 700 10.5px/1 var(--font-body); text-transform: uppercase; letter-spacing: 0.04em; color: #fff; border-radius: 4px; padding: 4px 5px; background: #b8401d; }
 .site-tool-file b.is-docx { background: #2453a8; }
 .site-tool-file b.is-pptx { background: #b5471b; }
 .site-tool-file b.is-xlsx { background: #1d6b3f; }
@@ -60,13 +82,13 @@
 .site-tool-badge.is-inline.is-strong { background: var(--action); color: var(--on-action); }
 .site-tool-badge.is-inline .site-icon { color: inherit; width: 13px; height: 13px; }
 
-/* OCR: a scanned page with one selectable line. */
-.site-tool-scan { position: relative; padding: 32px 24px; }
-.site-tool-scanpage { width: min(280px, 100%); padding: 24px; background: color-mix(in srgb, var(--surface) 88%, var(--hairline)); transform: rotate(-1.2deg); }
-.site-tool-scantitle { margin: 0 0 14px; font: 600 14px/1.3 var(--font-display); color: var(--ink); }
-.site-tool-selected { margin: 10px 0; font-size: 13px; line-height: 1.5; color: var(--ink); }
-.site-tool-selected span { background: color-mix(in srgb, var(--action) 26%, transparent); outline: 1px solid var(--action); border-radius: 2px; padding: 1px 3px; }
-.site-tool-caret { position: absolute; right: 32px; bottom: 30px; color: var(--link); }
+/* OCR: a scanned page whose title is now selectable text. */
+.site-tool-scan { padding: 36px 24px; width: min(100%, 340px); }
+.site-tool-scanpage { --site-behind: var(--surface); padding: 26px 24px 18px; background: color-mix(in srgb, var(--surface) 86%, var(--hairline)); transform: rotate(-1.2deg); box-shadow: var(--shadow-sm); }
+.site-tool-scantitle { margin: 0 0 16px; font: 600 15px/1.3 var(--font-display); color: var(--ink); }
+.site-tool-scantitle span { position: relative; padding: 1px 3px; margin-left: -3px; background: color-mix(in srgb, var(--action) 24%, transparent); border-radius: 2px; }
+/* The text caret at the end of the selection. */
+.site-tool-scantitle span::after { content: ''; position: absolute; right: -3px; top: -3px; bottom: -3px; width: 2px; border-radius: 1px; background: var(--action); }
 
 /* Sign / fill form: the editor page with a field filled in. */
 .site-tool-editorpic { width: 100%; align-self: stretch; }
@@ -75,29 +97,45 @@
 .site-tool-field b { height: 22px; border: 1px solid var(--hairline-strong); border-radius: 4px; background: var(--surface); position: relative; }
 .site-tool-field.is-on b { border-color: var(--action); outline: 1.5px dashed var(--action); outline-offset: 3px; }
 .site-tool-field i { position: absolute; left: 6px; top: 8px; width: 55%; height: 5px; border-radius: 3px; background: var(--link); }
+.site-tool-check { display: flex; align-items: center; gap: 10px; margin: 14px 0 4px; }
+.site-tool-check b { width: 18px; height: 18px; flex: none; display: grid; place-items: center; border-radius: 4px; background: var(--action); color: var(--on-action); }
+.site-tool-check .site-icon { width: 13px; height: 13px; }
+.site-tool-check span { height: 5px; width: 46%; border-radius: 3px; background: var(--hairline-strong); }
 
 .site-tool-caps { align-self: center; }
 
 @media (max-width: 560px) {
   .site-tool-pic { min-height: 0; }
-  .site-tool-convert { flex-direction: column; }
-  .site-tool-convert > .site-icon { transform: rotate(90deg); }
+  /* The hero facts become a short checklist; wrapped pills left ragged rows. */
+  .site-tool-chips { display: grid; gap: 8px; }
+  .site-tool-chips .site-chip { padding: 0; border: 0; background: none; font-size: 14px; gap: 8px; }
+  .site-tool-convert { padding: 28px 12px; gap: 12px; }
+  .site-tool-convert > .site-icon { width: 22px; height: 22px; }
+  .site-tool-doc { --site-tool-slot: 128px; }
+  .site-tool-docpage { width: 96px; padding: 14px 11px; gap: 6px; }
+  .site-tool-docpage.is-pptx { width: 118px; padding: 12px; }
+  .site-tool-docpage.is-pptx > i:nth-child(3) { height: 24px; }
+  .site-tool-file { font-size: 12.5px; gap: 6px; }
   .site-tool-strip { padding: 28px 12px; gap: 6px; }
   .site-tool-thumb { width: 44px; padding: 8px 6px; }
 }
 
 /* ── Tools directory ── */
-.site-tools-hero { padding-block: clamp(24px, 3vw, 48px) clamp(32px, 4vw, 56px); }
-.site-tools-hero-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 24px clamp(32px, 5vw, 72px); align-items: end; }
-.site-tools-hero-copy { display: grid; gap: 16px; }
-.site-tools-hero-copy .site-lead { margin: 0; max-width: var(--site-measure-lead); }
-.site-tools-find { display: grid; gap: 14px; min-width: 0; }
-.site-tools-search { display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 16px; background: var(--surface); border: 1px solid var(--hairline-strong); border-radius: var(--radius-pill); color: var(--muted); }
-.site-tools-search:focus-within { border-color: var(--action); box-shadow: 0 0 0 3px color-mix(in srgb, var(--action) 20%, transparent); }
+.site-tools-hero { padding-block: clamp(24px, 3vw, 48px) clamp(28px, 3.4vw, 44px); }
+/* Copy left, search right on the copy's last line; the group tabs run the full width below. */
+.site-tools-hero-grid { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); grid-template-areas: 'copy search' 'tabs tabs'; gap: 28px clamp(32px, 5vw, 72px); align-items: end; }
+.site-tools-hero-copy { grid-area: copy; display: grid; gap: 16px; }
+.site-tools-hero-copy .site-lead { margin: 0; max-width: var(--site-measure-lead); text-wrap: pretty; }
+.site-tools-find { display: contents; }
+.site-tools-search { grid-area: search; min-width: 0; }
+.site-tools-search > label { display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 18px; background: var(--surface); border: 1px solid var(--hairline-strong); border-radius: var(--radius-pill); color: var(--muted); cursor: text; }
+.site-tools-search > label:focus-within { border-color: var(--action); box-shadow: 0 0 0 3px color-mix(in srgb, var(--action) 20%, transparent); }
 .site-tools-search input { flex: 1; min-width: 0; height: 100%; border: 0; background: none; font: inherit; font-size: 16px; color: var(--ink); outline: none; }
 .site-tools-search input::placeholder { color: var(--muted); }
-.site-tools-filter { display: flex; flex-wrap: wrap; gap: 6px; }
-.site-tools-tab { font: 500 13.5px/1.2 var(--font-body); padding: 7px 12px; border-radius: var(--radius-pill); border: 1px solid var(--hairline); background: var(--surface); color: var(--text); cursor: pointer; text-align: left; }
+/* The pill shows focus; the input's own ring would draw a second box inside it. */
+.site-tools-search input:focus-visible { outline: none; }
+.site-tools-filter { grid-area: tabs; display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.site-tools-tab { flex: none; font: 500 14px/1.2 var(--font-body); padding: 8px 14px; border-radius: var(--radius-pill); border: 1px solid var(--hairline); background: var(--surface); color: var(--text); cursor: pointer; white-space: nowrap; transition: border-color var(--duration-fast) var(--ease), color var(--duration-fast) var(--ease); }
 .site-tools-tab:hover { border-color: var(--hairline-strong); color: var(--ink); }
 .site-tools-tab[aria-pressed='true'] { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 .site-tools-tab:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
@@ -106,39 +144,55 @@
 .site-tools-count { margin: 0 0 16px; color: var(--muted); font-size: 14px; }
 .site-tools-groups { columns: 3; column-gap: var(--site-grid-gap); }
 .site-tools-groups > .site-toolgroup { break-inside: avoid; margin-bottom: var(--site-grid-gap); }
+/* One group picked: it takes the full width and its rows flow in columns. */
+.site-tools-groups.is-single { columns: auto; }
+.site-tools-groups.is-single .site-toolgroup ul { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); column-gap: 8px; }
 .site-tools-group-title { font: 650 20px/1.3 var(--font-display); color: var(--ink); margin: 0; padding: 12px 12px 8px; letter-spacing: -0.01em; }
-.site-tools-row { grid-template-columns: 36px minmax(0, 1fr) 20px; }
+.site-tools-row { grid-template-columns: 36px minmax(0, 1fr) 16px; }
 .site-tools-row b { overflow-wrap: anywhere; }
-.site-tools-bot { display: grid; place-items: center; color: var(--link); }
-.site-tools-bot .site-icon { width: 16px; height: 16px; }
+.site-toollink.site-tools-row span span { text-wrap: pretty; }
+/* Bot availability: a quiet word after the name, not an icon that reads as "send". */
+.site-tools-tg { display: inline-block; vertical-align: 1px; padding: 2px 6px; border-radius: 4px; background: color-mix(in srgb, var(--link) 10%, transparent); color: var(--text); font: 500 11px/1.3 var(--font-body); letter-spacing: 0.01em; white-space: nowrap; }
+.site-tools-tg i { font-style: normal; }
 .site-tools-editor { margin: 4px 12px 10px; }
 .site-tools-empty { display: grid; gap: 16px; justify-items: start; padding: 32px; border: 1px dashed var(--hairline-strong); border-radius: var(--radius-lg); background: var(--surface); }
 .site-tools-empty p { margin: 0; color: var(--ink); font-size: 17px; overflow-wrap: anywhere; }
 
 .site-tools-ai { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 20px; align-items: center; padding: clamp(20px, 3vw, 32px); border: 1px solid var(--hairline); border-radius: var(--radius-xl); background: var(--site-band); }
-.site-tools-ai .site-h3 { margin: 0 0 6px; }
-.site-tools-ai p { margin: 0; color: var(--text); }
+.site-tools-ai .site-h3 { margin: 0 0 6px; text-wrap: balance; }
+.site-tools-ai p { margin: 0; color: var(--text); text-wrap: pretty; }
 .site-tools-ai .site-tool-ico { width: 48px; height: 48px; border-radius: 12px; }
 
 @media (max-width: 1000px) {
   .site-tools-groups { columns: 2; }
-  .site-tools-hero-grid { grid-template-columns: 1fr; }
+  .site-tools-hero-grid { grid-template-columns: minmax(0, 1fr); grid-template-areas: 'copy' 'search' 'tabs'; gap: 20px; }
+  .site-tools-search { margin-top: 4px; }
 }
 @media (max-width: 680px) {
   .site-tools-groups { columns: 1; }
   /* The home directory drops descriptions on phones; here they are the point. */
   .site-tools-groups .site-toolgroup ul { display: block; }
-  .site-tools-row.site-toollink { grid-template-columns: 36px minmax(0, 1fr) 20px; gap: 12px; padding: 10px 12px; }
+  .site-tools-row.site-toollink { grid-template-columns: 36px minmax(0, 1fr) 16px; gap: 12px; padding: 10px 12px; }
   .site-tools-row.site-toollink .site-tool-ico { width: 36px; height: 36px; border-radius: 10px; }
   .site-tools-row.site-toollink .site-tool-ico .site-icon { width: 20px; height: 20px; }
   .site-tools-row.site-toollink b { font-size: 15px; }
   .site-tools-row.site-toollink span span { display: block; }
-  /* The search stays in reach while the long list scrolls. */
-  .site-tools-find { position: sticky; top: var(--site-header-h); z-index: 20; margin-inline: calc(var(--site-gutter) * -1); padding: 10px var(--site-gutter); background: color-mix(in srgb, var(--paper) 94%, transparent); backdrop-filter: blur(10px); }
-  .site-tools-hero { position: relative; z-index: 2; }
-  .site-tools-filter { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: calc(var(--site-gutter) * -1); padding-inline: var(--site-gutter); }
+  /* No hover on a phone: the chevron stays, quiet, so each row reads as a link. */
+  .site-tools-row.site-toollink > .site-icon { display: block; opacity: 0.7; }
+
+  /* The search and tabs stick under the header while the long list scrolls:
+     the hero boxes step aside so the bar's sticky range is the whole list. */
+  .site-tools-hero, .site-tools-hero-grid { display: contents; }
+  .site-tools-hero-copy { padding: 20px var(--site-gutter) 0; }
+  .site-tools-find { display: grid; gap: 10px; position: sticky; top: var(--site-header-h); z-index: 20; margin: 14px 0 20px; padding: 10px 0; background: color-mix(in srgb, var(--paper) 92%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+  .site-tools-search { grid-area: auto; margin: 0; padding-inline: var(--site-gutter); }
+  .site-tools-search > label { height: 46px; padding: 0 16px; }
+  /* Tabs scroll sideways: edge fades say there is more, tabs snap so none sits half-cut at rest. */
+  .site-tools-filter { grid-area: auto; flex-wrap: nowrap; gap: 6px; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; scroll-snap-type: x proximity; scroll-padding-inline: var(--site-gutter); padding-inline: var(--site-gutter); -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--site-gutter), #000 calc(100% - 40px), transparent); mask-image: linear-gradient(90deg, transparent 0, #000 var(--site-gutter), #000 calc(100% - 40px), transparent); }
   .site-tools-filter::-webkit-scrollbar { display: none; }
-  .site-tools-tab { flex: none; }
+  .site-tools-tab { scroll-snap-align: start; font-size: 13.5px; padding: 7px 12px; }
+  .site-tools-tab:last-child { margin-right: 24px; }
+  .site-tools-tab:focus-visible { outline-offset: -2px; }
   .site-tools-ai { grid-template-columns: 1fr; justify-items: start; }
 }
 
@@ -147,7 +201,9 @@
 .site-pe-vignette { width: 100%; }
 .site-pe-vignette .site-editor-bar { overflow-x: hidden; }
 .site-pe-vignette .site-editor-page { width: min(100%, 440px); }
-.site-pe-redact { height: 10px; width: 58%; border-radius: 2px; background: var(--ink); margin: 0 0 9px; }
+/* Highlighted line, and a redaction bar that stays black in both themes (as it is in the file). */
+.site-doc-line.site-pe-hl { width: 64%; margin: 14px 0 17px; background: color-mix(in srgb, var(--ink) 22%, var(--site-highlight)); box-shadow: 0 0 0 4px var(--site-highlight); }
+.site-pe-redact { height: 10px; width: 58%; border-radius: 2px; background: #05070a; box-shadow: 0 0 0 1px var(--hairline-strong); margin: 0 0 9px; }
 .site-pe-props { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--hairline); background: var(--surface); color: var(--muted); }
 .site-pe-props i { flex: 1; }
 .site-pe-swatch { width: 18px; height: 18px; border-radius: 50%; background: var(--site-highlight); border: 1px solid var(--hairline-strong); }
@@ -174,20 +230,24 @@
 .site-pe-scene.is-signature i:nth-child(3) { height: 22px; width: 46%; background: none; border-bottom: 1.5px solid var(--hairline-strong); border-radius: 0; position: relative; }
 .site-pe-scene.is-signature i:nth-child(3)::after { content: ''; position: absolute; left: 6px; right: 6px; bottom: 4px; height: 12px; border: 2px solid var(--link); border-color: var(--link) transparent transparent transparent; border-radius: 50% 40% 0 0; transform: skewX(-20deg); }
 .site-pe-scene.is-images i:nth-child(2) { height: 34px; width: 48px; background: var(--blue-100); border: 1px solid var(--blue-200); border-radius: 4px; }
-.site-pe-scene.is-redact i:nth-child(2) { height: 9px; background: var(--ink); border-radius: 1px; }
+.site-pe-scene.is-redact i:nth-child(2) { height: 9px; background: #05070a; box-shadow: 0 0 0 1px var(--hairline-strong); border-radius: 1px; }
 
-.site-pe-plans { display: grid; gap: 10px; justify-items: start; }
-.site-pe-plans > * { max-width: var(--site-container-narrow); }
-.site-pe-plans .site-h3 { margin: 0; }
-.site-pe-plans p { margin: 0; color: var(--text); font-size: 17px; text-wrap: pretty; }
+/* Plans line: a quiet panel, the same shape as the tools page's AI cross-link. */
+.site-pe-plans { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 20px; align-items: center; padding: clamp(20px, 3vw, 32px); border: 1px solid var(--hairline); border-radius: var(--radius-xl); background: var(--site-band); }
+.site-pe-plans .site-tool-ico { width: 48px; height: 48px; border-radius: 12px; }
+.site-pe-plans .site-h3 { margin: 0 0 6px; text-wrap: balance; }
+.site-pe-plans p { margin: 0; max-width: 72ch; color: var(--text); text-wrap: pretty; }
+.site-pe-note { margin-top: 16px; }
 
 @media (max-width: 1100px) { .site-pe-caps { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 900px) { .site-pe-hero-grid { grid-template-columns: 1fr; } }
 @media (max-width: 560px) {
   .site-pe-caps { grid-template-columns: 1fr; gap: 10px; }
-  .site-pe-caps > li { grid-template-columns: 64px minmax(0, 1fr); gap: 14px; padding: 12px; align-items: start; }
-  .site-pe-scene { height: 64px; padding: 8px 10px; gap: 5px; }
-  .site-pe-scene .site-icon { right: 6px; bottom: 6px; width: 14px; height: 14px; }
-  .site-pe-scene.is-annotate i:nth-child(3) { width: 24px; height: 18px; margin-right: 12px; }
-  .site-pe-scene.is-images i:nth-child(2) { width: 30px; height: 22px; }
+  .site-pe-caps > li { grid-template-columns: 40px minmax(0, 1fr); gap: 14px; padding: 14px 16px; align-items: start; }
+  /* Too small for the page scene: the capability's icon in a tile, like the tool lists. */
+  .site-pe-scene { width: 40px; height: 40px; padding: 0; place-items: center; border-radius: 10px; background: var(--blue-50); }
+  .site-pe-scene i { display: none; }
+  .site-pe-scene .site-icon { position: static; width: 20px; height: 20px; }
+  .site-pe-caps p { font-size: 14px; }
+  .site-pe-plans { grid-template-columns: 1fr; justify-items: start; gap: 14px; }
 }

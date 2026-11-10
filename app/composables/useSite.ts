@@ -26,6 +26,7 @@ export const TOOL_GROUPS = [
  * and returns '' for a line whose detail is not set yet, so a page hides it
  * (`v-if`) rather than showing a token.
  */
+const RU_SHORT = /(^|[\s(«„])(в|во|о|об|на|с|со|к|ко|и|а|у|по|до|из|за|от|не|ни)\s(?=\S)/gi
 export function useSite() {
   const { t, path, locale } = useLocale()
   const { contacts } = contactsState()
@@ -50,7 +51,10 @@ export function useSite() {
       .replaceAll('{formerBrand}', 'PDF Master')
       .replace(/\{(freeAi|freeFiles|plusAi)\}/g, (_match, field) => numbers[field]!)
       .replace(/\{\{([a-z_.]+)\}\}/g, (match, token) => known.value[token] || match)
-    return done.includes('{{') ? '' : done
+    if (done.includes('{{')) return ''
+    // "1 000", "20 MB" stay on one line.
+    const kept = done.replace(/(\d) (\d{3})(?!\d)/g, '$1\u00a0$2').replace(/(\d) (MB|МБ|GB|ГБ)/g, '$1\u00a0$2')
+    return locale.value === 'ru' ? kept.replace(RU_SHORT, '$1$2\u00a0') : kept
   }
   const st = (key: string, values: Record<string, string | number> = {}) => fill(t(key, values))
 

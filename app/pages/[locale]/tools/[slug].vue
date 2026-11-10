@@ -229,9 +229,16 @@ useHead(() => {
           </div>
 
           <div v-else-if="pic === 'convert'" class="site-tool-convert">
-            <span class="site-tool-file"><b :class="`is-${convert[0]}`">{{ convert[0] }}</b>{{ base }}.{{ convert[0] }}</span>
-            <AppIcon name="right" class="site-icon" />
-            <span class="site-tool-file site-tool-result"><b :class="`is-${convert[1]}`">{{ convert[1] }}</b>{{ base }}.{{ convert[1] }}</span>
+            <template v-for="(ext, index) in convert" :key="index">
+              <AppIcon v-if="index" name="right" class="site-icon" />
+              <div class="site-tool-doc" :class="{ 'is-out': index === 1 }">
+                <span v-if="ext === 'jpg'" class="site-tool-docpage is-jpg"><span><i></i><i></i><i></i><i></i></span></span>
+                <span v-else-if="ext === 'pptx'" class="site-tool-docpage is-pptx"><i></i><i></i><i></i></span>
+                <span v-else-if="ext === 'xlsx'" class="site-tool-docpage is-xlsx site-sheet"><i v-for="n in 24" :key="n"></i></span>
+                <span v-else class="site-tool-docpage site-sheet"><i v-for="n in 6" :key="n"></i></span>
+                <span class="site-tool-file"><b :class="`is-${ext}`">{{ ext }}</b>{{ base }}.{{ ext }}</span>
+              </div>
+            </template>
           </div>
 
           <ol v-else-if="pic === 'pages'" class="site-tool-strip">
@@ -247,14 +254,13 @@ useHead(() => {
 
           <div v-else-if="pic === 'ocr'" class="site-tool-scan">
             <div class="site-sheet site-tool-scanpage">
-              <p class="site-tool-scantitle">{{ t('siteHomeVignetteDocTitle') }}</p>
+              <p class="site-tool-scantitle"><span>{{ t('siteHomeVignetteDocTitle') }}</span></p>
               <div class="site-doc-line"></div>
-              <p class="site-tool-selected"><span>{{ t('siteHomeVignetteDocTitle') }}</span></p>
               <div class="site-doc-line is-s"></div>
+              <div class="site-doc-line"></div>
               <div class="site-doc-line"></div>
               <div class="site-doc-line is-s"></div>
             </div>
-            <span class="site-tool-caret"><AppIcon name="cursor" class="site-icon" /></span>
           </div>
 
           <div v-else-if="pic === 'lock'" class="site-tool-sizes">
@@ -275,14 +281,15 @@ useHead(() => {
               <div class="site-doc-line"></div>
               <div class="site-doc-line is-s"></div>
               <template v-if="slug === 'fill-pdf-form'">
-                <div v-for="n in 2" :key="n" class="site-tool-field" :class="{ 'is-on': n === 1 }">
+                <div v-for="n in 3" :key="n" class="site-tool-field" :class="{ 'is-on': n === 1 }">
                   <span></span><b><i v-if="n === 1"></i></b>
                 </div>
+                <div class="site-tool-check"><b><AppIcon name="check" class="site-icon" /></b><span></span></div>
               </template>
               <div v-else class="site-doc-line"></div>
-              <div class="site-editor-sign">
+              <div v-if="slug === 'sign-pdf'" class="site-editor-sign">
                 <span></span
-                ><svg v-if="slug === 'sign-pdf'" viewBox="0 0 120 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                ><svg viewBox="0 0 120 40" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
                   <path d="M6 28c8-14 14-20 18-16s-6 18 0 16 10-18 16-14-4 14 2 12 8-10 14-8 4 8 10 6 10-6 16-4 10 2 20 0" />
                 </svg>
               </div>

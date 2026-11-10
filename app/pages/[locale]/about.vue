@@ -30,18 +30,15 @@ const legal = [
   <div class="site-about">
     <SiteBreadcrumb />
     <section class="site-section is-tight site-about-company" aria-labelledby="about-title">
-      <div class="site-container is-narrow">
-        <h1 id="about-title" class="site-h1">{{ t('siteAboutTitle') }}</h1>
-        <p class="site-lead">{{ t('siteAboutBody') }}</p>
-      </div>
-    </section>
-
-    <section v-if="company" class="site-section site-about-requisites" aria-labelledby="about-requisites">
-      <div class="site-container is-narrow">
-        <div class="site-about-sheet site-sheet">
+      <div :class="['site-container site-about-top', { 'is-solo': !company }]">
+        <div class="site-about-intro">
+          <h1 id="about-title" class="site-h1">{{ t('siteAboutTitle') }}</h1>
+          <p class="site-lead">{{ t('siteAboutBody') }}</p>
+        </div>
+        <div v-if="company" class="site-about-sheet site-sheet" role="region" aria-labelledby="about-requisites">
           <h2 id="about-requisites" class="site-h3">{{ t('siteAboutRequisitesTitle') }}</h2>
           <dl>
-            <div v-if="company.name">
+            <div v-if="company.name" class="is-wide">
               <dt>{{ t('siteAboutLegalName') }}</dt>
               <dd>{{ company.name }}</dd>
             </div>
@@ -58,13 +55,13 @@ const legal = [
                 </ClientOnly>
               </dd>
             </div>
-            <div v-if="company.address" class="is-wide">
-              <dt>{{ t('siteAboutAddress') }}</dt>
-              <dd>{{ company.address }}</dd>
-            </div>
             <div>
               <dt>{{ t('siteAboutVat') }}</dt>
               <dd>{{ t('siteAboutVatValue') }}</dd>
+            </div>
+            <div v-if="company.address" class="is-wide">
+              <dt>{{ t('siteAboutAddress') }}</dt>
+              <dd>{{ company.address }}</dd>
             </div>
             <div v-if="company.phone">
               <dt>{{ t('siteFooterPhone') }}</dt>
@@ -80,39 +77,43 @@ const legal = [
     </section>
 
     <section class="site-section is-band" aria-labelledby="about-contacts">
-      <div class="site-container is-narrow">
-        <h2 id="about-contacts" class="site-h2 site-about-h2">{{ t('siteAboutContactsTitle') }}</h2>
-        <ul class="site-help-contacts site-about-contacts">
+      <div class="site-container site-help-contact">
+        <SiteSectionHead id="about-contacts" :title="t('siteAboutContactsTitle')" :intro="t('siteHelpContactLine')" />
+        <ul class="site-help-contacts">
           <li v-if="company?.phone">
             <a :href="`tel:${company.phone.replace(/[^+\d]/g, '')}`"
               ><span class="site-tool-ico"><AppIcon name="phone" class="site-icon" /></span
-              ><span><b>{{ t('siteContactPhone') }}</b><small>{{ company.phone }}</small><small>{{ t('siteContactPhoneHint') }}</small></span></a
-            >
+              ><span><b>{{ t('siteContactPhone') }}</b><small>{{ company.phone }}</small><small>{{ t('siteContactPhoneHint') }}</small></span
+              ><AppIcon name="chevron" class="site-icon is-sm"
+            /></a>
           </li>
           <li v-if="company?.email">
             <a :href="`mailto:${company.email}`"
-              ><span class="site-tool-ico"><AppIcon name="send" class="site-icon" /></span
-              ><span><b>{{ t('siteContactEmail') }}</b><small>{{ company.email }}</small><small>{{ t('siteContactEmailHint') }}</small></span></a
-            >
+              ><span class="site-tool-ico"><AppIcon name="mail" class="site-icon" /></span
+              ><span><b>{{ t('siteContactEmail') }}</b><small>{{ company.email }}</small><small>{{ t('siteContactEmailHint') }}</small></span
+              ><AppIcon name="chevron" class="site-icon is-sm"
+            /></a>
           </li>
           <li v-if="support?.url">
             <a :href="support.url" target="_blank" rel="noopener"
               ><span class="site-tool-ico"><AppIcon name="send" class="site-icon" /></span
-              ><span><b>{{ t('siteContactTelegram') }}</b><small>@{{ support.username }}</small><small>{{ t('siteContactTelegramHint') }}</small></span></a
-            >
+              ><span><b>{{ t('siteContactTelegram') }}</b><small>@{{ support.username }}</small><small>{{ t('siteContactTelegramHint') }}</small></span
+              ><AppIcon name="external" class="site-icon is-sm"
+            /></a>
           </li>
           <li>
             <NuxtLink :to="path('/app/support')"
               ><span class="site-tool-ico"><AppIcon name="help" class="site-icon" /></span
-              ><span><b>{{ t('siteContactInApp') }}</b><small>{{ t('siteContactInAppHint') }}</small></span></NuxtLink
-            >
+              ><span><b>{{ t('siteContactInApp') }}</b><small>{{ t('siteContactInAppHint') }}</small></span
+              ><AppIcon name="chevron" class="site-icon is-sm"
+            /></NuxtLink>
           </li>
         </ul>
       </div>
     </section>
 
     <section class="site-section" aria-labelledby="about-legal">
-      <div class="site-container is-narrow">
+      <div class="site-container">
         <h2 id="about-legal" class="site-h2 site-about-h2">{{ t('siteAboutLegalTitle') }}</h2>
         <ul class="site-about-docs">
           <li v-for="[to, title, line] in legal" :key="to">

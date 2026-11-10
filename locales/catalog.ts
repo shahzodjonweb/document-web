@@ -4,14 +4,7 @@ import { site } from './site.ts'
 export type Locale = 'en' | 'uz' | 'ru'
 const entries: Record<string, [string, string, string]> = {
   preview: ['Preview', 'Ko‘rib chiqish', 'Предпросмотр'],
-  // A page that does not exist, or one that failed to render.
-  notFoundTitle: ['We couldn’t find that page', 'Bu sahifa topilmadi', 'Такой страницы нет'],
-  notFoundLead: [
-    'The link may be old or have a typo. Start from the home page or pick a tool.',
-    'Havola eskirgan yoki xato yozilgan bo‘lishi mumkin. Bosh sahifadan boshlang yoki vositani tanlang.',
-    'Возможно, ссылка устарела или в ней опечатка. Начните с главной или выберите инструмент.',
-  ],
-  notFoundHome: ['Home', 'Bosh sahifa', 'Главная'],
+  // A page that failed to render (app/error.vue; a missing page uses siteNotFound*).
   pageErrorTitle: ['Something went wrong', 'Nimadir xato ketdi', 'Что-то пошло не так'],
   pageErrorLead: [
     'The page didn’t load. Try again in a moment.',

@@ -26,6 +26,8 @@ export function planNumbers(plans: readonly any[]): Record<string, string> {
     plusAi: limit('plus', 'weekly_ai_documents', 20),
   }
 }
+/** Russian short words that should not end a line: "в", "о", "с", "и", "по"… */
+const RU_SHORT_WORD = /(^|[\s(«„])(в|во|о|об|на|с|со|к|ко|и|а|у|по|до|из|за|от|не|ни)\s(?=\S)/gi
 export function useLocale() {
   const route = useRoute()
   const locale = computed<Locale>(() =>
@@ -42,7 +44,10 @@ export function useLocale() {
   }
   const t = (key: string | null | undefined, values: Record<string, string | number> = {}) => {
     const name = String(key ?? '')
-    const text = dictionaries[locale.value][name] || dictionaries.en[name] || name
+    const raw = dictionaries[locale.value][name] || dictionaries.en[name] || name
+    // On the public site's Russian pages a one- or two-letter preposition or conjunction
+    // stays with the word after it; the app's own strings are left exactly as written.
+    const text = locale.value === 'ru' && name.startsWith('site') ? raw.replace(RU_SHORT_WORD, '$1$2\u00a0') : raw
     if (!text.includes('{')) return text
     const numbers = /\{(freeAi|freeFiles|plusAi)\}/.test(text) ? planNumbers(plans.value) : {}
     return text.replace(

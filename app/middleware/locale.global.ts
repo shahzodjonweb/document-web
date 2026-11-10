@@ -23,6 +23,10 @@ function preferred(header: string): string {
 }
 
 export default defineNuxtRouteMiddleware((to) => {
+  // The server already redirected or refused this address before sending the page;
+  // checking again while the browser takes the page over would only raise the 404 twice.
+  const nuxtApp = useNuxtApp()
+  if (import.meta.client && nuxtApp.isHydrating && nuxtApp.payload.serverRendered) return
   const match = to.path.match(/^\/(en|uz|ru)(?=\/|$)/)
   if (!match) {
     // The bare address picks the visitor's language; it may differ next time, so it is not permanent.

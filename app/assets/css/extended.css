@@ -1757,6 +1757,11 @@
    about how the page looks and the hint text is the actual explanation. */
 
 /* Prompt guide: a short reference table and examples that can be used as-is. */
+.guide-lead,
+.guide-table,
+.guide-examples > li.panel {
+  padding: var(--space-5) var(--space-6);
+}
 .guide-lead p {
   font-size: 15px;
   line-height: 1.7;

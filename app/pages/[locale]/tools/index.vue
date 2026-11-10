@@ -48,6 +48,33 @@ const reset = () => {
   group.value = 'all'
 }
 
+// Phones: the search bar sticks under the header, so a new filter brings the list's top back into view
+// and the picked tab scrolls into the strip.
+const findEl = ref<HTMLElement | null>(null)
+const listEl = ref<HTMLElement | null>(null)
+const pick = (value: ToolCategory | 'all', event: Event) => {
+  group.value = value
+  // Centre the picked tab in the strip when it scrolls (phones); scrolling only the strip, never the page.
+  const tab = event.currentTarget as HTMLElement
+  const strip = tab.parentElement
+  if (strip && strip.scrollWidth > strip.clientWidth)
+    strip.scrollTo({ left: tab.offsetLeft - (strip.clientWidth - tab.offsetWidth) / 2, behavior: 'smooth' })
+}
+watch([group, words], () =>
+  nextTick(() => {
+    const bar = findEl.value
+    const list = listEl.value
+    if (!bar || !list) return
+    const style = getComputedStyle(bar)
+    if (style.position !== 'sticky') return
+    // Document offsets, not viewport rects: the page may just have shrunk under the current scroll.
+    let top = 0
+    for (let node: HTMLElement | null = list; node; node = node.offsetParent as HTMLElement | null) top += node.offsetTop
+    const target = Math.max(0, top - parseFloat(style.top) - bar.offsetHeight - 8)
+    if (window.scrollY > target) window.scrollTo({ top: target })
+  }),
+)
+
 const freeTasks = computed(() => {
   const free = ws.plans.value.find((plan: any) => plan.id === 'free') as any
   const value = free?.limits?.weekly_file_jobs
@@ -57,68 +84,75 @@ const freeTasks = computed(() => {
 <template>
   <div class="site-tools">
     <SiteBreadcrumb />
-    <section class="site-tools-hero">
-      <div class="site-container site-tools-hero-grid">
-        <div class="site-tools-hero-copy">
-          <h1 class="site-h1">{{ t('siteToolsHeroTitle') }}</h1>
-          <p class="site-lead">{{ t('siteToolsHeroLead') }}</p>
-        </div>
-        <div class="site-tools-find" role="search">
-          <label class="site-tools-search">
-            <span class="site-visually-hidden">{{ t('siteToolsSearch') }}</span>
-            <AppIcon name="search" class="site-icon" />
-            <input v-model="query" type="search" :placeholder="t('siteToolsSearch')" autocomplete="off" enterkeyhint="search" />
-          </label>
-          <div class="site-tools-filter" role="group" :aria-label="t('siteToolsFilterLabel')">
-            <button type="button" class="site-tools-tab" :aria-pressed="group === 'all'" @click="group = 'all'">
-              {{ t('siteToolsFilterAll') }}
-            </button>
-            <button
-              v-for="category in categories"
-              :key="category"
-              type="button"
-              class="site-tools-tab"
-              :aria-pressed="group === category"
-              @click="group = category"
-            >
-              {{ t(toolCategoryKeys[category]) }}
-            </button>
+    <div class="site-tools-browse">
+      <section class="site-tools-hero">
+        <div class="site-container site-tools-hero-grid">
+          <div class="site-tools-hero-copy">
+            <h1 class="site-h1">{{ t('siteToolsHeroTitle') }}</h1>
+            <p class="site-lead">{{ t('siteToolsHeroLead') }}</p>
+          </div>
+          <div ref="findEl" class="site-tools-find">
+            <div class="site-tools-search" role="search">
+              <label>
+                <span class="site-visually-hidden">{{ t('siteToolsSearch') }}</span>
+                <AppIcon name="search" class="site-icon" />
+                <input v-model="query" type="search" :placeholder="t('siteToolsSearch')" autocomplete="off" enterkeyhint="search" />
+              </label>
+            </div>
+            <div class="site-tools-filter" role="group" :aria-label="t('siteToolsFilterLabel')">
+              <button type="button" class="site-tools-tab" :aria-pressed="group === 'all'" @click="pick('all', $event)">
+                {{ t('siteToolsFilterAll') }}
+              </button>
+              <button
+                v-for="category in categories"
+                :key="category"
+                type="button"
+                class="site-tools-tab"
+                :aria-pressed="group === category"
+                @click="pick(category, $event)"
+              >
+                {{ t(toolCategoryKeys[category]) }}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="site-section site-tools-list" :aria-label="t('siteToolsHeroTitle')">
-      <div class="site-container">
-        <p class="site-tools-count" :class="{ 'site-visually-hidden': !filtering }" aria-live="polite">
-          {{ t('siteToolsResultCount', { count }) }}
-        </p>
-        <div v-if="sections.length" class="site-tools-groups">
-          <section v-for="section in sections" :key="section.category" class="site-toolgroup" :aria-labelledby="`tools-${section.category}`">
-            <h2 :id="`tools-${section.category}`" class="site-tools-group-title">{{ section.title }}</h2>
-            <ul>
-              <li v-for="item in section.tools" :key="item.slug">
-                <NuxtLink class="site-toollink site-tools-row" :to="toolPage(item.slug)"
-                  ><span class="site-tool-ico" aria-hidden="true"><AppIcon :name="item.icon" class="site-icon" /></span
-                  ><span
-                    ><b>{{ toolName(item) }}</b><span>{{ desc(item) }}</span></span
-                  ><span v-if="inBot(item)" class="site-tools-bot" :title="t('siteToolsBotLabel')"
-                    ><AppIcon name="send" class="site-icon is-sm" /><span class="site-visually-hidden">{{ t('siteToolsBotLabel') }}</span></span
-                  ><span v-else aria-hidden="true"></span
-                ></NuxtLink>
-              </li>
-            </ul>
-            <NuxtLink v-if="section.category === 'edit'" class="site-link-arrow site-tools-editor" :to="path('/pdf-editor')"
-              >{{ t('siteToolEditorMoreLink') }}<AppIcon name="right" class="site-icon is-sm"
-            /></NuxtLink>
-          </section>
+      <section ref="listEl" class="site-section site-tools-list" :aria-label="t('siteToolsHeroTitle')">
+        <div class="site-container">
+          <p class="site-tools-count" :class="{ 'site-visually-hidden': !filtering }" aria-live="polite">
+            {{ t('siteToolsResultCount', { count }) }}
+          </p>
+          <div v-if="sections.length" class="site-tools-groups" :class="{ 'is-single': sections.length === 1 }">
+            <section v-for="section in sections" :key="section.category" class="site-toolgroup" :aria-labelledby="`tools-${section.category}`">
+              <h2 :id="`tools-${section.category}`" class="site-tools-group-title">{{ section.title }}</h2>
+              <ul>
+                <li v-for="item in section.tools" :key="item.slug">
+                  <NuxtLink class="site-toollink site-tools-row" :to="toolPage(item.slug)"
+                    ><span class="site-tool-ico" aria-hidden="true"><AppIcon :name="item.icon" class="site-icon" /></span
+                    ><span
+                      ><b
+                        >{{ inBot(item) ? `${toolName(item)} ` : toolName(item)
+                        }}<small v-if="inBot(item)" class="site-tools-tg" :title="t('siteToolsBotLabel')"
+                          ><i aria-hidden="true">Telegram</i><i class="site-visually-hidden">, {{ t('siteToolsBotLabel') }}</i></small
+                        ></b
+                      ><span>{{ desc(item) }}</span></span
+                    ><AppIcon name="chevron" class="site-icon is-sm"
+                  /></NuxtLink>
+                </li>
+              </ul>
+              <NuxtLink v-if="section.category === 'edit'" class="site-link-arrow site-tools-editor" :to="path('/pdf-editor')"
+                >{{ t('siteToolEditorMoreLink') }}<AppIcon name="right" class="site-icon is-sm"
+              /></NuxtLink>
+            </section>
+          </div>
+          <div v-else class="site-tools-empty">
+            <p>{{ t('siteToolsEmpty', { query: query.trim() }) }}</p>
+            <button type="button" class="site-btn is-secondary" @click="reset">{{ t('siteToolsEmptyLink') }}</button>
+          </div>
         </div>
-        <div v-else class="site-tools-empty">
-          <p>{{ t('siteToolsEmpty', { query: query.trim() }) }}</p>
-          <button type="button" class="site-btn is-secondary" @click="reset">{{ t('siteToolsEmptyLink') }}</button>
-        </div>
-      </div>
-    </section>
+      </section>
+    </div>
 
     <section class="site-section is-band" aria-labelledby="tools-limits">
       <div class="site-container">
