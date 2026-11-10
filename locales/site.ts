@@ -1046,6 +1046,21 @@ export const site = {
   siteLegalOfferTitle: ['Public offer', 'Ommaviy oferta', 'Публичная оферта'],
   siteLegalPrivacyTitle: ['Privacy policy', 'Maxfiylik siyosati', 'Политика конфиденциальности'],
   siteLegalRefundsTitle: ['Refunds and cancellation', 'To‘lovni qaytarish va bekor qilish', 'Возврат средств и отмена'],
+  // Until the signed-off legal texts are published (step W5): the rules already in force, plainly.
+  siteLegalPendingLead: [
+    'The full text is being finalised with our lawyer and will be published here. Until then, these are the rules we already follow.',
+    'Hujjatning to‘liq matni yuristimiz bilan yakunlanmoqda va shu yerda eʼlon qilinadi. Hozircha amal qilayotgan qoidalarimiz quyida.',
+    'Полный текст согласуется с юристом и будет опубликован здесь. А пока — правила, которым мы уже следуем.',
+  ],
+  siteLegalFilesTitle: ['Your files and data', 'Fayllaringiz va maʼlumotlaringiz', 'Ваши файлы и данные'],
+  siteLegalPlansTitle: ['Plans, payment and refunds', 'Tariflar, to‘lov va pulni qaytarish', 'Тарифы, оплата и возврат'],
+  siteLegalQuestionsTitle: ['Questions about this page?', 'Bu sahifa bo‘yicha savollar bormi?', 'Вопросы по этой странице?'],
+  siteLegalQuestionsLine: [
+    'Write to our support on Telegram, or see the company details and contacts.',
+    'Telegram orqali yordam xizmatimizga yozing yoki kompaniya rekvizitlari va aloqa maʼlumotlarini ko‘ring.',
+    'Напишите в поддержку в Telegram или посмотрите реквизиты и контакты компании.',
+  ],
+  siteLegalQuestionsSupport: ['Write to support', 'Yordam xizmatiga yozish', 'Написать в поддержку'],
   siteLegalMetaUzName: ['Uzbek title: {name}', 'Hujjat nomi: {name}', 'Название на узбекском: {name}'],
   siteLegalMetaVersion: ['Version {version}', '{version}-tahrir', 'Редакция {version}'],
   siteLegalMetaEffective: ['In force from {date}', '{date} dan kuchga kiradi', 'Действует с {date}'],

@@ -392,7 +392,7 @@ html { -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--site-heade
 @media (max-width: 760px) { .site-steps { grid-template-columns: 1fr; gap: 28px; } }
 
 /* ---------------------------------------------------------------- privacy lifecycle */
-.site-life { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); position: relative; margin: 8px 0 40px; }
+.site-life { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); position: relative; margin: 8px 0 40px; padding: 0; }
 .site-life::before { content: ''; position: absolute; left: 18px; right: 18px; top: 17px; height: 2px; background: linear-gradient(90deg, var(--action) 0 66%, var(--hairline-strong) 66% 100%); }
 .site-life li { list-style: none; position: relative; display: grid; gap: 6px; padding-right: 24px; align-content: start; }
 .site-life-dot { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); border: 2px solid var(--action); color: var(--link); margin-bottom: 10px; }
@@ -608,8 +608,6 @@ html { -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--site-heade
 .site-banner-line { margin: 0; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
 #main-content:focus { outline: none; }
 .site-requisites dd a { color: inherit; }
-/* Pages that keep their app-styled content inside the site frame (guide, draft legal). */
-.site-legacy { font-size: var(--text-md); }
 /* Pricing (pages/[locale]/pricing.vue) */
 .site-pricing-intro { padding-bottom: 32px; }
 .site-pricing-head { display: grid; gap: 16px; justify-items: start; }
@@ -619,3 +617,71 @@ html { -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--site-heade
 .site-pricing-cards { margin-top: 28px; }
 .site-pricing-tiles { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
 .site-pricing-tiles dt { display: flex; align-items: center; gap: 6px; }
+
+/* Not found and errors (app/error.vue) */
+.site-error-inner { display: grid; gap: 18px; justify-items: center; text-align: center; padding-block: clamp(24px, 6vw, 72px); }
+.site-error-code { font: 800 clamp(64px, 8vw, 112px)/1 var(--font-display); letter-spacing: -0.04em; color: var(--blue-200); }
+.site-error-inner .site-lead { max-width: 46ch; }
+.site-error-path { margin: 0; color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
+.site-error-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 8px; }
+@media (max-width: 520px) { .site-error-links .site-btn { flex: 1 1 calc(50% - 6px); } }
+
+/* Discount line: the full prices from a tablet up; one short line on a phone,
+   where the full one is still there for screen readers. */
+.site-banner-short { display: none; margin: 0; }
+@media (max-width: 640px) {
+  .site-banner { font-size: 14px; }
+  .site-banner .site-container { min-height: 44px; gap: 8px 12px; flex-wrap: nowrap; }
+  .site-banner .site-container > .site-icon { display: none; }
+  .site-banner-line { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .site-banner-short { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; min-width: 0; }
+  .site-banner-short > span { display: inline-flex; align-items: center; gap: 6px; }
+  .site-banner .site-link-arrow { margin-left: auto; white-space: nowrap; }
+}
+
+/* Legal pages until the signed-off texts arrive (pages/[locale]/legal/[doc].vue) */
+.site-legal-hero { padding-bottom: clamp(32px, 4vw, 56px); }
+.site-legal-intro { display: grid; gap: 20px; justify-items: start; }
+.site-legal-intro .site-note { max-width: 720px; }
+.site-legal-tiles { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.site-legal-tiles dt { display: flex; align-items: center; gap: 6px; }
+.site-legal-vat { margin: 20px 0 0; }
+.site-legal-questions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px 40px;
+  padding: clamp(24px, 3vw, 36px); background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-xl); }
+.site-legal-questions p { margin: 8px 0 0; color: var(--text); max-width: 56ch; }
+
+/* Prompt guide (pages/[locale]/guide.vue) */
+.site-guide-hero { padding-bottom: clamp(40px, 4vw, 64px); }
+.site-guide-intro { display: grid; gap: 20px; justify-items: start; }
+.site-guide-intro .site-note { max-width: 720px; }
+.site-guide-table tbody th { width: 26%; color: var(--ink); font-weight: 600; }
+.site-guide-table td { color: var(--text); font-variant-numeric: normal; }
+@media (max-width: 600px) { .site-guide-table td::before { content: none; } .site-guide-table td { display: block; } }
+.site-guide-service + .site-guide-service { margin-top: clamp(32px, 4vw, 48px); }
+.site-guide-service .site-h3 { margin-bottom: 16px; }
+.site-guide-examples { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--site-grid-gap); counter-reset: site-guide; }
+.site-guide-example { counter-increment: site-guide; display: grid; grid-template-rows: 1fr auto; gap: 16px; justify-items: start;
+  padding: 22px 24px; background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--radius-lg); }
+.site-guide-example p { margin: 0; color: var(--ink); font-size: 15px; line-height: 1.6; white-space: pre-line; }
+.site-guide-example p::before { content: counter(site-guide) '. '; color: var(--muted); font-weight: 600; }
+@media (max-width: 420px) { .site-guide-examples { grid-template-columns: 1fr; } }
+
+/* Polish pass */
+/* The stacked limits table on a phone keeps its caption full width, above the rows. */
+@media (max-width: 600px) {
+  .site-table caption { display: block; width: auto; border-top: 0; border-bottom: 1px solid var(--hairline); }
+}
+/* A plan's regular price: only the amount is struck, its label reads normally. */
+.site-plan-regular { color: var(--muted); font-size: 15px; }
+.site-plan-regular s { color: inherit; }
+/* The AI cards' slide vignette fits the narrower stage on a tablet. */
+@media (max-width: 1000px) {
+  .site-ai-stage .site-mini-slide { width: 176px; }
+  .site-ai-stage .site-mini-slide.is-back { transform: translate(-22px, -20px) rotate(-5deg); }
+  .site-ai-stage .site-mini-slide.is-mid { transform: translate(20px, -10px) rotate(4deg); }
+}
+/* The phone menu sheet (a sibling of the header, placed under it by Header.vue). */
+@media (max-width: 1099px) {
+  .site-mobile-menu.is-open { inset: auto 0 0 0; bottom: 0; z-index: 60; }
+  html.site-sheet-open { overflow: hidden; }
+}

@@ -11,6 +11,16 @@ const open = ref<'' | 'tools' | 'ai' | 'lang'>('')
 const sheet = ref(false)
 const root = ref<HTMLElement | null>(null)
 const toggle = (menu: 'tools' | 'ai' | 'lang') => (open.value = open.value === menu ? '' : menu)
+// The sheet starts where the header ends, which moves with the discount line above it.
+const sheetTop = ref(72)
+watch(sheet, (on) => {
+  if (!import.meta.client) return
+  if (on) sheetTop.value = Math.max(0, Math.round(root.value?.getBoundingClientRect().bottom ?? 72))
+  document.documentElement.classList.toggle('site-sheet-open', on)
+})
+onBeforeUnmount(() => {
+  if (import.meta.client) document.documentElement.classList.remove('site-sheet-open')
+})
 const close = () => {
   open.value = ''
   sheet.value = false
@@ -182,44 +192,44 @@ const current = (to: string) => route.path === to || route.path.startsWith(`${to
         </button>
       </div>
     </div>
-    <div id="site-mobile-menu" class="site-mobile-menu" :class="{ 'is-open': sheet }">
-      <details>
-        <summary>{{ t('siteNavTools') }}<AppIcon name="down" class="site-icon" /></summary>
-        <ul>
-          <template v-for="group in groups" :key="group.key">
-            <li v-for="item in group.tools" :key="item.slug">
-              <NuxtLink :to="toolPage(item.slug)">{{ toolName(item) }}</NuxtLink>
-            </li>
-          </template>
-          <li>
-            <NuxtLink :to="path('/tools')"><b>{{ t('siteNavAllTools') }}</b></NuxtLink>
-          </li>
-        </ul>
-      </details>
-      <NuxtLink :to="path('/pdf-editor')">{{ t('siteNavEditor') }}<AppIcon name="chevron" class="site-icon" /></NuxtLink>
-      <details>
-        <summary>{{ t('siteNavAi') }}<AppIcon name="down" class="site-icon" /></summary>
-        <ul>
-          <li v-for="item in ai" :key="item.to">
-            <NuxtLink :to="item.to">{{ item.title }}</NuxtLink>
-          </li>
-        </ul>
-      </details>
-      <NuxtLink :to="path('/pricing')">{{ t('siteNavPricing') }}<AppIcon name="chevron" class="site-icon" /></NuxtLink>
-      <NuxtLink :to="path('/telegram')">{{ t('siteNavTelegram') }}<AppIcon name="chevron" class="site-icon" /></NuxtLink>
-      <div class="site-mobile-menu-end">
-        <div class="site-mobile-menu-langs" role="group" :aria-label="t('siteLangLabel')">
-          <a
-            v-for="language in languages"
-            :key="language.code"
-            :href="localePath(language.code)"
-            :lang="language.code"
-            :aria-current="language.code === locale ? 'true' : undefined"
-            >{{ t(language.key) }}</a
-          >
-        </div>
-        <NuxtLink class="site-btn is-secondary" :to="path('/app')">{{ t('siteNavSignIn') }}</NuxtLink>
-      </div>
-    </div>
   </header>
+  <div id="site-mobile-menu" class="site-mobile-menu" :class="{ 'is-open': sheet }" :style="{ top: `${sheetTop}px` }">
+    <details>
+      <summary>{{ t('siteNavTools') }}<AppIcon name="down" class="site-icon" /></summary>
+      <ul>
+        <template v-for="group in groups" :key="group.key">
+          <li v-for="item in group.tools" :key="item.slug">
+            <NuxtLink :to="toolPage(item.slug)">{{ toolName(item) }}</NuxtLink>
+          </li>
+        </template>
+        <li>
+          <NuxtLink :to="path('/tools')"><b>{{ t('siteNavAllTools') }}</b></NuxtLink>
+        </li>
+      </ul>
+    </details>
+    <NuxtLink :to="path('/pdf-editor')">{{ t('siteNavEditor') }}<AppIcon name="chevron" class="site-icon" /></NuxtLink>
+    <details>
+      <summary>{{ t('siteNavAi') }}<AppIcon name="down" class="site-icon" /></summary>
+      <ul>
+        <li v-for="item in ai" :key="item.to">
+          <NuxtLink :to="item.to">{{ item.title }}</NuxtLink>
+        </li>
+      </ul>
+    </details>
+    <NuxtLink :to="path('/pricing')">{{ t('siteNavPricing') }}<AppIcon name="chevron" class="site-icon" /></NuxtLink>
+    <NuxtLink :to="path('/telegram')">{{ t('siteNavTelegram') }}<AppIcon name="chevron" class="site-icon" /></NuxtLink>
+    <div class="site-mobile-menu-end">
+      <div class="site-mobile-menu-langs" role="group" :aria-label="t('siteLangLabel')">
+        <a
+          v-for="language in languages"
+          :key="language.code"
+          :href="localePath(language.code)"
+          :lang="language.code"
+          :aria-current="language.code === locale ? 'true' : undefined"
+          >{{ t(language.key) }}</a
+        >
+      </div>
+      <NuxtLink class="site-btn is-secondary" :to="path('/app')">{{ t('siteNavSignIn') }}</NuxtLink>
+    </div>
+  </div>
 </template>

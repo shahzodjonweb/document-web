@@ -22,6 +22,8 @@ const card = (plan: any) => {
     body: t(`sitePlan${capitalized(plan.id)}Body`),
     price: figure(price(plan)),
     regular: deal ? figure(regular(plan)) : '',
+    // "Regular price {price}": the words around the amount, which alone is struck.
+    regularLabel: t('sitePlanRegular', { price: '\u0000' }).split('\u0000') as [string, string],
     period: regular(plan)
       ? deal
         ? t('sitePlanDiscountPeriod', { date: dayLabel(deal.until) })
@@ -49,7 +51,9 @@ const card = (plan: any) => {
         <span v-if="plan.percent" class="site-badge">−{{ plan.percent }}%</span>
       </div>
       <div class="site-plan-price">
-        <s v-if="plan.regular">{{ t('sitePlanRegular', { price: `${plan.regular} so'm` }) }}</s>
+        <span v-if="plan.regular" class="site-plan-regular"
+          >{{ plan.regularLabel[0] }}<s>{{ plan.regular }} so'm</s>{{ plan.regularLabel[1] }}</span
+        >
         <strong>{{ plan.price }}<small>so'm</small></strong><span>{{ plan.period }}</span>
       </div>
       <ul>
