@@ -1,3 +1,4 @@
-pdfmaster.orderdesk.live {
+# The site; the old host serves the same gateway until it redirects.
+docmaster.live, pdfmaster.orderdesk.live {
     reverse_proxy 127.0.0.1:8310
 }

@@ -37,9 +37,11 @@ if ids and ids!=['unavailable']:
             'mounts':[{'source':m['Source'],'target':m['Destination']} for m in c['Mounts']]}))
         if 'caddy' in c['Config']['Image'].lower():
             print('CADDY_ROUTES',routes(['docker','exec',c['Id'],'caddy','adapt','--config','/etc/caddy/Caddyfile','--pretty']))
-for path in ('/etc/caddy/Caddyfile',str(Path.home()/'pdf-master/state.json')):
+for path in ('/etc/caddy/Caddyfile',str(Path.home()/'docmaster/state.json')):
     p=Path(path)
     if p.is_file():
-        if path.endswith('state.json'):print('EXISTING_PDFMASTER_STATE',p.read_text())
+        if path.endswith('state.json'):print('EXISTING_DOCMASTER_STATE',p.read_text())
         else:print('HOST_CADDY_ROUTES',routes(['caddy','adapt','--config',path,'--pretty']))
-print('PDFMASTER_PATH_EXISTS',(Path.home()/'pdf-master').exists())
+print('DOCMASTER_PATH_EXISTS',(Path.home()/'docmaster').exists())
+# The pre-rename folder: present only before the rename migration or after its rollback.
+print('PDF_MASTER_PATH_EXISTS',(Path.home()/'pdf-master').exists())
