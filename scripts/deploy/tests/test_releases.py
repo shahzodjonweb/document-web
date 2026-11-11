@@ -49,17 +49,17 @@ class Docker:
 class Releases(unittest.TestCase):
     def setUp(self):
         self.temp=tempfile.TemporaryDirectory()
-        self.root=Path(self.temp.name)/'pdf-master'
+        self.root=Path(self.temp.name)/'docmaster'
         self.docker=Docker()
         for component in ('platform','web'):
             root=self.root/component;root.mkdir(parents=True)
-            domain='pdfmaster-admin.orderdesk.live' if component=='platform' else 'pdfmaster.orderdesk.live'
+            domain='api.docmaster.live' if component=='platform' else 'docmaster.live'
             env=root/'.env'
             env.write_text('\n'.join([
                 'PUBLIC_DOMAIN='+domain, 'SECRET_KEY='+'s'*48, 'POSTGRES_PASSWORD='+'p'*40,
                 'FILE_SECRET_KEY='+'f'*44, 'INTEGRATION_ENCRYPTION_KEY='+'i'*44,
-                'ALLOWED_HOSTS=pdfmaster-admin.orderdesk.live,127.0.0.1,localhost,api',
-                'CSRF_TRUSTED_ORIGINS=https://pdfmaster.orderdesk.live',
+                'ALLOWED_HOSTS=api.docmaster.live,127.0.0.1,localhost,api',
+                'CSRF_TRUSTED_ORIGINS=https://docmaster.live',
                 'DEBUG=0','DEVELOPMENT_LOGIN_ENABLED=0','COMMERCE_SANDBOX_ENABLED=0',
             ])+'\n');env.chmod(0o600)
     def tearDown(self):self.temp.cleanup()
@@ -67,17 +67,17 @@ class Releases(unittest.TestCase):
     def bundle(self,component,run,*,contract='c'*64,architecture='amd64',attempt=1,corrupt=False):
         sha=hashlib.sha1((component+str(run)).encode()).hexdigest()
         release_id=f'{sha}-{run}-{attempt}'
-        image=f'pdfmaster-{component}:{release_id}'
+        image=f'docmaster-{component}:{release_id}'
         image_bytes,config_id=saved_image(image,release_id)
         meta={'protocol':2,'component':component,'commit':sha,'release_id':release_id,
-              'run_id':run,'run_attempt':attempt,'image':f'pdfmaster-{component}:{release_id}',
+              'run_id':run,'run_attempt':attempt,'image':f'docmaster-{component}:{release_id}',
               'image_id':config_id,
               'architecture':architecture,'contract_sha256':contract,
               'archive_sha256':hashlib.sha256(image_bytes if not corrupt else b'wrong').hexdigest()}
         self.docker.images[meta['image']]=meta['image_id']
         self.docker.exports[meta['image']]=image_bytes
         members={'release.json':json.dumps(meta).encode(),'image.tar.gz':image_bytes,
-                 'stack/compose.yaml':('name: pdfmaster-'+component+'\n').encode(),'stack/nginx.conf':b'server {}'}
+                 'stack/compose.yaml':('name: docmaster-'+component+'\n').encode(),'stack/nginx.conf':b'server {}'}
         target=Path(self.temp.name)/(release_id+'.tgz')
         with tarfile.open(target,'w:gz') as archive:
             for name,data in members.items():
@@ -90,7 +90,7 @@ class Releases(unittest.TestCase):
     def assert_only_project(self,component):
         for call in self.docker.calls:
             if '--project-name' in call:
-                self.assertEqual(call[call.index('--project-name')+1],'pdfmaster-'+component)
+                self.assertEqual(call[call.index('--project-name')+1],'docmaster-'+component)
                 self.assertIn(str((self.root/component/'.env').resolve()),call)
         self.assertFalse(any('down' in c or 'prune' in c or '--remove-orphans' in c for c in self.docker.calls))
 
@@ -227,10 +227,10 @@ class Releases(unittest.TestCase):
 
     def test_config_identity_matches_classic_and_oci_archives_and_rejects_other_tags(self):
         for oci in (False,True):
-            content,identity=saved_image('pdfmaster-web:test','release',oci=oci)
-            self.assertEqual(server.image_config_id(io.BytesIO(content),'pdfmaster-web:test'),identity)
+            content,identity=saved_image('docmaster-web:test','release',oci=oci)
+            self.assertEqual(server.image_config_id(io.BytesIO(content),'docmaster-web:test'),identity)
             with self.assertRaisesRegex(server.DeploymentError,'Cannot verify'):
-                server.image_config_id(io.BytesIO(content),'pdfmaster-web:other')
+                server.image_config_id(io.BytesIO(content),'docmaster-web:other')
 
     def test_readiness_names_missing_settings_and_never_echoes_values(self):
         names=('DEPLOY_HOST','DEPLOY_USER','DEPLOY_SSH_KEY','DEPLOY_KNOWN_HOSTS')
