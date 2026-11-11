@@ -1,4 +1,4 @@
-# PDF Master customer design, v1
+# DocMaster customer design, v1
 
 Author: dedicated customer UI/UX specialist. Scope: browser and Telegram Mini App, P1 file tools. Created before screen implementation, 2026-09-22.
 

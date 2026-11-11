@@ -89,8 +89,8 @@ const MAX_QUESTIONS = 40
 const MAX_ITEMS = 8
 const MAX_COLUMNS = 3
 /** Each with the account's id after it: one device, one set of marks per account. */
-const SEEN_KEY = 'pdf-master-deck-seen'
-const SENT_KEY = 'pdf-master-deck-sent'
+const SEEN_KEY = 'docmaster-deck-seen'
+const SENT_KEY = 'docmaster-deck-sent'
 const MARKS_KEPT = 20
 
 type Timer = ReturnType<typeof setTimeout>

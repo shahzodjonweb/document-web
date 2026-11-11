@@ -6,7 +6,7 @@
  * the new frame does not see the old one flash first, and anyone else, who has
  * never seen it on, gets today's until the server says otherwise.
  */
-const REMEMBERED = 'pdf-master-editor-v2'
+const REMEMBERED = 'docmaster-editor-v2'
 
 function remembered() {
   try {

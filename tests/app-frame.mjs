@@ -85,7 +85,7 @@ const go = async (route) => {
 }
 const theme = (value) =>
   page.evaluate((next) => {
-    localStorage.setItem('pdf-master-theme', next)
+    localStorage.setItem('docmaster-theme', next)
     document.documentElement.dataset.theme = next
   }, value)
 const overflow = () => page.evaluate(() => document.documentElement.scrollWidth > innerWidth)
@@ -194,7 +194,7 @@ try {
   assert.equal(await toggle.getAttribute('aria-label'), 'Switch to dark theme')
   await toggle.click()
   assert.equal(await page.evaluate(() => document.documentElement.dataset.theme), 'dark')
-  assert.equal(await page.evaluate(() => localStorage.getItem('pdf-master-theme')), 'dark')
+  assert.equal(await page.evaluate(() => localStorage.getItem('docmaster-theme')), 'dark')
   assert.equal(await toggle.getAttribute('aria-label'), 'Switch to light theme')
   await toggle.click()
   checks.push('The theme toggle switches and remembers light and dark')

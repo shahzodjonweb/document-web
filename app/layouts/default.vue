@@ -106,7 +106,7 @@ function applyTheme(value: string) {
 function toggleTheme() {
   const next = theme.value === 'dark' ? 'light' : 'dark'
   try {
-    localStorage.setItem('pdf-master-theme', next)
+    localStorage.setItem('docmaster-theme', next)
   } catch {}
   applyTheme(next)
 }
@@ -142,7 +142,7 @@ async function signInMiniApp() {
 onMounted(async () => {
   let saved = ''
   try {
-    saved = localStorage.getItem('pdf-master-theme') || ''
+    saved = localStorage.getItem('docmaster-theme') || ''
   } catch {}
   // Inside Telegram, a customer who never chose a theme gets Telegram's own.
   applyTheme(saved || telegram.colorScheme() || 'light')
@@ -170,18 +170,18 @@ onMounted(async () => {
   } else await Promise.allSettled([ws.loadCatalog(), ws.loadPlans(), ws.loadAccount(), config])
   if (user.value) {
     try {
-      const pending = JSON.parse(sessionStorage.getItem('pdf-master-pending-job') || 'null')
+      const pending = JSON.parse(sessionStorage.getItem('docmaster-pending-job') || 'null')
       if (pending) {
         const job = await ws.api('/jobs', {
           method: 'POST',
           headers: { 'Idempotency-Key': pending.key },
           body: { quote_id: pending.quote_id },
         })
-        sessionStorage.removeItem('pdf-master-pending-job')
+        sessionStorage.removeItem('docmaster-pending-job')
         await navigateTo(path(`/app/jobs/${job.id}`))
       }
     } catch (e: any) {
-      if (e.statusCode && e.statusCode < 500) sessionStorage.removeItem('pdf-master-pending-job')
+      if (e.statusCode && e.statusCode < 500) sessionStorage.removeItem('docmaster-pending-job')
     }
   }
 })

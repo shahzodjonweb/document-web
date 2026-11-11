@@ -89,7 +89,7 @@ async function execute() {
     const id = quote.value.id
     const key = submissionKeys.value[id] || (submissionKeys.value[id] = crypto.randomUUID())
     sessionStorage.setItem(
-      'pdf-master-pending-batch',
+      'docmaster-pending-batch',
       JSON.stringify({ quote_id: id, key, feature_id: props.featureId }),
     )
     result.value = await ws.api('/batches', {
@@ -97,13 +97,13 @@ async function execute() {
       headers: { 'Idempotency-Key': key },
       body: { quote_id: quote.value.id },
     })
-    sessionStorage.removeItem('pdf-master-pending-batch')
+    sessionStorage.removeItem('docmaster-pending-batch')
     quote.value = null
     await ws.loadAccount()
   })
 }
 onMounted(async () => {
-  const pending = JSON.parse(sessionStorage.getItem('pdf-master-pending-batch') || 'null')
+  const pending = JSON.parse(sessionStorage.getItem('docmaster-pending-batch') || 'null')
   if (pending && pending.feature_id === props.featureId)
     await run('resume', async () => {
       result.value = await ws.api('/batches', {
@@ -111,7 +111,7 @@ onMounted(async () => {
         headers: { 'Idempotency-Key': pending.key },
         body: { quote_id: pending.quote_id },
       })
-      sessionStorage.removeItem('pdf-master-pending-batch')
+      sessionStorage.removeItem('docmaster-pending-batch')
       await ws.loadAccount()
     })
 })

@@ -15,7 +15,9 @@ export interface KeptSignature {
   height: number
 }
 
-const KEY = 'pdf-master-signatures'
+const KEY = 'docmaster-signatures'
+/** Their name while the product was PDF Master: moved to KEY on first read. */
+const OLD_KEY = 'pdf-master-signatures'
 const MOST = 3
 
 const kept = ref<KeptSignature[]>([])
@@ -56,10 +58,19 @@ export function useEditorSignatures() {
   const telegram = useTelegramApp()
 
   function load() {
-    reading ??= telegram.storageGet(KEY).then((value) => {
+    reading ??= (async () => {
+      let value = await telegram.storageGet(KEY)
+      if (value === null) {
+        // Telegram's DeviceStorage is out of reach of the start-up migration.
+        const old = await telegram.storageGet(OLD_KEY)
+        if (old !== null) {
+          value = old
+          if (await telegram.storageSet(KEY, old)) await telegram.storageSet(OLD_KEY, null)
+        }
+      }
       kept.value = parse(value)
       loaded.value = true
-    })
+    })()
     return reading
   }
 

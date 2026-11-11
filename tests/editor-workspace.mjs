@@ -298,6 +298,10 @@ const fixtureApi = async (route) => {
       draft: true,
     })
   if (endpoint === '/plans') return json({ plans: [{ id: plan, name: plan, limits: {} }], draft: true })
+  // The seller's details and contacts, which public pages and Help read.
+  if (endpoint === '/contacts')
+    return json({ support: { username: '', url: '' }, ads: { username: '', url: '' }, bot: { username: '', url: '' },
+      company: { name: '"ARCANIUM TECHNOLOGIES" MCHJ', tin: '313458514', address: 'Toshkent', phone: '', email: '' } })
   if (endpoint === '/usage')
     return json({ plan: 'free', week: { starts_at: '2026-10-11T19:00:00Z', resets_at: '2026-10-18T19:00:00Z', time_zone: 'Asia/Tashkent' }, resets_at: '2026-10-18T19:00:00Z',
       ai_documents: { limit: 5, used: 0, remaining: 5 }, file_jobs: { limit: 15, used: 4, remaining: 11 }, edits_per_file: 3 })
@@ -551,7 +555,7 @@ try {
   const box = await settledBox('editor-page-1')
   const scale = box.width / PAGE.width
   await page.getByTestId('editor-page-1').click({ position: { x: 120, y: 160 } })
-  await page.getByTestId('editor-text-input').fill('Reviewed in PDF Master')
+  await page.getByTestId('editor-text-input').fill('Reviewed in DocMaster')
   await page.getByTestId('editor-page-1').click({ position: { x: 400, y: 600 } })
   await page.waitForFunction(
     () => document.querySelectorAll('[data-testid="editor-command-list"] li').length > 0,
@@ -561,7 +565,7 @@ try {
   assert.ok(placed, 'the text command reached the server')
   assert.ok(Math.abs(placed.x - 120 / scale) < 0.02, `x ${placed.x} ≈ ${120 / scale}`)
   assert.ok(Math.abs(placed.y - 160 / scale) < 0.02, `y ${placed.y} ≈ ${160 / scale}`)
-  assert.equal(placed.text, 'Reviewed in PDF Master')
+  assert.equal(placed.text, 'Reviewed in DocMaster')
   checks.push('Clicking the page places a command at the exact PDF point under the cursor')
 
   // 3. The payload carries exactly the fields the engine allows.
@@ -617,7 +621,7 @@ try {
   await page.getByTestId('editor-export').waitFor()
   await page.getByTestId('editor-export').click()
   await page.locator('.error-banner').waitFor()
-  const pendingJob = () => page.evaluate(() => sessionStorage.getItem('pdf-master-pending-job'))
+  const pendingJob = () => page.evaluate(() => sessionStorage.getItem('docmaster-pending-job'))
   assert.notEqual(await pendingJob(), null, 'the export is waiting to be retried')
   await placeMark('highlight', 100, 300)
   assert.equal(await pendingJob(), null, 'the edit ends that, so a reload does not make the old version')

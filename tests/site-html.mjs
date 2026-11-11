@@ -103,7 +103,7 @@ try {
     assert.ok(html.includes('20 000'), 'the Plus price')
     assert.ok(html.includes('45 000'), 'a discount still running')
     assert.ok(!html.includes('15 000'), 'a discount whose last day has passed')
-    assert.ok(html.includes('pdf-master-theme'), 'the theme is set before the first paint')
+    assert.ok(html.includes('docmaster-theme'), 'the theme is set before the first paint')
     assert.ok(!html.includes('telegram-web-app.js'), 'no Telegram script on a public page')
   })
 

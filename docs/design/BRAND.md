@@ -1,5 +1,7 @@
 # PDF Master brand refresh
 
+> History: this describes the artwork from before the product became DocMaster. The DocMaster mark is specified in `docs/site/design/spec.md`; the old logo files have been removed from `public/brand`.
+
 The supplied `PDF_Master_Brand_Assets.zip` is the source of the artwork in `public/brand`. SVG paths, proportions and colors are unchanged. `BrandLogo` renders the outlined wordmark; `BrandIcon` renders the connected document pages. The original wordmark sits on a white surface in dark mode to preserve its dark ink lettering.
 
 ## Palette

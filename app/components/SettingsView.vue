@@ -10,7 +10,7 @@ const form = reactive({
   locale: ws.user.value?.locale || 'en',
   mode: ws.user.value?.mode || 'general',
   adult_assistance: !!ws.user.value?.preferences?.adult_assistance,
-  theme: import.meta.client ? localStorage.getItem('pdf-master-theme') || 'light' : 'light',
+  theme: import.meta.client ? localStorage.getItem('docmaster-theme') || 'light' : 'light',
 })
 async function save() {
   saving.value = true
@@ -28,7 +28,7 @@ async function save() {
         adult_assistance: form.adult_assistance,
       },
     })
-    localStorage.setItem('pdf-master-theme', form.theme)
+    localStorage.setItem('docmaster-theme', form.theme)
     document.documentElement.dataset.theme =
       form.theme === 'system'
         ? matchMedia('(prefers-color-scheme:dark)').matches

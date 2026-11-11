@@ -562,7 +562,7 @@ async function phone({ width, height, locale, theme }) {
   })
   await context.addInitScript((value) => {
     try {
-      localStorage.setItem('pdf-master-theme', value)
+      localStorage.setItem('docmaster-theme', value)
     } catch {}
   }, theme)
   // Outside Telegram: its script is the only thing the page loads from elsewhere, and it stays empty.

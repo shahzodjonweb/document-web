@@ -4,7 +4,7 @@
  */
 export type HintTask = 'place' | 'sign' | 'blackout' | 'editText' | 'deckEdit'
 
-const KEY = 'pdf-master-editor-tips'
+const KEY = 'docmaster-editor-tips'
 const retired = ref<HintTask[] | null>(null)
 
 function read(): HintTask[] {

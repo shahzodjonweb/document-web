@@ -30,7 +30,7 @@ const SEND_TIMEOUT = 30_000
 /** At this share of the week's file tasks used, the app stays open after a send. */
 const STAY_OPEN_AT = 0.8
 const TERMINAL = ['succeeded', 'failed', 'canceled', 'expired', 'no_op']
-const SENT_KEY = 'pdf-master-editor-sent'
+const SENT_KEY = 'docmaster-editor-sent'
 const SENT_KEPT = 20
 /** What Review says of a picture that never got in, above Confirm: told, the person sends or fixes it. */
 const MISSED: Record<PictureMiss, string> = {

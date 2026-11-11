@@ -1422,7 +1422,7 @@ html.editor-bare .main-content.main-content-wide {
   background: var(--surface);
   color: var(--ink);
   font:
-    16px/1.35 'PDFMasterNoto',
+    16px/1.35 'DocMasterNoto',
     var(--font-body);
   resize: none;
 }

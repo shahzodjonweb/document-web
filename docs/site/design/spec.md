@@ -60,7 +60,7 @@ Rules
   `--error-*`). Discounts, prices and CTAs never use red. Red text is never used: #FA3331 on
   white is 3.8:1 (enough for a graphic, not for text).
 - "DocMaster (formerly PDF Master)" appears once in the footer brand blurb and on /about
-  during the transition. The old `pdf-master-*` files stay untouched until the switch.
+  during the transition. The old logo files were removed from `public/brand` after the switch.
 - Regenerate everything with `tools/gen.py` (needs `pip install fonttools`; paths at the top of each script point at the worktree). It outlines the
   wordmark from `public/fonts`, so swapping to concept B or C is one variable (`rec`).
 

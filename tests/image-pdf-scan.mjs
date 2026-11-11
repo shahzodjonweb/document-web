@@ -132,7 +132,7 @@ try {
     const start = page.getByRole('button', { name: startLabel, exact: true })
     const paperSize = page.locator('.tool-page select').first()
     const savedDraft = () =>
-      page.evaluate(() => JSON.parse(sessionStorage.getItem('pdf-master-draft') || 'null'))
+      page.evaluate(() => JSON.parse(sessionStorage.getItem('docmaster-draft') || 'null'))
     const quote = async () => {
       await review.click()
       await start.waitFor({ state: 'visible' })
@@ -154,7 +154,7 @@ try {
     await page.locator('input[type="file"]').setInputFiles('tests/fixtures/brand-logo.png')
     await review.waitFor({ state: 'visible' })
     await page.waitForFunction(
-      () => JSON.parse(sessionStorage.getItem('pdf-master-draft') || 'null')?.files?.length === 1,
+      () => JSON.parse(sessionStorage.getItem('docmaster-draft') || 'null')?.files?.length === 1,
     )
     const fresh = await quote()
     assert.deepEqual(legacyKeys(fresh), [], 'No scanning switch reaches the quote')
@@ -185,7 +185,7 @@ try {
     await page.evaluate(
       (file) =>
         sessionStorage.setItem(
-          'pdf-master-draft',
+          'docmaster-draft',
           JSON.stringify({
             tool: 'pdf.images_to_pdf',
             files: [file],
@@ -246,8 +246,8 @@ try {
     await page.locator('input[type="file"]').setInputFiles('tests/fixtures/research-notes.pdf')
     await page.waitForFunction(
       () =>
-        JSON.parse(sessionStorage.getItem('pdf-master-draft') || 'null')?.tool === 'pdf.compress' &&
-        JSON.parse(sessionStorage.getItem('pdf-master-draft') || 'null')?.files?.length === 1,
+        JSON.parse(sessionStorage.getItem('docmaster-draft') || 'null')?.tool === 'pdf.compress' &&
+        JSON.parse(sessionStorage.getItem('docmaster-draft') || 'null')?.files?.length === 1,
     )
     const otherTool = await quote()
     assert.deepEqual(legacyKeys(otherTool), [])
