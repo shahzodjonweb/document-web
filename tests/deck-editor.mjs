@@ -547,7 +547,7 @@ function telegramStub({ inside, scheme, version, platform, stable, safeBottom, k
     hideKeyboard: gated('hideKeyboard', '9.1'),
   }
   // The phone's own storage, from 9.0: what it holds is Telegram's, not the web view's.
-  const stored = new Map(kept ? [['pdf-master-signatures', kept]] : [])
+  const stored = new Map(kept ? [['docmaster-signatures', kept]] : [])
   app.DeviceStorage = {
     setItem: gated('DeviceStorage.setItem', '9.0', (key, value, done) => {
       stored.set(key, value)
@@ -685,7 +685,7 @@ async function openDeck({
   })
   await context.addInitScript((value) => {
     try {
-      if (!localStorage.getItem('pdf-master-theme')) localStorage.setItem('pdf-master-theme', value)
+      if (!localStorage.getItem('docmaster-theme')) localStorage.setItem('docmaster-theme', value)
     } catch {}
   }, theme)
   // WebKit (iPhone and iPad Telegram) takes a focused field away with no blur, focusout or change; Chrome

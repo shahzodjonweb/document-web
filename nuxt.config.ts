@@ -26,8 +26,10 @@ const browserOnly = Object.fromEntries(
 )
 // Before the first paint, so a dark-theme visitor never sees a server-rendered
 // page flash white. The app frame applies the same choice again once it mounts.
+// It runs before the storage-migration plugin, so it still reads the key the
+// choice had while the product was PDF Master.
 const themeBeforePaint =
-  "try{var s=localStorage.getItem('pdf-master-theme');if(s==='dark'||(s==='system'&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}"
+  "try{var s=localStorage.getItem('docmaster-theme');if(s===null)s=localStorage.getItem('pdf-master-theme');if(s==='dark'||(s==='system'&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.dataset.theme='dark'}catch(e){}"
 
 export default defineNuxtConfig({
   compatibilityDate: '2026-02-01',

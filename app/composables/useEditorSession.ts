@@ -345,7 +345,7 @@ export function useEditorSession() {
     // An export that may have failed will not be retried now: its quote has just gone.
     if (submissionPending.value) {
       submissionPending.value = false
-      sessionStorage.removeItem('pdf-master-pending-job')
+      sessionStorage.removeItem('docmaster-pending-job')
     }
     if (saveState.value === 'paused') return
     saveState.value = 'dirty'
@@ -859,14 +859,14 @@ export function useEditorSession() {
     if (!idempotency.value[active.id]) idempotency.value[active.id] = crypto.randomUUID()
     const key = idempotency.value[active.id] as string
     submissionPending.value = true
-    sessionStorage.setItem('pdf-master-pending-job', JSON.stringify({ quote_id: active.id, key }))
+    sessionStorage.setItem('docmaster-pending-job', JSON.stringify({ quote_id: active.id, key }))
     try {
       const job = await ws.api<{ id: string }>('/jobs', {
         method: 'POST',
         headers: { 'Idempotency-Key': key },
         body: { quote_id: active.id },
       })
-      sessionStorage.removeItem('pdf-master-pending-job')
+      sessionStorage.removeItem('docmaster-pending-job')
       submissionPending.value = false
       await ws.loadAccount()
       await navigateTo(useLocale().path(`/app/jobs/${job.id}`))
@@ -876,7 +876,7 @@ export function useEditorSession() {
       const status = e?.statusCode || e?.status || e?.response?.status
       if (status >= 400 && status < 500) {
         submissionPending.value = false
-        sessionStorage.removeItem('pdf-master-pending-job')
+        sessionStorage.removeItem('docmaster-pending-job')
         if (e?.data?.error?.code === 'quote_expired') quote.value = null
       }
       error.value = requestError(e)

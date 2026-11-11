@@ -95,7 +95,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   }
   if (path === '/auth/browser/challenges') {
     telegramIntent = body.intent
-    return json({ id: 'telegram-link', telegram_url: 'https://t.me/pdfmaster_test_bot?start=auth_example' })
+    return json({ id: 'telegram-link', telegram_url: 'https://t.me/docmaster_test_bot?start=auth_example' })
   }
   if (path === '/auth/browser/challenges/telegram-link') return json({ status: 'approved' })
   if (path === '/auth/browser/challenges/telegram-link/exchange') {

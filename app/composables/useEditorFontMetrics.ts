@@ -14,7 +14,7 @@
  */
 
 const FONT_URL = '/fonts/noto-sans-regular.ttf'
-export const FONT_FAMILY = 'PDFMasterNoto'
+export const FONT_FAMILY = 'DocMasterNoto'
 /** `_overlay` advances each line by exactly `1.3 * font_size`. */
 export const LINE_FACTOR = 1.3
 
@@ -183,7 +183,7 @@ async function registerFace(buffer: ArrayBuffer) {
  * above; the rest are fetched only when a preview first needs one, as each is half
  * a megabyte or more.
  */
-export const SERIF_FAMILY = 'PDFMasterNotoSerif'
+export const SERIF_FAMILY = 'DocMasterNotoSerif'
 const PREVIEW_FACES: Record<string, [family: string, url: string, weight: string]> = {
   'sans-700': [FONT_FAMILY, '/fonts/noto-sans-bold.ttf', '700'],
   'serif-400': [SERIF_FAMILY, '/fonts/noto-serif-regular.ttf', '400'],

@@ -551,7 +551,7 @@ try {
   const box = await settledBox('editor-page-1')
   const scale = box.width / PAGE.width
   await page.getByTestId('editor-page-1').click({ position: { x: 120, y: 160 } })
-  await page.getByTestId('editor-text-input').fill('Reviewed in PDF Master')
+  await page.getByTestId('editor-text-input').fill('Reviewed in DocMaster')
   await page.getByTestId('editor-page-1').click({ position: { x: 400, y: 600 } })
   await page.waitForFunction(
     () => document.querySelectorAll('[data-testid="editor-command-list"] li').length > 0,
@@ -561,7 +561,7 @@ try {
   assert.ok(placed, 'the text command reached the server')
   assert.ok(Math.abs(placed.x - 120 / scale) < 0.02, `x ${placed.x} ≈ ${120 / scale}`)
   assert.ok(Math.abs(placed.y - 160 / scale) < 0.02, `y ${placed.y} ≈ ${160 / scale}`)
-  assert.equal(placed.text, 'Reviewed in PDF Master')
+  assert.equal(placed.text, 'Reviewed in DocMaster')
   checks.push('Clicking the page places a command at the exact PDF point under the cursor')
 
   // 3. The payload carries exactly the fields the engine allows.
@@ -617,7 +617,7 @@ try {
   await page.getByTestId('editor-export').waitFor()
   await page.getByTestId('editor-export').click()
   await page.locator('.error-banner').waitFor()
-  const pendingJob = () => page.evaluate(() => sessionStorage.getItem('pdf-master-pending-job'))
+  const pendingJob = () => page.evaluate(() => sessionStorage.getItem('docmaster-pending-job'))
   assert.notEqual(await pendingJob(), null, 'the export is waiting to be retried')
   await placeMark('highlight', 100, 300)
   assert.equal(await pendingJob(), null, 'the edit ends that, so a reload does not make the old version')

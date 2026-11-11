@@ -126,15 +126,15 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   }
   if (endpoint.startsWith('/jobs/')) return json(jobs.get(endpoint.split('/')[2]) || {})
   if (endpoint === '/contacts')
-    return json({ support: { username: 'pdfmaster_help', url: 'https://t.me/pdfmaster_help' },
-      ads: { username: 'pdfmaster_ads', url: 'https://t.me/pdfmaster_ads' },
+    return json({ support: { username: 'docmaster_help', url: 'https://t.me/docmaster_help' },
+      ads: { username: 'docmaster_ads', url: 'https://t.me/docmaster_ads' },
       company: { name: '"ARCANIUM TECHNOLOGIES" MCHJ', tin: '313458514',
         address: 'Toshkent shahri, Yunusobod tumani, Qashqar MFY, Markaz 4 mavzesi, 25-uy',
         phone: '+998 (71) 200-00-00', email: '' } })
   if (endpoint === '/referrals')
     // Seven friends counted: one reward (1 month), two toward the next (2 months), this month's five
     // used up with one more waiting, and one who joined without finishing a task.
-    return json({ code: 'MALIKA7', url: 'https://t.me/pdfmaster_bot?start=ref_MALIKA7', rewards_count: 7, pending_count: 2,
+    return json({ code: 'MALIKA7', url: 'https://t.me/docmaster_bot?start=ref_MALIKA7', rewards_count: 7, pending_count: 2,
       monthly_cap: 5, qualification: 'first_successful_task', sandbox: false, step: 5, counted: 7, counted_this_month: 5,
       month_full: true, next_month: '2026-12-01T00:00:00+05:00', waiting_next_month: 1,
       next_reward: { tier: 2, months: 2, invites: 10, have: 2, remaining: 3 },
@@ -150,7 +150,7 @@ const go = async (route) => {
 }
 const theme = (value) =>
   page.evaluate((next) => {
-    localStorage.setItem('pdf-master-theme', next)
+    localStorage.setItem('docmaster-theme', next)
     document.documentElement.dataset.theme = next
   }, value)
 const overflow = () => page.evaluate(() => document.documentElement.scrollWidth > innerWidth)
@@ -286,7 +286,7 @@ try {
   await go('/en/app/support')
   await page.locator('.contact-row').first().waitFor()
   assert.deepEqual(await page.locator('.contact-row').evaluateAll((rows) => rows.map((row) => row.getAttribute('href'))),
-    ['https://t.me/pdfmaster_help', 'https://t.me/pdfmaster_ads'])
+    ['https://t.me/docmaster_help', 'https://t.me/docmaster_ads'])
   assert.equal(await page.locator('textarea').count(), 0, 'nothing to fill in: people write on Telegram')
   await page.locator('.help-card').first().waitFor()
   const articles = await page.locator('section.help-card').count()
@@ -362,9 +362,9 @@ try {
   // Invite friends: the link to copy or share, how far to the next Plus months, and the months earned.
   await go('/en/app/referrals')
   await page.locator('.referral-link-panel').waitFor()
-  assert.equal(await page.locator('.copy-field input').first().inputValue(), 'https://t.me/pdfmaster_bot?start=ref_MALIKA7')
+  assert.equal(await page.locator('.copy-field input').first().inputValue(), 'https://t.me/docmaster_bot?start=ref_MALIKA7')
   assert.match(await page.locator('.referral-share').getAttribute('href'),
-    /^https:\/\/t\.me\/share\/url\?url=https%3A%2F%2Ft\.me%2Fpdfmaster_bot%3Fstart%3Dref_MALIKA7&text=/)
+    /^https:\/\/t\.me\/share\/url\?url=https%3A%2F%2Ft\.me%2Fdocmaster_bot%3Fstart%3Dref_MALIKA7&text=/)
   const progress = page.getByTestId('referral-progress')
   assert.equal(await progress.locator('h2').innerText(), 'Next gift: 2 months of Plus')
   assert.equal(await progress.locator('.referral-progress-count').innerText(), '2 of 5 friends')

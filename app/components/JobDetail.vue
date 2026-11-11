@@ -167,14 +167,14 @@ async function confirmRetry() {
   const key = retryKey.value || (retryKey.value = crypto.randomUUID())
   const quoteId = retryQuote.value.id
   retryPending.value = true
-  sessionStorage.setItem('pdf-master-pending-job', JSON.stringify({ quote_id: quoteId, key }))
+  sessionStorage.setItem('docmaster-pending-job', JSON.stringify({ quote_id: quoteId, key }))
   try {
     const result: any = await ws.api('/jobs', {
       method: 'POST',
       headers: { 'Idempotency-Key': key },
       body: { quote_id: quoteId },
     })
-    sessionStorage.removeItem('pdf-master-pending-job')
+    sessionStorage.removeItem('docmaster-pending-job')
     retryPending.value = false
     retryQuote.value = null
     await navigateTo(path(`/app/jobs/${result.id}`))
@@ -182,7 +182,7 @@ async function confirmRetry() {
     const status = e.statusCode || e.status || e.response?.status
     if (status >= 400 && status < 500) {
       retryPending.value = false
-      sessionStorage.removeItem('pdf-master-pending-job')
+      sessionStorage.removeItem('docmaster-pending-job')
     }
     error.value = e.data?.error?.message || t('genericError')
   } finally {

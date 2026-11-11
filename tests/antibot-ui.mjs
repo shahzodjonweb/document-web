@@ -107,7 +107,7 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
       ? json({ error: { code: failure } }, 503)
       : json({ authorization_url: 'https://accounts.google.com/o/oauth2/v2/auth?state=test' })
   if (path === '/auth/browser/challenges')
-    return json({ id: 'challenge-one', telegram_url: 'https://t.me/pdfmaster_test_bot?start=auth_test' })
+    return json({ id: 'challenge-one', telegram_url: 'https://t.me/docmaster_test_bot?start=auth_test' })
   if (path === '/auth/telegram/miniapp') {
     signedIn = true
     return json({ user: account })
@@ -301,7 +301,7 @@ try {
   ]) {
     await page.setViewportSize({ width: 320, height: 800 })
     await page.evaluate(
-      (dark) => localStorage.setItem('pdf-master-theme', dark ? 'dark' : 'light'),
+      (dark) => localStorage.setItem('docmaster-theme', dark ? 'dark' : 'light'),
       locale === 'ru',
     )
     await go(`/${locale}/app`)

@@ -144,12 +144,12 @@ export function useWorkspace() {
     jobs.value = []
     activeUploads.value = []
     quote.value = null
-    if (import.meta.client) sessionStorage.removeItem('pdf-master-draft')
+    if (import.meta.client) sessionStorage.removeItem('docmaster-draft')
   }
   function persistDraft() {
     if (import.meta.client)
       sessionStorage.setItem(
-        'pdf-master-draft',
+        'docmaster-draft',
         JSON.stringify({
           tool: activeTool.value,
           files: activeUploads.value,
@@ -162,7 +162,7 @@ export function useWorkspace() {
   function restoreDraft() {
     if (!import.meta.client) return
     try {
-      const d = JSON.parse(sessionStorage.getItem('pdf-master-draft') || 'null')
+      const d = JSON.parse(sessionStorage.getItem('docmaster-draft') || 'null')
       if (d) {
         activeTool.value = d.tool
         activeUploads.value = d.files || []

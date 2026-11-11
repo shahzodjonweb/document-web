@@ -1194,7 +1194,7 @@ async function generate() {
     const key = submissionKey.value || (submissionKey.value = crypto.randomUUID())
     const quoteId = quote.value.id
     submissionPending.value = true
-    sessionStorage.setItem('pdf-master-pending-job', JSON.stringify({ quote_id: quoteId, key }))
+    sessionStorage.setItem('docmaster-pending-job', JSON.stringify({ quote_id: quoteId, key }))
     let job
     try {
       job = await ws.api('/jobs', {
@@ -1208,11 +1208,11 @@ async function generate() {
       const status = e.statusCode || e.status || e.response?.status
       if (status >= 400 && status < 500) {
         submissionPending.value = false
-        sessionStorage.removeItem('pdf-master-pending-job')
+        sessionStorage.removeItem('docmaster-pending-job')
       }
       throw e
     }
-    sessionStorage.removeItem('pdf-master-pending-job')
+    sessionStorage.removeItem('docmaster-pending-job')
     submissionPending.value = false
     await ws.loadAccount()
     if (quoteStage.value === 'outline' && job.status === 'succeeded') {

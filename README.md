@@ -1,4 +1,4 @@
-# PDF Master · customer workspace
+# DocMaster · customer workspace
 
 A Nuxt 4 / Vue 3 / TypeScript workspace in English, Uzbek Latin and Russian. This repository contains the public website, customer application and Telegram Mini App shell. The API, workers, actual aiogram bot, ledger and staff interface live in the sibling `document-platform` repository.
 

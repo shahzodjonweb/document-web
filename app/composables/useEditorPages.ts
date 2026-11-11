@@ -146,18 +146,18 @@ export function useEditorPages() {
       })
       if (!idempotency.value[quote.id]) idempotency.value[quote.id] = crypto.randomUUID()
       const key = idempotency.value[quote.id] as string
-      sessionStorage.setItem('pdf-master-pending-job', JSON.stringify({ quote_id: quote.id, key }))
+      sessionStorage.setItem('docmaster-pending-job', JSON.stringify({ quote_id: quote.id, key }))
       const job = await ws.api<{ id: string }>('/jobs', {
         method: 'POST',
         headers: { 'Idempotency-Key': key },
         body: { quote_id: quote.id },
       })
-      sessionStorage.removeItem('pdf-master-pending-job')
+      sessionStorage.removeItem('docmaster-pending-job')
       await ws.loadAccount()
       await navigateTo(path(`/app/jobs/${job.id}`))
     } catch (e: any) {
       const status = e?.statusCode || e?.status || e?.response?.status
-      if (status >= 400 && status < 500) sessionStorage.removeItem('pdf-master-pending-job')
+      if (status >= 400 && status < 500) sessionStorage.removeItem('docmaster-pending-job')
       error.value = session.requestError(e)
     } finally {
       busy.value = false

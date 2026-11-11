@@ -1,5 +1,5 @@
 {
-  "name": "pdf-master-web",
+  "name": "docmaster-web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -33,7 +33,8 @@
     "test:channels": "node tests/channel-gate.mjs",
     "test:frame": "node tests/app-frame.mjs",
     "test:core": "node tests/core-pages.mjs",
-    "test:scan": "node tests/image-pdf-scan.mjs"
+    "test:scan": "node tests/image-pdf-scan.mjs",
+    "test:storage-migration": "node tests/storage-migration.mjs"
   },
   "dependencies": {
     "lucide-vue-next": "0.563.0",

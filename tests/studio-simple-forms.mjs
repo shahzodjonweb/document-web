@@ -1589,7 +1589,7 @@ try {
   const replay = calls('/jobs').at(-1)
   assert.equal(replay.idempotencyKey, ambiguous.idempotencyKey)
   assert.deepEqual(replay.body, ambiguous.body)
-  assert.equal(await page.evaluate(() => sessionStorage.getItem('pdf-master-pending-job')), null)
+  assert.equal(await page.evaluate(() => sessionStorage.getItem('docmaster-pending-job')), null)
   checks.push(
     'A failed generation retries only after confirmation and preserves its key on an ambiguous response',
   )

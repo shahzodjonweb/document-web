@@ -42,8 +42,8 @@ let joinedAll = false
 let checks_made = 0
 let refuseTasks = false
 const channelState = () => ({ required: true, joined: joinedAll, channels: [
-  { title: 'PDF Master News', url: 'https://t.me/pdfmaster_news', joined: joinedAll },
-  { title: 'PDF Tips', url: 'https://t.me/pdfmaster_tips', joined: true }] })
+  { title: 'DocMaster News', url: 'https://t.me/docmaster_news', joined: joinedAll },
+  { title: 'PDF Tips', url: 'https://t.me/docmaster_tips', joined: true }] })
 const options = () => ({
   enabled: true, currency: 'UZS', period_days: 30, automatic: { available: false },
   plans: [{ plan: 'plus', price: 20000, regular_price: 20000, discount: null },
@@ -135,7 +135,7 @@ try {
   const dialog = page.getByTestId('channel-gate')
   await dialog.waitFor()
   const links = await dialog.locator('a[href^="https://t.me/"]').evaluateAll((nodes) => nodes.map((n) => [n.textContent.trim(), n.target, n.rel]))
-  assert.deepEqual(links, [['PDF Master News', '_blank', 'noopener'], ['PDF Tips', '_blank', 'noopener']])
+  assert.deepEqual(links, [['DocMaster News', '_blank', 'noopener'], ['PDF Tips', '_blank', 'noopener']])
   assert.match(await dialog.locator('#channel-description').innerText(), /Free and Plus plans/)
   const premium = dialog.getByRole('link', { name: 'Or choose Premium, which needs no channels' })
   assert.equal(await premium.getAttribute('href'), '/en/app/billing')
@@ -144,7 +144,7 @@ try {
 
   await page.getByTestId('channels-joined').click()
   await dialog.getByRole('alert').waitFor()
-  assert.match(await dialog.getByRole('alert').innerText(), /PDF Master News/)
+  assert.match(await dialog.getByRole('alert').innerText(), /DocMaster News/)
   await page.getByTestId('channels-joined').click()
   await dialog.getByText('Thanks for joining!').waitFor()
   await dialog.getByRole('button', { name: 'Continue' }).click()

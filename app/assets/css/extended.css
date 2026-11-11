@@ -1,4 +1,4 @@
-/* Task-specific surfaces share the PDF Master brand tokens. */
+/* Task-specific surfaces share the DocMaster brand tokens. */
 .provider-banner {
   display: flex;
   align-items: center;
@@ -1119,7 +1119,7 @@
   white-space: pre;
   overflow: visible;
   resize: none;
-  font-family: 'PDFMasterNoto', 'DM Sans', sans-serif;
+  font-family: 'DocMasterNoto', 'DM Sans', sans-serif;
 }
 .editor-text-input.overflowing {
   border-color: var(--error);

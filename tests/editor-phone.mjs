@@ -55,7 +55,7 @@ const checks = []
 const passed = (name) => checks.push(name)
 
 /** Telegram's object as the app sees it, refusing anything the claimed version would not have. */
-function telegramStub({ inside, scheme, version, platform, stable, safeBottom, kept }) {
+function telegramStub({ inside, scheme, version, platform, stable, safeBottom, kept, keptKey }) {
   const atLeast = (wanted) => {
     const a = String(version).split('.').map(Number)
     const b = String(wanted).split('.').map(Number)
@@ -129,7 +129,7 @@ function telegramStub({ inside, scheme, version, platform, stable, safeBottom, k
     hideKeyboard: gated('hideKeyboard', '9.1'),
   }
   // The phone's own storage, from 9.0: what it holds is Telegram's, not the web view's.
-  const stored = new Map(kept ? [['pdf-master-signatures', kept]] : [])
+  const stored = new Map(kept ? [[keptKey || 'docmaster-signatures', kept]] : [])
   app.DeviceStorage = {
     setItem: gated('DeviceStorage.setItem', '9.0', (key, value, done) => {
       stored.set(key, value)
@@ -191,6 +191,8 @@ async function openContext({
   remembered = false,
   formFields = [],
   kept = null,
+  // The name the kept signatures sit under in DeviceStorage (the PDF Master one, to test its move).
+  keptKey = null,
   pageCount = 2,
   pdf = pageCount === 4 ? numberedBytes : pdfBytes,
   imageCounts = Array.from({ length: pageCount }, () => 0),
@@ -239,13 +241,14 @@ async function openContext({
     stable: stable ?? null,
     safeBottom,
     kept,
+    keptKey,
   })
   await context.addInitScript((value) => {
     try {
-      if (!localStorage.getItem('pdf-master-theme')) localStorage.setItem('pdf-master-theme', value)
+      if (!localStorage.getItem('docmaster-theme')) localStorage.setItem('docmaster-theme', value)
     } catch {}
   }, theme)
-  if (remembered) await context.addInitScript(() => localStorage.setItem('pdf-master-editor-v2', '1'))
+  if (remembered) await context.addInitScript(() => localStorage.setItem('docmaster-editor-v2', '1'))
   const server = {
     requests: [],
     version: 1,
@@ -778,7 +781,7 @@ passed('Off, absent or failed: today’s editor, with nothing of Telegram’s to
   await fresh.page.getByTestId('editor-frame').waitFor()
   assert.equal(await fresh.page.locator('.mobile-nav').count(), 0)
   assert.equal(
-    await fresh.page.evaluate(() => localStorage.getItem('pdf-master-editor-v2')),
+    await fresh.page.evaluate(() => localStorage.getItem('docmaster-editor-v2')),
     '1',
     'and it is kept',
   )
@@ -798,7 +801,7 @@ passed('Off, absent or failed: today’s editor, with nothing of Telegram’s to
   await goToDocument(offNow)
   await offNow.page.locator('.mobile-nav').waitFor()
   assert.equal(await offNow.page.getByTestId('editor-frame').count(), 0, 'the server has the last word')
-  assert.equal(await offNow.page.evaluate(() => localStorage.getItem('pdf-master-editor-v2')), null)
+  assert.equal(await offNow.page.evaluate(() => localStorage.getItem('docmaster-editor-v2')), null)
   await offNow.context.close()
   passed('The last answer on this device stands in until the switch answers')
 }
@@ -1538,6 +1541,21 @@ function counter(page) {
 }
 
 {
+  // Signatures kept in DeviceStorage under the PDF Master name move to the DocMaster one on first read.
+  const opened = await openContext({ width: 390, height: 656, marks: [], kept: keptSignature, keptKey: 'pdf-master-signatures' })
+  const { page } = opened
+  await goToDocument(opened)
+  await page.getByTestId('editor-tab-sign').click()
+  await page.getByTestId('editor-kept-1').waitFor()
+  await page.waitForFunction(() => !window.__tg.stored.has('pdf-master-signatures'))
+  assert.equal(await page.evaluate(() => window.__tg.stored.get('docmaster-signatures')), keptSignature)
+  assert.deepEqual(await page.evaluate(() => window.__tg.violations), [])
+  assert.deepEqual(opened.errors, [])
+  await opened.context.close()
+  passed('Signatures kept under the old PDF Master name in DeviceStorage move to the new one')
+}
+
+{
   // F5 as this release has it: Edit, Black out, the number, Send to chat, I understand, Confirm.
   const opened = await openContext({ width: 390, height: 656, marks: [] })
   const { page, server } = opened
@@ -1603,14 +1621,14 @@ function counter(page) {
     const kept = await page.evaluate(
       (telegram) =>
         telegram
-          ? window.__tg.stored.get('pdf-master-signatures')
-          : localStorage.getItem('pdf-master-signatures'),
+          ? window.__tg.stored.get('docmaster-signatures')
+          : localStorage.getItem('docmaster-signatures'),
       version === '9.1',
     )
     assert.equal(JSON.parse(kept).length, 1, `${version}: kept on the phone`)
     if (version === '8.0')
       assert.equal((await spied(page, 'DeviceStorage.setItem')).length, 0, 'below 9.0 the browser’s storage')
-    else assert.equal(await page.evaluate(() => localStorage.getItem('pdf-master-signatures')), null)
+    else assert.equal(await page.evaluate(() => localStorage.getItem('docmaster-signatures')), null)
     // Forget is right there, a little apart from the signature, and Undo puts it back.
     await page.getByTestId('editor-tab-sign').click()
     const thumb = await page.getByTestId('editor-kept-1').boundingBox()
@@ -1620,8 +1638,8 @@ function counter(page) {
       page.evaluate(
         (telegram) =>
           telegram
-            ? (window.__tg.stored.get('pdf-master-signatures') ?? null)
-            : localStorage.getItem('pdf-master-signatures'),
+            ? (window.__tg.stored.get('docmaster-signatures') ?? null)
+            : localStorage.getItem('docmaster-signatures'),
         version === '9.1',
       )
     await page.getByTestId('editor-forget-1').click()
@@ -2068,7 +2086,7 @@ function counter(page) {
   await page.getByTestId('editor-snackbar').locator('.icon-button').click()
   await page.getByTestId('editor-hint').waitFor()
   assert.deepEqual(
-    JSON.parse(await page.evaluate(() => localStorage.getItem('pdf-master-editor-tips') ?? '[]')),
+    JSON.parse(await page.evaluate(() => localStorage.getItem('docmaster-editor-tips') ?? '[]')),
     [],
   )
   // The bot's link can name a tool, which opens its own place.
@@ -2799,7 +2817,7 @@ const lastQuote = (server) => server.quotes.filter((quote) => quote.id).at(-1)
   assert.ok(await page.getByTestId('editor-tab-sign').isVisible())
   await page.getByTestId('editor-scan-ocr').click()
   await page.waitForURL(/\/en\/app\/tools\/ocr\.searchable_pdf$/)
-  const carried = await page.evaluate(() => JSON.parse(sessionStorage.getItem('pdf-master-draft') || 'null'))
+  const carried = await page.evaluate(() => JSON.parse(sessionStorage.getItem('docmaster-draft') || 'null'))
   assert.equal(carried?.tool, 'ocr.searchable_pdf')
   assert.deepEqual(
     carried?.files.map((file) => file.id),
@@ -3034,7 +3052,7 @@ const lastQuote = (server) => server.quotes.filter((quote) => quote.id).at(-1)
   await opened.context.close()
   // In a browser the top bar's arrow does the same, rather than leaving for the list.
   const plain = await openContext({ width: 390, height: 656, marks: [], inside: false })
-  await plain.context.addInitScript((value) => localStorage.setItem('pdf-master-signatures', value), keptSignature)
+  await plain.context.addInitScript((value) => localStorage.setItem('docmaster-signatures', value), keptSignature)
   await goToDocument(plain)
   await plain.page.getByTestId('editor-tab-sign').click()
   await plain.page.getByTestId('editor-kept-1').click()
@@ -4946,7 +4964,7 @@ const inlineOpen = async (page) => {
   )
   let stack = await faces(inline(page))
   assert.match(stack[0], /^"?g_d\d+_f\d+"?$/, `the document’s own face first (${stack.join(', ')})`)
-  assert.deepEqual(stack.slice(1), ['PDFMasterNoto', 'sans-serif'])
+  assert.deepEqual(stack.slice(1), ['DocMasterNoto', 'sans-serif'])
   assert.ok(
     await page.evaluate(
       (face) =>
@@ -4963,7 +4981,7 @@ const inlineOpen = async (page) => {
   const uzbek = page.locator('.editor-mark.edit_text').first()
   assert.equal(await uzbek.textContent(), 'Bog‘dagi o‘rik va jo‘xori: Жёлтый цвет')
   stack = await faces(uzbek.locator('.editor-mark-edit'))
-  assert.deepEqual(stack.slice(1), ['PDFMasterNoto', 'sans-serif'], 'new letters fall to Noto Sans')
+  assert.deepEqual(stack.slice(1), ['DocMasterNoto', 'sans-serif'], 'new letters fall to Noto Sans')
 
   // The Cyrillic line keeps its colour; the serif line its family; the bold title its weight.
   await click(140, 176)
@@ -4976,7 +4994,7 @@ const inlineOpen = async (page) => {
   await click(100, 216)
   assert.equal(await inline(page).inputValue(), 'Shartnoma raqami: 0000-FIX')
   stack = await faces(inline(page))
-  assert.deepEqual(stack.slice(1), ['PDFMasterNotoSerif', 'serif'], 'a serif line previews in Noto Serif')
+  assert.deepEqual(stack.slice(1), ['DocMasterNotoSerif', 'serif'], 'a serif line previews in Noto Serif')
   // Its neighbour on the same baseline at 360 points bounds its room.
   await toEnd(inline(page))
   await page.keyboard.type(' va qo‘shimcha raqam 12345')
@@ -4992,7 +5010,7 @@ const inlineOpen = async (page) => {
   await page.waitForFunction(() =>
     [...document.fonts].some(
       (face) =>
-        face.family.replace(/"/g, '') === 'PDFMasterNoto' &&
+        face.family.replace(/"/g, '') === 'DocMasterNoto' &&
         face.weight === '700' &&
         face.status === 'loaded',
     ),

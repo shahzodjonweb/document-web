@@ -44,7 +44,7 @@ function loadScript(): Promise<TurnstileApi> {
     script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
     script.async = true
     script.defer = true
-    script.dataset.pdfMasterTurnstile = 'true'
+    script.dataset.docmasterTurnstile = 'true'
     let settled = false
     const settle = (api?: TurnstileApi) => {
       if (settled) return

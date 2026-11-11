@@ -215,7 +215,7 @@ async function submit() {
   const id = ws.quote.value.id
   if (!idempotency.value[id]) idempotency.value[id] = crypto.randomUUID()
   sessionStorage.setItem(
-    'pdf-master-pending-job',
+    'docmaster-pending-job',
     JSON.stringify({ quote_id: id, key: idempotency.value[id] }),
   )
   try {
@@ -224,13 +224,13 @@ async function submit() {
       headers: { 'Idempotency-Key': idempotency.value[id] },
       body: { quote_id: id },
     })
-    sessionStorage.removeItem('pdf-master-pending-job')
+    sessionStorage.removeItem('docmaster-pending-job')
     ws.quote.value = null
     password.value = ''
     await ws.loadAccount()
     await navigateTo(path(`/app/jobs/${job.id}`))
   } catch (e: any) {
-    if (e.statusCode && e.statusCode < 500) sessionStorage.removeItem('pdf-master-pending-job')
+    if (e.statusCode && e.statusCode < 500) sessionStorage.removeItem('docmaster-pending-job')
     error.value = errorMessage(e)
   } finally {
     busy.value = ''

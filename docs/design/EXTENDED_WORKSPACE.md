@@ -1,6 +1,6 @@
 # Extended workspace interaction design
 
-This pass extends the established PDF Master tokens and shell before implementing the generation, education, commerce and editing views. It addresses the user's request for complete local demonstrations while keeping locally simulated providers/payments explicit.
+This pass extends the established DocMaster tokens and shell before implementing the generation, education, commerce and editing views. It addresses the user's request for complete local demonstrations while keeping locally simulated providers/payments explicit.
 
 ## Navigation and modes
 
