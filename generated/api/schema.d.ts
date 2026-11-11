@@ -514,7 +514,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description The Telegram accounts for support and for advertising or partnerships, as set in the admin, empty when not set; and the company's legal details (name, taxpayer number, address, phone, email), the phone and email empty when not set. */
+        /** @description The Telegram accounts for support and for advertising or partnerships, as set in the admin, empty when not set; the bot (its public username and t.me link, empty when not set); and the company's legal details (name, taxpayer number, address, phone, email), the phone and email empty when not set. */
         get: operations["getContacts"];
         put?: never;
         post?: never;
@@ -4501,6 +4501,10 @@ export interface operations {
                 content: {
                     "application/json": {
                         ads: {
+                            url: string;
+                            username: string;
+                        };
+                        bot: {
                             url: string;
                             username: string;
                         };

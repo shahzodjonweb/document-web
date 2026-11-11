@@ -298,6 +298,10 @@ const fixtureApi = async (route) => {
       draft: true,
     })
   if (endpoint === '/plans') return json({ plans: [{ id: plan, name: plan, limits: {} }], draft: true })
+  // The seller's details and contacts, which public pages and Help read.
+  if (endpoint === '/contacts')
+    return json({ support: { username: '', url: '' }, ads: { username: '', url: '' }, bot: { username: '', url: '' },
+      company: { name: '"ARCANIUM TECHNOLOGIES" MCHJ', tin: '313458514', address: 'Toshkent', phone: '', email: '' } })
   if (endpoint === '/usage')
     return json({ plan: 'free', week: { starts_at: '2026-10-11T19:00:00Z', resets_at: '2026-10-18T19:00:00Z', time_zone: 'Asia/Tashkent' }, resets_at: '2026-10-18T19:00:00Z',
       ai_documents: { limit: 5, used: 0, remaining: 5 }, file_jobs: { limit: 15, used: 4, remaining: 11 }, edits_per_file: 3 })
