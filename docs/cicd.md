@@ -12,7 +12,7 @@ CI checks the API/catalog contract, types and production build, tests release is
 
 Optional Actions Variables: `DEPLOY_PORT` (default 22), `DEPLOY_PLATFORM` (default `linux/amd64`, also supports `linux/arm64`). Use `scripts/deploy/configure_variables.py --storage secrets` from either repository to configure both from verified local credential files, or omit `--storage secrets` to use Variables.
 
-`infra/production/Caddyfile` contains this site's host-proxy route. For containerized ingress, the optional `proxy-network.example.yaml` attaches only this project's gateway with aliases `docmaster-web-gateway` and, until the shared proxy moves to it, the pre-rename `pdfmaster-web-gateway`; it is stored as `~/docmaster/web/compose.override.yaml` on the server. Existing projects and TLS routes must be preserved. Routine deployments do not reload or edit the shared TLS proxy.
+HTTPS is DocMaster's own Caddy (compose project `docmaster-proxy`), set up and changed through the platform's server operations ([its runbook](https://github.com/shahzodjonweb/document-platform/blob/main/docs/cicd.md#https)). The server-owned `~/docmaster/web/compose.override.yaml` joins only this project's gateway to the `docmaster-proxy` network under the alias `docmaster-web-gateway`. Routine deployments never touch the proxy.
 
 Rollback only this project:
 
