@@ -96,6 +96,7 @@ import {
   Languages,
   Smartphone,
   Mail,
+  Palette,
 } from 'lucide-vue-next'
 const props = withDefaults(defineProps<{ name: string; size?: number }>(), { size: 20 })
 const icons: Record<string, any> = {
@@ -197,6 +198,7 @@ const icons: Record<string, any> = {
   languages: Languages,
   phone: Smartphone,
   mail: Mail,
+  palette: Palette,
 }
 </script>
 <template>

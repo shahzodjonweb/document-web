@@ -386,6 +386,18 @@ export function useDeckEditor() {
   const conflict = useState('deck-conflict', () => false)
   /** A send in flight: its job reads the draft when it starts, so nothing changes meanwhile. */
   const held = useState('deck-held', () => false)
+  /**
+   * A change the server is making (a picture, a design): the deck waits for it, as for a send,
+   * and takes the version it answers with (`adopt`). The action's name, or null.
+   */
+  const busy = useState<string | null>('deck-busy', () => null)
+  /** Goes up with every opening: whatever a picture action waits on is let go once another deck, or this one again, is opened. */
+  const openings = useState('deck-openings', () => 0)
+  // The picture actions' own state (useDeckPictures), let go with the deck it was about.
+  const picturesRunning = useState<unknown>('deck-pictures-running', () => null)
+  const picturesMessage = useState('deck-pictures-message', () => '')
+  const picturesStyle = useState<string | null>('deck-pictures-style', () => null)
+  const picturesPick = useState<string | null>('deck-pictures-pick', () => null)
   /** Goes up with every change to the history, so an offer to undo one step can tell it is still the last. */
   const steps = useState('deck-steps', () => 0)
   const canUndo = useState('deck-can-undo', () => false)
@@ -422,7 +434,9 @@ export function useDeckEditor() {
     })),
   ])
   const total = computed(() => slides.value.length)
-  const editable = computed(() => openState.value === 'ready' && !held.value && !conflict.value)
+  const editable = computed(
+    () => openState.value === 'ready' && !held.value && !conflict.value && !busy.value,
+  )
   const expiresAt = computed(() => draft.value?.expires_at ?? '')
   const expiresSoon = computed(
     () => !!expiresAt.value && Date.parse(expiresAt.value) - clock.value < EXPIRY_WARNING,
@@ -950,6 +964,48 @@ export function useDeckEditor() {
   const save = () => persist(false)
 
   /**
+   * A version the server made (a picture put on or taken off, another design), taken as one
+   * step of history: Undo takes back what it did to the words and layouts, as it would a tap
+   * here. `changed` names the slides whose pictures it changed without changing their words
+   * ('all' for a design), so they show as being drawn again until their new picture comes.
+   */
+  function adopt(fresh: DeckDraft, changed: string[] | 'all' = []) {
+    const state = deck()
+    if (!state || fresh.id !== state.id || fresh.version < version.value) return
+    const before = JSON.stringify(content.value)
+    confirm(state, fresh)
+    if (state.onServer !== JSON.stringify(normaliseContent(content.value))) {
+      state.past.push(before)
+      if (state.past.length > HISTORY_LIMIT) state.past.shift()
+      state.future.length = 0
+      state.lastLabel = ''
+      holdingCurrent(() => (content.value = JSON.parse(state.onServer)))
+      syncFlags(state)
+    }
+    const ids = changed === 'all' ? sections.value.map((section) => section.id) : changed
+    for (const id of ids) state.changedAt.set(id, fresh.version)
+    if (changed === 'all') state.questionsChangedAt = fresh.version
+    if (changed === 'all') void loadFace(fresh)
+    saveState.value = 'saved'
+    saveError.value = ''
+    saveRetryable.value = false
+    requestRender()
+  }
+
+  /** Back to the deck as it was opened or last sent, as one step: Undo brings this back. */
+  function startOver() {
+    const to = baseline.value
+    if (!to) return false
+    const before = steps.value
+    holdingCurrent(() =>
+      mutate('start-over', (c) => {
+        Object.assign(c, clone(to))
+      }),
+    )
+    return steps.value !== before
+  }
+
+  /**
    * What is waiting goes now, as a hidden or closing app may never run the timer.
    * True once the server holds everything; false while a conflict waits or it could not.
    */
@@ -1079,6 +1135,14 @@ export function useDeckEditor() {
   async function open(id: string) {
     const opening = ++opens
     opener = self
+    // What the last deck's pictures were doing, and its Undo offers, are not this deck's.
+    openings.value += 1
+    busy.value = null
+    snackbar.dismiss()
+    picturesRunning.value = null
+    picturesMessage.value = ''
+    picturesStyle.value = null
+    picturesPick.value = null
     const previous = openedId.value
     const owner = account()
     // Opened by another account before a sign-out and in on this device: let go unsaved, as this
@@ -1569,6 +1633,8 @@ export function useDeckEditor() {
     saveRetryable,
     conflict,
     held,
+    busy,
+    openings,
     steps,
     canUndo,
     canRedo,
@@ -1606,6 +1672,8 @@ export function useDeckEditor() {
     undo,
     redo,
     save,
+    adopt,
+    startOver,
     flush,
     flushBriefly,
     holdForChoice,

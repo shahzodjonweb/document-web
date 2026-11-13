@@ -752,6 +752,23 @@ export interface paths {
         patch: operations["updateGenerationDraft"];
         trace?: never;
     };
+    "/generation/drafts/{id}/design": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Another design for a drawn deck, from `/studio/deck-designs`: a new version of the draft that changes its look and nothing else. `invalid_parameters` for a design not listed; `version_conflict`; `generation_running` while a send is under way. */
+        post: operations["setDeckDesign"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/generation/drafts/{id}/export-quote": {
         parameters: {
             query?: never;
@@ -812,6 +829,57 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["reviewGenerationOutline"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/generation/drafts/{id}/photos": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description A drawn deck's pictures changed in the slide editor, free and never an AI edit. `remove` (a slide's picture off, kept first among its candidates) answers 200 with the draft. The rest answer 202 with a picture task to follow: `fill` gives slides with none a picture where their words still all show (3 a day), `next` puts a slide's `asset_id` candidate, or its first, on it, `upload` makes the customer's uploaded `asset_id` a slide's picture, `search` offers four for a slide from English `query` words (10 a day, 5 a minute). A slide that would lose words to a picture is refused (`picture_no_room`), never cut. Each that lands is a new version of the draft. `photos_limit` (429, `limit_kind` fill, search, search_minute or deck) past a cap; `photos_unavailable` without the photo library; `deck_pictures_complete`; `lane_busy` with one already running; `version_conflict`; `generation_running` while a send is under way; `feature_unavailable` with the switch off. */
+        post: operations["changeDeckPictures"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/generation/drafts/{id}/photos/{task}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description How a picture task stands. `error` names why one failed (`picture_unavailable`, `picture_no_room`, `photos_unavailable`, `invalid_image`). */
+        get: operations["getDeckPictureTask"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/generation/drafts/{id}/pictures/{asset}.jpg": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description One of the deck's own pictures, as it wears it or has it on offer, inline. Anything else is 404. */
+        get: operations["getDeckPicture"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1544,6 +1612,33 @@ export interface components {
             /** @description What the file would come without: `logo_left_out` when the logo is no longer stored. */
             warnings: string[];
         };
+        DeckPhotoTask: {
+            /** @enum {unknown} */
+            action: "fill" | "next" | "upload" | "search";
+            error: string | null;
+            /** @description Once done: `version`, the draft's new version to read back, and counts and ids only (`added`, `asked`, `no_room`, `unmatched`, `failed` for a fill; `asset_id` for next and upload; `found` for a search). */
+            result: Record<string, never> | null;
+            /** @enum {unknown} */
+            status: "queued" | "running" | "done" | "failed";
+            /** Format: uuid */
+            task_id: string;
+        };
+        DeckPictures: {
+            /** @description Add to all slides left today (Tashkent). */
+            fills_left: number;
+            /** @description Whether the slide editor may change pictures at all (the `photos_task` switch). */
+            on: boolean;
+            /** @description Pictures this deck may hold. */
+            per_deck: number;
+            /** @description Slides that wear one now. */
+            pinned: number;
+            /** @description Find more left today. */
+            searches_left: number;
+            /** @description Whether pictures can come from the photo library now: Add to all slides and Find more need it. */
+            stock: boolean;
+            /** @enum {unknown} */
+            style: "photo" | "illustration";
+        };
         DeckPins: {
             body_size: number;
             deck_seed: string;
@@ -1556,6 +1651,8 @@ export interface components {
                         /** Format: uuid */
                         asset_id: string;
                     }[];
+                    /** @description Every candidate on offer, those with no stored copy too: what Another picture can reach. */
+                    offered?: number;
                 };
             };
             variants: {
@@ -1886,6 +1983,8 @@ export interface components {
             output_format: "pdf" | "pptx";
             /** @enum {unknown} */
             output_locale: "en" | "uz" | "ru";
+            /** @description A drawn deck opened in the slide editor: what its Pictures sheet allows now. */
+            readonly pictures?: components["schemas"]["DeckPictures"];
             prompt?: string;
             provider_mode: string;
             /** @description A generated deck (`ai.pptx`): how it was drawn, so an edit changes only the slide it touches. `variants` and `photos` are by section id; a photo `asset_id` is the account's own file, null when none was kept, and `candidates` are small copies kept on offer for that slide, possibly none. `deck_seed` is opaque. Absent until a deck has been made. */
@@ -1896,6 +1995,10 @@ export interface components {
                 /** Format: uuid */
                 source_draft_id?: string;
                 source_version?: number;
+            };
+            /** @description A drawn deck read in the slide editor (GET, PATCH and the picture and design calls): whether a send of it this week uses no file task, as it was counted already. */
+            readonly send?: {
+                counted_this_week: boolean;
             };
             source_ids?: string[];
             source_text?: string;
@@ -6298,6 +6401,69 @@ export interface operations {
             };
         };
     };
+    setDeckDesign: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRFToken": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    design: string;
+                    version: number;
+                };
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerationDraft"];
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     quoteDeckExport: {
         parameters: {
             query?: never;
@@ -6518,6 +6684,200 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["GenerationDraft"];
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    changeDeckPictures: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRFToken": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {unknown} */
+                    action: "fill" | "next" | "upload" | "search" | "remove";
+                    /** Format: uuid */
+                    asset_id?: string;
+                    query?: string;
+                    section_id?: string;
+                    /** @enum {unknown} */
+                    style?: "photo" | "illustration";
+                    version: number;
+                };
+            };
+        };
+        responses: {
+            /** @description `remove`: the draft */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerationDraft"];
+                };
+            };
+            /** @description Success */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @enum {unknown} */
+                        status: "queued" | "running" | "done" | "failed";
+                        /** Format: uuid */
+                        task_id: string;
+                    };
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getDeckPictureTask: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                task: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeckPhotoTask"];
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getDeckPicture: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+                asset: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Private JPEG */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/jpeg": string;
                 };
             };
             /** @description Invalid request */

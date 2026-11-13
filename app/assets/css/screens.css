@@ -2335,6 +2335,12 @@
   font: 600 var(--text-lg) var(--font-display);
   color: var(--ink);
 }
+/* The picker as the panel's own grid row: its children keep the panel's spacing, and its category tabs scroll within it. */
+.deck-design-picker {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
 .deck-auto {
   position: relative;
   display: flex;
@@ -3371,9 +3377,166 @@
   border-right: 1px solid var(--hairline);
 }
 
-/* One tab, Slides: a pill of its own size, not the whole bar (frame.css stretches one). */
-.editor-tabbar.deck-edit-single .editor-toolpill {
-  flex: 0 1 200px;
+/* The Pictures, Design and Ask AI sheets: one column of sections, each a short title and its controls. */
+.deck-pictures,
+.deck-design,
+.deck-ask {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.deck-pictures h3,
+.deck-design h3 {
+  margin: 0;
+  font-size: var(--text-md, 16px);
+}
+.deck-pictures .field-hint,
+.deck-design .field-hint,
+.deck-ask .field-hint {
+  margin: 0;
+}
+/* Inside the editor every target is 44 px, the pill toggles too. */
+.deck-pictures .category-tabs button,
+.deck-design .category-tabs button {
+  min-height: 44px;
+}
+.deck-pictures-all,
+.deck-pictures-slide,
+.deck-pictures-find,
+.deck-design-layout,
+.deck-design-whole {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.deck-pictures-all > .button {
+  width: 100%;
+}
+.deck-pictures-all .field-hint {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+}
+.deck-pictures-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+.deck-pictures-worn {
+  flex: none;
+  margin: 0;
+}
+.deck-pictures-worn img,
+.deck-pictures-empty {
+  display: block;
+  width: 128px;
+  height: 72px;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+}
+.deck-pictures-worn img {
+  box-shadow: 0 0 0 2px var(--action);
+}
+.deck-pictures-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: var(--space-2);
+  border: 1px dashed var(--hairline-strong);
+  color: var(--muted);
+  font-size: var(--text-xs);
+  text-align: center;
+}
+.deck-pictures-offered {
+  display: flex;
+  flex: 1 1 0;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.deck-pictures-pick {
+  display: block;
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  box-shadow: 0 0 0 1px var(--hairline-strong);
+  cursor: pointer;
+}
+.deck-pictures-pick img {
+  display: block;
+  width: 72px;
+  height: 48px;
+  object-fit: cover;
+}
+.deck-pictures-pick:hover:not(:disabled),
+.deck-pictures-pick:focus-visible {
+  box-shadow: 0 0 0 2px var(--action);
+}
+.deck-pictures-pick:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.deck-pictures-actions,
+.deck-ask-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.deck-pictures-find .form-field small {
+  color: var(--muted);
+}
+.deck-pictures-find > .button {
+  align-self: flex-start;
+}
+.deck-pictures-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 1.4em;
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+.deck-pictures-status:empty {
+  min-height: 0;
+}
+.deck-design-layout-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.deck-design .deck-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+.deck-ask-scope {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.deck-ask-scope > span {
+  font-weight: 600;
+}
+.deck-ask .category-tabs button {
+  min-height: 44px;
+}
+.deck-ask .category-tabs button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.deck-ask textarea {
+  font-size: 16px;
+}
+.deck-ask > .button.primary {
+  align-self: stretch;
 }
 
 /* The field dock, where the top bar was: everything in it stays above the keyboard. */
@@ -3606,6 +3769,41 @@
   margin: 0;
   padding: 0;
   list-style: none;
+}
+/* A row and its grip side by side; the gaps to put a row in span both. */
+.deck-edit-list > li {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  transition: transform 0.15s ease;
+}
+.deck-edit-list > li > .deck-edit-put {
+  grid-column: 1 / -1;
+}
+.deck-edit-list.dragging > li {
+  user-select: none;
+}
+.deck-edit-list > li.lifted {
+  transition: none;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-md, 0 6px 18px rgb(0 0 0 / 0.18));
+}
+.deck-edit-grip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  color: var(--muted);
+  cursor: grab;
+  touch-action: none;
+}
+.deck-edit-list > li.lifted .deck-edit-grip {
+  cursor: grabbing;
+  color: var(--action);
 }
 .deck-edit-list-row {
   position: relative;
