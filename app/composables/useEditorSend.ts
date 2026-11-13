@@ -103,6 +103,7 @@ export function useEditorSend() {
   const session = useEditorSession()
   const telegram = useTelegramApp()
   const tools = useEditorTools()
+  const blackout = useEditorBlackOut()
   loadSent()
 
   const deliver = computed<Deliver>(() => (telegram.isMiniApp.value ? 'chat' : 'download'))
@@ -272,6 +273,11 @@ export function useEditorSend() {
       refusal.value = { code: 'needs_fix', message: session.describeIssue(issue), params: { id: issue.id } }
       stage.value = 'failed'
       return
+    }
+    // Which pages keep their words when blacked out is found first: the quote asks "I understand" for the others alone.
+    if (blackout.keepsText.value && blackout.boxes.value.length) {
+      await blackout.ensureChecked()
+      if (run !== runs) return
     }
     const before = quote.value?.summary?.cost
     // One quote at a time: an earlier ask still on its way is waited for, not refused.

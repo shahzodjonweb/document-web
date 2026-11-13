@@ -309,6 +309,13 @@ watch(
         <NuxtLink :to="path('/app/settings')" class="button secondary">{{ t('authLinkTelegram') }}</NuxtLink>
       </template>
       <p v-else-if="refusal.code === 'payload_too_large'">{{ t('editorTooMuch') }}</p>
+      <!-- A page the check found would keep its words did not, when the file was made: nothing was made or counted. -->
+      <template v-else-if="refusal.code === 'rasterization_consent_required'">
+        <p>{{ t('editorPicturePageLate') }}</p>
+        <button type="button" class="button secondary" data-testid="editor-review-again" @click="send.check()">
+          {{ t('editorCheckAgain') }}
+        </button>
+      </template>
       <template v-else-if="refusedIndex !== null">
         <p>
           {{

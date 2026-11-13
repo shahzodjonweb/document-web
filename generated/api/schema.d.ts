@@ -557,6 +557,24 @@ export interface paths {
         patch: operations["updateEditorDocument"];
         trace?: never;
     };
+    "/editor/documents/{id}/blackout-check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Which pages with a black-out box keep their text in a send of the stored draft as it is saved now, and which become pictures. Nothing is queued. */
+        get: operations["getBlackoutCheck"];
+        put?: never;
+        /** @description The same, with a check queued for the pages not known yet: 202 while it runs. A free task of the editor lane (`lane_busy` past the day's budget). The quote asks consent for the pages a check has not found to keep their text. */
+        post: operations["checkBlackout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/editor/documents/{id}/quote": {
         parameters: {
             query?: never;
@@ -1538,6 +1556,27 @@ export interface components {
             quote_id: string;
             status: string;
         };
+        BlackoutCheck: {
+            error: string | null;
+            pages: components["schemas"]["BlackoutPage"][];
+            /**
+             * @description `done` when every page with a box has its answer in `pages`; `queued`/`running` while a check finds the rest (ask again with GET); `failed` when the last check failed (`error`), and `none` when none has been asked for since the boxes changed (POST asks).
+             * @enum {unknown}
+             */
+            status: "done" | "queued" | "running" | "failed" | "none";
+            version: number;
+        };
+        BlackoutPage: {
+            /** @description Its boxes are blacked out and the rest of the page stays text. Otherwise the page becomes a picture, and the send asks consent for it. */
+            keeps_text: boolean;
+            /** @description Numbered as uploaded. */
+            page: number;
+            /**
+             * @description `vector` when it keeps its text. Why it becomes a picture otherwise: `scan` its words are drawn over a picture of the page, `image` a box covers a picture, `mark` a box is under another change of this draft, `left` words in a box would stay readable, `others` the page would change outside its boxes (a table border or a panel that a box touches), `black` a box would not come out black, `engine` this black-out is off, `large`, `refused`, `parts`, `invalid` (the send refuses that box).
+             * @enum {unknown}
+             */
+            reason: "vector" | "engine" | "large" | "scan" | "image" | "mark" | "invalid" | "refused" | "left" | "others" | "black" | "parts";
+        };
         BotDelivery: {
             attempts: number;
             /** Format: uuid */
@@ -1896,7 +1935,7 @@ export interface components {
             kept_until: string;
             pages_after: number;
             pages_before: number;
-            /** @description The pages, numbered as uploaded, that will become pictures for their black-out. A page being deleted is not among them. */
+            /** @description The pages, numbered as uploaded, that will become pictures for their black-out: every page with a box that a check (`/editor/documents/{id}/blackout-check`) has not found to keep its words. A page being deleted is not among them. */
             raster_pages: number[];
             /** @description About how many bytes the file comes to. In a chat, a file over 50 MB arrives as a link. */
             size_estimate: number;
@@ -4983,6 +5022,134 @@ export interface operations {
                         error?: components["schemas"]["Error"];
                     };
                 };
+            };
+        };
+    };
+    getBlackoutCheck: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BlackoutCheck"];
+                };
+            };
+            /** @description Success */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BlackoutCheck"];
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    checkBlackout: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRFToken": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BlackoutCheck"];
+                };
+            };
+            /** @description Success */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BlackoutCheck"];
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -8480,6 +8647,7 @@ export interface operations {
                                 pdfcraft: boolean;
                                 photos_task: boolean;
                                 text_edit: boolean;
+                                vector_blackout: boolean;
                             };
                         };
                         provider: {
