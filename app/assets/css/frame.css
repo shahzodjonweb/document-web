@@ -1944,6 +1944,78 @@ html.editor-bare .main-content.main-content-wide {
   font-size: 14px;
   font-weight: 600;
 }
+/* Finding what to black out: a field, the presets as 44 px chips, and what was found. */
+.editor-blackout-find {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+}
+.editor-blackout-find .input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  /* iOS zooms into a field set smaller. */
+  font-size: 16px;
+}
+.editor-blackout-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.editor-blackout-presets .chip {
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+.editor-blackout-presets .chip.active {
+  border-color: var(--action);
+  background: var(--blue-50);
+  color: var(--ink);
+  font-weight: 600;
+}
+.editor-blackout-found {
+  margin: 0;
+  color: var(--ink);
+  font-size: 14px;
+}
+/* What each page with a box comes to. */
+.editor-blackout-pages {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text);
+  font-size: 14px;
+}
+.editor-blackout-pages li {
+  display: flex;
+  flex-direction: column;
+}
+.editor-blackout-pages strong {
+  color: var(--ink);
+}
+.editor-blackout-pages small {
+  color: var(--muted);
+}
+/* What Black out found and has not covered yet: outlined, for a tap or Black out all. */
+.editor-match {
+  position: absolute;
+  z-index: 1;
+  border-radius: 2px;
+  outline: 2px solid var(--danger);
+  outline-offset: 1px;
+  background: #c8232f1f;
+  pointer-events: none;
+}
 
 /* The object form. */
 .editor-objectform > p {

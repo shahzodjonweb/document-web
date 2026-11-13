@@ -164,7 +164,12 @@ function closePanel() {
 watch(
   () => selected.value?._id,
   async (id) => {
-    if (!id) return
+    // A box's form put away in Black out: back to Black out, its tab lit and what it found outlined.
+    if (!id) {
+      if (tools.armed.value?.kind === 'redact' && tools.sheet.value === 'blackout' && session.mode.value === 'edit')
+        session.mode.value = 'redact'
+      return
+    }
     // A page's own change is in Pages, where it is undone or changed.
     if (isPageCommand(selected.value!)) {
       session.select(null)

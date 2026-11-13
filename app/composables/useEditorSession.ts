@@ -458,6 +458,8 @@ export function useEditorSession() {
         commands.value = commands.value.map((command) => {
           if (command._id !== id) return command
           const next = { ...command, ...patch } as ClientCommand
+          // A box made over found words, moved or sized, is a box: the words it held may be elsewhere now.
+          if (next.type === 'redact' && ['page', 'x', 'y', 'width', 'height'].some((key) => key in patch)) delete next.text
           if (next.page === undefined) return next
           next.page = Math.max(1, Math.min(Math.round(next.page) || 1, doc.value?.file.page_count ?? 1000))
           return clampCommand(next, pageSize(next.page), mode)

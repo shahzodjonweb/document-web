@@ -29,6 +29,9 @@ const scannedBytes = await fs.readFile('tests/fixtures/scanned-pages.pdf')
 const wordsBytes = await fs.readFile('tests/fixtures/uzbek-cyrillic.pdf')
 // A made-up OCR'd scan: a picture of words with the same words laid unseen over it, and one visible line.
 const ocrBytes = await fs.readFile('tests/fixtures/scanned-ocr.pdf')
+// Two made-up pages of numbers people black out: +998 phones, a card, a passport, a PINFL, decoys that are
+// none of them, and o‘g‘li with each of its apostrophes (U+2018, ', U+02BB), in Noto Sans.
+const blackoutBytes = await fs.readFile('tests/fixtures/blackout-numbers.pdf')
 const onePixelPng = Buffer.from(
   'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
   'base64',
@@ -224,6 +227,9 @@ async function openContext({
   scale = 1,
   // Jobs already made, as the task page reads them.
   presetJobs = [],
+  // The server's black-out check: each page's answer (`vector` keeps its words), from the server's state,
+  // and how many looks find it still running.
+  blackout = null,
 }) {
   const context = await browser.newContext({
     viewport: { width, height },
@@ -261,6 +267,23 @@ async function openContext({
     jobPosts: [],
     jobs: [],
   }
+  /** The pages with a black-out box, numbered as uploaded, a page being deleted aside. */
+  const boxedPages = () => {
+    const deleted = server.commands.filter((item) => item.type === 'delete_page').map((item) => item.page)
+    return [
+      ...new Set(
+        server.commands.filter((item) => item.type === 'redact' && !deleted.includes(item.page)).map((item) => item.page),
+      ),
+    ].sort()
+  }
+  /** What a check says of a page, as the server's state is now. */
+  const answerOf = (page) => (typeof blackout?.outcomes === 'function' ? blackout.outcomes(server) : blackout?.outcomes)?.[page] ?? 'vector'
+  /** A check answers for these boxes, and these answers: a box moved, or an answer changed, needs another. */
+  const checkKey = () =>
+    JSON.stringify([
+      server.commands.filter((item) => item.type === 'redact').map(({ page, x, y, width, height, text }) => [page, x, y, width, height, text]),
+      boxedPages().map(answerOf),
+    ])
   /** A job as GET /jobs/{id} answers it: waiting, then running, then as it ends. */
   const jobBody = (job) => {
     const waits = typeof queued === 'function' ? queued(server.jobs.indexOf(job) + 1) : queued
@@ -470,13 +493,10 @@ async function openContext({
         )
       }
       const deleted = server.commands.filter((item) => item.type === 'delete_page').map((item) => item.page)
-      const raster = [
-        ...new Set(
-          server.commands
-            .filter((item) => item.type === 'redact' && !deleted.includes(item.page))
-            .map((item) => item.page),
-        ),
-      ].sort()
+      // A page found to keep its words by a check of these very boxes is not asked about.
+      const raster = boxedPages().filter(
+        (page) => !(blackout && server.checkedFor === checkKey() && answerOf(page) === 'vector'),
+      )
       if (raster.length && !body.accept_rasterization) {
         server.quotes.push({ id: null, body })
         return json(
@@ -513,6 +533,25 @@ async function openContext({
         },
         201,
       )
+    }
+    if (endpoint === `/editor/documents/${DOC}/blackout-check`) {
+      const pages = () =>
+        boxedPages().map((page) => ({ page, keeps_text: answerOf(page) === 'vector', reason: answerOf(page) }))
+      const body = (status) => ({ status, version: server.version, pages: status === 'done' ? pages() : [], error: null })
+      if (method === 'POST') {
+        server.checks = (server.checks ?? 0) + 1
+        if (server.checkedFor === checkKey()) return json(body('done'))
+        server.checkLeft = blackout?.runs ?? 1
+        server.checking = checkKey()
+        return json(body('running'), 202)
+      }
+      if (server.checking !== checkKey()) return json(body(server.checkedFor === checkKey() ? 'done' : 'none'))
+      if (server.checkLeft > 0) {
+        server.checkLeft -= 1
+        return json(body('running'), 202)
+      }
+      server.checkedFor = server.checking
+      return json(body('done'))
     }
     if (endpoint === '/telegram/local/messages')
       return json({
@@ -5080,6 +5119,373 @@ for (const [name, width, height, locale, theme] of [
   await opened.context.close()
 }
 passed('Changing a line in the dock at 390 and 320, en uz ru, light and dark: axe, 44 px, no sideways scroll')
+
+/* ---------------------------------------------------- Black out by finding words */
+
+const BLACKOUT_ON = { editor_v2: true, pdfcraft: true, vector_blackout: true }
+const found = (page) => page.getByTestId('editor-blackout-found')
+/** What the search says once it has looked through every page. */
+const foundSays = async (page, text) => {
+  await page.waitForFunction(
+    (text) => document.querySelector('[data-testid="editor-blackout-found"]')?.textContent.trim() === text,
+    text,
+  )
+}
+const outcomesSay = (page) => page.getByTestId('editor-blackout-pages').evaluate((node) => node.innerText.trim())
+
+{
+  // Find the +998 numbers, Black out all with the MainButton, a check says which pages stay text,
+  // and Review asks "I understand" for the page that becomes a picture alone.
+  const opened = await openContext({
+    width: 390,
+    height: 656,
+    marks: [],
+    pdf: blackoutBytes,
+    editor: BLACKOUT_ON,
+    blackout: { outcomes: { 1: 'vector', 2: 'others' }, runs: 1 },
+  })
+  const { page, server } = opened
+  await goToDocument(opened)
+  await settle(page)
+  const flow = counter(page)
+  await flow.tap(page.getByTestId('editor-tab-blackout'))
+  await page.getByTestId('editor-blackout-sheet').waitFor()
+  assert.equal((await mainButton(page)).text, 'Send to chat', 'nothing found yet: the frame keeps its button')
+  await flow.tap(page.getByTestId('editor-blackout-preset-phone'))
+  await foundSays(page, '3 matches · pages 1, 2')
+  assert.equal(await page.getByTestId('editor-blackout-preset-phone').getAttribute('aria-pressed'), 'true')
+  assert.equal(await page.getByTestId('editor-match').count(), 3, 'each match is outlined on its page')
+  assert.deepEqual(
+    { text: (await mainButton(page)).text, isActive: (await mainButton(page)).isActive },
+    { text: 'Black out all 3', isActive: true },
+  )
+  await page.screenshot({ path: path.join(output, 'blackout-390-en-found.png') })
+  await flow.main()
+  const commands = await saved(page, server)
+  assert.deepEqual(
+    commands.map((command) => [command.type, command.page, command.text]),
+    [
+      ['redact', 1, '+998 90 123 45 67'],
+      ['redact', 2, '+998 (91) 765-43-21'],
+      ['redact', 2, '998 93 111 22 33'],
+    ],
+    'each box holds the words as the page has them',
+  )
+  // "Telefon: " in Noto Sans 12 ends at 120.44 and the number is 101.71 wide, on the baseline 180 down:
+  // the box is there, 0.12 of the size wider each side.
+  const [first] = commands
+  assert.ok(Math.abs(first.x - 119.0) < 1 && Math.abs(first.width - 104.59) < 1.5, JSON.stringify(first))
+  assert.ok(Math.abs(first.y - (180 - 0.95 * 12)) < 0.6 && Math.abs(first.height - 15) < 0.6, JSON.stringify(first))
+  assert.equal(await page.getByTestId('editor-match').count(), 0, 'covered: no longer outlined')
+  assert.equal(await page.locator('.editor-mark.redact.pending').count(), 3, 'and hatched until the file is made')
+  await foundSays(page, 'Everything found is blacked out.')
+  await page.locator('[data-testid="editor-blackout-pages"] [data-outcome="picture"]').waitFor()
+  assert.equal(
+    await outcomesSay(page),
+    'Page 1: the other words stay text\nPage 2 becomes a picture\nCovering it would also take lines or shapes beside it.',
+  )
+  assert.equal(server.checks, 1, 'checked once, when the boxes were saved')
+  assert.equal((await mainButton(page)).text, 'Send to chat', 'all covered: the frame has its button back')
+  await page.screenshot({ path: path.join(output, 'blackout-390-en-checked.png') })
+  await flow.main()
+  await page.getByTestId('editor-review-consent').waitFor()
+  assert.match(
+    await page.getByTestId('editor-review-consent').textContent(),
+    /Pages that become pictures: 2(?![\d,])/,
+    'only the page the check did not find to keep its words',
+  )
+  await flow.tap(page.getByTestId('editor-consent'))
+  await page.getByTestId('editor-review-cost').waitFor()
+  await flow.main()
+  await page.getByTestId('editor-accepted').waitFor()
+  assert.deepEqual(
+    server.quotes.map((quote) => quote.body.accept_rasterization),
+    [false, true],
+  )
+  assert.ok(flow.taps <= 7, `found, blacked out, consented and sent in ${flow.taps} taps`)
+  assert.deepEqual(opened.errors, [])
+  assert.deepEqual(server.unexpected, [])
+  await opened.context.close()
+  passed(`Black out by preset: 3 found and outlined, Black out all, page 1 stays text, consent for page 2 only (${flow.taps} taps)`)
+}
+
+{
+  // Every page keeps its words: Review asks nothing, and the quote is the first one.
+  const opened = await openContext({
+    width: 390,
+    height: 656,
+    marks: [],
+    pdf: blackoutBytes,
+    editor: BLACKOUT_ON,
+    blackout: { outcomes: { 1: 'vector', 2: 'vector' }, runs: 2 },
+  })
+  const { page, server } = opened
+  await goToDocument(opened)
+  await settle(page)
+  await page.getByTestId('editor-tab-blackout').click()
+  await page.getByTestId('editor-blackout-preset-card').click()
+  await foundSays(page, '1 match · page 1')
+  await pressMain(page)
+  await saved(page, server)
+  // While it runs, the page says so.
+  await page.locator('[data-testid="editor-blackout-pages"] [data-outcome="checking"]').waitFor()
+  await page.locator('[data-testid="editor-blackout-pages"] [data-outcome="keeps"]').waitFor()
+  await pressMain(page)
+  await page.getByTestId('editor-review-cost').waitFor()
+  assert.equal(await page.getByTestId('editor-review-consent').count(), 0, 'no page becomes a picture: nothing to agree to')
+  assert.deepEqual(server.quotes.map((quote) => quote.body.accept_rasterization), [false])
+  assert.equal(server.commands[0].text, '8600 1234 5678 9012')
+  assert.deepEqual(opened.errors, [])
+  assert.deepEqual(server.unexpected, [])
+  await opened.context.close()
+  passed('A card found and blacked out on a page that stays text: checking, then sent with no I understand')
+}
+
+{
+  // Send at once after Black out all: Review waits for the sheet's own check rather than asking about every page.
+  const opened = await openContext({
+    width: 390,
+    height: 656,
+    marks: [],
+    pdf: blackoutBytes,
+    editor: BLACKOUT_ON,
+    blackout: { outcomes: { 1: 'vector', 2: 'others' }, runs: 4 },
+  })
+  const { page, server } = opened
+  await goToDocument(opened)
+  await settle(page)
+  await page.getByTestId('editor-tab-blackout').click()
+  await page.getByTestId('editor-blackout-preset-phone').click()
+  await foundSays(page, '3 matches · pages 1, 2')
+  await pressMain(page)
+  await saved(page, server)
+  await page.waitForFunction(() => window.__tg.app.MainButton.text === 'Send to chat')
+  await pressMain(page)
+  await page.getByTestId('editor-review-consent').waitFor()
+  assert.match(await page.getByTestId('editor-review-consent').textContent(), /Pages that become pictures: 2(?![\d,])/)
+  assert.ok(server.checks <= 2, `the sheet's check and Review's are one (${server.checks})`)
+  assert.deepEqual(opened.errors, [])
+  assert.deepEqual(server.unexpected, [])
+  await opened.context.close()
+  passed('Review opened at once after Black out all waits for the check under way and asks about page 2 alone')
+}
+
+{
+  // A box chosen in Black out and its form put away: Black out again, its tab lit and the rest outlined.
+  const opened = await openContext({ width: 390, height: 656, marks: [], pdf: blackoutBytes, editor: BLACKOUT_ON })
+  const { page, server } = opened
+  await goToDocument(opened)
+  await settle(page)
+  await page.getByTestId('editor-tab-blackout').click()
+  await page.getByTestId('editor-blackout-preset-phone').click()
+  await foundSays(page, '3 matches · pages 1, 2')
+  const match = await page.getByTestId('editor-match').first().boundingBox()
+  const paper = await page.getByTestId('editor-page-1').boundingBox()
+  const middle = { x: match.x - paper.x + match.width / 2, y: match.y - paper.y + match.height / 2 }
+  await page.getByTestId('editor-page-1').click({ position: middle })
+  await saved(page, server)
+  await page.getByTestId('editor-page-1').click({ position: middle })
+  await page.getByTestId('editor-object-sheet').waitFor()
+  await page.getByTestId('editor-object-sheet').getByTestId('editor-sheet-close').click()
+  await page.getByTestId('editor-object-sheet').waitFor({ state: 'detached' })
+  await page.getByTestId('editor-blackout-sheet').waitFor()
+  assert.equal(await page.getByTestId('editor-tab-blackout').getAttribute('aria-pressed'), 'true')
+  assert.equal(await page.getByTestId('editor-match').count(), 2, 'what is left is outlined again')
+  assert.deepEqual(opened.errors, [])
+  assert.deepEqual(server.unexpected, [])
+  await opened.context.close()
+  passed('A box chosen in Black out and put away gives Black out back, lit, with what is left outlined')
+}
+
+{
+  // Folding and the presets, outside Telegram in Uzbek: ‘ ' ʻ are one apostrophe, case is no matter,
+  // and each preset finds its own and no decoy. A tap on one match covers that one.
+  const opened = await openContext({
+    width: 390,
+    height: 844,
+    inside: false,
+    locale: 'uz',
+    marks: [],
+    pdf: blackoutBytes,
+    editor: BLACKOUT_ON,
+  })
+  const { page, server } = opened
+  await goToDocument(opened)
+  await settle(page)
+  await page.getByTestId('editor-tab-blackout').click()
+  const search = page.getByTestId('editor-blackout-search')
+  await search.fill("o'g'li")
+  await foundSays(page, '3 ta topildi · sahifalar: 1, 2')
+  assert.equal(await page.getByTestId('editor-primary').textContent(), 'Hammasini bo‘yab yopish (3)', 'drawn by the sheet outside Telegram')
+  await search.fill('oʻgʻli')
+  await foundSays(page, '3 ta topildi · sahifalar: 1, 2')
+  await search.fill('OTA')
+  await foundSays(page, '2 ta topildi · sahifalar: 1, 2')
+  await search.fill('+998901234567')
+  await foundSays(page, '1 ta topildi · 1-sahifa')
+  for (const [preset, says, text] of [
+    ['card', '1 ta topildi · 1-sahifa', '8600 1234 5678 9012'],
+    ['passport', '1 ta topildi · 1-sahifa', 'AA1234567'],
+    ['pinfl', '1 ta topildi · 1-sahifa', '31234567890123'],
+  ]) {
+    await page.getByTestId(`editor-blackout-preset-${preset}`).click()
+    assert.equal(await search.inputValue(), '', 'a preset takes the place of the words typed')
+    await foundSays(page, says)
+    await page.getByTestId(`editor-blackout-preset-${preset}`).click()
+    await foundSays(page, '')
+    void text
+  }
+  await page.getByTestId('editor-blackout-preset-phone').click()
+  await foundSays(page, '3 ta topildi · sahifalar: 1, 2')
+  // A tap on the first page's number covers it alone.
+  const match = await page.getByTestId('editor-match').first().boundingBox()
+  const paper = await page.getByTestId('editor-page-1').boundingBox()
+  await page.getByTestId('editor-page-1').click({ position: { x: match.x - paper.x + match.width / 2, y: match.y - paper.y + match.height / 2 } })
+  const commands = await saved(page, server)
+  assert.deepEqual(commands.map((command) => command.text), ['+998 90 123 45 67'])
+  await foundSays(page, '2 ta topildi · 2-sahifa')
+  assert.equal(await page.getByTestId('editor-primary').textContent(), 'Hammasini bo‘yab yopish (2)')
+  // Undo takes the box away and the match is outlined again.
+  await page.getByTestId('editor-undo').click()
+  await foundSays(page, '3 ta topildi · sahifalar: 1, 2')
+  assert.deepEqual(opened.errors, [])
+  assert.deepEqual(server.unexpected, [])
+  await opened.context.close()
+  passed('Search folds ‘ \' ʻ and case, numbers in any spacing; presets find cards, passports and PINFL but no decoy; a tap covers one')
+}
+
+{
+  // An OCR'd scan: the words laid unseen over its picture are found nowhere; its visible line is.
+  const opened = await openContext({ width: 390, height: 656, marks: [], pdf: ocrBytes, pageCount: 1, editor: BLACKOUT_ON })
+  const { page, server } = opened
+  await goToDocument(opened)
+  await settle(page)
+  await page.getByTestId('editor-tab-blackout').click()
+  await page.getByTestId('editor-blackout-search').fill('scan words')
+  await foundSays(
+    page,
+    'Nothing found in the pages’ words. Words in a picture of a page cannot be found: tap them to cover them.',
+  )
+  assert.equal(await page.getByTestId('editor-match').count(), 0)
+  await page.getByTestId('editor-blackout-search').fill('fixture')
+  await foundSays(page, '1 match · page 1')
+  assert.deepEqual(opened.errors, [])
+  assert.deepEqual(server.unexpected, [])
+  await opened.context.close()
+  passed('On an OCR’d scan the search finds nothing in the words out of sight, and the visible line')
+}
+
+{
+  // The switch off: no check is asked, the sheet says every page with a box becomes a picture, and
+  // Review asks about each of them, as before.
+  const opened = await openContext({ width: 390, height: 656, marks: [], pdf: blackoutBytes, editor: { editor_v2: true } })
+  const { page, server } = opened
+  await goToDocument(opened)
+  await settle(page)
+  await page.getByTestId('editor-tab-blackout').click()
+  await page.getByTestId('editor-blackout-preset-phone').click()
+  await foundSays(page, '3 matches · pages 1, 2')
+  await pressMain(page)
+  await saved(page, server)
+  assert.equal(await page.getByTestId('editor-blackout-pages').count(), 0)
+  assert.match(await page.getByTestId('editor-blackout-sheet').textContent(), /Each page with a black box becomes a picture/)
+  await pressMain(page)
+  await page.getByTestId('editor-review-consent').waitFor()
+  assert.match(await page.getByTestId('editor-review-consent').textContent(), /Pages that become pictures: 1, 2(?![\d,])/)
+  assert.equal(server.checks ?? 0, 0, 'nothing asked of the server with the switch off')
+  assert.deepEqual(opened.errors, [])
+  assert.deepEqual(server.unexpected, [])
+  await opened.context.close()
+  passed('With the switch off the search still works, nothing is checked and Review asks about every page with a box')
+}
+
+{
+  // A page the check found would keep its words did not when the file was made: Review says so, and
+  // Check again asks about it. "I understand" given for page 2 alone does not stand for page 1.
+  const opened = await openContext({
+    width: 390,
+    height: 656,
+    pdf: blackoutBytes,
+    editor: BLACKOUT_ON,
+    marks: [
+      { type: 'redact', page: 1, x: 119, y: 168.6, width: 104.6, height: 15, text: '+998 90 123 45 67' },
+      { type: 'redact', page: 2, x: 110, y: 112.6, width: 120, height: 15, text: '+998 (91) 765-43-21' },
+    ],
+    blackout: { outcomes: (server) => ({ 1: server.jobs.length ? 'refused' : 'vector', 2: 'image' }), runs: 0 },
+    jobOutcome: ['rasterization_consent_required', { index: 0 }],
+  })
+  const { page, server } = opened
+  await goToDocument(opened)
+  await settle(page)
+  await pressMain(page)
+  await page.getByTestId('editor-review-consent').waitFor()
+  assert.match(await page.getByTestId('editor-review-consent').textContent(), /Pages that become pictures: 2(?![\d,])/)
+  await page.getByTestId('editor-consent').click()
+  await page.getByTestId('editor-review-cost').waitFor()
+  await pressMain(page)
+  await page.locator('[data-testid="editor-refused"][data-code="rasterization_consent_required"]').waitFor()
+  assert.match(
+    await page.getByTestId('editor-refused').textContent(),
+    /A page has to become a picture after all\. Check again to see which/,
+  )
+  await page.getByTestId('editor-review-again').click()
+  await page.waitForFunction(() =>
+    /Pages that become pictures: 1, 2(?![\d,])/.test(document.querySelector('[data-testid="editor-review-consent"]')?.textContent ?? ''),
+  )
+  assert.equal(await page.getByTestId('editor-consent').isChecked(), false, 'asked again: page 1 was never agreed to')
+  assert.equal((await mainButton(page)).isActive, false, 'and Confirm waits for it')
+  assert.deepEqual(opened.errors, [])
+  assert.deepEqual(server.unexpected, [])
+  await opened.context.close()
+  passed('A page that became a picture after all fails the send uncounted; Check again asks I understand again, for it too')
+}
+
+for (const [name, width, height, locale, theme] of [
+  ['390-en-light', 390, 656, 'en', 'light'],
+  ['390-uz-dark', 390, 656, 'uz', 'dark'],
+  ['390-ru-light', 390, 656, 'ru', 'light'],
+  ['320-en-dark', 320, 568, 'en', 'dark'],
+  ['320-uz-light', 320, 568, 'uz', 'light'],
+  ['320-ru-dark', 320, 568, 'ru', 'dark'],
+]) {
+  // The Black out sheet with what it found, a box, and what each page comes to, in every language.
+  const opened = await openContext({
+    width,
+    height,
+    locale,
+    theme,
+    marks: [],
+    pdf: blackoutBytes,
+    editor: BLACKOUT_ON,
+    blackout: { outcomes: { 1: 'vector', 2: 'image' }, runs: 0 },
+  })
+  const { page, server, errors } = opened
+  await goToDocument(opened)
+  await settle(page)
+  const look = async (state) => {
+    await noSidewaysScroll(page, `${name} ${state}`)
+    assert.deepEqual(await smallTargets(page), [], `${name} ${state}: tap targets`)
+    await axe(page, `${name} ${state}`)
+    await page.screenshot({ path: path.join(output, `blackout-${name}-${state}.png`) })
+  }
+  await page.getByTestId('editor-tab-blackout').click()
+  await page.getByTestId('editor-blackout-sheet').waitFor()
+  await look('open')
+  await page.getByTestId('editor-blackout-preset-phone').click()
+  await page.waitForFunction(() => document.querySelectorAll('[data-testid="editor-match"]').length === 3)
+  await look('found')
+  // The second page's two numbers, by the MainButton's count; the first left to be found.
+  await page.getByTestId('editor-blackout-search').fill(locale === 'ru' ? '998 93' : '765-43')
+  await page.waitForFunction(() => document.querySelectorAll('[data-testid="editor-match"]').length === 1)
+  await pressMain(page)
+  await saved(page, server)
+  await page.locator('[data-testid="editor-blackout-pages"] [data-outcome="picture"]').waitFor()
+  await look('checked')
+  assert.deepEqual(errors, [], `${name}: page errors`)
+  assert.deepEqual(server.unexpected, [], `${name}: requests with no fixture`)
+  await opened.context.close()
+}
+passed('The Black out sheet at 390 and 320, en uz ru, light and dark: search, presets, outcomes; axe, 44 px, no sideways scroll')
 
 await browser.close()
 console.log(`Pass: ${checks.length} groups of checks`)

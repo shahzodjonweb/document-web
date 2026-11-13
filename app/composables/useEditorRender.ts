@@ -50,6 +50,18 @@ export interface TextLine {
    * face pdf.js put in its place.
    */
   face: string
+  /** Where each run of the line stands: its letters `start` to `end` of `text`, drawn from `x` for `width`. */
+  pieces?: LinePiece[]
+}
+
+export interface LinePiece {
+  start: number
+  end: number
+  x: number
+  width: number
+  /** The run's words as drawn, and how many of its first letters the line's start lost as spaces. */
+  text?: string
+  lead?: number
 }
 
 /** One run of words as pdf.js gives it, already in the editor's frame. */
@@ -111,17 +123,28 @@ export function groupRuns(
       const size = Math.max(...segment.map((run) => run.size))
       let text = ''
       let end = -Infinity
+      const pieces: LinePiece[] = []
       for (const run of segment) {
         // A space where the gap is one and neither side has it already.
         if (text && run.x - end > 0.15 * size && !/\s$/.test(text) && !/^\s/.test(run.str)) text += ' '
+        pieces.push({ start: text.length, end: text.length + run.str.length, x: run.x, width: run.width, text: run.str })
         text += run.str
         end = Math.max(end, run.x + run.width)
       }
       const baseline = segment[0]!.baseline
       const x = segment[0]!.x
+      // Counted in the line's words as kept, without the spaces they began with.
+      const lead = text.length - text.trimStart().length
+      const kept = text.trim().length
       lines.push({
         id: '',
         page,
+        pieces: pieces.map((piece) => ({
+          ...piece,
+          start: Math.min(kept, Math.max(0, piece.start - lead)),
+          end: Math.min(kept, Math.max(0, piece.end - lead)),
+          lead: Math.max(0, lead - piece.start),
+        })),
         text: text.trim(),
         x,
         y: baseline - 0.95 * size,
@@ -555,6 +578,8 @@ export function useEditorRender() {
   async function textLines(page: number): Promise<TextLine[] | null> {
     const text = await readText(page)
     if (!text) return null
+    // No words, no lines: a scan's page is never asked for its drawing, which would decode its pictures.
+    if (!text.runs.length) return []
     text.hidden ??= unseenFaces(text.proxy).then((faces) => {
       text.unseen = faces
       text.styled = false
