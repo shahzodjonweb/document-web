@@ -17,6 +17,7 @@ const hints = useEditorHints()
 const pageOrder = useEditorPageOrder()
 const telegram = useTelegramApp()
 const blackout = useEditorBlackOut()
+const send = useEditorSend()
 
 const PRESET_LABEL: Record<BlackOutPreset, string> = {
   phone: 'editorBlackOutPhones',
@@ -53,13 +54,18 @@ const status = computed(() => {
   if (blackout.searching.value) return t('editorBlackOutLooking')
   if (!blackout.searched.value) return ''
   const found = blackout.matches.value.length
-  if (!found) return t(blackout.foundCount.value ? 'editorBlackOutAllCovered' : 'editorBlackOutNothing')
+  // Pages whose words did not come just now, and the pages after the first matches, were not looked through: said so.
+  const unread = blackout.unread.value ? ` ${t('editorBlackOutUnread')}` : ''
+  if (!found) {
+    if (blackout.truncated.value) return t('editorBlackOutFirstCovered', { count: blackout.most }) + unread
+    return t(blackout.foundCount.value ? 'editorBlackOutAllCovered' : 'editorBlackOutNothing') + unread
+  }
   const pages = foundPages.value
   return `${count('editorBlackOutFound', found)} · ${
     new Set(pages).size > 1
       ? t('editorBlackOutPages', { pages: listed(pages) })
       : t('editorBlackOutPage', { page: listed(pages) })
-  }`
+  }${blackout.truncated.value ? ` · ${t('editorBlackOutMoreLater')}` : ''}${unread}`
 })
 
 function blackOutAll() {
@@ -71,7 +77,8 @@ function blackOutAll() {
 // "Black out all {n}" is the sheet's one filled button while there is something to black out.
 telegram.usePrimaryAction('blackout', () => {
   const found = blackout.matches.value.length
-  if (!found || session.held.value) return null
+  // Review over the sheet has its own button: this one stands down while a send is being looked at.
+  if (!found || session.held.value || send.stage.value !== 'idle') return null
   return { text: t('editorBlackOutAll', { count: found }), onPress: blackOutAll }
 })
 
@@ -88,8 +95,10 @@ const outcomes = computed(() =>
 )
 // Checked again once the boxes have settled and been saved, while this sheet is open.
 watch(
-  () =>
-    [JSON.stringify(blackout.boxes.value.map(({ _id, ...box }) => box)), session.doc.value?.version] as const,
+  [
+    () => JSON.stringify(blackout.boxes.value.map(({ _id, ...box }) => box)),
+    () => session.doc.value?.version,
+  ],
   () => blackout.checkSoon(),
   { immediate: true },
 )
@@ -133,9 +142,8 @@ onBeforeUnmount(() => blackout.stopChecking())
           {{ t(PRESET_LABEL[preset]) }}
         </button>
       </div>
-      <p v-if="status" class="editor-blackout-found" role="status" data-testid="editor-blackout-found">
-        {{ status }}
-      </p>
+      <!-- Always there, so what it says next is read out. -->
+      <p class="editor-blackout-found" role="status" data-testid="editor-blackout-found">{{ status }}</p>
     </form>
 
     <p class="field-hint">
@@ -155,25 +163,27 @@ onBeforeUnmount(() => blackout.stopChecking())
       }}
     </p>
 
-    <ul
-      v-if="blackout.keepsText.value && outcomes.length"
-      class="editor-blackout-pages"
-      data-testid="editor-blackout-pages"
-    >
-      <li v-for="row in outcomes" :key="row.page" :data-outcome="row.outcome" :data-page="row.place">
-        <template v-if="row.outcome === 'keeps'">{{
-          t('editorBlackOutKeeps', { page: row.place })
-        }}</template>
-        <template v-else-if="row.outcome === 'picture'">
-          <strong>{{ t('editorBlackOutBecomes', { page: row.place }) }}</strong>
-          <small>{{ t(REASON[row.reason] ?? 'editorBlackOutWhyOther') }}</small>
-        </template>
-        <template v-else-if="row.outcome === 'checking'">{{
-          t('editorBlackOutChecking', { page: row.place })
-        }}</template>
-        <template v-else>{{ t('editorBlackOutMaybe', { page: row.place }) }}</template>
-      </li>
-    </ul>
+    <div aria-live="polite">
+      <ul
+        v-if="blackout.keepsText.value && outcomes.length"
+        class="editor-blackout-pages"
+        data-testid="editor-blackout-pages"
+      >
+        <li v-for="row in outcomes" :key="row.page" :data-outcome="row.outcome" :data-page="row.place">
+          <template v-if="row.outcome === 'keeps'">{{
+            t('editorBlackOutKeeps', { page: row.place })
+          }}</template>
+          <template v-else-if="row.outcome === 'picture'">
+            <strong>{{ t('editorBlackOutBecomes', { page: row.place }) }}</strong>
+            <small>{{ t(REASON[row.reason] ?? 'editorBlackOutWhyOther') }}</small>
+          </template>
+          <template v-else-if="row.outcome === 'checking'">{{
+            t('editorBlackOutChecking', { page: row.place })
+          }}</template>
+          <template v-else>{{ t('editorBlackOutMaybe', { page: row.place }) }}</template>
+        </li>
+      </ul>
+    </div>
     <p class="field-hint">
       {{ t(blackout.keepsText.value ? 'editorBlackOutKeepsWhy' : 'editorBlackOutPictures') }}
     </p>

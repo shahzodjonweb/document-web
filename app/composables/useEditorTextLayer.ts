@@ -203,19 +203,28 @@ export interface BlackOutMatch extends Rect {
   text: string
 }
 
-const APOSTROPHES = new Set(['‘', '’', 'ʻ', 'ʼ', '`', "'"])
+const APOSTROPHES = new Set(['‘', '’', 'ʻ', 'ʼ', '`', '´', "'"])
 // On the folded words: lower case, one space for any run of spaces, one apostrophe. The first group is
 // what may stand before a match, the second the match: Safari before 16.4, in older Telegrams, has no lookbehind.
 const PRESETS: Record<BlackOutPreset, RegExp> = {
   phone: /(^|[^\d+])((?:\+ ?)?998[ ().-]*\d{2}[ ().-]*\d{3}[ .-]*\d{2}[ .-]*\d{2})(?!\d)/gu,
-  card: /(^|\D)(\d{4}[ -]?\d{4}[ -]?\d{4}[ -]?\d{4})(?!\d)/gu,
-  passport: /(^|[^\p{L}\d])([a-z]{2} ?\d{7})(?![\p{L}\d])/gu,
+  // Not four groups of a longer run of digit groups, as a bank account's 20 digits are written.
+  card: /(^|\D)(\d{4}[ -]?\d{4}[ -]?\d{4}[ -]?\d{4})(?![ -]?\d)/gu,
+  // The series in Latin or in the Cyrillic letters typed for it, with or without a №.
+  passport: /(^|[^\p{L}\d])([a-zа-яё]{2} ?(?:№ ?)?\d{7})(?![\p{L}\d])/gu,
   pinfl: /(^|\D)(\d{14})(?!\d)/gu,
 }
 /** Points a box reaches past its words each side: an estimate, which the server finds the words inside. */
 const SIDE = 0.12
 
-/** Words as compared, with where each of their letters came from in the line. */
+/** Presets whose digits must stand apart from other groups of digits on either side. */
+const APART: ReadonlySet<BlackOutPreset> = new Set(['card'])
+
+/**
+ * Words as compared, with where each of their letters came from in the line: lower case (whatever
+ * the phone's language), letters taken apart from their marks (a й typed whole finds one written
+ * as и and its mark), one space for any run of spaces, one apostrophe for every way of writing it.
+ */
 export function fold(text: string) {
   let folded = ''
   const at: number[] = []
@@ -231,7 +240,7 @@ export function fold(text: string) {
       continue
     }
     space = false
-    const lower = APOSTROPHES.has(char) ? "'" : char.toLocaleLowerCase()
+    const lower = APOSTROPHES.has(char) ? "'" : char.toLowerCase().normalize('NFD')
     for (const part of lower) {
       folded += part
       at.push(index)
@@ -248,7 +257,7 @@ const escape = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 /** What a search looks for: a preset's pattern, or the words typed, in any spacing. The match is its second group. */
 export function patternOf(query: string, preset: BlackOutPreset | null): RegExp | null {
-  if (preset) return new RegExp(PRESETS[preset].source, PRESETS[preset].flags)
+  if (preset) return Object.assign(new RegExp(PRESETS[preset].source, PRESETS[preset].flags), { apart: APART.has(preset) })
   const letters = [...fold(query).folded.replace(/ /g, '')]
   if (letters.length < 2) return null
   return new RegExp(`()(${letters.map(escape).join(' ?')})`, 'gu')
@@ -261,16 +270,20 @@ export function wordsBox(
   end: number,
   measure: (text: string) => number = (text) => text.length,
 ): Rect {
-  const pieces = line.pieces?.length ? line.pieces : [{ start: 0, end: line.text.length, x: line.x, width: line.width }]
+  const pieces = line.pieces?.length
+    ? line.pieces
+    : [{ start: 0, end: line.text.length, x: line.x, width: line.width, text: line.text, lead: 0 }]
   let left = Infinity
   let right = -Infinity
   for (const piece of pieces) {
     const from = Math.max(start, piece.start)
     const to = Math.min(end, piece.end)
     if (to <= from) continue
-    const words = line.text.slice(piece.start, piece.end)
+    // Shares of the run as it was drawn, the spaces the line's ends lost included.
+    const words = piece.text ?? line.text.slice(piece.start, piece.end)
+    const lead = piece.lead ?? 0
     const whole = measure(words) || words.length || 1
-    const share = (stop: number) => measure(line.text.slice(piece.start, stop)) / whole
+    const share = (stop: number) => measure(words.slice(0, lead + stop - piece.start)) / whole
     left = Math.min(left, piece.x + piece.width * share(from))
     right = Math.max(right, piece.x + piece.width * share(to))
   }
@@ -296,6 +309,7 @@ export function matchLines(
       const words = hit[2] ?? ''
       if (!words.trim()) continue
       const start = hit.index! + (hit[1] ?? '').length
+      if ((pattern as RegExp & { apart?: boolean }).apart && /\d[ -]$/.test(folded.slice(0, start))) continue
       const first = at[start]!
       const last = at[start + words.length - 1]!
       const box = wordsBox(line, first, last + 1, measure)

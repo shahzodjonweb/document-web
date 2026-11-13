@@ -15,6 +15,7 @@
  * (…/blackout-check) does what a send will. Review asks "I understand" only for the pages it does
  * not find to keep them. With its switches off every page with a box becomes a picture, as before.
  */
+import type { ComputedRef } from 'vue'
 import type { ClientCommand } from './useEditorCommands'
 import { newCommandId } from './useEditorCommands'
 import { clampCommand, type Rect } from './useEditorGeometry'
@@ -54,12 +55,23 @@ const found = shallowRef<BlackOutMatch[]>([])
 const searching = ref(false)
 /** Whether what is found is for what is asked: a search not run yet says nothing. */
 const searched = ref(false)
+/** The search stopped at MOST: later pages were not looked through. */
+const truncated = ref(false)
+/** Pages whose words could not be read just now (a range that did not come): not searched. */
+const unread = ref(0)
 const check = shallowRef<BlackOutCheck | null>(null)
 const checking = ref(false)
 let searches = 0
 let checks = 0
+/** The check being followed, and the draft version it is of: another ask for that version joins it. */
+let inflight: { version: number; doc: string; answer: Promise<BlackOutCheck | null> } | null = null
 let settle: ReturnType<typeof setTimeout> | null = null
 let watching = false
+/** Shared by every page's layer, so a page asks for its own matches without filtering them all again. */
+let shared: {
+  matches: ComputedRef<BlackOutMatch[]>
+  byPage: ComputedRef<Map<number, BlackOutMatch[]>>
+} | null = null
 
 export function useEditorBlackOut() {
   const session = useEditorSession()
@@ -80,56 +92,80 @@ export function useEditorBlackOut() {
   const canSearch = computed(() => v2.value && render.mode.value === 'pdfjs')
 
   const boxes = computed(() => session.commands.value.filter((command) => command.type === 'redact'))
-  /** The matches not under a box already: what Black out all would cover. */
-  /** What is found and not covered yet, on pages that stay in the file. */
-  const matches = computed(() =>
+  /** What is found and not covered yet, on pages that stay in the file: what Black out all would cover. */
+  const uncovered = () =>
     found.value.filter(
       (match) =>
         !pageOrder.isRemoved(match.page) &&
         !boxes.value.some((box) => box.page === match.page && covered(match, box as Rect) >= 0.6),
-    ),
-  )
-  const matchesOn = (page: number) => matches.value.filter((match) => match.page === page)
+    )
+  const group = (list: BlackOutMatch[]) => {
+    const pages = new Map<number, BlackOutMatch[]>()
+    for (const match of list) pages.set(match.page, [...(pages.get(match.page) ?? []), match])
+    return pages
+  }
 
   if (!watching && import.meta.client) {
     watching = true
     effectScope(true).run(() => {
+      const matches = computed(uncovered)
+      shared = { matches, byPage: computed(() => group(matches.value)) }
       // A file opened again is searched and checked again.
       watch(render.generation, () => {
         query.value = ''
         preset.value = null
         found.value = []
         searched.value = false
+        truncated.value = false
+        unread.value = 0
         check.value = null
+        checking.value = false
+        inflight = null
         searches += 1
         checks += 1
       })
       watch([query, preset], () => void search())
     })
   }
+  const matches = shared?.matches ?? computed(uncovered)
+  const byPage = shared?.byPage ?? computed(() => group(matches.value))
+  const matchesOn = (page: number) => byPage.value.get(page) ?? []
 
   const measure = (text: string) => (metrics.ready.value ? metrics.stringWidth(text, 10) : text.length)
 
-  /** Every page looked through for what is asked, the first matches up to MOST. */
+  /** Every page that stays in the file looked through for what is asked, the first matches up to MOST. */
   async function search() {
     const run = ++searches
     const pattern = patternOf(query.value, preset.value)
+    // What the last search found is not this one's: nothing is offered until this one has looked.
+    found.value = []
+    truncated.value = false
+    unread.value = 0
     if (!pattern || !canSearch.value) {
-      found.value = []
       searched.value = !!pattern
       searching.value = false
       return
     }
     searching.value = true
     searched.value = false
-    const count = session.doc.value?.pages.length ?? render.pageCount.value ?? 0
+    // The draft's pages, as far as the file pdf.js opened has them.
+    const count = Math.min(session.doc.value?.pages.length ?? Infinity, render.pageCount.value || Infinity)
     const all: BlackOutMatch[] = []
-    for (let page = 1; page <= count && all.length < MOST; page++) {
+    let missed = 0
+    for (let page = 1; page <= count; page++) {
+      if (pageOrder.isRemoved(page)) continue
+      if (all.length >= MOST) {
+        truncated.value = true
+        break
+      }
       const lines = await render.textLines(page)
       if (run !== searches) return
       if (lines) all.push(...matchLines(lines, pattern, measure))
+      else missed += 1
     }
+    if (all.length > MOST) truncated.value = true
     found.value = all.slice(0, MOST)
+    unread.value = missed
     searching.value = false
     searched.value = true
   }
@@ -213,25 +249,11 @@ export function useEditorBlackOut() {
   }
   const reasonOf = (page: number) => check.value?.pages.find((item) => item.page === page)?.reason ?? ''
 
-  /**
-   * The check of the draft as saved, asked for and followed until it says, for at most `patience`.
-   * Nothing is asked with the switches off or no box, or while a save is outstanding.
-   */
-  async function ensureChecked(patience = CHECK_FOR) {
-    const run = ++checks
-    if (!keepsText.value || !boxes.value.length) {
-      check.value = null
-      return null
-    }
-    await session.flush()
-    const current = session.doc.value
-    if (run !== checks || !current || !['saved', 'clean'].includes(session.saveState.value)) return null
-    checking.value = true
+  /** One check of a version: asked for and followed until it says, for at most `patience`. */
+  async function follow(id: string, version: number, run: number, patience: number) {
     const started = Date.now()
     try {
-      let answer = await ws.api<BlackOutCheck>(`/editor/documents/${current.id}/blackout-check`, {
-        method: 'POST',
-      })
+      let answer = await ws.api<BlackOutCheck>(`/editor/documents/${id}/blackout-check`, { method: 'POST' })
       while (
         run === checks &&
         (answer.status === 'queued' || answer.status === 'running') &&
@@ -239,7 +261,7 @@ export function useEditorBlackOut() {
       ) {
         await new Promise((resolve) => setTimeout(resolve, CHECK_EVERY))
         if (run !== checks) return null
-        answer = await ws.api<BlackOutCheck>(`/editor/documents/${current.id}/blackout-check`)
+        answer = await ws.api<BlackOutCheck>(`/editor/documents/${id}/blackout-check`)
       }
       if (run !== checks) return null
       check.value = answer
@@ -248,8 +270,36 @@ export function useEditorBlackOut() {
       // The quote asks about every page with a box not known to keep its words: nothing is lost.
       return null
     } finally {
-      if (run === checks) checking.value = false
+      if (run === checks) {
+        checking.value = false
+        inflight = null
+      }
     }
+  }
+
+  /**
+   * The check of the draft as saved. One already being followed for this version is joined, not
+   * replaced: Review asking while the sheet's own check runs waits for that one's answer. Nothing is
+   * asked with the switches off or no box, or while a save is outstanding.
+   */
+  async function ensureChecked(patience = CHECK_FOR): Promise<BlackOutCheck | null> {
+    if (!keepsText.value || !boxes.value.length) {
+      checks += 1
+      inflight = null
+      check.value = null
+      checking.value = false
+      return null
+    }
+    await session.flush()
+    const current = session.doc.value
+    if (!current || !['saved', 'clean'].includes(session.saveState.value)) return null
+    if (inflight && inflight.version === current.version && inflight.doc === current.id)
+      return inflight.answer
+    const run = ++checks
+    checking.value = true
+    const answer = follow(current.id, current.version, run, patience)
+    inflight = { version: current.version, doc: current.id, answer }
+    return answer
   }
 
   /** While the sheet is open: checked again once the boxes have been saved and left alone a moment. */
@@ -271,9 +321,12 @@ export function useEditorBlackOut() {
     setQuery,
     setPreset,
     searching: computed(() => searching.value),
-    /** Everything the search found, covered or not. */
+    /** Everything the search found on pages that stay, covered or not. */
     foundCount: computed(() => found.value.filter((match) => !pageOrder.isRemoved(match.page)).length),
     searched: computed(() => searched.value),
+    truncated: computed(() => truncated.value),
+    unread: computed(() => unread.value),
+    most: MOST,
     matches,
     matchesOn,
     matchAt,

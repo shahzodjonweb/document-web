@@ -28,8 +28,8 @@ const tools = useEditorTools()
 const images = useEditorImages()
 const textLayer = useEditorTextLayer()
 const blackout = useEditorBlackOut()
-/** Black out's matches on this page, while Black out is open. */
-const found = computed(() => (session.mode.value === 'redact' ? blackout.matchesOn(props.page) : []))
+/** Black out's matches on this page, while Black out is armed: what a tap there covers. */
+const found = computed(() => (tools.armed.value?.kind === 'redact' ? blackout.matchesOn(props.page) : []))
 const wide = useEditorWide()
 
 const layer = ref<HTMLElement>()
@@ -268,10 +268,16 @@ function tap(at: { x: number; y: number }, began = Infinity) {
     return
   }
   const armed = tools.armed.value
+  // Words Black out found, tapped right on: that match alone is covered, holding its words, before
+  // any box a fingertip's reach would take it for. Near one, it is still that match, past a box.
+  const exact = armed?.kind === 'redact' ? blackout.matchAt(props.page, at) : null
+  if (exact) {
+    blackout.blackOut([exact])
+    return
+  }
   const hits = hitsAt(at)
   if (armed && !(armed.kind === 'redact' && hits.length)) {
     if (armed.kind === 'draw') return
-    // Words Black out found, tapped: that match alone is covered, holding its words.
     const match = armed.kind === 'redact' ? blackout.matchAt(props.page, at, 8 / (props.zoom || 1)) : null
     if (match) {
       blackout.blackOut([match])

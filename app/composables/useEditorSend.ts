@@ -46,6 +46,8 @@ const refusal = shallowRef<Refusal | null>(null)
 /** Pages the server says become pictures, and whether the person has said they understand. */
 const consentPages = ref<number[]>([])
 const consent = ref(false)
+/** The pages "I understand" was ticked for: a quote naming any other page asks again. */
+let agreedPages: number[] = []
 const costChanged = ref(false)
 const job = shallowRef<any>(null)
 const busy = ref(false)
@@ -196,7 +198,16 @@ export function useEditorSend() {
     !standing().length &&
     tools.started.value === quotedStarted
   /** What Review shows, to tell whether a check in the background found anything new. */
-  const shown = () => `${said.size}|${notices.value.join('|')}`
+  const shown = () => `${said.size}|${notices.value.join('|')}|${consentPages.value.join(',')}`
+  /**
+   * The pages the latest answer says become pictures. "I understand" holds only for the pages it
+   * was ticked for: one more, from a send that had to make a page a picture after all or a change
+   * landed since, unticks it.
+   */
+  function pictured(pages: number[]) {
+    consentPages.value = pages
+    if (consent.value && pages.some((page) => !agreedPages.includes(page))) consent.value = false
+  }
   /** Saved, with changes, and not what was last sent from here. */
   const unsent = computed(() => {
     const current = session.doc.value
@@ -213,6 +224,7 @@ export function useEditorSend() {
     refusal.value = null
     consentPages.value = []
     consent.value = false
+    agreedPages = []
     costChanged.value = false
     job.value = null
     uncertain.value = false
@@ -293,7 +305,7 @@ export function useEditorSend() {
     if (answer && 'id' in answer) {
       quote.value = answer
       quotedVersion = session.doc.value?.version ?? null
-      if (answer.summary?.raster_pages?.length) consentPages.value = answer.summary.raster_pages
+      pictured(answer.summary?.raster_pages ?? [])
       costChanged.value = !!before && JSON.stringify(before) !== JSON.stringify(answer.summary?.cost)
       stage.value = answer.affordable === false ? 'failed' : 'ready'
       if (answer.affordable === false) refusal.value = { code: 'weekly_file_limit', message: '', params: {} }
@@ -301,7 +313,7 @@ export function useEditorSend() {
     }
     quote.value = null
     if (answer?.code === 'rasterization_consent_required') {
-      consentPages.value = (answer.params.pages ?? []).map(Number)
+      pictured((answer.params.pages ?? []).map(Number))
       consent.value = false
       stage.value = 'ready'
       return
@@ -313,6 +325,7 @@ export function useEditorSend() {
   /** "I understand" is part of the quote: with it, the server quotes the pages as pictures. */
   function understand(value: boolean) {
     consent.value = value
+    agreedPages = value ? [...consentPages.value] : []
     if (value && !quote.value) void check()
   }
 

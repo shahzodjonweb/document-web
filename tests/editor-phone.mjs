@@ -5242,6 +5242,62 @@ const outcomesSay = (page) => page.getByTestId('editor-blackout-pages').evaluate
 }
 
 {
+  // Send at once after Black out all: Review waits for the sheet's own check rather than asking about every page.
+  const opened = await openContext({
+    width: 390,
+    height: 656,
+    marks: [],
+    pdf: blackoutBytes,
+    editor: BLACKOUT_ON,
+    blackout: { outcomes: { 1: 'vector', 2: 'others' }, runs: 4 },
+  })
+  const { page, server } = opened
+  await goToDocument(opened)
+  await settle(page)
+  await page.getByTestId('editor-tab-blackout').click()
+  await page.getByTestId('editor-blackout-preset-phone').click()
+  await foundSays(page, '3 matches · pages 1, 2')
+  await pressMain(page)
+  await saved(page, server)
+  await page.waitForFunction(() => window.__tg.app.MainButton.text === 'Send to chat')
+  await pressMain(page)
+  await page.getByTestId('editor-review-consent').waitFor()
+  assert.match(await page.getByTestId('editor-review-consent').textContent(), /Pages that become pictures: 2(?![\d,])/)
+  assert.ok(server.checks <= 2, `the sheet's check and Review's are one (${server.checks})`)
+  assert.deepEqual(opened.errors, [])
+  assert.deepEqual(server.unexpected, [])
+  await opened.context.close()
+  passed('Review opened at once after Black out all waits for the check under way and asks about page 2 alone')
+}
+
+{
+  // A box chosen in Black out and its form put away: Black out again, its tab lit and the rest outlined.
+  const opened = await openContext({ width: 390, height: 656, marks: [], pdf: blackoutBytes, editor: BLACKOUT_ON })
+  const { page, server } = opened
+  await goToDocument(opened)
+  await settle(page)
+  await page.getByTestId('editor-tab-blackout').click()
+  await page.getByTestId('editor-blackout-preset-phone').click()
+  await foundSays(page, '3 matches · pages 1, 2')
+  const match = await page.getByTestId('editor-match').first().boundingBox()
+  const paper = await page.getByTestId('editor-page-1').boundingBox()
+  const middle = { x: match.x - paper.x + match.width / 2, y: match.y - paper.y + match.height / 2 }
+  await page.getByTestId('editor-page-1').click({ position: middle })
+  await saved(page, server)
+  await page.getByTestId('editor-page-1').click({ position: middle })
+  await page.getByTestId('editor-object-sheet').waitFor()
+  await page.getByTestId('editor-object-sheet').getByTestId('editor-sheet-close').click()
+  await page.getByTestId('editor-object-sheet').waitFor({ state: 'detached' })
+  await page.getByTestId('editor-blackout-sheet').waitFor()
+  assert.equal(await page.getByTestId('editor-tab-blackout').getAttribute('aria-pressed'), 'true')
+  assert.equal(await page.getByTestId('editor-match').count(), 2, 'what is left is outlined again')
+  assert.deepEqual(opened.errors, [])
+  assert.deepEqual(server.unexpected, [])
+  await opened.context.close()
+  passed('A box chosen in Black out and put away gives Black out back, lit, with what is left outlined')
+}
+
+{
   // Folding and the presets, outside Telegram in Uzbek: ‘ ' ʻ are one apostrophe, case is no matter,
   // and each preset finds its own and no decoy. A tap on one match covers that one.
   const opened = await openContext({
@@ -5276,7 +5332,7 @@ const outcomesSay = (page) => page.getByTestId('editor-blackout-pages').evaluate
     assert.equal(await search.inputValue(), '', 'a preset takes the place of the words typed')
     await foundSays(page, says)
     await page.getByTestId(`editor-blackout-preset-${preset}`).click()
-    await page.waitForFunction(() => !document.querySelector('[data-testid="editor-blackout-found"]'))
+    await foundSays(page, '')
     void text
   }
   await page.getByTestId('editor-blackout-preset-phone').click()
@@ -5300,7 +5356,7 @@ const outcomesSay = (page) => page.getByTestId('editor-blackout-pages').evaluate
 
 {
   // An OCR'd scan: the words laid unseen over its picture are found nowhere; its visible line is.
-  const opened = await openContext({ width: 390, height: 656, marks: [], pdf: ocrBytes, editor: BLACKOUT_ON })
+  const opened = await openContext({ width: 390, height: 656, marks: [], pdf: ocrBytes, pageCount: 1, editor: BLACKOUT_ON })
   const { page, server } = opened
   await goToDocument(opened)
   await settle(page)
@@ -5345,22 +5401,27 @@ const outcomesSay = (page) => page.getByTestId('editor-blackout-pages').evaluate
 
 {
   // A page the check found would keep its words did not when the file was made: Review says so, and
-  // Check again asks about it.
+  // Check again asks about it. "I understand" given for page 2 alone does not stand for page 1.
   const opened = await openContext({
     width: 390,
     height: 656,
     pdf: blackoutBytes,
     editor: BLACKOUT_ON,
-    marks: [{ type: 'redact', page: 1, x: 121, y: 150.6, width: 115, height: 15, text: '+998 90 123 45 67' }],
-    blackout: { outcomes: (server) => ({ 1: server.jobs.length ? 'refused' : 'vector' }), runs: 0 },
+    marks: [
+      { type: 'redact', page: 1, x: 119, y: 168.6, width: 104.6, height: 15, text: '+998 90 123 45 67' },
+      { type: 'redact', page: 2, x: 110, y: 112.6, width: 120, height: 15, text: '+998 (91) 765-43-21' },
+    ],
+    blackout: { outcomes: (server) => ({ 1: server.jobs.length ? 'refused' : 'vector', 2: 'image' }), runs: 0 },
     jobOutcome: ['rasterization_consent_required', { index: 0 }],
   })
   const { page, server } = opened
   await goToDocument(opened)
   await settle(page)
   await pressMain(page)
+  await page.getByTestId('editor-review-consent').waitFor()
+  assert.match(await page.getByTestId('editor-review-consent').textContent(), /Pages that become pictures: 2(?![\d,])/)
+  await page.getByTestId('editor-consent').click()
   await page.getByTestId('editor-review-cost').waitFor()
-  assert.equal(await page.getByTestId('editor-review-consent').count(), 0)
   await pressMain(page)
   await page.locator('[data-testid="editor-refused"][data-code="rasterization_consent_required"]').waitFor()
   assert.match(
@@ -5368,12 +5429,15 @@ const outcomesSay = (page) => page.getByTestId('editor-blackout-pages').evaluate
     /A page has to become a picture after all\. Check again to see which/,
   )
   await page.getByTestId('editor-review-again').click()
-  await page.getByTestId('editor-review-consent').waitFor()
-  assert.match(await page.getByTestId('editor-review-consent').textContent(), /Pages that become pictures: 1(?![\d,])/)
+  await page.waitForFunction(() =>
+    /Pages that become pictures: 1, 2(?![\d,])/.test(document.querySelector('[data-testid="editor-review-consent"]')?.textContent ?? ''),
+  )
+  assert.equal(await page.getByTestId('editor-consent').isChecked(), false, 'asked again: page 1 was never agreed to')
+  assert.equal((await mainButton(page)).isActive, false, 'and Confirm waits for it')
   assert.deepEqual(opened.errors, [])
   assert.deepEqual(server.unexpected, [])
   await opened.context.close()
-  passed('A page that became a picture after all fails the send uncounted; Check again asks I understand for it')
+  passed('A page that became a picture after all fails the send uncounted; Check again asks I understand again, for it too')
 }
 
 for (const [name, width, height, locale, theme] of [

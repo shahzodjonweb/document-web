@@ -998,6 +998,17 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Topilganlarning hammasi bo‘yab yopildi.',
     'Всё найденное закрашено.',
   ],
+  editorBlackOutMoreLater: ['later pages not looked through', 'keyingi sahifalar ko‘rilmadi', 'дальше не просмотрено'],
+  editorBlackOutFirstCovered: [
+    'The first {count} found are blacked out; later pages were not looked through.',
+    'Topilgan dastlabki {count} tasi bo‘yab yopildi; keyingi sahifalar ko‘rilmadi.',
+    'Первые {count} найденных закрашены; дальше страницы не просмотрены.',
+  ],
+  editorBlackOutUnread: [
+    'Some pages could not be read just now: search again in a moment.',
+    'Baʼzi sahifalarni hozir o‘qib bo‘lmadi: birozdan keyin yana qidiring.',
+    'Некоторые страницы сейчас не прочитались: поищите ещё раз чуть позже.',
+  ],
   editorBlackOutFound_one: ['{count} match', '{count} ta topildi', '{count} совпадение'],
   editorBlackOutFound_few: ['{count} matches', '{count} ta topildi', '{count} совпадения'],
   editorBlackOutFound_many: ['{count} matches', '{count} ta topildi', '{count} совпадений'],
