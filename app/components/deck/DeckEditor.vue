@@ -48,6 +48,7 @@ const images = useDeckImages()
 const send = useDeckSend()
 const latin = useDeckLatin()
 const cover = useDeckCover()
+const deckPictures = useDeckPictures()
 const telegram = useTelegramApp()
 const frame = useEditorFrame()
 const hints = useEditorHints()
@@ -76,7 +77,10 @@ const questionsForm = computed(() => questionsSheet.value ?? questionsPanel.valu
 
 const dock = ref<Dock | null>(null)
 let dockSessions = 0
-const panel = ref<'slides' | 'cover' | null>(null)
+type Panel = 'slides' | 'cover' | 'pictures' | 'design' | 'ask'
+/** The sheets a tab opens: on a wide screen they take the panel while chosen. */
+const TAB_PANELS: Panel[] = ['slides', 'pictures', 'design', 'ask']
+const panel = ref<Panel | null>(null)
 const menuOpen = ref(false)
 const layoutsFor = ref<{ id: string; fit: DeckFit | null; pictureMode: boolean; fromReview: boolean } | null>(
   null,
@@ -237,10 +241,14 @@ const notices = computed(() =>
       ['held', deck.held.value && !reviewOpen.value],
       ['saveFailed', saveFailed.value],
       ['offline', !online.value],
+      ['pictures', !!deckPictures.running.value && panel.value !== 'pictures' && panel.value !== 'design'],
       ['latin', !!latin.offer.value],
       ['preview', previewOff.value],
       ['shortened', deck.hiddenAtFirstRender.value > 0 && !shortenedHidden.value],
       ['expiring', deck.expiresSoon.value],
+      // What a send will need, said at open: after what is about the deck itself, and put away once read.
+      ['channels', channelsNeeded.value && !sendNoticesHidden.value.includes('channels')],
+      ['weekUsed', weekUsed.value && !sendNoticesHidden.value.includes('weekUsed')],
     ] as const
   )
     .filter(([, on]) => on)
@@ -248,6 +256,43 @@ const notices = computed(() =>
     .map(([name]) => name as string),
 )
 const notice = (name: string) => notices.value.includes(name)
+
+/* ------------------------------------------------------- what a send needs */
+
+/**
+ * Said at open, so nobody edits a deck for a while to learn at Send that it cannot go
+ * yet: the owner's channels to join first, or a week whose file tasks are used up (a
+ * deck already counted this week sends free, so then nothing is said).
+ */
+const channelState = ref<{ required: boolean; joined: boolean; channels: any[] } | null>(null)
+const sendNoticesHidden = ref<string[]>([])
+const usageState = ref<any>(null)
+const channelsNeeded = computed(() => !!channelState.value?.required && !channelState.value.joined)
+const weekUsed = computed(() => {
+  const files = usageState.value?.file_jobs
+  if (!files || typeof files.limit !== 'number' || (files.remaining ?? files.limit - files.used) > 0) return false
+  return !(deck.draft.value as any)?.send?.counted_this_week
+})
+async function readSendNeeds() {
+  const id = props.draftId
+  const [channels, usage] = await Promise.allSettled([ws.api('/channels'), ws.api('/usage')])
+  if (props.draftId !== id) return
+  channelState.value = channels.status === 'fulfilled' ? (channels.value as any) : null
+  usageState.value = usage.status === 'fulfilled' ? usage.value : null
+}
+const channelGate = useState<{ channels: any[] } | null>('channel-gate', () => null)
+function joinChannels() {
+  channelGate.value = { channels: channelState.value?.channels ?? [] }
+}
+// The dialog closed after a join: the notice reads again whether it still holds.
+watch(channelGate, (gate, before) => {
+  if (!gate && before) void readSendNeeds()
+})
+const pictureWorking = computed(() => {
+  const now = deckPictures.running.value
+  if (!now) return ''
+  return t(now.action === 'fill' ? 'deckPicturesWorking' : now.action === 'design' ? 'deckDesignWorking' : 'deckPictureWorking')
+})
 
 /**
  * Today's time alone; a deck kept into tomorrow says the day after it, never a year (a
@@ -295,7 +340,7 @@ telegram.usePrimaryAction('deck', () =>
     ? 'hidden'
     : {
         text: t(send.deliver.value === 'chat' ? 'editorSendToChat' : 'editorDownload'),
-        enabled: !deck.held.value && !deck.conflict.value && online.value,
+        enabled: !deck.held.value && !deck.conflict.value && !deck.busy.value && online.value,
         onPress: openReview,
       },
 )
@@ -323,7 +368,11 @@ watch(
     reviewOpen.value = false
     seenImage.value = false
     shortenedHidden.value = false
+    channelState.value = null
+    usageState.value = null
+    sendNoticesHidden.value = []
     void deck.open(id)
+    if (id) void readSendNeeds()
   },
   { immediate: true },
 )
@@ -506,15 +555,40 @@ function onMenuField(field: Field) {
 }
 
 const slidesOpen = computed(() => panel.value === 'slides')
-function toggleSlides() {
-  if (slidesOpen.value) {
+const tabPanel = computed(() => (panel.value && TAB_PANELS.includes(panel.value) ? panel.value : null))
+/** A tab's sheet, or none when it is the one open: the words still open go in first. */
+function togglePanel(name: Panel) {
+  if (panel.value === name) {
     panel.value = null
     return
   }
   commitOpen('close')
   dock.value = null
   menuOpen.value = false
-  panel.value = 'slides'
+  panel.value = name
+}
+const toggleSlides = () => togglePanel('slides')
+const showPictures = computed(() => deckPictures.on.value)
+
+/* ---------------------------------------------------------------- pictures */
+
+const photoInput = ref<HTMLInputElement | null>(null)
+/** The phone's photo picker, for the slide asked: the input lives with the frame, so a late iOS answer still lands. */
+function pickPhoto(sectionId: string) {
+  deckPictures.pickFor.value = sectionId
+  photoInput.value?.click()
+}
+function onPhoto(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  const target = deckPictures.pickFor.value
+  input.value = ''
+  deckPictures.pickFor.value = null
+  if (file && target && sectionById(target)) void deckPictures.upload(target, file)
+}
+function layoutFromDesign(id: string) {
+  if (!wide.value) panel.value = null
+  openLayouts(id, null)
 }
 function closePanel() {
   commitOpen('close')
@@ -980,7 +1054,7 @@ const refusal = computed(() => {
 })
 
 const panelContent = computed(() => {
-  if (slidesOpen.value) return 'slides'
+  if (tabPanel.value) return tabPanel.value
   if (!wide.value) return panel.value
   if (dock.value) return 'fields'
   if (onCover.value) return 'cover'
@@ -990,6 +1064,12 @@ const panelTitle = computed(() => {
   switch (panelContent.value) {
     case 'slides':
       return t('deckTabSlides')
+    case 'pictures':
+      return t('deckTabPictures')
+    case 'design':
+      return t('deckTabDesign')
+    case 'ask':
+      return t('deckAskTitle')
     case 'cover':
       return t('deckCoverDetails')
     case 'questions':
@@ -1159,7 +1239,37 @@ const panelTitle = computed(() => {
           <p v-if="notice('offline')" class="info-banner" data-testid="deck-offline">
             <AppIcon name="globe" :size="17" /><span>{{ t('deckOffline') }}</span>
           </p>
+          <p v-if="notice('pictures')" class="info-banner" data-testid="deck-pictures-working">
+            <AppIcon name="loader" class="spin" :size="17" /><span>{{ pictureWorking }}</span>
+          </p>
         </div>
+        <p v-if="notice('channels')" class="info-banner" role="status" data-testid="deck-channels-notice">
+          <AppIcon name="send" :size="17" /><span>{{ t('deckChannelsOpen') }}</span
+          ><button type="button" class="text-link" data-testid="deck-channels-join" @click="joinChannels">
+            {{ t('deckChannelsJoin') }}</button
+          ><button
+            type="button"
+            class="icon-button"
+            :aria-label="t('editorDismiss')"
+            data-testid="deck-channels-dismiss"
+            @click="sendNoticesHidden.push('channels')"
+          >
+            <AppIcon name="x" :size="16" />
+          </button>
+        </p>
+        <p v-if="notice('weekUsed')" class="warning-banner" role="status" data-testid="deck-week-used">
+          <AppIcon name="clock" :size="17" /><span>{{ t('deckWeekUsedOpen', { time: untilText }) }}</span
+          ><NuxtLink :to="path('/app/billing')" class="text-link">{{ t('studioSeePlans') }}</NuxtLink
+          ><button
+            type="button"
+            class="icon-button"
+            :aria-label="t('editorDismiss')"
+            data-testid="deck-week-dismiss"
+            @click="sendNoticesHidden.push('weekUsed')"
+          >
+            <AppIcon name="x" :size="16" />
+          </button>
+        </p>
         <DeckLatinOffer
           :offer="notice('latin') ? latin.offer.value : null"
           @switch="latin.accept()"
@@ -1277,9 +1387,9 @@ const panelTitle = computed(() => {
         <EditorSheet
           :open="wide || panel !== null"
           :permanent="wide"
-          :size="!wide && panel === 'slides' && shortScreen ? 'tall' : 'compact'"
+          :size="!wide && ((panel === 'slides' && shortScreen) || panel === 'design' || panel === 'ask') ? 'tall' : 'compact'"
           :title="panelTitle"
-          :testid="wide ? 'deck-panel' : panel === 'slides' ? 'deck-slides-sheet' : 'deck-cover-sheet'"
+          :testid="wide ? 'deck-panel' : panel === 'cover' ? 'deck-cover-sheet' : `deck-${panel}-sheet`"
           @close="closePanel"
         >
           <DeckSlideList
@@ -1299,6 +1409,24 @@ const panelTitle = computed(() => {
             @fewer="fewerQuestions"
             @remove-quiz="removeQuiz"
             @questions="openQuestions"
+          />
+          <DeckPictureSheet
+            v-else-if="panelContent === 'pictures'"
+            :section="currentSection"
+            :number="deck.current.value + 1"
+            @phone="pickPhoto"
+          />
+          <DeckDesignSheet
+            v-else-if="panelContent === 'design'"
+            :section="currentSection"
+            :number="deck.current.value + 1"
+            :is-cover="onCover"
+            @layout="layoutFromDesign"
+          />
+          <DeckAskAiSheet
+            v-else-if="panelContent === 'ask'"
+            :section="onCover ? null : currentSection"
+            :number="deck.current.value + 1"
           />
           <DeckCoverSheet
             v-else-if="panelContent === 'cover' && coverSection"
@@ -1342,7 +1470,18 @@ const panelTitle = computed(() => {
         </EditorSheet>
       </div>
 
-      <nav v-if="!dock || wide" class="editor-tabbar deck-edit-single" :aria-label="t('deckTabs')">
+      <nav v-if="!dock || wide" class="editor-tabbar deck-edit-tabs" :aria-label="t('deckTabs')">
+        <button
+          v-if="showPictures"
+          type="button"
+          class="editor-toolpill"
+          :class="{ active: panel === 'pictures' }"
+          :aria-pressed="panel === 'pictures'"
+          data-testid="deck-tab-pictures"
+          @click="togglePanel('pictures')"
+        >
+          <AppIcon name="image" :size="20" /><span>{{ t('deckTabPictures') }}</span>
+        </button>
         <button
           type="button"
           class="editor-toolpill"
@@ -1353,7 +1492,37 @@ const panelTitle = computed(() => {
         >
           <AppIcon name="reorder" :size="20" /><span>{{ t('deckTabSlides') }}</span>
         </button>
+        <button
+          type="button"
+          class="editor-toolpill"
+          :class="{ active: panel === 'design' }"
+          :aria-pressed="panel === 'design'"
+          data-testid="deck-tab-design"
+          @click="togglePanel('design')"
+        >
+          <AppIcon name="palette" :size="20" /><span>{{ t('deckTabDesign') }}</span>
+        </button>
+        <button
+          type="button"
+          class="editor-toolpill"
+          :class="{ active: panel === 'ask' }"
+          :aria-pressed="panel === 'ask'"
+          data-testid="deck-tab-ask"
+          @click="togglePanel('ask')"
+        >
+          <AppIcon name="sparkle" :size="20" /><span>{{ t('deckTabAskAi') }}</span>
+        </button>
       </nav>
+      <input
+        ref="photoInput"
+        class="visually-hidden"
+        type="file"
+        accept="image/jpeg,image/png,image/*"
+        tabindex="-1"
+        aria-hidden="true"
+        data-testid="deck-photo-input"
+        @change="onPhoto"
+      />
       <EditorMainButtonFallback />
 
       <DeckSlideMenu
@@ -1407,6 +1576,7 @@ const panelTitle = computed(() => {
         @cover="openCover"
         @questions="openQuestions"
         @notes="openNotes"
+        @show="go"
       />
       <EditorSheet
         :open="reviewOpen"

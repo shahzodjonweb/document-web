@@ -40,6 +40,12 @@ const PHOTOS = [
   '00000000-0000-4000-8000-000000000102',
   '00000000-0000-4000-8000-000000000103',
 ]
+// Pictures the picture actions put on: one from the phone, one Another picture took, two a search found.
+const UPLOADED = '00000000-0000-4000-8000-000000000201'
+const FILLED = ['00000000-0000-4000-8000-000000000104', '00000000-0000-4000-8000-000000000107']
+const FOUND = ['00000000-0000-4000-8000-000000000105', '00000000-0000-4000-8000-000000000106']
+const REVISION_DRAFT = '00000000-0000-4000-8000-0000000000d3'
+const PICTURES = { on: true, stock: true, per_deck: 12, pinned: 2, fills_left: 3, searches_left: 10, style: 'photo' }
 const PPTX_ARTIFACT = '00000000-0000-4000-8000-0000000000e2'
 const PDF_ARTIFACT = '00000000-0000-4000-8000-0000000000e3'
 const EXPORT_JOB = '00000000-0000-4000-8000-0000000000f5'
@@ -666,6 +672,18 @@ async function openDeck({
   // A slow uplink on the second deck: its writes are taken, and answered, only this many ms late.
   otherSaveDelay = 0,
   accounts = false,
+  // What the Pictures sheet is told at open (draft `pictures`); null for a platform that says nothing.
+  pictures = PICTURES,
+  // GET /channels: whether this account must join the owner's channels before a send.
+  channels = { required: false, joined: true, channels: [] },
+  // File tasks left this week, and whether this deck was counted already (draft `send`).
+  weekLeft = 11,
+  counted = false,
+  // A picture or design call refused at once: (action, n) => [code, status, params] or null.
+  photoRefusal = null,
+  // A picture task that fails once followed: (action) => code or null; and how many looks it stays running.
+  taskFails = null,
+  taskPolls = 1,
 } = {}) {
   const context = await browser.newContext({
     viewport: { width, height },
@@ -733,6 +751,14 @@ async function openDeck({
     keys: new Map(),
     pictures: new Map(),
     unexpected: [],
+    photoPosts: [],
+    photoTasks: new Map(),
+    uploads: [],
+    designs: [],
+    revisions: [],
+    channelState: clone(channels),
+    channelsAsked: 0,
+    pictureState: pictures ? clone(pictures) : null,
     expiresAt: new Date(Date.now() + expiresIn).toISOString(),
     down: true,
     render: notEditable
@@ -860,7 +886,20 @@ async function openDeck({
             },
           }
         : {}),
-      ...(main && server.render ? { render: server.render } : {}),
+      ...(main && server.render
+        ? {
+            render: server.render,
+            send: { counted_this_week: counted },
+            ...(server.pictureState
+              ? {
+                  pictures: {
+                    ...server.pictureState,
+                    pinned: Object.values(server.render.photos).filter((photo) => photo.asset_id).length,
+                  },
+                }
+              : {}),
+          }
+        : {}),
       ...(main
         ? {}
         : {
@@ -877,7 +916,7 @@ async function openDeck({
   }
   const usage = () => ({
     ai_documents: { limit: 5, used: 0, remaining: 5 },
-    file_jobs: { limit: 15, used: 4, remaining: 11 },
+    file_jobs: { limit: 15, used: 15 - weekLeft, remaining: weekLeft },
     edits_per_file: 3,
     resets_at: '2026-11-15T19:00:00Z',
   })
@@ -1097,12 +1136,61 @@ async function openDeck({
                   card: '#EEF1F4',
                 },
               },
+              {
+                id: 'harbour',
+                name: 'Harbour',
+                theme: 'dark',
+                photo: false,
+                pattern: '',
+                composition: 'split',
+                preview: '/api/v1/studio/deck-designs/harbour.png?locale=en&v=fixture',
+                heading_font: 'Cambria',
+                body_font: 'Calibri',
+                colours: {
+                  accent: '#3A7BD5',
+                  surface: '#101820',
+                  cover_fill: '#101820',
+                  cover_ink: '#FFFFFF',
+                  heading: '#FFFFFF',
+                  ink: '#E8EDF2',
+                  muted: '#A9B4C0',
+                  accent_soft: '#1D3557',
+                  card: '#1A2633',
+                },
+              },
             ],
           },
         ],
       })
     if (/^\/studio\/deck-designs\/[\w-]+\.png$/.test(endpoint))
       return route.fulfill({ status: 200, contentType: 'image/png', body: canvas(32, 18, ACCENT).png() })
+    if (endpoint === '/channels' && method === 'GET') {
+      server.channelsAsked += 1
+      return json(server.channelState)
+    }
+    if (endpoint === '/channels/check' && method === 'POST') return json(server.channelState)
+    // The phone's photo, as the platform keeps an upload: the bytes are kept here to be read.
+    if (endpoint === '/files/uploads' && method === 'POST') {
+      const raw = request.postDataBuffer() ?? Buffer.alloc(0)
+      server.uploads.push(raw)
+      return json(
+        {
+          id: UPLOADED,
+          name: 'photo.jpg',
+          size_bytes: raw.length,
+          page_count: 1,
+          mime_type: 'image/jpeg',
+          state: 'ready',
+          expires_at: server.expiresAt,
+        },
+        201,
+      )
+    }
+    // Ask AI: a change draft of this deck, opened in Create.
+    if (endpoint === '/generation/drafts' && method === 'POST') {
+      server.revisions.push(body)
+      return json({ ...draftBody(), id: REVISION_DRAFT, version: 1 }, 201)
+    }
     if (endpoint === '/jobs' && method === 'GET') return json({ results: [], count: 0 })
     if (endpoint === '/generation/drafts' && method === 'GET') return json({ results: [] })
 
@@ -1411,6 +1499,107 @@ async function openDeck({
           headers: { 'content-type': 'image/png', 'cache-control': 'private, no-store' },
           body: server.pictures.get(cached),
         })
+      }
+      // The deck's own pictures, as small PNGs (a browser takes them as pictures whatever the address says).
+      if (/^\/pictures\/[0-9a-f-]+\.jpg$/.test(rest) && method === 'GET')
+        return route.fulfill({ status: 200, contentType: 'image/png', body: canvas(48, 27, ACCENT).png() })
+      if (rest === '/photos' && method === 'POST') {
+        if (!wantsEditor()) return refuse('feature_unavailable', 409)
+        server.photoPosts.push(body)
+        const refused = photoRefusal?.(body?.action, server.photoPosts.length)
+        if (refused) return refuse(refused[0], refused[1], refused[2] ?? {})
+        if (!server.pictureState?.on) return refuse('feature_unavailable', 409)
+        if (body?.version !== server.version) return refuse('version_conflict', 409)
+        const allowed = ['action', 'version', 'style', 'section_id', 'asset_id', 'query']
+        if (Object.keys(body).some((key) => !allowed.includes(key)) || !['photo', 'illustration'].includes(body.style))
+          server.unexpected.push(`POST /photos ${JSON.stringify(body)}`)
+        const photos = server.render.photos
+        const sid = body.section_id
+        const row = server.content.sections.find((entry) => entry.id === sid)
+        const bump = () => {
+          server.version += 1
+          server.history.set(server.version, clone(server.content))
+        }
+        /** Slide `id` wears `asset`: what it wore goes last among its candidates; a slide with no photo layout takes one. */
+        const wear = (id, asset) => {
+          const before = photos[id] ?? { asset_id: null, candidates: [] }
+          const rest = before.candidates.filter((entry) => entry.asset_id !== asset)
+          if (before.asset_id && before.asset_id !== asset) rest.push({ asset_id: before.asset_id })
+          photos[id] = { asset_id: asset, candidates: rest, offered: rest.length }
+          const slide = server.content.sections.find((entry) => entry.id === id)
+          if (slide && !PHOTO_LAYOUTS.includes(slide.layout)) slide.layout = 'image_split'
+        }
+        if (body.action === 'remove') {
+          if (!photos[sid]?.asset_id) return refuse('invalid_parameters', 400)
+          const worn = photos[sid].asset_id
+          const rest = photos[sid].candidates.filter((entry) => entry.asset_id !== worn)
+          photos[sid] = { asset_id: null, candidates: [{ asset_id: worn }, ...rest], offered: rest.length + 1 }
+          bump()
+          return json(draftBody())
+        }
+        if (!['fill', 'next', 'upload', 'search'].includes(body.action) || (body.action !== 'fill' && !row))
+          return refuse('invalid_parameters', 400)
+        const task = {
+          id: `00000000-0000-4000-8000-0000000c${String(server.photoTasks.size + 1).padStart(4, '0')}`,
+          action: body.action,
+          polls: 0,
+          error: taskFails?.(body.action) ?? null,
+          result: null,
+        }
+        server.photoTasks.set(task.id, task)
+        if (!task.error) {
+          if (body.action === 'fill') {
+            // The list slide takes a picture beside its lines; the steps slide has no room for one.
+            wear('s2', FILLED[0])
+            bump()
+            server.pictureState.fills_left -= 1
+            task.result = { version: server.version, added: 1, asked: 2, no_room: 1, unmatched: 0, failed: 0 }
+          } else if (body.action === 'search') {
+            const kept = (photos[sid]?.candidates ?? []).filter((entry) => !FOUND.includes(entry.asset_id))
+            photos[sid] = {
+              asset_id: photos[sid]?.asset_id ?? null,
+              candidates: [...FOUND.map((asset_id) => ({ asset_id })), ...kept],
+              offered: FOUND.length + kept.length,
+            }
+            bump()
+            server.pictureState.searches_left -= 1
+            task.result = { version: server.version, found: FOUND.length }
+          } else {
+            const asset =
+              body.action === 'upload' ? body.asset_id : (body.asset_id ?? photos[sid]?.candidates?.[0]?.asset_id)
+            if (!asset) return refuse('invalid_parameters', 400)
+            wear(sid, asset)
+            bump()
+            task.result = { version: server.version, asset_id: asset }
+          }
+        }
+        return json({ task_id: task.id, status: 'queued' }, 202)
+      }
+      const followed = /^\/photos\/([0-9a-f-]+)$/.exec(rest)
+      if (followed && method === 'GET') {
+        const task = server.photoTasks.get(followed[1])
+        if (!task) return refuse('not_found', 404)
+        task.polls += 1
+        const status = task.polls <= taskPolls ? 'running' : task.error ? 'failed' : 'done'
+        return json({
+          task_id: task.id,
+          status,
+          action: task.action,
+          result: status === 'done' ? task.result : null,
+          error: status === 'failed' ? task.error : null,
+        })
+      }
+      if (rest === '/design' && method === 'POST') {
+        if (!wantsEditor()) return refuse('feature_unavailable', 409)
+        server.designs.push(body)
+        const refused = photoRefusal?.('design', server.designs.length)
+        if (refused) return refuse(refused[0], refused[1], refused[2] ?? {})
+        if (body?.version !== server.version) return refuse('version_conflict', 409)
+        if (!['aurora', 'harbour'].includes(body?.design)) return refuse('invalid_parameters', 400)
+        server.render.design = body.design
+        server.version += 1
+        server.history.set(server.version, clone(server.content))
+        return json(draftBody())
       }
       if (rest === '/fit' && method === 'POST') {
         if (!wantsEditor()) return refuse('feature_unavailable', 409)
@@ -6518,6 +6707,411 @@ await group('65 A typed school keeps its row through Undo of a later change', as
 
 /* ------------------------------------------------------------------ every combination */
 
+/* ------------------------------------------------------------------ 66-75: pictures, design, Ask AI and step 12's rest */
+
+async function openTab(page, name) {
+  await page.getByTestId(`deck-tab-${name}`).click()
+  await page.getByTestId(`deck-${name}-sheet`).waitFor()
+}
+const pictureStatus = (page) => page.getByTestId('deck-pictures-status')
+const snackSays = (page, words) =>
+  until(
+    async () => (await page.getByTestId('editor-snackbar').count()) && (await page.getByTestId('editor-snackbar').innerText()).includes(words),
+    `the snackbar to say "${words}"`,
+  )
+/** The width and height a JPEG says it is, from its first SOF marker. */
+function jpegSize(bytes) {
+  assert.ok(bytes[0] === 0xff && bytes[1] === 0xd8, 'a JPEG')
+  for (let at = 2; at < bytes.length; ) {
+    if (bytes[at] !== 0xff) return null
+    const marker = bytes[at + 1]
+    const length = bytes.readUInt16BE(at + 2)
+    if (marker >= 0xc0 && marker <= 0xc3) return { height: bytes.readUInt16BE(at + 5), width: bytes.readUInt16BE(at + 7) }
+    at += 2 + length
+  }
+  return null
+}
+/** The JPEG inside a multipart body. */
+function multipartJpeg(raw) {
+  const start = raw.indexOf(Buffer.from([0xff, 0xd8, 0xff]))
+  assert.ok(start >= 0, 'the upload carries a JPEG')
+  return raw.subarray(start)
+}
+
+await group('66 Add pictures to all slides', async () => {
+  const o = await openDeck({ taskPolls: 3 })
+  const { page, server } = o
+  await goToDeck(o)
+  await openTab(page, 'pictures')
+  await page.getByTestId('deck-pictures-count').waitFor()
+  assert.match(await page.getByTestId('deck-pictures-count').innerText(), /2 of 12[\s\S]*3/)
+  const before = server.version
+  const gets = server.draftGets
+  await page.getByTestId('deck-pictures-all').click()
+  // The deck waits while the server adds them: nothing to send, and the button is not tapped twice.
+  await until(async () => (await pictureStatus(page).innerText()).includes('Adding pictures'), 'the working line')
+  assert.equal((await mainButton(page)).isActive, false, 'no send while pictures are being added')
+  assert.equal(await page.getByTestId('deck-pictures-all').isDisabled(), true)
+  await until(async () => (await pictureStatus(page).innerText()).includes('new picture: 1'), 'what came of it')
+  assert.deepEqual(server.photoPosts[0], { action: 'fill', version: before, style: 'photo' })
+  assert.ok(server.draftGets > gets, 'the draft is read back at its new version')
+  assert.match(await page.getByTestId('deck-pictures-count').innerText(), /3 of 12[\s\S]*2/)
+  await until(async () => (await mainButton(page)).isActive, 'send again once it is done')
+  // Its layout change is one step of history: Undo puts the list slide back, and saves on the new version.
+  await closeSheet(page, 'deck-pictures-sheet')
+  const from = mark(server)
+  await page.getByTestId('editor-undo').click()
+  const undone = await savedPatch(server, (c) => c.sections[1].layout === 'bullets', from, 'Undo of the layout')
+  assert.equal(undone.version, before + 1)
+  // Drawings, as the photo is drawn: picture stays as asked; and Drawing goes with the next search.
+  await goTo(page, 5)
+  await openTab(page, 'pictures')
+  await page.getByTestId('deck-pictures-drawing').click()
+  await page.getByTestId('deck-picture-query').fill('storm clouds')
+  await page.getByTestId('deck-picture-find').click()
+  await until(() => server.photoPosts.length === 2, 'the search asked')
+  assert.equal(server.photoPosts[1].style, 'illustration')
+  assert.equal(server.photoPosts[1].query, 'storm clouds')
+  await finish(o)
+})
+
+await group('67 Another picture, Remove and their Undo', async () => {
+  const o = await openDeck()
+  const { page, server } = o
+  await goToDeck(o)
+  await openTab(page, 'pictures')
+  // The cover wears one and has one on offer: a tap puts it on.
+  await page.getByTestId('deck-picture-worn').waitFor()
+  await page.getByTestId('deck-picture-offer-1').click()
+  await snackSays(page, 'Picture changed')
+  assert.deepEqual(server.photoPosts.at(-1), { action: 'next', version: server.version - 1, style: 'photo', section_id: 's1', asset_id: PHOTOS[1] })
+  assert.equal(server.render.photos.s1.asset_id, PHOTOS[1])
+  // Undo puts back the one it wore, stored whole.
+  await page.getByTestId('editor-snackbar-action').click()
+  await until(() => server.render.photos.s1.asset_id === PHOTOS[0], 'the cover’s own picture back')
+  assert.equal(server.photoPosts.at(-1).asset_id, PHOTOS[0])
+  // Remove answers at once; Undo brings it back the same way.
+  await page.getByTestId('deck-picture-remove').click()
+  await snackSays(page, 'Picture removed')
+  assert.equal(server.render.photos.s1.asset_id, null)
+  await page.getByTestId('deck-picture-none').waitFor()
+  await page.getByTestId('editor-snackbar-action').click()
+  await until(() => server.render.photos.s1.asset_id === PHOTOS[0], 'removed, then back')
+  // A slide with nothing on offer refuses Another picture at the tap; a search fills its offer.
+  await closeSheet(page, 'deck-pictures-sheet')
+  await goTo(page, 5)
+  await openTab(page, 'pictures')
+  assert.equal(await page.getByTestId('deck-picture-another').isDisabled(), true)
+  await page.getByTestId('deck-picture-query').fill('rain clouds')
+  await page.getByTestId('deck-picture-find').click()
+  await until(async () => (await pictureStatus(page).innerText()).includes('found: 2'), 'four on offer said')
+  await page.getByTestId('deck-picture-offer-2').waitFor()
+  assert.equal(await page.getByTestId('deck-picture-another').isDisabled(), false)
+  await look(o, 'pictures-offered')
+  await finish(o)
+})
+
+await group('68 From my phone', async () => {
+  const o = await openDeck()
+  const { page, server } = o
+  await goToDeck(o)
+  await goTo(page, 2)
+  await openTab(page, 'pictures')
+  const chooser = page.waitForEvent('filechooser')
+  await page.getByTestId('deck-picture-phone').click()
+  // A big photo, as a phone takes one: 2400 by 1600.
+  await (await chooser).setFiles({ name: 'IMG_0042.png', mimeType: 'image/png', buffer: canvas(2400, 1600, ACCENT).png() })
+  await until(() => server.photoPosts.some((post) => post.action === 'upload'), 'the photo put on')
+  const jpeg = multipartJpeg(server.uploads[0])
+  const size = jpegSize(jpeg)
+  assert.ok(size && Math.max(size.width, size.height) === 1600 && size.width === 1600, `shrunk to 1600 px: ${JSON.stringify(size)}`)
+  assert.deepEqual(server.photoPosts.at(-1), { action: 'upload', version: server.version - 1, style: 'photo', section_id: 's2', asset_id: UPLOADED })
+  await snackSays(page, 'Your picture')
+  assert.equal(server.content.sections[1].layout, 'image_split')
+  // A file that is no picture is said so, and nothing is sent.
+  const uploads = server.uploads.length
+  const second = page.waitForEvent('filechooser')
+  await page.getByTestId('deck-picture-phone').click()
+  await (await second).setFiles({ name: 'notes.png', mimeType: 'image/png', buffer: Buffer.from('not a picture') })
+  await until(async () => (await pictureStatus(page).innerText()).includes('can’t be used'), 'the refusal')
+  assert.equal(server.uploads.length, uploads)
+  await finish(o)
+})
+
+await group('69 Pictures refused at the tap and by the server', async () => {
+  // Today's fills used: the button says so by being off, with the count beside it.
+  let o = await openDeck({ pictures: { ...PICTURES, fills_left: 0 } })
+  await goToDeck(o)
+  await openTab(o.page, 'pictures')
+  assert.equal(await o.page.getByTestId('deck-pictures-all').isDisabled(), true)
+  assert.match(await o.page.getByTestId('deck-pictures-count').innerText(), /Left today: 0/)
+  await finish(o)
+  // A full deck.
+  o = await openDeck({ pictures: { ...PICTURES, per_deck: 2 } })
+  await goToDeck(o)
+  await openTab(o.page, 'pictures')
+  assert.equal(await o.page.getByTestId('deck-pictures-all').isDisabled(), true)
+  await closeSheet(o.page, 'deck-pictures-sheet')
+  await goTo(o.page, 2)
+  await openTab(o.page, 'pictures')
+  assert.equal(await o.page.getByTestId('deck-picture-phone').isDisabled(), true, 'a slide with none takes no more')
+  await finish(o)
+  // No picture library: only the customer's own pictures.
+  o = await openDeck({ pictures: { ...PICTURES, stock: false } })
+  await goToDeck(o)
+  await openTab(o.page, 'pictures')
+  assert.equal(await o.page.getByTestId('deck-pictures-all').count(), 0)
+  assert.equal(await o.page.getByTestId('deck-picture-query').count(), 0)
+  assert.equal(await o.page.getByTestId('deck-picture-phone').count(), 1)
+  await finish(o)
+  // Switched off, or a platform that says nothing: no Pictures tab.
+  for (const pictures of [{ ...PICTURES, on: false }, null]) {
+    o = await openDeck({ pictures })
+    await goToDeck(o)
+    assert.equal(await o.page.getByTestId('deck-tab-pictures').count(), 0)
+    assert.equal(await o.page.getByTestId('deck-tab-design').count(), 1)
+    await finish(o)
+  }
+  // The server's refusals, in this app's words; a task that failed too.
+  o = await openDeck({
+    photoRefusal: (action) => (action === 'search' ? ['photos_limit', 429, { limit_kind: 'search_minute', limit: 5 }] : null),
+    taskFails: (action) => (action === 'next' ? 'picture_no_room' : null),
+  })
+  await goToDeck(o)
+  await goTo(o.page, 5)
+  await openTab(o.page, 'pictures')
+  await o.page.getByTestId('deck-picture-query').fill('clouds')
+  await o.page.getByTestId('deck-picture-find').click()
+  await until(async () => (await pictureStatus(o.page).innerText()).includes('in a minute'), 'the minute’s limit said')
+  await closeSheet(o.page, 'deck-pictures-sheet')
+  await goTo(o.page, 1)
+  await openTab(o.page, 'pictures')
+  await o.page.getByTestId('deck-picture-offer-1').click()
+  await until(async () => (await pictureStatus(o.page).innerText()).includes('wouldn’t all show'), 'no room said')
+  assert.equal(o.server.render.photos.s1.asset_id, PHOTOS[0], 'nothing changed')
+  await finish(o)
+  return '69 Pictures refused at the tap and by the server: fills used, a full deck, no library, off, unsaid; limits and a failed task in words'
+})
+
+await group('70 Design and layout', async () => {
+  const o = await openDeck()
+  const { page, server } = o
+  await goToDeck(o)
+  await goTo(page, 2)
+  await openTab(page, 'design')
+  await page.locator('.deck-card[data-design="harbour"]').waitFor()
+  assert.equal(await page.locator('.deck-card[data-design="aurora"]').getAttribute('aria-checked'), 'true')
+  assert.equal(await page.getByTestId('deck-design-auto').count(), 0, 'no Auto for a deck already drawn')
+  await look(o, 'design-sheet')
+  const before = server.version
+  await page.locator('.deck-card[data-design="harbour"]').click()
+  await snackSays(page, 'Design changed')
+  assert.deepEqual(server.designs[0], { version: before, design: 'harbour' })
+  assert.equal(server.render.design, 'harbour')
+  await until(() => server.renderPosts.some((post) => post.version === before + 1), 'every slide drawn again')
+  await page.getByTestId('editor-snackbar-action').click()
+  await until(() => server.render.design === 'aurora', 'Undo puts the last design back')
+  assert.deepEqual(server.designs[1], { version: before + 1, design: 'aurora' })
+  // The slide's layout, from the same sheet.
+  await page.getByTestId('deck-design-layout').click()
+  await page.getByTestId('deck-layout-sheet').waitFor()
+  await closeSheet(page, 'deck-layout-sheet')
+  await goTo(page, 1)
+  await openTab(page, 'design')
+  await page.getByTestId('deck-design-no-layout').waitFor()
+  await finish(o)
+})
+
+await group('71 Ask AI for one slide or the deck', async () => {
+  const o = await openDeck()
+  const { page, server } = o
+  await goToDeck(o)
+  await goTo(page, 2)
+  await openTab(page, 'ask')
+  await page.getByTestId('deck-ask-cost').waitFor()
+  assert.match(await page.getByTestId('deck-ask-cost').innerText(), /1 AI edit/)
+  await look(o, 'ask-sheet')
+  await page.getByRole('button', { name: 'Make it shorter' }).click()
+  assert.equal(await page.getByTestId('deck-ask-text').inputValue(), 'Make it shorter')
+  await page.getByTestId('deck-ask-go').click()
+  await page.waitForURL(`**/app/create/${REVISION_DRAFT}`)
+  assert.deepEqual(server.revisions[0], {
+    prompt: 'Make it shorter',
+    options: { revise_draft_id: DRAFT, revise_section_ids: ['s2'], revise_base_version: server.version },
+  })
+  await finish(o, { lenient: true })
+  // On the cover it is the whole deck; a language switch is for the whole deck too.
+  const p = await openDeck({ locale: 'ru' })
+  await goToDeck(p)
+  await openTab(p.page, 'ask')
+  assert.equal(await p.page.getByTestId('deck-ask-slide').isDisabled(), true)
+  assert.equal(await p.page.getByTestId('deck-ask-deck').getAttribute('aria-pressed'), 'true')
+  // An English deck offers Russian and Uzbek, not English.
+  assert.equal(await p.page.getByTestId('deck-ask-to-en').count(), 0)
+  assert.equal(await p.page.getByTestId('deck-ask-to-ru').count(), 1)
+  await finish(p)
+  return '71 Ask AI for one slide or the deck: cost above the button, a preset, a change draft of this slide opened in Create'
+})
+
+await group('72 Grip drag in the Slides list', async () => {
+  const o = await openDeck({ width: 390, height: 844 })
+  const { page, server } = o
+  await goToDeck(o)
+  await openTab(page, 'slides')
+  assert.equal(await page.getByTestId('deck-grip-1').count(), 0, 'the title slide has no grip')
+  const grip = await page.getByTestId('deck-grip-4').boundingBox()
+  const target = await page.getByTestId('deck-row-2').boundingBox()
+  assert.ok(grip.width >= 44 && grip.height >= 44, 'a 44 px grip')
+  const from = mark(server)
+  await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2)
+  await page.mouse.down()
+  for (let step = 1; step <= 8; step += 1)
+    await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2 + ((target.y + 6 - (grip.y + grip.height / 2)) * step) / 8)
+  assert.equal((await spied(page, 'disableVerticalSwipes')).length > 0, true, 'Telegram’s swipe-down held while dragging')
+  await page.mouse.up()
+  await savedPatch(server, (c) => order(c).startsWith('s1,s4,s2,s3'), from, 'the dragged order')
+  await page.getByTestId('deck-moved').waitFor()
+  await finish(o)
+  // Below Telegram 7.7 a drag would pull the app down: no grip, the buttons stay.
+  const old = await openDeck({ version: '7.0' })
+  await goToDeck(old)
+  await openTab(old.page, 'slides')
+  assert.equal(await old.page.getByTestId('deck-grip-4').count(), 0)
+  await finish(old)
+  return '72 Grip drag in the Slides list: a 44 px grip, swipes held, one move saved; none below Telegram 7.7'
+})
+
+await group('73 More: All changes and Start over', async () => {
+  const o = await openDeck()
+  const { page, server } = o
+  await goToDeck(o)
+  const original = clone(server.content)
+  await openHeading(o, 2)
+  await page.getByTestId('deck-headline').fill('Evaporation, step by step')
+  await page.getByTestId('deck-dock-done').click()
+  await savedPatch(server, (c) => c.sections[1].heading === 'Evaporation, step by step')
+  await page.getByTestId('editor-more').click()
+  await page.getByTestId('deck-more-changes').click()
+  await page.getByTestId('deck-more-changes-list').waitFor()
+  await look(o, 'more-changes')
+  await page.getByTestId('deck-more-changes-list').getByRole('button').first().click()
+  await page.getByTestId('deck-more-sheet').waitFor({ state: 'hidden' })
+  assert.equal(await currentSlide(page), 2)
+  await page.getByTestId('editor-more').click()
+  const from = mark(server)
+  await page.getByTestId('deck-more-start-over').click()
+  await savedPatch(server, (c) => JSON.stringify(c) === JSON.stringify(original), from, 'the deck as opened')
+  await snackSays(page, 'Back to the deck')
+  await page.getByTestId('editor-snackbar-action').click()
+  await savedPatch(server, (c) => c.sections[1].heading === 'Evaporation, step by step', from + 1, 'Undo of Start over')
+  await finish(o)
+})
+
+await group('74 Notices at open: channels and the week', async () => {
+  let o = await openDeck({ channels: { required: true, joined: false, channels: [{ title: 'Fixture news', url: 'https://t.me/fixture_news', joined: false }] } })
+  await goToDeck(o)
+  await o.page.getByTestId('deck-channels-notice').waitFor()
+  await look(o, 'channels-notice')
+  await o.page.getByTestId('deck-channels-join').click()
+  await o.page.getByTestId('channel-gate').waitFor()
+  await finish(o)
+  // Both at once, put away one at a time: they never hold the deck's own notices back for good.
+  o = await openDeck({ weekLeft: 0, channels: { required: true, joined: false, channels: [] } })
+  await goToDeck(o)
+  await o.page.getByTestId('deck-week-used').waitFor()
+  await o.page.getByTestId('deck-channels-dismiss').click()
+  await o.page.getByTestId('deck-channels-notice').waitFor({ state: 'detached' })
+  await o.page.getByTestId('deck-week-dismiss').click()
+  await o.page.getByTestId('deck-week-used').waitFor({ state: 'detached' })
+  await finish(o)
+  o = await openDeck({ weekLeft: 0 })
+  await goToDeck(o)
+  await o.page.getByTestId('deck-week-used').waitFor()
+  assert.match(await o.page.getByTestId('deck-week-used').innerText(), /Monday/)
+  await finish(o)
+  // A deck already counted this week sends free: nothing to say.
+  o = await openDeck({ weekLeft: 0, counted: true })
+  await goToDeck(o)
+  await o.page.waitForTimeout(600)
+  assert.equal(await o.page.getByTestId('deck-week-used').count(), 0)
+  assert.equal(await o.page.getByTestId('deck-channels-notice').count(), 0)
+  await finish(o)
+  return '74 Notices at open: join the channels (opens the list), the week used, and nothing for a deck counted already'
+})
+
+await group('77 A picture action outlived by its deck', async () => {
+  // Another deck opened while pictures are being added: the second is not held, and opening the first again starts free.
+  const o = await openDeck({ taskPolls: 40, second: 'en' })
+  const { page, server } = o
+  await goToDeck(o)
+  await openTab(page, 'pictures')
+  await page.getByTestId('deck-pictures-all').click()
+  await until(async () => (await pictureStatus(page).innerText()).includes('Adding pictures'), 'the fill under way')
+  await routeTo(page, `/en/app/editor/deck/${OTHER_DRAFT}`)
+  await until(() => server.other.gets > 0, 'the other deck opened')
+  await page.getByTestId('deck-tab-slides').waitFor()
+  await routeTo(page, `/en/app/editor/deck/${DRAFT}`)
+  await page.getByTestId('deck-slide-image').waitFor()
+  await until(async () => (await mainButton(page)).isActive, 'the deck reopened is not held')
+  const from = mark(server)
+  await openHeading(o, 2)
+  await page.getByTestId('deck-headline').fill('Evaporation again')
+  await page.getByTestId('deck-dock-done').click()
+  await savedPatch(server, (c) => c.sections[1].heading === 'Evaporation again', from, 'a save on the reopened deck')
+  assert.equal(await page.getByTestId('deck-conflict').count(), 0, 'no choice between versions over our own fill')
+  await finish(o)
+  // A task the server refused because the deck moved on elsewhere asks which version stands.
+  const p = await openDeck({ taskFails: (action) => (action === 'next' ? 'version_conflict' : null) })
+  await goToDeck(p)
+  await openTab(p.page, 'pictures')
+  await p.page.getByTestId('deck-picture-offer-1').click()
+  await p.page.getByTestId('deck-conflict').waitFor()
+  await finish(p)
+  return '77 A picture action outlived by its deck: another deck is free, the first reopened saves with no conflict; a task refused for a version moved elsewhere asks which stands'
+})
+
+await group('75 Pictures, Design and Ask AI at every size', async () => {
+  let seen = 0
+  for (const [width, height, locale, theme, inside] of [
+    [390, 656, 'en', 'light', true],
+    [390, 656, 'uz', 'dark', true],
+    [320, 426, 'ru', 'light', true],
+    [320, 426, 'uz', 'light', true],
+    [320, 568, 'en', 'dark', false],
+    [1280, 800, 'en', 'light', false],
+    [1280, 800, 'ru', 'dark', false],
+    [1280, 800, 'uz', 'light', false],
+  ]) {
+    const o = await openDeck({ width, height, locale, theme, inside })
+    await goToDeck(o)
+    for (const tab of ['pictures', 'design', 'ask']) {
+      await goTo(o.page, tab === 'pictures' ? 5 : 2)
+      await o.page.getByTestId(`deck-tab-${tab}`).click()
+      await o.page.getByTestId(width >= 980 ? 'deck-panel' : `deck-${tab}-sheet`).waitFor()
+      await o.page.getByTestId(`deck-${tab === 'ask' ? 'ask' : tab === 'design' ? 'design' : 'pictures'}`).waitFor()
+      if (tab === 'design') await o.page.locator('.deck-card').first().waitFor()
+      await look(o, `${tab}-sheet`)
+      if (width === 320)
+        assert.deepEqual(
+          await overflowing(o.page, ['.deck-pictures-actions .button', '.deck-ask-presets .button', '.editor-tabbar .editor-toolpill']),
+          [],
+          `${label(o)} ${tab}: words in their boxes`,
+        )
+      if (width >= 980) await o.page.getByTestId(`deck-tab-${tab}`).click()
+      else await closeSheet(o.page, `deck-${tab}-sheet`)
+    }
+    if (width === 320 && inside) {
+      await scaleText(o.page)
+      assert.deepEqual(await overflowing(o.page, ['.editor-tabbar .editor-toolpill']), [], `${label(o)}: four tabs at 1.3`)
+      await noSidewaysScroll(o.page, `${label(o)} tabs at 1.3`)
+      await shot(o, 'tabs-at-1.3')
+    }
+    await finish(o)
+    seen += 1
+  }
+  return `75 Pictures, Design and Ask AI at 390x844 and 320x568 in Telegram, 320 in a browser and 1280, en uz ru, light and dark (${seen}): axe, 44 px, no sideways scroll; four tabs at 1.3`
+})
+
 const DEVICES = [
   { name: '390', width: 390, height: 844, webView: 656 },
   { name: '320', width: 320, height: 568, webView: 426 },
@@ -6581,6 +7175,13 @@ async function everyState(o) {
   await page.getByTestId('deck-more-sheet').waitFor()
   await look(o, 'more')
   await closeSheet(page, 'deck-more-sheet')
+  for (const tab of ['pictures', 'design', 'ask']) {
+    await page.getByTestId(`deck-tab-${tab}`).click()
+    await page.getByTestId(`deck-${tab}-sheet`).waitFor()
+    if (tab === 'design') await page.locator('.deck-card').first().waitFor()
+    await look(o, `${tab}-sheet`)
+    await closeSheet(page, `deck-${tab}-sheet`)
+  }
   if (o.deck === 'uz') {
     await openHeading(o, 2)
     await page.getByTestId('deck-headline').fill('Ҳаво ифлосланиши')
@@ -6658,7 +7259,7 @@ await group(
 )
 
 await group(
-  '66 End checks',
+  '76 End checks',
   async () => {
     assert.deepEqual(contextFailures, [], 'page errors or requests without a fixture')
     assert.ok(checkedContexts > 0, 'no context was checked')
