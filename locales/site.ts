@@ -244,6 +244,12 @@ export const site = {
   siteLifecycle2Time: ['When the task ends', 'Vazifa tugaganda', 'Когда задача готова'],
   siteLifecycle3Title: ['Deleted', 'O‘chiriladi', 'Удаляется'],
   siteLifecycle3Text: ['Uploaded files and results are removed.', 'Yuklangan fayllar va natijalar o‘chiriladi.', 'Загруженные файлы и результаты удаляются.'],
+  // The same step where an AI document's privacy is told (privacy policy, AI CV page): what a change needs stays.
+  siteLifecycle3KeptText: [
+    'Uploaded files and results are removed, except those an AI document needs for a change.',
+    'Yuklangan fayllar va natijalar o‘chiriladi, AI hujjatni o‘zgartirish uchun kerakli fayllar bundan mustasno.',
+    'Загруженные файлы и результаты удаляются, кроме нужных для изменения ИИ-документа.',
+  ],
   siteLifecycle3Time: ['After 24 hours', '24 soatdan keyin', 'Через 24 часа'],
 
   // PDF editor capabilities: shared by home (titles) and the editor page (titles + lines).
@@ -373,11 +379,11 @@ export const site = {
     'Telegram, Google yoki email va parol bilan kiring. Sayt, bot va Mini App uchun bitta hisob.',
     'Входите через Telegram, Google или по почте и паролю. Один аккаунт для сайта, бота и мини-приложения.',
   ],
-  siteHomeFactAiTitle: ['AI: 30 days', 'AI: 30 kun', 'ИИ: 30 дней'],
+  siteHomeFactAiTitle: ['AI: kept for changes', 'AI: o‘zgartirish uchun saqlanadi', 'ИИ: хранится для правок'],
   siteHomeFactAiText: [
-    'Your AI requests and results are kept for 30 days for quality review, then deleted.',
-    'AI so‘rovlaringiz va natijalar sifatni tekshirish uchun 30 kun saqlanadi, keyin o‘chiriladi.',
-    'Запросы к ИИ и результаты хранятся 30 дней для проверки качества, затем удаляются.',
+    'A document’s request and text stay in your account so you can ask for changes; a copy kept for quality review is deleted after 30 days.',
+    'Hujjatning so‘rovi va matni o‘zgartirish so‘rashingiz uchun hisobingizda saqlanadi; sifatni tekshirish uchun olingan nusxa 30 kundan keyin o‘chiriladi.',
+    'Запрос и текст документа хранятся в вашем аккаунте, чтобы вы могли попросить изменения; копия для проверки качества удаляется через 30 дней.',
   ],
   siteHomePrivacyLink: ['Read the privacy policy', 'Maxfiylik siyosatini o‘qish', 'Читать политику конфиденциальности'],
 
@@ -793,9 +799,9 @@ export const site = {
   ],
   siteAiCvPrivacyTitle: ['A CV holds personal data', 'Rezyumeda shaxsiy maʼlumotlar bor', 'В резюме есть личные данные'],
   siteAiCvPrivacyNote: [
-    'Your request and the CV’s text stay in your account so you can ask for changes later; a copy is kept 30 days for quality review. Uploaded files and results are deleted after 24 hours, except the photo on the CV. Include only what you want an employer to see.',
-    'So‘rovingiz va rezyume matni keyinroq o‘zgartirish so‘rashingiz uchun hisobingizda saqlanadi; ularning nusxasi sifatni tekshirish uchun 30 kun saqlanadi. Yuklangan fayllar va natijalar 24 soatdan keyin o‘chiriladi, rezyumedagi rasm bundan mustasno. Faqat ish beruvchi ko‘rishi kerak bo‘lgan maʼlumotni yozing.',
-    'Запрос и текст резюме хранятся в вашем аккаунте, чтобы вы могли позже попросить изменения; копия хранится 30 дней для проверки качества. Загруженные файлы и результаты удаляются через 24 часа, кроме фото в резюме. Указывайте только то, что должен видеть работодатель.',
+    'Your request, what was read from your files and the CV’s text stay in your account so you can ask for changes later; a copy is kept 30 days for quality review. Uploaded files and results are deleted after 24 hours, except the photo on the CV. Include only what you want an employer to see.',
+    'So‘rovingiz, fayllaringizdan o‘qilgan maʼlumotlar va rezyume matni keyinroq o‘zgartirish so‘rashingiz uchun hisobingizda saqlanadi; ularning nusxasi sifatni tekshirish uchun 30 kun saqlanadi. Yuklangan fayllar va natijalar 24 soatdan keyin o‘chiriladi, rezyumedagi rasm bundan mustasno. Faqat ish beruvchi ko‘rishi kerak bo‘lgan maʼlumotni yozing.',
+    'Запрос, то, что прочитано из ваших файлов, и текст резюме хранятся в вашем аккаунте, чтобы вы могли позже попросить изменения; копия хранится 30 дней для проверки качества. Загруженные файлы и результаты удаляются через 24 часа, кроме фото в резюме. Указывайте только то, что должен видеть работодатель.',
   ],
   siteAiCvFaqTitle: ['Questions about the AI CV', 'AI rezyume haqida savollar', 'Вопросы о резюме с ИИ'],
 

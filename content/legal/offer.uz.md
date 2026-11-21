@@ -108,7 +108,7 @@ AI natijalari avtomatik tayyorlanadi va ularda xatolar, eskirgan maʼlumotlar yo
 
 Ijrochi natija original yoki noyob bo‘lishini, antiplagiat yoki AI aniqlash tekshiruvidan o‘tishini kafolatlamaydi.
 
-Sifatni tekshirish va suiisteʼmolning oldini olish uchun Ijrochi AI so‘rovlari, rejalar va natijalar nusxalarini 30 kun saqlaydi, so‘ngra o‘chiradi. Foydalanuvchi keyinroq o‘zgartirish so‘rashi uchun AI hujjatning so‘rovi va matni hamda uni o‘zgartirish uchun kerakli fayllar Hisob o‘chirilguncha yoki Foydalanuvchi ularni o‘chirishni so‘raguncha Hisobda saqlanadi. Batafsil maʼlumot [Maxfiylik siyosati](/uz/legal/privacy)da.
+Sifatni tekshirish va suiisteʼmolning oldini olish uchun Ijrochi AI so‘rovlari, rejalar va natijalar nusxalarini 30 kun saqlaydi, so‘ngra o‘chiradi. Foydalanuvchi keyinroq o‘zgartirish so‘rashi uchun AI hujjatning so‘rovi va matni, u yaratilgan fayllardan o‘qilgan maʼlumotlar hamda uni o‘zgartirish uchun kerakli fayllar Hisob o‘chirilguncha yoki Foydalanuvchi ularni o‘chirishni so‘raguncha Hisobda saqlanadi. Batafsil maʼlumot [Maxfiylik siyosati](/uz/legal/privacy)da.
 
 ## 12. Intellektual mulk
 

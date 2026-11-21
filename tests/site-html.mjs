@@ -183,6 +183,45 @@ try {
     ])
   })
 
+  // An AI document's draft, what was read from its files and the files a change of it needs stay in the account
+  // until it is deleted (document-platform apps/studio/keeping.py): no page may still say they go on their own.
+  await check('no page says an AI document, or the files a change of it needs, is deleted after 30 days or 24 hours', async () => {
+    const stale = [
+      'AI: 30 days', 'AI: 30 kun', 'ИИ: 30 дней',
+      'Your AI requests and results are kept for 30 days for quality review, then deleted.',
+      'AI so‘rovlaringiz va natijalar sifatni tekshirish uchun 30 kun saqlanadi, keyin o‘chiriladi.',
+      'Запросы к ИИ и результаты хранятся 30 дней для проверки качества, затем удаляются.',
+      'for up to 24 hours. AI', 'ko‘pi bilan 24 soat. AI', 'не дольше 24 часов. Запросы',
+    ]
+    // The file band itself is true of the file tools (home, help, a tool's page); beside an AI document's privacy it names the exception.
+    const staleBand = ['Uploaded files and results are removed.', 'Yuklangan fayllar va natijalar o‘chiriladi.', 'Загруженные файлы и результаты удаляются.']
+    const said = {
+      en: { home: 'AI: kept for changes', help: 'the files an AI document needs to be changed stay until the account is deleted',
+            kept: 'except those an AI document needs for a change', cv: 'what was read from your files', meta: 'unless an AI document needs them' },
+      uz: { home: 'AI: o‘zgartirish uchun saqlanadi', help: 'AI hujjatni o‘zgartirish uchun kerakli fayllar esa hisob o‘chirilguncha',
+            kept: 'AI hujjatni o‘zgartirish uchun kerakli fayllar bundan mustasno', cv: 'fayllaringizdan o‘qilgan maʼlumotlar', meta: 'AI hujjatga kerakli fayllardan tashqari' },
+      ru: { home: 'ИИ: хранится для правок', help: 'файлы, нужные для изменения ИИ-документа, хранятся, пока аккаунт не удалён',
+            kept: 'кроме нужных для изменения ИИ-документа', cv: 'то, что прочитано из ваших файлов', meta: 'кроме нужных ИИ-документу' },
+    }
+    for (const [locale, lines] of Object.entries(said)) {
+      const pages = {}
+      for (const [name, page] of [['home', ''], ['privacy', '/legal/privacy'], ['help', '/help'], ['cv', '/ai/cv']]) {
+        const response = await get(site, `/${locale}${page}`)
+        assert.equal(response.status, 200, `/${locale}${page}`)
+        pages[name] = (await response.text()).replaceAll('\u00a0', ' ')
+        for (const line of [...stale, ...(['privacy', 'cv'].includes(name) ? staleBand : [])]) {
+          assert.ok(!pages[name].includes(line), `/${locale}${page} still says “${line}”`)
+        }
+      }
+      assert.ok(pages.home.includes(lines.home) && pages.privacy.includes(lines.home), `${locale}: the AI fact says it is kept`)
+      assert.ok(pages.help.includes(lines.help), `${locale}: where files are stored names the AI document’s files`)
+      assert.ok(pages.privacy.includes(lines.kept) && pages.cv.includes(lines.kept), `${locale}: the file band names what is kept`)
+      assert.ok(pages.cv.includes(lines.cv), `${locale}: the CV page says what was read from the files stays`)
+      const description = head(pages.privacy, /<meta[^>]*name="description"[^>]*content="([^"]*)"/g)[0] || ''
+      assert.ok(description.includes(lines.meta), `${locale}: the privacy page’s description names the exception: ${description}`)
+    }
+  })
+
   await check('draft legal pages are kept out of search', async () => {
     const html = await (await get(site, '/en/legal/privacy')).text()
     assert.match(html, /<meta[^>]*name="robots"[^>]*content="noindex, follow"/)

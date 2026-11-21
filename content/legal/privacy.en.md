@@ -61,7 +61,7 @@ We process personal data on these grounds:
 | Data | How long |
 |---|---|
 | Uploaded files and results | 24 hours after upload or creation, then deleted, except the files an AI document needs to be changed (next row) |
-| An AI document's request and text, and the files a change of it needs (its sources, logo, CV photo and slide pictures) | Until the account is deleted or you ask us to delete them |
+| An AI document's request and text, what was read from the files it was made from, and the files a change of it needs (its sources, logo, CV photo and slide pictures) | Until the account is deleted or you ask us to delete them |
 | Copies of AI requests, outlines and results kept for quality review | 30 days, then deleted |
 | Payment receipts | 90 days after our decision on the payment |
 | Account data | Until the account is deleted, then as required by law |

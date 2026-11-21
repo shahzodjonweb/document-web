@@ -353,9 +353,9 @@ export const faq = [
     id: 'cv-privacy', group: 'ai', pages: ['ai-cv', 'help'],
     q: ['Who can see my CV data?', 'Rezyumedagi maʼlumotlarimni kim ko‘ra oladi?', 'Кто видит данные моего резюме?'],
     a: [
-      'Your request and the CV’s text stay in your account, with its photo, so you can ask for changes later. A copy is kept 30 days for quality review: only support staff can open it, and every opening is recorded. Other uploaded files and results are deleted after 24 hours.',
-      'So‘rovingiz va rezyume matni undagi rasm bilan birga keyinroq o‘zgartirish so‘rashingiz uchun hisobingizda saqlanadi. Ularning nusxasi sifatni tekshirish uchun 30 kun saqlanadi: uni faqat yordam xodimlari ochishi mumkin va har bir ochish qayd etiladi. Boshqa yuklangan fayllar va natijalar 24 soatdan keyin o‘chiriladi.',
-      'Запрос и текст резюме вместе с фото хранятся в вашем аккаунте, чтобы вы могли позже попросить изменения. Копия хранится 30 дней для проверки качества: открыть её могут только сотрудники поддержки, и каждое открытие записывается. Остальные загруженные файлы и результаты удаляются через 24 часа.',
+      'Your request, what was read from your files and the CV’s text stay in your account, with its photo, so you can ask for changes later. A copy is kept 30 days for quality review: only support staff can open it, and every opening is recorded. Other uploaded files and results are deleted after 24 hours.',
+      'So‘rovingiz, fayllaringizdan o‘qilgan maʼlumotlar va rezyume matni undagi rasm bilan birga keyinroq o‘zgartirish so‘rashingiz uchun hisobingizda saqlanadi. Ularning nusxasi sifatni tekshirish uchun 30 kun saqlanadi: uni faqat yordam xodimlari ochishi mumkin va har bir ochish qayd etiladi. Boshqa yuklangan fayllar va natijalar 24 soatdan keyin o‘chiriladi.',
+      'Запрос, то, что прочитано из ваших файлов, и текст резюме вместе с фото хранятся в вашем аккаунте, чтобы вы могли позже попросить изменения. Копия хранится 30 дней для проверки качества: открыть её могут только сотрудники поддержки, и каждое открытие записывается. Остальные загруженные файлы и результаты удаляются через 24 часа.',
     ],
   },
 
@@ -523,9 +523,9 @@ export const faq = [
     id: 'files-where', group: 'files', pages: ['help'],
     q: ['Where are my files stored?', 'Fayllarim qayerda saqlanadi?', 'Где хранятся мои файлы?'],
     a: [
-      'In object storage run by Contabo in the European Union, for up to 24 hours. AI requests are processed by OpenAI. The privacy policy lists every service we use and why.',
-      'Yevropa Ittifoqidagi Contabo obyekt omborida, ko‘pi bilan 24 soat. AI so‘rovlari OpenAI orqali qayta ishlanadi. Biz foydalanadigan barcha xizmatlar va sabablari maxfiylik siyosatida keltirilgan.',
-      'В объектном хранилище Contabo в Евросоюзе, не дольше 24 часов. Запросы к ИИ обрабатывает OpenAI. Все сервисы, которыми мы пользуемся, и зачем — в политике конфиденциальности.',
+      'In object storage run by Contabo in the European Union, for up to 24 hours; the files an AI document needs to be changed stay until the account is deleted or you ask us to delete them. AI requests are processed by OpenAI. The privacy policy lists every service we use and why.',
+      'Yevropa Ittifoqidagi Contabo obyekt omborida, ko‘pi bilan 24 soat; AI hujjatni o‘zgartirish uchun kerakli fayllar esa hisob o‘chirilguncha yoki ularni o‘chirishni so‘raguningizcha saqlanadi. AI so‘rovlari OpenAI orqali qayta ishlanadi. Biz foydalanadigan barcha xizmatlar va sabablari maxfiylik siyosatida keltirilgan.',
+      'В объектном хранилище Contabo в Евросоюзе, не дольше 24 часов; файлы, нужные для изменения ИИ-документа, хранятся, пока аккаунт не удалён или вы не попросите их удалить. Запросы к ИИ обрабатывает OpenAI. Все сервисы, которыми мы пользуемся, и зачем — в политике конфиденциальности.',
     ],
   },
   {

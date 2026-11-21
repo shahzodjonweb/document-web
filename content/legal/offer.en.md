@@ -108,7 +108,7 @@ AI results are made automatically and may contain mistakes, outdated facts or in
 
 The Provider does not promise that a result is original, unique, or will pass any plagiarism or AI-detection check.
 
-To review quality and prevent misuse, the Provider keeps copies of AI requests, outlines and results for 30 days, then deletes them. So that the User can ask for changes later, an AI document's request and text, and the files a change of it needs, are kept in the Account until the Account is deleted or the User asks for them to be deleted. Details are in the [Privacy policy](/en/legal/privacy).
+To review quality and prevent misuse, the Provider keeps copies of AI requests, outlines and results for 30 days, then deletes them. So that the User can ask for changes later, an AI document's request and text, what was read from the files it was made from, and the files a change of it needs, are kept in the Account until the Account is deleted or the User asks for them to be deleted. Details are in the [Privacy policy](/en/legal/privacy).
 
 ## 12. Intellectual property
 

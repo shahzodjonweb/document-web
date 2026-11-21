@@ -61,7 +61,7 @@ Shaxsga doir maʼlumotlarni quyidagi asoslarda qayta ishlaymiz:
 | Maʼlumot | Muddat |
 |---|---|
 | Yuklangan fayllar va natijalar | Yuklangan yoki yaratilgan paytdan 24 soat, so‘ng o‘chiriladi; AI hujjatni o‘zgartirish uchun kerakli fayllar bundan mustasno (keyingi qator) |
-| AI hujjatning so‘rovi va matni hamda uni o‘zgartirish uchun kerakli fayllar (manbalari, logotipi, rezyumedagi rasm va slayd rasmlari) | Hisob o‘chirilguncha yoki ularni o‘chirishni so‘raguningizcha |
+| AI hujjatning so‘rovi va matni, u yaratilgan fayllardan o‘qilgan maʼlumotlar hamda uni o‘zgartirish uchun kerakli fayllar (manbalari, logotipi, rezyumedagi rasm va slayd rasmlari) | Hisob o‘chirilguncha yoki ularni o‘chirishni so‘raguningizcha |
 | Sifatni tekshirish uchun saqlanadigan AI so‘rovlari, rejalar va natijalar nusxalari | 30 kun, so‘ng o‘chiriladi |
 | To‘lov kvitansiyalari | To‘lov bo‘yicha qarorimizdan keyin 90 kun |
 | Hisob maʼlumotlari | Hisob o‘chirilgunga qadar, so‘ng qonunda belgilangan muddat |
