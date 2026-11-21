@@ -98,7 +98,7 @@ async function remove(id: string) {
         <NuxtLink :to="path(`/app/editor/${item.id}`)">
           <AppIcon name="file" :size="18" />
           <span>{{ item.file?.name }}</span>
-          <!-- A file kept for an AI document's changes has no expiry: no date then. -->
+          <!-- The date is when the file stops opening here; one an AI document was made from stays stored past it. A row with no time shows no date. -->
           <small
             >{{ t('version') }} {{ item.version
             }}<template v-if="item.file?.expires_at"> · {{ date(item.file.expires_at) }}</template></small

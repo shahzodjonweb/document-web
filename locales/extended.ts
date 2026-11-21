@@ -1388,10 +1388,12 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Не удалось отправить. Ничего не списано.',
   ],
   editorTryAgain: ['Try again', 'Qayta urinish', 'Повторить'],
+  // The time is when the file stops opening here. A file an AI document was made from is not deleted then,
+  // only no longer opened here, so the words hold for both.
   editorWeekUsed: [
-    'Sending opens Monday 00:00 (Tashkent); this file is deleted at {time}.',
-    'Yuborish dushanba 00:00 dan (Toshkent); fayl {time} da o‘chiriladi.',
-    'Отправка — с понедельника 00:00 (Ташкент); файл удалится в {time}.',
+    'Sending opens Monday 00:00 (Tashkent); this file can be changed here until {time}.',
+    'Yuborish dushanba 00:00 dan (Toshkent); faylni bu yerda {time} gacha o‘zgartirish mumkin.',
+    'Отправка — с понедельника 00:00 (Ташкент); изменить файл здесь можно до {time}.',
   ],
   editorWeekUsedOpens: [
     'Sending opens Monday 00:00 (Tashkent).',
@@ -1486,6 +1488,12 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Deleted after 24 hours. Send the file to the bot again to change it.',
     '24 soatdan keyin o‘chirildi. O‘zgartirish uchun faylni botga qayta yuboring.',
     'Удалено через 24 часа. Чтобы изменить файл, пришлите его боту снова.',
+  ],
+  // Past its 24 hours a file an AI document was made from is still stored, for that document's changes only.
+  editorKeptForDocument: [
+    'This file is kept only for changing the AI document made from it, so it can no longer be opened here. Send it again to edit it.',
+    'Bu fayl faqat undan yaratilgan AI hujjatni o‘zgartirish uchun saqlanadi, shuning uchun uni bu yerda endi ochib bo‘lmaydi. Tahrirlash uchun uni qayta yuboring.',
+    'Этот файл хранится только для изменения сделанного по нему ИИ-документа, поэтому открыть его здесь больше нельзя. Чтобы отредактировать, пришлите его снова.',
   ],
   editorOtherFile: ['Open another file', 'Boshqa faylni ochish', 'Открыть другой файл'],
   // A scan opens as any file does; its words need making into text first.

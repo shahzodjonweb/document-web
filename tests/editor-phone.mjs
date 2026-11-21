@@ -2551,7 +2551,7 @@ const lastQuote = (server) => server.quotes.filter((quote) => quote.id).at(-1)
     {
       name: 'week-used',
       options: { quoteRefusal: () => ['weekly_file_limit', 429] },
-      text: /^Sending opens Monday 00:00 \(Tashkent\); this file is deleted at .+\./,
+      text: /^Sending opens Monday 00:00 \(Tashkent\); this file can be changed here until .+\./,
     },
     {
       name: 'no-chat',
@@ -2779,20 +2779,33 @@ const lastQuote = (server) => server.quotes.filter((quote) => quote.id).at(-1)
 
 {
   // The bot's link to a file the editor cannot open says why, with the way on.
-  for (const [reason, testid] of [
+  // A file past its day that an AI document was made from is still stored: it is not said to be deleted.
+  for (const [reason, testid, refusal, words] of [
     ['password', 'editor-refusal-unlock'],
     ['signed', null],
+    ['file_expired', null, ['file_expired', 410, {}], /^Deleted after 24 hours\./],
+    [
+      'kept_for_document',
+      null,
+      ['file_expired', 410, { reason: 'kept_for_document' }],
+      /^This file is kept only for changing the AI document made from it, so it can no longer be opened here\./,
+    ],
   ]) {
     const opened = await openContext({
       width: 390,
       height: 656,
-      openRefusal: ['unsupported_file', 400, { reason }],
+      openRefusal: refusal ?? ['unsupported_file', 400, { reason }],
     })
     await opened.page.goto(`${origin}/en/app/editor?file_id=${FILE}`, { waitUntil: 'domcontentloaded' })
     const state = opened.page.getByTestId('editor-refusal')
     await state.waitFor()
     assert.equal(await state.getAttribute('data-reason'), reason)
     if (testid) assert.ok(await opened.page.getByTestId(testid).isVisible())
+    if (words) {
+      const said = await state.innerText()
+      assert.match(said, words)
+      if (reason === 'kept_for_document') assert.doesNotMatch(said, /deleted|no longer stored/i)
+    }
     await noSidewaysScroll(opened.page, reason)
     assert.deepEqual(
       await smallTargets(opened.page, '[data-testid="editor-refusal"]'),
@@ -2815,7 +2828,7 @@ const lastQuote = (server) => server.quotes.filter((quote) => quote.id).at(-1)
   assert.equal(await off.page.getByTestId('editor-refusal').count(), 0)
   await off.context.close()
   passed(
-    'Open-time refusals: password offers Unlock PDF, signed asks for an unsigned copy; off, the launcher',
+    'Open-time refusals: password offers Unlock PDF, signed asks for an unsigned copy, a run-out file says it was deleted and one kept for an AI document says it is kept; off, the launcher',
   )
 }
 

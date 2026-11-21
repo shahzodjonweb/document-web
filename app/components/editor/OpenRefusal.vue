@@ -2,7 +2,7 @@
 /**
  * A file the new frame cannot open, said as a state with the way on, not as the
  * launcher: a password has an unlock, a signed file needs an unsigned copy.
- * The reason is the server's (`unsupported_file`'s `reason`); nothing is guessed.
+ * The reason is the server's (`unsupported_file`'s and `file_expired`'s `reason`); nothing is guessed.
  */
 import type { Refusal } from '~/composables/useEditorSession'
 
@@ -24,7 +24,14 @@ const state = computed(() => {
         return { icon: 'file', text: t('editorNotPdf'), action: '' }
     }
   }
-  if (code === 'file_expired') return { icon: 'clock', text: t('editorExpired'), action: '' }
+  // Past its day a file an AI document was made from is still stored, for that document's changes only:
+  // saying it was deleted would be false.
+  if (code === 'file_expired')
+    return {
+      icon: 'clock',
+      text: t(params.reason === 'kept_for_document' ? 'editorKeptForDocument' : 'editorExpired'),
+      action: '',
+    }
   return { icon: 'alert', text: message || t('genericError'), action: '' }
 })
 </script>
