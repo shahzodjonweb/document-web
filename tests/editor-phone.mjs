@@ -2941,9 +2941,14 @@ const lastQuote = (server) => server.quotes.filter((quote) => quote.id).at(-1)
   })
   const sentJob = '00000000-0000-4000-8000-0000000000d1'
   const mergeJob = '00000000-0000-4000-8000-0000000000d2'
+  // A result past its day, as one kept only for an AI document's changes is: the server refuses to send it.
+  const pastJob = '00000000-0000-4000-8000-0000000000d3'
+  const past = job(pastJob, 'pdf.rotate', {}, RESULT)
+  past.artifacts[0].state = 'expired'
   const presetJobs = [
     job(sentJob, 'editor.visual', { editor_document_id: DOC, version: 3, deliver: 'chat' }, RESULT),
     job(mergeJob, 'pdf.merge', {}, RESULT),
+    past,
   ]
   const opened = await openContext({ width: 390, height: 844, presetJobs })
   const { page, server } = opened
@@ -2954,6 +2959,7 @@ const lastQuote = (server) => server.quotes.filter((quote) => quote.id).at(-1)
     await page.getByText('Send to chat').isVisible(),
     'Send to my bot reads Send to chat in the Mini App',
   )
+  assert.equal(await page.getByTestId('artifact-send').count(), 1, 'a result in its day is sent')
   await page.screenshot({ path: path.join(output, 'job-390-en-edit.png') })
   await page.goto(`${origin}/en/app/jobs/${mergeJob}`, { waitUntil: 'domcontentloaded' })
   await page.getByTestId('artifact-edit').waitFor()
@@ -2964,14 +2970,31 @@ const lastQuote = (server) => server.quotes.filter((quote) => quote.id).at(-1)
       .body,
     { file_id: RESULT },
   )
+  await page.goto(`${origin}/en/app/jobs/${pastJob}`, { waitUntil: 'domcontentloaded' })
+  await page.locator('.artifact-row').waitFor()
+  await page.locator('.artifact-secondary').waitFor({ state: 'attached' })
+  assert.equal(await page.getByTestId('artifact-send').count(), 0, 'past its day: no Send to chat')
+  assert.equal(await page.getByText('Send to chat').count(), 0)
+  assert.equal(
+    server.requests.filter((item) => item.endpoint.endsWith('/deliver')).length,
+    0,
+    'nothing was sent',
+  )
   await opened.context.close()
   const off = await openContext({ width: 390, height: 844, presetJobs, editor: { editor_v2: false } })
   await off.page.goto(`${origin}/en/app/jobs/${sentJob}`, { waitUntil: 'domcontentloaded' })
   await off.page.locator('.artifact-row').waitFor()
   assert.equal(await off.page.getByTestId('artifact-edit').count(), 0, 'off: no Edit')
   assert.ok(await off.page.getByText('Send to my bot').isVisible())
+  await off.page.goto(`${origin}/en/app/jobs/${pastJob}`, { waitUntil: 'domcontentloaded' })
+  await off.page.locator('.artifact-row').waitFor()
+  await off.page.locator('.artifact-secondary').waitFor({ state: 'attached' })
+  assert.equal(await off.page.getByTestId('artifact-send').count(), 0, 'off, past its day: no Send to my bot')
+  assert.equal(await off.page.getByText('Send to my bot').count(), 0)
   await off.context.close()
-  passed('Edit under a PDF reopens the draft a send came from, or opens the file; off, nothing changes')
+  passed(
+    'Edit under a PDF reopens the draft a send came from, or opens the file; off, nothing changes; a result past its day offers no send',
+  )
 }
 
 {

@@ -30,6 +30,11 @@ const editLink = computed(() =>
 )
 /** Inside Telegram the bot is the chat this app was opened from. */
 const inChat = computed(() => editorV2.value && telegram.isMiniApp.value)
+/**
+ * A result past its day is sent to the chat and shared no more, one still stored for an AI
+ * document's changes too: the server refuses both, so neither is offered.
+ */
+const servable = computed(() => props.artifact.state !== 'expired')
 const share = ref<any>(null)
 const copied = ref(false)
 const busy = ref(false)
@@ -92,18 +97,24 @@ async function deliver() {
       t('editorEdit')
     }}</NuxtLink
     ><button
-      v-if="['learner_material', 'public_preview'].includes(artifact.role)"
+      v-if="servable && ['learner_material', 'public_preview'].includes(artifact.role)"
       class="text-link"
       @click="createShare"
       :disabled="busy"
     >
       <AppIcon name="send" :size="15" />{{ t('shareMaterial') }}</button
     ><NuxtLink
-      v-if="ws.user.value?.login_methods?.telegram === false"
+      v-if="servable && ws.user.value?.login_methods?.telegram === false"
       :to="path('/app/settings')"
       class="text-link"
       ><AppIcon name="send" :size="15" />{{ t('authLinkTelegram') }}</NuxtLink
-    ><button v-else class="text-link" @click="deliver" :disabled="busy || delivered">
+    ><button
+      v-else-if="servable"
+      class="text-link"
+      data-testid="artifact-send"
+      @click="deliver"
+      :disabled="busy || delivered"
+    >
       <AppIcon name="send" :size="15" />{{
         t(delivered ? (inChat ? 'sentToChat' : 'sentToBot') : inChat ? 'sendToChat' : 'sendToBot')
       }}</button
