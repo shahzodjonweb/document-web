@@ -195,14 +195,19 @@ try {
       'for up to 24 hours. AI', 'ko‘pi bilan 24 soat. AI', 'не дольше 24 часов. Запросы',
     ]
     // Wherever the file band is shown (home, help, privacy, the AI CV page) its last step names the exception.
-    const staleBand = ['Uploaded files and results are removed.', 'Yuklangan fayllar va natijalar o‘chiriladi.', 'Загруженные файлы и результаты удаляются.']
+    const staleBand = ['Uploaded files and results are removed.', 'Yuklangan fayllar va natijalar o‘chiriladi.', 'Загруженные файлы и результаты удаляются.',
+      // Its first step no longer says the file is kept only for the task.
+      'The file is kept only to run your task.', 'Fayl faqat vazifangizni bajarish uchun saqlanadi.', 'Файл хранится только для вашей задачи.']
     const said = {
       en: { home: 'AI: kept for changes', help: 'the files an AI document needs to be changed stay until the account is deleted',
-            kept: 'except those an AI document needs for a change', cv: 'what was read from your files', meta: 'unless an AI document needs them' },
+            kept: 'except those an AI document needs for a change', cv: 'what was read from your files', meta: 'unless an AI document needs them',
+            later: 'For an AI document, ask for a change instead.' },
       uz: { home: 'AI: o‘zgartirish uchun saqlanadi', help: 'AI hujjatni o‘zgartirish uchun kerakli fayllar esa hisob o‘chirilguncha',
-            kept: 'AI hujjatni o‘zgartirish uchun kerakli fayllar bundan mustasno', cv: 'fayllaringizdan o‘qilgan maʼlumotlar', meta: 'AI hujjatga kerakli fayllardan tashqari' },
+            kept: 'AI hujjatni o‘zgartirish uchun kerakli fayllar bundan mustasno', cv: 'fayllaringizdan o‘qilgan ma’lumotlar', meta: 'AI hujjatga kerakli fayllardan tashqari',
+            later: 'AI hujjat uchun buning o‘rniga o‘zgartirish so‘rang.' },
       ru: { home: 'ИИ: хранится для правок', help: 'файлы, нужные для изменения ИИ-документа, хранятся, пока аккаунт не удалён',
-            kept: 'кроме нужных для изменения ИИ-документа', cv: 'то, что прочитано из ваших файлов', meta: 'кроме нужных ИИ-документу' },
+            kept: 'кроме нужных для изменения ИИ-документа', cv: 'то, что прочитано из ваших файлов', meta: 'кроме нужных ИИ-документу',
+            later: 'Для ИИ-документа вместо этого попросите его изменить.' },
     }
     for (const [locale, lines] of Object.entries(said)) {
       const pages = {}
@@ -216,6 +221,8 @@ try {
       }
       assert.ok(pages.home.includes(lines.home) && pages.privacy.includes(lines.home), `${locale}: the AI fact says it is kept`)
       assert.ok(pages.help.includes(lines.help), `${locale}: where files are stored names the AI document’s files`)
+      // A result that is gone must be run again, but an AI document is changed instead (its draft stays).
+      assert.ok(pages.help.includes(lines.later), `${locale}: “Can I download a result again later?” names the AI document`)
       for (const name of ['home', 'help', 'privacy', 'cv']) assert.ok(pages[name].includes(lines.kept), `${locale} ${name}: the file band names what is kept`)
       assert.ok(pages.cv.includes(lines.cv), `${locale}: the CV page says what was read from the files stays`)
       const description = head(pages.privacy, /<meta[^>]*name="description"[^>]*content="([^"]*)"/g)[0] || ''
@@ -225,11 +232,13 @@ try {
 
   // The text read from the files an AI document was made from (an old CV, a LinkedIn PDF) stays in its kept draft
   // after those files go, as /terms, the privacy policy and the offer say: so do the app's privacy article, the AI
-  // hub's note and the answer to “Is my request stored?”. The article ('Temporary files & privacy' on /app/support
-  // and a tool's page) is drawn in the browser, so its catalog string is read; the note and the answer are read on
-  // the pages too.
+  // hub's note, the answer to “Is my request stored?” and the AI fact on the home and privacy pages. The article
+  // ('Temporary files & privacy' on /app/support and a tool's page) is drawn in the browser, so its catalog string
+  // is read; the note, the answer and the fact are read on the pages too.
   await check('what an AI document keeps names what was read from the files it was made from, wherever it is said', async () => {
     const read = ['what was read from the files it was made from', 'u yaratilgan fayllardan o‘qilgan ma’lumotlar', 'то, что прочитано из файлов, по которым']
+    // The AI fact is a short tile: in English and Russian it says “its files”.
+    const fact = ['what was read from its files', 'u yaratilgan fayllardan o‘qilgan ma’lumotlar', 'то, что прочитано из его файлов']
     const { default: dictionaries } = await import('../locales/catalog.ts')
     const { site: copy } = await import('../locales/site.ts')
     const { faq: questions } = await import('../content/site/faq.ts')
@@ -238,6 +247,11 @@ try {
       assert.ok(dictionaries[locale].helpPrivacyBody.includes(read[index]), `${locale}: the app's privacy article says it`)
       assert.ok(copy.siteAiDataNote[index].includes(read[index]), `${locale}: the AI hub's note says it`)
       assert.ok(stored.a[index].includes(read[index]), `${locale}: “${stored.q[index]}” says it`)
+      assert.ok(copy.siteHomeFactAiText[index].includes(fact[index]), `${locale}: the AI fact says it`)
+      for (const page of ['', '/legal/privacy']) {
+        const html = (await (await get(site, `/${locale}${page}`)).text()).replaceAll(' ', ' ')
+        assert.ok(html.includes(fact[index]), `/${locale}${page}: the AI fact says it`)
+      }
       for (const page of ['/ai', '/help']) {
         const html = (await (await get(site, `/${locale}${page}`)).text()).replaceAll(' ', ' ')
         assert.ok(html.includes(read[index]), `/${locale}${page} says it`)
@@ -272,7 +286,10 @@ try {
       'Tool files deleted after 24 hours', 'Vosita fayllari 24 soatda o‘chiriladi', 'Файлы инструментов удаляются через 24 часа',
       'Save it to your device or get it in Telegram. The result file is deleted after 24 hours.',
       'Uploaded files and results are removed, except those an AI document needs for a change.',
-      'A document’s request and text stay in your account so you can ask for changes; a copy kept for quality review is deleted after 30 days.',
+      'A document’s request and text, and what was read from its files, stay in your account so you can ask for changes; a copy kept for quality review is deleted after 30 days.',
+      'Hujjatning so‘rovi va matni hamda u yaratilgan fayllardan o‘qilgan ma’lumotlar o‘zgartirish so‘rashingiz uchun hisobingizda saqlanadi; sifatni tekshirish uchun olingan nusxa 30 kundan keyin o‘chiriladi.',
+      'Запрос и текст документа, а также то, что прочитано из его файлов, хранятся в вашем аккаунте, чтобы вы могли попросить изменения; копия для проверки качества удаляется через 30 дней.',
+      'The file is used to run your task.', 'Fayl vazifangizni bajarish uchun ishlatiladi.', 'Файл используется для вашей задачи.',
       'We delete our copies after 24 hours. Files already in your Telegram chat or saved on your device stay there until you delete them.',
       'PDF passwords you enter are used for the task and not kept with your files.',
       'The text becomes editable again, but the original layout is not kept exactly.',

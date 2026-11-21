@@ -354,7 +354,7 @@ export const faq = [
     q: ['Who can see my CV data?', 'Rezyumedagi maʼlumotlarimni kim ko‘ra oladi?', 'Кто видит данные моего резюме?'],
     a: [
       'Your request, what was read from your files and the CV’s text stay in your account, with its photo, so you can ask for changes later. A copy is kept 30 days for quality review: only support staff can open it, and every opening is recorded. Other uploaded files and results are deleted after 24 hours.',
-      'So‘rovingiz, fayllaringizdan o‘qilgan maʼlumotlar va rezyume matni undagi rasm bilan birga keyinroq o‘zgartirish so‘rashingiz uchun hisobingizda saqlanadi. Ularning nusxasi sifatni tekshirish uchun 30 kun saqlanadi: uni faqat yordam xodimlari ochishi mumkin va har bir ochish qayd etiladi. Boshqa yuklangan fayllar va natijalar 24 soatdan keyin o‘chiriladi.',
+      'So‘rovingiz, fayllaringizdan o‘qilgan ma’lumotlar va rezyume matni undagi rasm bilan birga keyinroq o‘zgartirish so‘rashingiz uchun hisobingizda saqlanadi. Ularning nusxasi sifatni tekshirish uchun 30 kun saqlanadi: uni faqat yordam xodimlari ochishi mumkin va har bir ochish qayd etiladi. Boshqa yuklangan fayllar va natijalar 24 soatdan keyin o‘chiriladi.',
       'Запрос, то, что прочитано из ваших файлов, и текст резюме вместе с фото хранятся в вашем аккаунте, чтобы вы могли позже попросить изменения. Копия хранится 30 дней для проверки качества: открыть её могут только сотрудники поддержки, и каждое открытие записывается. Остальные загруженные файлы и результаты удаляются через 24 часа.',
     ],
   },
@@ -505,9 +505,9 @@ export const faq = [
     id: 'files-download-later', group: 'files', pages: ['help'],
     q: ['Can I download a result again later?', 'Natijani keyinroq yana yuklab olsa bo‘ladimi?', 'Можно ли скачать результат позже?'],
     a: [
-      'Yes, from your task history, for 24 hours after the task. After that the file is deleted and the task has to be run again.',
-      'Ha, vazifadan keyin 24 soat davomida vazifalar tarixidan. Shundan so‘ng fayl o‘chiriladi va vazifani qaytadan bajarish kerak bo‘ladi.',
-      'Да, из истории задач в течение 24 часов после выполнения. Потом файл удаляется, и задачу придётся запустить снова.',
+      'Yes, from your task history, for 24 hours after the task. After that the file is deleted and the task has to be run again. For an AI document, ask for a change instead.',
+      'Ha, vazifadan keyin 24 soat davomida vazifalar tarixidan. Shundan so‘ng fayl o‘chiriladi va vazifani qaytadan bajarish kerak bo‘ladi. AI hujjat uchun buning o‘rniga o‘zgartirish so‘rang.',
+      'Да, из истории задач в течение 24 часов после выполнения. Потом файл удаляется, и задачу придётся запустить снова. Для ИИ-документа вместо этого попросите его изменить.',
     ],
   },
   {
