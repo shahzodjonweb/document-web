@@ -98,7 +98,11 @@ async function remove(id: string) {
         <NuxtLink :to="path(`/app/editor/${item.id}`)">
           <AppIcon name="file" :size="18" />
           <span>{{ item.file?.name }}</span>
-          <small>{{ t('version') }} {{ item.version }} · {{ date(item.file?.expires_at) }}</small>
+          <!-- A file kept for an AI document's changes has no expiry: no date then. -->
+          <small
+            >{{ t('version') }} {{ item.version
+            }}<template v-if="item.file?.expires_at"> · {{ date(item.file.expires_at) }}</template></small
+          >
           <AppIcon name="chevron" :size="16" />
         </NuxtLink>
         <button type="button" class="icon-button" :aria-label="t('editorDeleteDocument')" @click="remove(item.id)">
