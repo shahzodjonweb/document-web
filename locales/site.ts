@@ -544,9 +544,9 @@ export const site = {
   ],
   siteAiGuideButton: ['Open the prompt guide', 'Qo‘llanmani ochish', 'Открыть руководство'],
   siteAiDataNote: [
-    'AI requests are processed by OpenAI. A document’s request and text stay in your account so you can ask for changes later; a copy of requests and results is kept 30 days for quality review, then deleted. Uploaded files are deleted after 24 hours, unless a document needs them for a change.',
-    'AI so‘rovlari OpenAI orqali qayta ishlanadi. Hujjatning so‘rovi va matni keyinroq o‘zgartirish so‘rashingiz uchun hisobingizda saqlanadi; so‘rovlar va natijalar nusxasi sifatni tekshirish uchun 30 kun saqlanadi, keyin o‘chiriladi. Yuklangan fayllar 24 soatdan keyin o‘chiriladi, agar hujjatni o‘zgartirish uchun kerak bo‘lmasa.',
-    'Запросы к ИИ обрабатывает OpenAI. Запрос и текст документа хранятся в вашем аккаунте, чтобы вы могли позже попросить изменения; копия запросов и результатов хранится 30 дней для проверки качества, затем удаляется. Загруженные файлы удаляются через 24 часа, если они не нужны для изменения документа.',
+    'AI requests are processed by OpenAI. A document’s request and text, and what was read from the files it was made from, stay in your account so you can ask for changes later; a copy of requests and results is kept 30 days for quality review, then deleted. Uploaded files are deleted after 24 hours, unless a document needs them for a change.',
+    'AI so‘rovlari OpenAI orqali qayta ishlanadi. Hujjatning so‘rovi va matni hamda u yaratilgan fayllardan o‘qilgan ma’lumotlar keyinroq o‘zgartirish so‘rashingiz uchun hisobingizda saqlanadi; so‘rovlar va natijalar nusxasi sifatni tekshirish uchun 30 kun saqlanadi, keyin o‘chiriladi. Yuklangan fayllar 24 soatdan keyin o‘chiriladi, agar hujjatni o‘zgartirish uchun kerak bo‘lmasa.',
+    'Запросы к ИИ обрабатывает OpenAI. Запрос и текст документа, а также то, что прочитано из файлов, по которым он сделан, хранятся в вашем аккаунте, чтобы вы могли позже попросить изменения; копия запросов и результатов хранится 30 дней для проверки качества, затем удаляется. Загруженные файлы удаляются через 24 часа, если они не нужны для изменения документа.',
   ],
   siteAiLanguagesTitle: ['English, Uzbek or Russian', 'O‘zbek, rus yoki ingliz tilida', 'На русском, узбекском или английском'],
   siteAiLimitsNoteFree: ['On Free: 3 AI edits per file', 'Free: har bir faylga 3 ta tahrir', 'На Free: 3 правки на файл'],

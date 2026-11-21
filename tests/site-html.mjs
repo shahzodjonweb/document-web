@@ -223,6 +223,28 @@ try {
     }
   })
 
+  // The text read from the files an AI document was made from (an old CV, a LinkedIn PDF) stays in its kept draft
+  // after those files go, as /terms, the privacy policy and the offer say: so do the app's privacy article, the AI
+  // hub's note and the answer to “Is my request stored?”. The article ('Temporary files & privacy' on /app/support
+  // and a tool's page) is drawn in the browser, so its catalog string is read; the note and the answer are read on
+  // the pages too.
+  await check('what an AI document keeps names what was read from the files it was made from, wherever it is said', async () => {
+    const read = ['what was read from the files it was made from', 'u yaratilgan fayllardan o‘qilgan ma’lumotlar', 'то, что прочитано из файлов, по которым']
+    const { default: dictionaries } = await import('../locales/catalog.ts')
+    const { site: copy } = await import('../locales/site.ts')
+    const { faq: questions } = await import('../content/site/faq.ts')
+    const stored = questions.find((item) => item.id === 'ai-docs-stored')
+    for (const [index, locale] of ['en', 'uz', 'ru'].entries()) {
+      assert.ok(dictionaries[locale].helpPrivacyBody.includes(read[index]), `${locale}: the app's privacy article says it`)
+      assert.ok(copy.siteAiDataNote[index].includes(read[index]), `${locale}: the AI hub's note says it`)
+      assert.ok(stored.a[index].includes(read[index]), `${locale}: “${stored.q[index]}” says it`)
+      for (const page of ['/ai', '/help']) {
+        const html = (await (await get(site, `/${locale}${page}`)).text()).replaceAll(' ', ' ')
+        assert.ok(html.includes(read[index]), `/${locale}${page} says it`)
+      }
+    }
+  })
+
   // Every page in the sitemap, the legal pages and the app's billing page, in three languages: a general
   // statement that files are not kept, or go after 24 hours or 30 days, names the AI document's exception
   // (tests/retention-claims.mjs says what counts as general).
