@@ -2142,8 +2142,8 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   ],
   cv_photo_gone: [
     'The photo is no longer stored, so this version of the CV is without it.',
-    'Rasmning saqlanish muddati tugagani uchun rezyumening bu nusxasi rasmsiz tayyorlandi.',
-    'Срок хранения фото истёк, поэтому эта версия резюме — без него.',
+    'Rasm endi saqlanmagan, shuning uchun rezyumening bu nusxasi rasmsiz tayyorlandi.',
+    'Фото больше не хранится, поэтому эта версия резюме — без него.',
   ],
   studioCvUnread: [
     'Not read: {what}. The CV is made without it; to include it, send fewer pages or clearer photos.',
