@@ -3,6 +3,7 @@
 // stub of the platform's public API, then against no API at all.
 import assert from 'node:assert/strict'
 import { spawn } from 'node:child_process'
+import fs from 'node:fs/promises'
 import http from 'node:http'
 import process from 'node:process'
 
@@ -193,7 +194,7 @@ try {
       'Запросы к ИИ и результаты хранятся 30 дней для проверки качества, затем удаляются.',
       'for up to 24 hours. AI', 'ko‘pi bilan 24 soat. AI', 'не дольше 24 часов. Запросы',
     ]
-    // The file band itself is true of the file tools (home, help, a tool's page); beside an AI document's privacy it names the exception.
+    // Wherever the file band is shown (home, help, privacy, the AI CV page) its last step names the exception.
     const staleBand = ['Uploaded files and results are removed.', 'Yuklangan fayllar va natijalar o‘chiriladi.', 'Загруженные файлы и результаты удаляются.']
     const said = {
       en: { home: 'AI: kept for changes', help: 'the files an AI document needs to be changed stay until the account is deleted',
@@ -209,17 +210,88 @@ try {
         const response = await get(site, `/${locale}${page}`)
         assert.equal(response.status, 200, `/${locale}${page}`)
         pages[name] = (await response.text()).replaceAll('\u00a0', ' ')
-        for (const line of [...stale, ...(['privacy', 'cv'].includes(name) ? staleBand : [])]) {
+        for (const line of [...stale, ...staleBand]) {
           assert.ok(!pages[name].includes(line), `/${locale}${page} still says “${line}”`)
         }
       }
       assert.ok(pages.home.includes(lines.home) && pages.privacy.includes(lines.home), `${locale}: the AI fact says it is kept`)
       assert.ok(pages.help.includes(lines.help), `${locale}: where files are stored names the AI document’s files`)
-      assert.ok(pages.privacy.includes(lines.kept) && pages.cv.includes(lines.kept), `${locale}: the file band names what is kept`)
+      for (const name of ['home', 'help', 'privacy', 'cv']) assert.ok(pages[name].includes(lines.kept), `${locale} ${name}: the file band names what is kept`)
       assert.ok(pages.cv.includes(lines.cv), `${locale}: the CV page says what was read from the files stays`)
       const description = head(pages.privacy, /<meta[^>]*name="description"[^>]*content="([^"]*)"/g)[0] || ''
       assert.ok(description.includes(lines.meta), `${locale}: the privacy page’s description names the exception: ${description}`)
     }
+  })
+
+  // Every page in the sitemap, the legal pages and the app's billing page, in three languages: a general
+  // statement that files are not kept, or go after 24 hours or 30 days, names the AI document's exception
+  // (tests/retention-claims.mjs says what counts as general).
+  await check('no page says a customer’s files or AI documents are not kept, or go after 24 hours or 30 days, without the AI document’s exception', async () => {
+    const { block, blocks, untrue } = await import('./retention-claims.mjs')
+    // What the pages said before this was checked is caught; what they say now, and true narrower statements, are not.
+    const caught = [
+      'Your files are not kept', 'Fayllaringiz saqlanib qolmaydi', 'Ваши файлы не хранятся',
+      'Files deleted after 24 hours', 'Fayllar 24 soatda o‘chiriladi', 'Файлы удаляются через 24 часа',
+      'Save it to your device or get it in Telegram. Files are deleted after 24 hours.',
+      'Nothing is deleted from your account, but remember that files are removed 24 hours after upload anyway.',
+      'Hisobdan hech narsa o‘chirilmaydi, lekin fayllar baribir yuklangandan 24 soat o‘tib o‘chirilishini unutmang.',
+      'Из аккаунта ничего не удаляется, но файлы и так удаляются через 24 часа после загрузки.',
+      'Files are automatically deleted after 24 hours.', 'Fayllar 24 soatdan keyin avtomatik o‘chiriladi.', 'Файлы автоматически удаляются через 24 часа.',
+      'Your AI requests and results are kept for 30 days for quality review, then deleted.',
+      'AI so‘rovlaringiz va natijalar sifatni tekshirish uchun 30 kun saqlanadi, keyin o‘chiriladi.',
+      'Запросы к ИИ и результаты хранятся 30 дней для проверки качества, затем удаляются.',
+      'In object storage run by Contabo in the European Union, for up to 24 hours.',
+      'Yevropa Ittifoqidagi Contabo obyekt omborida, ko‘pi bilan 24 soat.', 'В объектном хранилище Contabo в Евросоюзе, не дольше 24 часов.',
+      'The file is kept only to run your task.', 'Fayl faqat vazifangizni bajarish uchun saqlanadi.', 'Файл хранится только для вашей задачи.',
+    ].map((text) => block(text))
+    caught.push(block('You upload Start Result is ready When the task ends Deleted After 24 hours', ['You upload Start', 'Result is ready When the task ends', 'Deleted After 24 hours']))
+    for (const piece of caught) assert.notDeepEqual(untrue(piece), [], `the check lets “${piece.text}” through`)
+    const allowed = [
+      'Tool files deleted after 24 hours', 'Vosita fayllari 24 soatda o‘chiriladi', 'Файлы инструментов удаляются через 24 часа',
+      'Save it to your device or get it in Telegram. The result file is deleted after 24 hours.',
+      'Uploaded files and results are removed, except those an AI document needs for a change.',
+      'A document’s request and text stay in your account so you can ask for changes; a copy kept for quality review is deleted after 30 days.',
+      'We delete our copies after 24 hours. Files already in your Telegram chat or saved on your device stay there until you delete them.',
+      'PDF passwords you enter are used for the task and not kept with your files.',
+      'The text becomes editable again, but the original layout is not kept exactly.',
+      'Nothing is charged after the 30 days. To continue, pay again for the next period.',
+    ]
+    for (const text of allowed) assert.deepEqual(untrue(block(text)), [], `the check refuses “${text}”`)
+
+    const sitemap = head(await (await get(site, '/sitemap.xml')).text(), /<loc>([^<]+)<\/loc>/g).map((url) => new URL(url).pathname)
+    assert.ok(sitemap.length >= 99, `${sitemap.length} sitemap pages`)
+    const legal = ['en', 'uz', 'ru'].flatMap((locale) => [`/${locale}/legal/privacy`, `/${locale}/legal/terms`])
+    const found = []
+    let judged = 0
+    for (const path of [...sitemap, ...legal]) {
+      // A file tool's own page speaks of that tool's files, which do go after 24 hours.
+      if (/^\/(?:en|uz|ru)\/(?:tools\/[^/]+|pdf-editor)$/.test(path)) continue
+      const response = await get(site, path)
+      assert.equal(response.status, 200, path)
+      judged += 1
+      for (const piece of blocks(await response.text())) for (const unit of untrue(piece)) found.push(`${path}: “${unit}”`)
+    }
+    assert.ok(judged >= 30, `${judged} pages judged`)
+
+    // The app's billing page (and the app's landing) are drawn in the browser, not sent as HTML: what they
+    // can say is every catalog string their components name.
+    const { default: dictionaries } = await import('../locales/catalog.ts')
+    const named = async (component, depth) => {
+      const source = await fs.readFile(new URL(`../app/components/${component}.vue`, import.meta.url), 'utf8').catch(() => '')
+      const keys = [...source.matchAll(/'([A-Za-z][\w.]*)'/g)].map((match) => match[1]).filter((key) => key in dictionaries.en)
+      if (depth) for (const [, child] of source.matchAll(/<([A-Z][A-Za-z]+)\b/g)) keys.push(...(await named(child, depth - 1)))
+      return keys
+    }
+    for (const [page, component] of [['app/billing', 'BillingView'], ['app', 'LandingView']]) {
+      const keys = [...new Set(await named(component, 1))]
+      assert.ok(component !== 'BillingView' || keys.includes('navBilling'), `${component}'s strings were read`)
+      for (const locale of ['en', 'uz', 'ru'])
+        for (const key of keys)
+          for (const unit of untrue(block(dictionaries[locale][key])))
+            found.push(`/${locale}/${page} (${component}, ${key}): “${unit}”`)
+    }
+    const said = [...new Set(found)]
+    assert.ok(!said.length, `${said.length} general statements with no exception:\n     ${said.join('\n     ')}`)
   })
 
   await check('draft legal pages are kept out of search', async () => {

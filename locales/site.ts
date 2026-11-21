@@ -234,7 +234,8 @@ export const site = {
   siteCompareRowAi: ['AI documents, slides, CVs', 'AI hujjat, slayd, rezyume', 'Документы, слайды, резюме с ИИ'],
   siteCompareYes: ['Yes', 'Bor', 'Есть'],
 
-  // File lifecycle (home, help, tool pages compact).
+  // File lifecycle (home, help, the privacy policy and the AI CV page). Its last step names what an AI
+  // document keeps for its changes (siteToolPrivacyNote speaks for a file tool's own page).
   siteLifecycleTitle: ['What happens to your files', 'Fayllaringiz bilan nima bo‘ladi', 'Что происходит с файлами'],
   siteLifecycle1Title: ['You upload', 'Yuklaysiz', 'Вы загружаете'],
   siteLifecycle1Text: ['The file is kept only to run your task.', 'Fayl faqat vazifangizni bajarish uchun saqlanadi.', 'Файл хранится только для вашей задачи.'],
@@ -243,8 +244,7 @@ export const site = {
   siteLifecycle2Text: ['Download it in the app or get it in Telegram.', 'Uni ilovada yuklab oling yoki Telegramʼda oling.', 'Скачайте его в приложении или получите в Telegram.'],
   siteLifecycle2Time: ['When the task ends', 'Vazifa tugaganda', 'Когда задача готова'],
   siteLifecycle3Title: ['Deleted', 'O‘chiriladi', 'Удаляется'],
-  siteLifecycle3Text: ['Uploaded files and results are removed.', 'Yuklangan fayllar va natijalar o‘chiriladi.', 'Загруженные файлы и результаты удаляются.'],
-  // The same step where an AI document's privacy is told (privacy policy, AI CV page): what a change needs stays.
+  // Uploads and results go, but not what a change of an AI document needs (document-platform apps/studio/keeping.py).
   siteLifecycle3KeptText: [
     'Uploaded files and results are removed, except those an AI document needs for a change.',
     'Yuklangan fayllar va natijalar o‘chiriladi, AI hujjatni o‘zgartirish uchun kerakli fayllar bundan mustasno.',
@@ -299,7 +299,7 @@ export const site = {
   siteHomeHeroCta: ['Get started', 'Boshlash', 'Начать работу'],
   siteHomeHeroCtaTelegram: ['Open in Telegram', 'Telegramʼda ochish', 'Открыть в Telegram'],
   siteHomeHeroChip1: ['Nothing to install', 'Hech narsa o‘rnatilmaydi', 'Ничего не нужно ставить'],
-  siteHomeHeroChip2: ['Files deleted after 24 hours', 'Fayllar 24 soatda o‘chiriladi', 'Файлы удаляются через 24 часа'],
+  siteHomeHeroChip2: ['Tool files deleted after 24 hours', 'Vosita fayllari 24 soatda o‘chiriladi', 'Файлы инструментов удаляются через 24 часа'],
   siteHomeHeroLangLine: ['Works in English, O‘zbekcha and Русский.', 'O‘zbekcha, Русский va English tillarida ishlaydi.', 'Работает на русском, узбекском и английском.'],
   // Hero vignette: decorative sample strings, matched to the page language.
   siteHomeVignetteTask: ['Merge PDF · 3 files', 'PDF birlashtirish · 3 ta fayl', 'Объединить PDF · 3 файла'],
@@ -356,12 +356,12 @@ export const site = {
   ],
   siteHomeStep3Title: ['Download the result', 'Natijani yuklab oling', 'Скачайте результат'],
   siteHomeStep3Text: [
-    'Save it to your device or get it in Telegram. Files are deleted after 24 hours.',
-    'Qurilmangizga saqlang yoki Telegramʼda oling. Fayllar 24 soatdan keyin o‘chiriladi.',
-    'Сохраните на устройство или получите в Telegram. Файлы удаляются через 24 часа.',
+    'Save it to your device or get it in Telegram. The result file is deleted after 24 hours.',
+    'Qurilmangizga saqlang yoki Telegramʼda oling. Natija fayli 24 soatdan keyin o‘chiriladi.',
+    'Сохраните на устройство или получите в Telegram. Файл результата удаляется через 24 часа.',
   ],
 
-  siteHomePrivacyTitle: ['Your files are not kept', 'Fayllaringiz saqlanib qolmaydi', 'Ваши файлы не хранятся'],
+  siteHomePrivacyTitle: ['What we keep, and for how long', 'Nimani va qancha saqlaymiz', 'Что мы храним и сколько'],
   siteHomePrivacyIntro: [
     'Concrete rules instead of badges: what we keep, for how long, and why.',
     'Belgilar o‘rniga aniq qoidalar: nimani, qancha muddat va nima uchun saqlaymiz.',

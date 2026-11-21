@@ -112,5 +112,5 @@ async function planChanged() {
       </section>
     </div>
   </section>
-  <p class="directory-note"><AppIcon name="shield" :size="16" />{{ t('retention') }}</p>
+  <p class="directory-note"><AppIcon name="shield" :size="16" />{{ t('retentionBilling') }}</p>
 </template>

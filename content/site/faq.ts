@@ -73,9 +73,9 @@ export const faq = [
     id: 'pricing-ends', group: 'plans', pages: ['pricing', 'help'],
     q: ['What happens when the 30 days end?', '30 kun tugagach nima bo‘ladi?', 'Что будет, когда 30 дней закончатся?'],
     a: [
-      'Your account moves to the Free plan with its weekly limits. Nothing is deleted from your account, but remember that files are removed 24 hours after upload anyway.',
-      'Hisobingiz o‘z haftalik limitlari bilan Free tarifiga o‘tadi. Hisobdan hech narsa o‘chirilmaydi, lekin fayllar baribir yuklangandan 24 soat o‘tib o‘chirilishini unutmang.',
-      'Аккаунт переходит на тариф Free с его недельными лимитами. Из аккаунта ничего не удаляется, но файлы и так удаляются через 24 часа после загрузки.',
+      'Your account moves to the Free plan with its weekly limits. Nothing is deleted from your account, but remember that files are removed 24 hours after upload anyway. Files an AI document needs to be changed later stay with it.',
+      'Hisobingiz o‘z haftalik limitlari bilan Free tarifiga o‘tadi. Hisobdan hech narsa o‘chirilmaydi, lekin fayllar baribir yuklangandan 24 soat o‘tib o‘chirilishini unutmang. AI hujjatni keyinroq o‘zgartirish uchun kerakli fayllar u bilan birga saqlanadi.',
+      'Аккаунт переходит на тариф Free с его недельными лимитами. Из аккаунта ничего не удаляется, но файлы и так удаляются через 24 часа после загрузки. Файлы, нужные для последующего изменения ИИ-документа, хранятся вместе с ним.',
     ],
   },
   {

@@ -175,6 +175,7 @@ useHead(() => ({
                 <li v-for="[icon, n] in life" :key="n">
                   <span class="site-life-dot"><AppIcon :name="icon" class="site-icon is-sm" /></span>
                   <b>{{ t(`siteLifecycle${n}Title`) }}</b>
+                  <p v-if="n === 3">{{ t('siteLifecycle3KeptText') }}</p>
                   <span class="site-life-time">{{ t(`siteLifecycle${n}Time`) }}</span>
                 </li>
               </ol>

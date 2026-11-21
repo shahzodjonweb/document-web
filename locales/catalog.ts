@@ -179,9 +179,9 @@ const entries: Record<string, [string, string, string]> = {
   ],
   heroShotFile: ['Photosynthesis.pdf', 'Fotosintez.pdf', 'Фотосинтез.pdf'],
   benefitPrivateBody: [
-    'Files are processed privately and deleted after 24 hours.',
-    'Fayllar maxfiy qayta ishlanadi va 24 soatdan keyin o‘chiriladi.',
-    'Файлы обрабатываются приватно и удаляются через 24 часа.',
+    'Files are processed privately and deleted after 24 hours. Files an AI document needs to be changed later stay with it.',
+    'Fayllar maxfiy qayta ishlanadi va 24 soatdan keyin o‘chiriladi. AI hujjatni keyinroq o‘zgartirish uchun kerakli fayllar u bilan birga saqlanadi.',
+    'Файлы обрабатываются приватно и удаляются через 24 часа. Файлы, нужные для последующего изменения ИИ-документа, хранятся вместе с ним.',
   ],
   benefitAiTitle: ['Describe it, get the document.', 'Yozing — hujjatni oling.', 'Опишите — получите документ.'],
   benefitAiBody: [
@@ -345,10 +345,17 @@ const entries: Record<string, [string, string, string]> = {
   dropFiles: ['Drop files here', 'Fayllarni bu yerga tashlang', 'Перетащите файлы сюда'],
   supported: ['PDF, JPG, PNG, DOCX and PPTX', 'PDF, JPG, PNG, DOCX va PPTX', 'PDF, JPG, PNG, DOCX и PPTX'],
   privateTitle: ['Your files stay yours.', 'Fayllaringiz faqat sizniki.', 'Ваши файлы — только ваши.'],
+  // Under a file tool, where it is true as it stands.
   retention: [
     'Files are automatically deleted after 24 hours.',
     'Fayllar 24 soatdan keyin avtomatik o‘chiriladi.',
     'Файлы автоматически удаляются через 24 часа.',
+  ],
+  // On the plans page, which speaks for the whole account: what an AI document needs for a change stays.
+  retentionBilling: [
+    'Files are automatically deleted after 24 hours. Files an AI document needs to be changed later stay with it.',
+    'Fayllar 24 soatdan keyin avtomatik o‘chiriladi. AI hujjatni keyinroq o‘zgartirish uchun kerakli fayllar u bilan birga saqlanadi.',
+    'Файлы автоматически удаляются через 24 часа. Файлы, нужные для последующего изменения ИИ-документа, хранятся вместе с ним.',
   ],
   learnMore: ['Learn more', 'Batafsil', 'Подробнее'],
   viewAll: ['View all tools', 'Barcha vositalar', 'Все инструменты'],
