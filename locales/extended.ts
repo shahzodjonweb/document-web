@@ -2257,9 +2257,9 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Эту презентацию здесь изменить нельзя. Опишите её заново, чтобы сделать новую.',
   ],
   deckExpired: [
-    'Deleted after 24 hours. Describe the deck again to make a new one.',
-    '24 soatdan keyin o‘chirildi. Yangisini yaratish uchun taqdimotni qayta tasvirlab bering.',
-    'Удалено через 24 часа. Опишите презентацию заново, чтобы сделать новую.',
+    'This deck is no longer here. Describe the deck again to make a new one.',
+    'Bu taqdimot endi yo‘q. Yangisini yaratish uchun taqdimotni qayta tasvirlab bering.',
+    'Этой презентации больше нет. Опишите презентацию заново, чтобы сделать новую.',
   ],
   deckMakeAgain: ['Make again', 'Qayta yaratish', 'Сделать заново'],
   deckConflictTitle: [

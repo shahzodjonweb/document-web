@@ -17,9 +17,9 @@ export const faq = [
     id: 'home-files-safe', group: 'files', pages: ['home', 'help', 'tools-index'],
     q: ['What happens to my files?', 'Fayllarim bilan nima bo‘ladi?', 'Что происходит с моими файлами?'],
     a: [
-      'They are used only to run your task. Uploaded files and results are deleted after 24 hours, so download what you need before then. We use no analytics or advertising trackers.',
-      'Ular faqat vazifangizni bajarish uchun ishlatiladi. Yuklangan fayllar va natijalar 24 soatdan keyin o‘chiriladi, shuning uchun keraklisini undan oldin yuklab oling. Biz analitika va reklama trekerlaridan foydalanmaymiz.',
-      'Они используются только для вашей задачи. Загруженные файлы и результаты удаляются через 24 часа, поэтому скачайте нужное заранее. Мы не используем аналитику и рекламные трекеры.',
+      'They are used only to run your task. Uploaded files and results are deleted after 24 hours, so download what you need before then. Files an AI document needs to be changed later stay with it. We use no analytics or advertising trackers.',
+      'Ular faqat vazifangizni bajarish uchun ishlatiladi. Yuklangan fayllar va natijalar 24 soatdan keyin o‘chiriladi, shuning uchun keraklisini undan oldin yuklab oling. AI hujjatni keyinroq o‘zgartirish uchun kerakli fayllar u bilan birga saqlanadi. Biz analitika va reklama trekerlaridan foydalanmaymiz.',
+      'Они используются только для вашей задачи. Загруженные файлы и результаты удаляются через 24 часа, поэтому скачайте нужное заранее. Файлы, нужные для последующего изменения ИИ-документа, хранятся вместе с ним. Мы не используем аналитику и рекламные трекеры.',
     ],
   },
   {
@@ -194,9 +194,9 @@ export const faq = [
     id: 'ai-docs-stored', group: 'ai', pages: ['ai-documents', 'ai-hub', 'help'],
     q: ['Is my request stored?', 'So‘rovim saqlanadimi?', 'Хранится ли мой запрос?'],
     a: [
-      'Yes, for 30 days. Your request, its outline and the result are kept so our team can check quality and stop misuse, then deleted. Requests are processed by OpenAI. Uploaded files are deleted after 24 hours.',
-      'Ha, 30 kun. So‘rovingiz, uning rejasi va natija jamoamiz sifatni tekshirishi va suiisteʼmolning oldini olishi uchun saqlanadi, keyin o‘chiriladi. So‘rovlar OpenAI orqali qayta ishlanadi. Yuklangan fayllar 24 soatdan keyin o‘chiriladi.',
-      'Да, 30 дней. Запрос, его план и результат хранятся, чтобы команда могла проверять качество и предотвращать злоупотребления, затем удаляются. Запросы обрабатывает OpenAI. Загруженные файлы удаляются через 24 часа.',
+      'Yes. Your request and the document’s text stay in your account, with the files a change of it needs, so you can ask for changes later. A copy of your request, its outline and the result is also kept 30 days so our team can check quality and stop misuse, then deleted. Requests are processed by OpenAI. Other uploaded files are deleted after 24 hours.',
+      'Ha. So‘rovingiz va hujjat matni uni o‘zgartirish uchun kerakli fayllar bilan birga keyinroq o‘zgartirish so‘rashingiz uchun hisobingizda saqlanadi. So‘rovingiz, uning rejasi va natija nusxasi esa jamoamiz sifatni tekshirishi va suiisteʼmolning oldini olishi uchun 30 kun saqlanadi, keyin o‘chiriladi. So‘rovlar OpenAI orqali qayta ishlanadi. Boshqa yuklangan fayllar 24 soatdan keyin o‘chiriladi.',
+      'Да. Запрос и текст документа вместе с файлами, нужными для его изменения, хранятся в вашем аккаунте, чтобы вы могли позже попросить изменения. Кроме того, копия запроса, его плана и результата хранится 30 дней, чтобы команда могла проверять качество и предотвращать злоупотребления, затем удаляется. Запросы обрабатывает OpenAI. Остальные загруженные файлы удаляются через 24 часа.',
     ],
   },
   {
@@ -353,9 +353,9 @@ export const faq = [
     id: 'cv-privacy', group: 'ai', pages: ['ai-cv', 'help'],
     q: ['Who can see my CV data?', 'Rezyumedagi maʼlumotlarimni kim ko‘ra oladi?', 'Кто видит данные моего резюме?'],
     a: [
-      'Your request and CV are kept 30 days for quality review. Only support staff can open them, and every opening is recorded. Uploaded files and results are deleted after 24 hours.',
-      'So‘rovingiz va rezyume sifatni tekshirish uchun 30 kun saqlanadi. Ularni faqat yordam xodimlari ochishi mumkin va har bir ochish qayd etiladi. Yuklangan fayllar va natijalar 24 soatdan keyin o‘chiriladi.',
-      'Запрос и резюме хранятся 30 дней для проверки качества. Открыть их могут только сотрудники поддержки, и каждое открытие записывается. Загруженные файлы и результаты удаляются через 24 часа.',
+      'Your request and the CV’s text stay in your account, with its photo, so you can ask for changes later. A copy is kept 30 days for quality review: only support staff can open it, and every opening is recorded. Other uploaded files and results are deleted after 24 hours.',
+      'So‘rovingiz va rezyume matni undagi rasm bilan birga keyinroq o‘zgartirish so‘rashingiz uchun hisobingizda saqlanadi. Ularning nusxasi sifatni tekshirish uchun 30 kun saqlanadi: uni faqat yordam xodimlari ochishi mumkin va har bir ochish qayd etiladi. Boshqa yuklangan fayllar va natijalar 24 soatdan keyin o‘chiriladi.',
+      'Запрос и текст резюме вместе с фото хранятся в вашем аккаунте, чтобы вы могли позже попросить изменения. Копия хранится 30 дней для проверки качества: открыть её могут только сотрудники поддержки, и каждое открытие записывается. Остальные загруженные файлы и результаты удаляются через 24 часа.',
     ],
   },
 

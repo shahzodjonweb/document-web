@@ -538,9 +538,9 @@ export const site = {
   ],
   siteAiGuideButton: ['Open the prompt guide', 'Qo‘llanmani ochish', 'Открыть руководство'],
   siteAiDataNote: [
-    'AI requests are processed by OpenAI. Requests and results are kept 30 days for quality review, then deleted. Uploaded files are deleted after 24 hours.',
-    'AI so‘rovlari OpenAI orqali qayta ishlanadi. So‘rovlar va natijalar sifatni tekshirish uchun 30 kun saqlanadi, keyin o‘chiriladi. Yuklangan fayllar 24 soatdan keyin o‘chiriladi.',
-    'Запросы к ИИ обрабатывает OpenAI. Запросы и результаты хранятся 30 дней для проверки качества, затем удаляются. Загруженные файлы удаляются через 24 часа.',
+    'AI requests are processed by OpenAI. A document’s request and text stay in your account so you can ask for changes later; a copy of requests and results is kept 30 days for quality review, then deleted. Uploaded files are deleted after 24 hours, unless a document needs them for a change.',
+    'AI so‘rovlari OpenAI orqali qayta ishlanadi. Hujjatning so‘rovi va matni keyinroq o‘zgartirish so‘rashingiz uchun hisobingizda saqlanadi; so‘rovlar va natijalar nusxasi sifatni tekshirish uchun 30 kun saqlanadi, keyin o‘chiriladi. Yuklangan fayllar 24 soatdan keyin o‘chiriladi, agar hujjatni o‘zgartirish uchun kerak bo‘lmasa.',
+    'Запросы к ИИ обрабатывает OpenAI. Запрос и текст документа хранятся в вашем аккаунте, чтобы вы могли позже попросить изменения; копия запросов и результатов хранится 30 дней для проверки качества, затем удаляется. Загруженные файлы удаляются через 24 часа, если они не нужны для изменения документа.',
   ],
   siteAiLanguagesTitle: ['English, Uzbek or Russian', 'O‘zbek, rus yoki ingliz tilida', 'На русском, узбекском или английском'],
   siteAiLimitsNoteFree: ['On Free: 3 AI edits per file', 'Free: har bir faylga 3 ta tahrir', 'На Free: 3 правки на файл'],
@@ -793,9 +793,9 @@ export const site = {
   ],
   siteAiCvPrivacyTitle: ['A CV holds personal data', 'Rezyumeda shaxsiy maʼlumotlar bor', 'В резюме есть личные данные'],
   siteAiCvPrivacyNote: [
-    'Your request and the CV are kept 30 days for quality review. Uploaded files and results are deleted after 24 hours. Include only what you want an employer to see.',
-    'So‘rovingiz va rezyume sifatni tekshirish uchun 30 kun saqlanadi. Yuklangan fayllar va natijalar 24 soatdan keyin o‘chiriladi. Faqat ish beruvchi ko‘rishi kerak bo‘lgan maʼlumotni yozing.',
-    'Запрос и резюме хранятся 30 дней для проверки качества. Загруженные файлы и результаты удаляются через 24 часа. Указывайте только то, что должен видеть работодатель.',
+    'Your request and the CV’s text stay in your account so you can ask for changes later; a copy is kept 30 days for quality review. Uploaded files and results are deleted after 24 hours, except the photo on the CV. Include only what you want an employer to see.',
+    'So‘rovingiz va rezyume matni keyinroq o‘zgartirish so‘rashingiz uchun hisobingizda saqlanadi; ularning nusxasi sifatni tekshirish uchun 30 kun saqlanadi. Yuklangan fayllar va natijalar 24 soatdan keyin o‘chiriladi, rezyumedagi rasm bundan mustasno. Faqat ish beruvchi ko‘rishi kerak bo‘lgan maʼlumotni yozing.',
+    'Запрос и текст резюме хранятся в вашем аккаунте, чтобы вы могли позже попросить изменения; копия хранится 30 дней для проверки качества. Загруженные файлы и результаты удаляются через 24 часа, кроме фото в резюме. Указывайте только то, что должен видеть работодатель.',
   ],
   siteAiCvFaqTitle: ['Questions about the AI CV', 'AI rezyume haqida savollar', 'Вопросы о резюме с ИИ'],
 

@@ -2,7 +2,7 @@
 title: Ommaviy oferta
 version: 1.0
 effective: "{{effective}}"
-updated: 2026-11-10
+updated: 2026-11-21
 summary: DocMaster xizmatidan bepul va pullik foydalanish uchun yagona shartnoma; tizimga kirish yoki to‘lov qilish orqali qabul qilinadi.
 ---
 
@@ -108,7 +108,7 @@ AI natijalari avtomatik tayyorlanadi va ularda xatolar, eskirgan maʼlumotlar yo
 
 Ijrochi natija original yoki noyob bo‘lishini, antiplagiat yoki AI aniqlash tekshiruvidan o‘tishini kafolatlamaydi.
 
-Sifatni tekshirish va suiisteʼmolning oldini olish uchun Ijrochi AI so‘rovlari, rejalar va natijalarni 30 kun saqlaydi, so‘ngra o‘chiradi. Batafsil maʼlumot [Maxfiylik siyosati](/uz/legal/privacy)da.
+Sifatni tekshirish va suiisteʼmolning oldini olish uchun Ijrochi AI so‘rovlari, rejalar va natijalar nusxalarini 30 kun saqlaydi, so‘ngra o‘chiradi. Foydalanuvchi keyinroq o‘zgartirish so‘rashi uchun AI hujjatning so‘rovi va matni hamda uni o‘zgartirish uchun kerakli fayllar Hisob o‘chirilguncha yoki Foydalanuvchi ularni o‘chirishni so‘raguncha Hisobda saqlanadi. Batafsil maʼlumot [Maxfiylik siyosati](/uz/legal/privacy)da.
 
 ## 12. Intellektual mulk
 
@@ -120,7 +120,7 @@ Xizmat, uning dasturiy taʼminoti, dizaynlari, shablonlari va brendi Ijrochiga y
 
 Xizmat "boricha" taqdim etiladi. Ijrochi Xizmatning ishlashi uchun oqilona choralar ko‘radi, ammo u xatosiz va uzilishlarsiz ishlashini yoki har qanday faylni qayta ishlay olishini kafolatlamaydi.
 
-Yuklangan fayllar va natijalar yuklangan yoki yaratilgan paytdan 24 soat o‘tgach o‘chiriladi. Foydalanuvchi natijalarni shu muddat ichida yuklab oladi va muhim fayllarning nusxasini o‘zida saqlaydi.
+Yuklangan fayllar va natijalar yuklangan yoki yaratilgan paytdan 24 soat o‘tgach o‘chiriladi, AI hujjatni o‘zgartirish uchun kerakli fayllar bundan mustasno (11-bo‘lim). Foydalanuvchi natijalarni shu muddat ichida yuklab oladi va muhim fayllarning nusxasini o‘zida saqlaydi.
 
 Ijrochi bilvosita zararlar, boy berilgan foyda yoki yo‘qolgan maʼlumotlar uchun javob bermaydi. Ijrochining Foydalanuvchi oldidagi umumiy javobgarligi quyida belgilangan miqdor bilan cheklanadi.
 

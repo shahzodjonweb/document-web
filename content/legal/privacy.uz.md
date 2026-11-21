@@ -2,7 +2,7 @@
 title: Maxfiylik siyosati
 version: 1.0
 effective: "{{effective}}"
-updated: 2026-11-10
+updated: 2026-11-21
 summary: DocMaster qaysi shaxsga doir maʼlumotlarni, nima uchun, qayerda va qancha muddat qayta ishlashi hamda ularni qanday boshqarishingiz mumkinligi.
 ---
 
@@ -60,8 +60,9 @@ Shaxsga doir maʼlumotlarni quyidagi asoslarda qayta ishlaymiz:
 
 | Maʼlumot | Muddat |
 |---|---|
-| Yuklangan fayllar va natijalar | Yuklangan yoki yaratilgan paytdan 24 soat, so‘ng o‘chiriladi |
-| AI so‘rovlari, rejalar va natijalar | 30 kun, so‘ng o‘chiriladi |
+| Yuklangan fayllar va natijalar | Yuklangan yoki yaratilgan paytdan 24 soat, so‘ng o‘chiriladi; AI hujjatni o‘zgartirish uchun kerakli fayllar bundan mustasno (keyingi qator) |
+| AI hujjatning so‘rovi va matni hamda uni o‘zgartirish uchun kerakli fayllar (manbalari, logotipi, rezyumedagi rasm va slayd rasmlari) | Hisob o‘chirilguncha yoki ularni o‘chirishni so‘raguningizcha |
+| Sifatni tekshirish uchun saqlanadigan AI so‘rovlari, rejalar va natijalar nusxalari | 30 kun, so‘ng o‘chiriladi |
 | To‘lov kvitansiyalari | To‘lov bo‘yicha qarorimizdan keyin 90 kun |
 | Hisob maʼlumotlari | Hisob o‘chirilgunga qadar, so‘ng qonunda belgilangan muddat |
 | To‘lov va buxgalteriya yozuvlari | Soliq va buxgalteriya qonunchiligida belgilangan muddat |
@@ -101,7 +102,7 @@ Maʼlumotlarni quyidagicha himoya qilamiz:
 - uzatilayotgan maʼlumotlarni shifrlash (HTTPS);
 - kirish huquqini faqat ishi uchun zarur bo‘lgan xodimlar bilan cheklash;
 - AI so‘rovlari va natijalariga har bir kirishni qayd etish;
-- fayllarni 24 soatdan keyin avtomatik o‘chirish;
+- fayllarni 24 soatdan keyin avtomatik o‘chirish (AI hujjatni o‘zgartirish uchun kerakli fayllardan tashqari);
 - avtomatlashtirilgan suiisteʼmolga qarshi botlardan himoya tekshiruvi.
 
 Siz kiritgan PDF parollari vazifa uchun ishlatiladi va fayllaringiz bilan birga saqlanmaydi.

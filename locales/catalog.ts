@@ -213,9 +213,9 @@ const entries: Record<string, [string, string, string]> = {
   ],
   faqFilesQ: ['What happens to my files?', 'Fayllarim nima bo‘ladi?', 'Что происходит с моими файлами?'],
   faqFilesA: [
-    'They are private and deleted after 24 hours, so download your results before then.',
-    'Ular maxfiy va 24 soatdan keyin o‘chiriladi, shuning uchun natijalarni undan oldin yuklab oling.',
-    'Они приватны и удаляются через 24 часа, поэтому скачайте результаты заранее.',
+    'They are private and deleted after 24 hours, so download your results before then. Files an AI document needs to be changed later stay with it.',
+    'Ular maxfiy va 24 soatdan keyin o‘chiriladi, shuning uchun natijalarni undan oldin yuklab oling. AI hujjatni keyinroq o‘zgartirish uchun kerakli fayllar u bilan birga saqlanadi.',
+    'Они приватны и удаляются через 24 часа, поэтому скачайте результаты заранее. Файлы, нужные для последующего изменения ИИ-документа, хранятся вместе с ним.',
   ],
   faqTelegramQ: ['Does it work in Telegram?', 'Telegram’da ishlaydimi?', 'Работает ли в Telegram?'],
   faqTelegramA: [
@@ -679,9 +679,9 @@ const entries: Record<string, [string, string, string]> = {
     'Временные файлы и конфиденциальность',
   ],
   helpPrivacyBody: [
-    'Your files are private and are deleted after 24 hours, so download results before then. Deleting a file on our server does not remove copies you have already downloaded or received in Telegram. When you create something with AI, we keep your description, its outline and the document made from it for 30 days so our team can check quality and stop misuse. Only support staff can open them, and every opening is recorded. Then they are deleted.',
-    'Fayllaringiz maxfiy va 24 soatdan keyin o‘chiriladi, shuning uchun natijani undan oldin yuklab oling. Serverdagi faylni o‘chirish yuklab olingan yoki Telegram’da olingan nusxalarni o‘chirmaydi. AI bilan biror narsa yaratganingizda tavsifingiz, uning rejasi va yaratilgan hujjat 30 kun saqlanadi — jamoamiz sifatni tekshirishi va suiiste’molning oldini olishi uchun. Ularni faqat yordam xodimlari ochishi mumkin va har bir ochish qayd etiladi. Keyin ular o‘chiriladi.',
-    'Ваши файлы приватны и удаляются через 24 часа, поэтому скачайте результат заранее. Удаление файла на сервере не удаляет уже скачанные или полученные в Telegram копии. Когда вы создаёте что-то с ИИ, мы храним ваше описание, его план и созданный документ 30 дней, чтобы команда могла проверять качество и предотвращать злоупотребления. Открыть их могут только сотрудники поддержки, и каждое открытие записывается. Затем они удаляются.',
+    'Your files are private and are deleted after 24 hours, so download results before then. Deleting a file on our server does not remove copies you have already downloaded or received in Telegram. When you create something with AI, its description and text, and the files a change of it needs, stay in your account so you can ask for changes later. Our team also keeps a copy of your description, its outline and the document made from it for 30 days to check quality and stop misuse. Only support staff can open it, and every opening is recorded. Then that copy is deleted.',
+    'Fayllaringiz maxfiy va 24 soatdan keyin o‘chiriladi, shuning uchun natijani undan oldin yuklab oling. Serverdagi faylni o‘chirish yuklab olingan yoki Telegram’da olingan nusxalarni o‘chirmaydi. AI bilan biror narsa yaratganingizda uning tavsifi va matni hamda uni o‘zgartirish uchun kerakli fayllar keyinroq o‘zgartirish so‘rashingiz uchun hisobingizda saqlanadi. Jamoamiz esa tavsifingiz, uning rejasi va yaratilgan hujjat nusxasini 30 kun saqlaydi — sifatni tekshirish va suiiste’molning oldini olish uchun. Bu nusxani faqat yordam xodimlari ochishi mumkin va har bir ochish qayd etiladi. Keyin u o‘chiriladi.',
+    'Ваши файлы приватны и удаляются через 24 часа, поэтому скачайте результат заранее. Удаление файла на сервере не удаляет уже скачанные или полученные в Telegram копии. Когда вы создаёте что-то с ИИ, его описание и текст, а также файлы, нужные для его изменения, хранятся в вашем аккаунте, чтобы вы могли позже попросить изменения. Кроме того, мы храним копию описания, его плана и созданного документа 30 дней, чтобы команда могла проверять качество и предотвращать злоупотребления. Открыть её могут только сотрудники поддержки, и каждое открытие записывается. Затем эта копия удаляется.',
   ],
   helpBilling: ['Usage & payments', 'Foydalanish va to‘lovlar', 'Лимиты и платежи'],
   helpBillingBody: [
