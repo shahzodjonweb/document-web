@@ -533,7 +533,7 @@ export interface paths {
         };
         get: operations["listEditorDocuments"];
         put?: never;
-        /** @description One draft per account and file: 201 for a new one, 200 with the marks already there for a file opened before. A file the editor cannot open is `unsupported_file`, with `message_params.reason` one of `password`, `signed`, `pptx_upload`, `not_pdf` when it is known. A file of this account that has run out is `file_expired` (410); one the customer deleted, is unknown or belongs to another account is `file_unavailable` (404). */
+        /** @description One draft per account and file: 201 for a new one, 200 with the marks already there for a file opened before. A file the editor cannot open is `unsupported_file`, with `message_params.reason` one of `password`, `signed`, `pptx_upload`, `not_pdf` when it is known. A file of this account that has run out is `file_expired` (410); one the customer deleted, is unknown or belongs to another account is `file_unavailable` (404). A file kept as the source of an AI document, past its own 24 hours, is `file_expired` (410) with `message_params.reason` `kept_for_document`: it is still stored, only for changing that document, so it is never said to be deleted or run out. */
         post: operations["createEditorDocument"];
         delete?: never;
         options?: never;
@@ -1479,7 +1479,7 @@ export interface components {
             download_url: string;
             /**
              * Format: date-time
-             * @description When it is deleted; null when it is kept until the customer deletes it: a draft a document, deck or CV was made from, and the files a change of it needs.
+             * @description When the file stops being downloaded. A result kept as the source of an AI document is downloaded for its own 24 hours only: this is when they end, and its `state` is `expired` after them, though it is still stored for changing that document.
              */
             expires_at?: string | null;
             /**
@@ -1874,6 +1874,7 @@ export interface components {
             commands: components["schemas"]["EditorCommand"][];
             /** @description The device that last changed it, as it named itself; empty when it did not. */
             device: string;
+            /** @description The file the draft is on, as the editor opens it. One kept as the source of an AI document is opened for its own 24 hours only: `expires_at` is when they end, and after them it is `expired` and left out of the list, though it is still stored for changing that document. */
             file: components["schemas"]["Asset"];
             form_fields?: {
                 name: string;
@@ -1903,6 +1904,7 @@ export interface components {
         EditorDocumentRow: {
             /** @description The device that last changed it, as it named itself; empty when it did not. */
             device: string;
+            /** @description The file the draft is on, as the editor opens it. One kept as the source of an AI document is opened for its own 24 hours only: `expires_at` is when they end, and after them it is `expired` and left out of the list, though it is still stored for changing that document. */
             file: components["schemas"]["Asset"];
             form_fields?: {
                 name: string;
@@ -4829,7 +4831,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description `file_expired`: the file has run out and has to be sent again. */
+            /** @description `file_expired`: the file has run out and has to be sent again. With `message_params.reason` `kept_for_document` it is still stored, but only for changing the AI document made from it, and is opened here no more. */
             410: {
                 headers: {
                     [name: string]: unknown;
