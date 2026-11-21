@@ -1477,8 +1477,11 @@ export interface components {
     schemas: {
         Artifact: {
             download_url: string;
-            /** Format: date-time */
-            expires_at?: string;
+            /**
+             * Format: date-time
+             * @description When it is deleted; null when it is kept until the customer deletes it: a draft a document, deck or CV was made from, and the files a change of it needs.
+             */
+            expires_at?: string | null;
             /**
              * Format: uuid
              * @description The stored file itself, as `POST /editor/documents` takes it.
@@ -1496,8 +1499,11 @@ export interface components {
         };
         Asset: {
             encrypted?: boolean;
-            /** Format: date-time */
-            expires_at: string;
+            /**
+             * Format: date-time
+             * @description When it is deleted; null when it is kept until the customer deletes it: a draft a document, deck or CV was made from, and the files a change of it needs.
+             */
+            expires_at: string | null;
             /** Format: uuid */
             id: string;
             mime_type: string;
@@ -2007,8 +2013,11 @@ export interface components {
                 page?: number;
                 text?: string;
             }[];
-            /** Format: date-time */
-            expires_at: string;
+            /**
+             * Format: date-time
+             * @description When it is deleted; null when it is kept until the customer deletes it: a draft a document, deck or CV was made from, and the files a change of it needs.
+             */
+            expires_at: string | null;
             feature_id: string;
             /** Format: uuid */
             id: string;
@@ -9320,8 +9329,11 @@ export interface operations {
                         messages: {
                             asset: {
                                 download_url?: string;
-                                /** Format: date-time */
-                                expires_at?: string;
+                                /**
+                                 * Format: date-time
+                                 * @description When it is deleted; null when it is kept until the customer deletes it: a draft a document, deck or CV was made from, and the files a change of it needs.
+                                 */
+                                expires_at?: string | null;
                                 /** Format: uuid */
                                 id?: string;
                                 mime_type?: string;
@@ -9412,8 +9424,11 @@ export interface operations {
                         messages: {
                             asset: {
                                 download_url?: string;
-                                /** Format: date-time */
-                                expires_at?: string;
+                                /**
+                                 * Format: date-time
+                                 * @description When it is deleted; null when it is kept until the customer deletes it: a draft a document, deck or CV was made from, and the files a change of it needs.
+                                 */
+                                expires_at?: string | null;
                                 /** Format: uuid */
                                 id?: string;
                                 mime_type?: string;
@@ -9493,8 +9508,11 @@ export interface operations {
                         messages: {
                             asset: {
                                 download_url?: string;
-                                /** Format: date-time */
-                                expires_at?: string;
+                                /**
+                                 * Format: date-time
+                                 * @description When it is deleted; null when it is kept until the customer deletes it: a draft a document, deck or CV was made from, and the files a change of it needs.
+                                 */
+                                expires_at?: string | null;
                                 /** Format: uuid */
                                 id?: string;
                                 mime_type?: string;

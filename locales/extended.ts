@@ -1393,6 +1393,11 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Yuborish dushanba 00:00 dan (Toshkent); fayl {time} da o‘chiriladi.',
     'Отправка — с понедельника 00:00 (Ташкент); файл удалится в {time}.',
   ],
+  editorWeekUsedOpens: [
+    'Sending opens Monday 00:00 (Tashkent).',
+    'Yuborish dushanba 00:00 dan (Toshkent).',
+    'Отправка — с понедельника 00:00 (Ташкент).',
+  ],
   editorSendLimitDay: [
     'This file has been sent {limit} times today. You can send it again tomorrow.',
     'Bu fayl bugun {limit} marta yuborildi. Ertaga yana yuborishingiz mumkin.',
@@ -2772,6 +2777,11 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'This week’s file tasks are used up: sending opens Monday 00:00 (Tashkent). You can keep editing; this deck is kept until {time}.',
     'Bu haftaning fayl vazifalari tugadi: yuborish dushanba 00:00 dan (Toshkent). Tahrirlashni davom ettirishingiz mumkin; taqdimot {time} gacha saqlanadi.',
     'Задачи с файлами на этой неделе закончились: отправка — с понедельника 00:00 (Ташкент). Править можно и сейчас; презентация хранится до {time}.',
+  ],
+  deckWeekUsedKept: [
+    'This week’s file tasks are used up: sending opens Monday 00:00 (Tashkent). You can keep editing; this deck is kept in your account.',
+    'Bu haftaning fayl vazifalari tugadi: yuborish dushanba 00:00 dan (Toshkent). Tahrirlashni davom ettirishingiz mumkin; taqdimot hisobingizda saqlanadi.',
+    'Задачи с файлами на этой неделе закончились: отправка — с понедельника 00:00 (Ташкент). Править можно и сейчас; презентация хранится в вашем аккаунте.',
   ],
   deckChannelsOpen: [
     'To send this deck, join our Telegram channels first.',

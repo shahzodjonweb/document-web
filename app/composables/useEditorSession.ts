@@ -66,7 +66,8 @@ export interface DraftQuote {
 export interface EditorDocument {
   id: string
   version: number
-  file: { id: string; name: string; page_count: number; expires_at?: string }
+  /** `expires_at` is null for a file kept as long as an AI document that needs it (its source). */
+  file: { id: string; name: string; page_count: number; expires_at?: string | null }
   pages: PageSize[]
   form_fields: { name: string; type: string }[]
   image_counts: number[]

@@ -294,7 +294,13 @@ watch(
         </button>
       </template>
       <template v-else-if="refusal.code === 'weekly_file_limit'">
-        <p>{{ t('editorWeekUsed', { time: date(session.doc.value?.file.expires_at, true) }) }}</p>
+        <p>
+          {{
+            session.doc.value?.file.expires_at
+              ? t('editorWeekUsed', { time: date(session.doc.value.file.expires_at, true) })
+              : t('editorWeekUsedOpens')
+          }}
+        </p>
         <NuxtLink :to="path('/app/billing')" class="button secondary">{{ t('studioSeePlans') }}</NuxtLink>
       </template>
       <p v-else-if="refusal.code === 'send_limit'">

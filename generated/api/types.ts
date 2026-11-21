@@ -42,7 +42,8 @@ export interface FileAsset {
   pages?: number
   page_count?: number
   mime_type?: string
-  expires_at?: string
+  /** Null for a file kept as long as an AI document that needs it (its source, its logo). */
+  expires_at?: string | null
   status?: string
 }
 export interface Artifact {
@@ -52,7 +53,7 @@ export interface Artifact {
   size_bytes?: number
   size?: number
   download_url?: string
-  expires_at?: string
+  expires_at?: string | null
 }
 /** One weekly allowance; a null limit is unlimited. */
 export interface WeeklyAllowance {

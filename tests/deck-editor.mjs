@@ -640,6 +640,8 @@ async function openDeck({
   lineRoom = {},
   slides = 60,
   expiresIn = 86400000,
+  // A deck a file was made from is kept until it is deleted: the server says no expiry at all.
+  kept = false,
   notEditable = false,
   expired = false,
   openFails = 0,
@@ -759,7 +761,7 @@ async function openDeck({
     channelState: clone(channels),
     channelsAsked: 0,
     pictureState: pictures ? clone(pictures) : null,
-    expiresAt: new Date(Date.now() + expiresIn).toISOString(),
+    expiresAt: kept ? null : new Date(Date.now() + expiresIn).toISOString(),
     down: true,
     render: notEditable
       ? null
@@ -7037,6 +7039,30 @@ await group('74 Notices at open: channels and the week', async () => {
   assert.equal(await o.page.getByTestId('deck-channels-notice').count(), 0)
   await finish(o)
   return '74 Notices at open: join the channels (opens the list), the week used, and nothing for a deck counted already'
+})
+
+await group('78 A kept deck says no time', async () => {
+  const o = await openDeck({ kept: true, weekLeft: 0 })
+  await goToDeck(o)
+  await o.page.getByTestId('deck-week-used').waitFor()
+  const said = await o.page.getByTestId('deck-week-used').innerText()
+  assert.match(said, /Monday/)
+  assert.match(said, /kept in your account/)
+  assert.doesNotMatch(said, /until|2999/)
+  assert.equal(await o.page.getByTestId('deck-until').count(), 0, 'no time beside the name')
+  assert.equal(await o.page.getByTestId('editor-expiring').count(), 0, 'nothing is running out')
+  await finish(o)
+  // Refused a send for the week, Review says when sending opens and names no time the deck is deleted at.
+  const week = await openDeck({ kept: true, quoteRefusal: (n) => (n === 1 ? ['weekly_file_limit', 429] : null) })
+  await goToDeck(week)
+  await pressMain(week.page)
+  const refused = week.page.locator('[data-testid="editor-refused"][data-code="weekly_file_limit"]')
+  await refused.waitFor()
+  const words = await refused.innerText()
+  assert.match(words, /Sending opens Monday 00:00/)
+  assert.doesNotMatch(words, /deleted at|—|2999/)
+  await finish(week)
+  return '78 A kept deck (no expiry from the server): no time beside the name, no running-out notice, the week used says it is kept, and Review names no time it is deleted at'
 })
 
 await group('77 A picture action outlived by its deck', async () => {

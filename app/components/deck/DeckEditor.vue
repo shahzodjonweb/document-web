@@ -1258,7 +1258,9 @@ const panelTitle = computed(() => {
           </button>
         </p>
         <p v-if="notice('weekUsed')" class="warning-banner" role="status" data-testid="deck-week-used">
-          <AppIcon name="clock" :size="17" /><span>{{ t('deckWeekUsedOpen', { time: untilText }) }}</span
+          <AppIcon name="clock" :size="17" /><span>{{
+            untilText ? t('deckWeekUsedOpen', { time: untilText }) : t('deckWeekUsedKept')
+          }}</span
           ><NuxtLink :to="path('/app/billing')" class="text-link">{{ t('studioSeePlans') }}</NuxtLink
           ><button
             type="button"
