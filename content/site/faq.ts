@@ -17,9 +17,9 @@ export const faq = [
     id: 'home-files-safe', group: 'files', pages: ['home', 'help', 'tools-index'],
     q: ['What happens to my files?', 'Fayllarim bilan nima bo‘ladi?', 'Что происходит с моими файлами?'],
     a: [
-      'They are used only to run your task. Uploaded files and results are deleted after 24 hours, so download what you need before then. We use no analytics or advertising trackers.',
-      'Ular faqat vazifangizni bajarish uchun ishlatiladi. Yuklangan fayllar va natijalar 24 soatdan keyin o‘chiriladi, shuning uchun keraklisini undan oldin yuklab oling. Biz analitika va reklama trekerlaridan foydalanmaymiz.',
-      'Они используются только для вашей задачи. Загруженные файлы и результаты удаляются через 24 часа, поэтому скачайте нужное заранее. Мы не используем аналитику и рекламные трекеры.',
+      'They are used only to run your task. Uploaded files and results are deleted after 24 hours, so download what you need before then. Files an AI document needs to be changed later stay with it. We use no analytics or advertising trackers.',
+      'Ular faqat vazifangizni bajarish uchun ishlatiladi. Yuklangan fayllar va natijalar 24 soatdan keyin o‘chiriladi, shuning uchun keraklisini undan oldin yuklab oling. AI hujjatni keyinroq o‘zgartirish uchun kerakli fayllar u bilan birga saqlanadi. Biz analitika va reklama trekerlaridan foydalanmaymiz.',
+      'Они используются только для вашей задачи. Загруженные файлы и результаты удаляются через 24 часа, поэтому скачайте нужное заранее. Файлы, нужные для последующего изменения ИИ-документа, хранятся вместе с ним. Мы не используем аналитику и рекламные трекеры.',
     ],
   },
   {
@@ -73,9 +73,9 @@ export const faq = [
     id: 'pricing-ends', group: 'plans', pages: ['pricing', 'help'],
     q: ['What happens when the 30 days end?', '30 kun tugagach nima bo‘ladi?', 'Что будет, когда 30 дней закончатся?'],
     a: [
-      'Your account moves to the Free plan with its weekly limits. Nothing is deleted from your account, but remember that files are removed 24 hours after upload anyway.',
-      'Hisobingiz o‘z haftalik limitlari bilan Free tarifiga o‘tadi. Hisobdan hech narsa o‘chirilmaydi, lekin fayllar baribir yuklangandan 24 soat o‘tib o‘chirilishini unutmang.',
-      'Аккаунт переходит на тариф Free с его недельными лимитами. Из аккаунта ничего не удаляется, но файлы и так удаляются через 24 часа после загрузки.',
+      'Your account moves to the Free plan with its weekly limits. Nothing is deleted from your account, but remember that files are removed 24 hours after upload anyway. Files an AI document needs to be changed later stay with it.',
+      'Hisobingiz o‘z haftalik limitlari bilan Free tarifiga o‘tadi. Hisobdan hech narsa o‘chirilmaydi, lekin fayllar baribir yuklangandan 24 soat o‘tib o‘chirilishini unutmang. AI hujjatni keyinroq o‘zgartirish uchun kerakli fayllar u bilan birga saqlanadi.',
+      'Аккаунт переходит на тариф Free с его недельными лимитами. Из аккаунта ничего не удаляется, но файлы и так удаляются через 24 часа после загрузки. Файлы, нужные для последующего изменения ИИ-документа, хранятся вместе с ним.',
     ],
   },
   {
@@ -194,9 +194,9 @@ export const faq = [
     id: 'ai-docs-stored', group: 'ai', pages: ['ai-documents', 'ai-hub', 'help'],
     q: ['Is my request stored?', 'So‘rovim saqlanadimi?', 'Хранится ли мой запрос?'],
     a: [
-      'Yes, for 30 days. Your request, its outline and the result are kept so our team can check quality and stop misuse, then deleted. Requests are processed by OpenAI. Uploaded files are deleted after 24 hours.',
-      'Ha, 30 kun. So‘rovingiz, uning rejasi va natija jamoamiz sifatni tekshirishi va suiisteʼmolning oldini olishi uchun saqlanadi, keyin o‘chiriladi. So‘rovlar OpenAI orqali qayta ishlanadi. Yuklangan fayllar 24 soatdan keyin o‘chiriladi.',
-      'Да, 30 дней. Запрос, его план и результат хранятся, чтобы команда могла проверять качество и предотвращать злоупотребления, затем удаляются. Запросы обрабатывает OpenAI. Загруженные файлы удаляются через 24 часа.',
+      'Yes. Your request, the document’s text and what was read from the files it was made from stay in your account, with the files a change of it needs, so you can ask for changes later. A copy of your request, its outline and the result is also kept 30 days so our team can check quality and stop misuse, then deleted. Requests are processed by OpenAI. Other uploaded files are deleted after 24 hours.',
+      'Ha. So‘rovingiz, hujjat matni va u yaratilgan fayllardan o‘qilgan ma’lumotlar uni o‘zgartirish uchun kerakli fayllar bilan birga keyinroq o‘zgartirish so‘rashingiz uchun hisobingizda saqlanadi. So‘rovingiz, uning rejasi va natija nusxasi esa jamoamiz sifatni tekshirishi va suiisteʼmolning oldini olishi uchun 30 kun saqlanadi, keyin o‘chiriladi. So‘rovlar OpenAI orqali qayta ishlanadi. Boshqa yuklangan fayllar 24 soatdan keyin o‘chiriladi.',
+      'Да. Запрос, текст документа и то, что прочитано из файлов, по которым он сделан, вместе с файлами, нужными для его изменения, хранятся в вашем аккаунте, чтобы вы могли позже попросить изменения. Кроме того, копия запроса, его плана и результата хранится 30 дней, чтобы команда могла проверять качество и предотвращать злоупотребления, затем удаляется. Запросы обрабатывает OpenAI. Остальные загруженные файлы удаляются через 24 часа.',
     ],
   },
   {
@@ -353,9 +353,9 @@ export const faq = [
     id: 'cv-privacy', group: 'ai', pages: ['ai-cv', 'help'],
     q: ['Who can see my CV data?', 'Rezyumedagi maʼlumotlarimni kim ko‘ra oladi?', 'Кто видит данные моего резюме?'],
     a: [
-      'Your request and CV are kept 30 days for quality review. Only support staff can open them, and every opening is recorded. Uploaded files and results are deleted after 24 hours.',
-      'So‘rovingiz va rezyume sifatni tekshirish uchun 30 kun saqlanadi. Ularni faqat yordam xodimlari ochishi mumkin va har bir ochish qayd etiladi. Yuklangan fayllar va natijalar 24 soatdan keyin o‘chiriladi.',
-      'Запрос и резюме хранятся 30 дней для проверки качества. Открыть их могут только сотрудники поддержки, и каждое открытие записывается. Загруженные файлы и результаты удаляются через 24 часа.',
+      'Your request, what was read from your files and the CV’s text stay in your account, with its photo, so you can ask for changes later. A copy is kept 30 days for quality review: only support staff can open it, and every opening is recorded. Other uploaded files and results are deleted after 24 hours.',
+      'So‘rovingiz, fayllaringizdan o‘qilgan ma’lumotlar va rezyume matni undagi rasm bilan birga keyinroq o‘zgartirish so‘rashingiz uchun hisobingizda saqlanadi. Ularning nusxasi sifatni tekshirish uchun 30 kun saqlanadi: uni faqat yordam xodimlari ochishi mumkin va har bir ochish qayd etiladi. Boshqa yuklangan fayllar va natijalar 24 soatdan keyin o‘chiriladi.',
+      'Запрос, то, что прочитано из ваших файлов, и текст резюме вместе с фото хранятся в вашем аккаунте, чтобы вы могли позже попросить изменения. Копия хранится 30 дней для проверки качества: открыть её могут только сотрудники поддержки, и каждое открытие записывается. Остальные загруженные файлы и результаты удаляются через 24 часа.',
     ],
   },
 
@@ -505,9 +505,9 @@ export const faq = [
     id: 'files-download-later', group: 'files', pages: ['help'],
     q: ['Can I download a result again later?', 'Natijani keyinroq yana yuklab olsa bo‘ladimi?', 'Можно ли скачать результат позже?'],
     a: [
-      'Yes, from your task history, for 24 hours after the task. After that the file is deleted and the task has to be run again.',
-      'Ha, vazifadan keyin 24 soat davomida vazifalar tarixidan. Shundan so‘ng fayl o‘chiriladi va vazifani qaytadan bajarish kerak bo‘ladi.',
-      'Да, из истории задач в течение 24 часов после выполнения. Потом файл удаляется, и задачу придётся запустить снова.',
+      'Yes, from your task history, for 24 hours after the task. After that the file is deleted and the task has to be run again. For an AI document, ask for a change instead.',
+      'Ha, vazifadan keyin 24 soat davomida vazifalar tarixidan. Shundan so‘ng fayl o‘chiriladi va vazifani qaytadan bajarish kerak bo‘ladi. AI hujjat uchun buning o‘rniga o‘zgartirish so‘rang.',
+      'Да, из истории задач в течение 24 часов после выполнения. Потом файл удаляется, и задачу придётся запустить снова. Для ИИ-документа вместо этого попросите его изменить.',
     ],
   },
   {
@@ -523,9 +523,9 @@ export const faq = [
     id: 'files-where', group: 'files', pages: ['help'],
     q: ['Where are my files stored?', 'Fayllarim qayerda saqlanadi?', 'Где хранятся мои файлы?'],
     a: [
-      'In object storage run by Contabo in the European Union, for up to 24 hours. AI requests are processed by OpenAI. The privacy policy lists every service we use and why.',
-      'Yevropa Ittifoqidagi Contabo obyekt omborida, ko‘pi bilan 24 soat. AI so‘rovlari OpenAI orqali qayta ishlanadi. Biz foydalanadigan barcha xizmatlar va sabablari maxfiylik siyosatida keltirilgan.',
-      'В объектном хранилище Contabo в Евросоюзе, не дольше 24 часов. Запросы к ИИ обрабатывает OpenAI. Все сервисы, которыми мы пользуемся, и зачем — в политике конфиденциальности.',
+      'In object storage run by Contabo in the European Union, for up to 24 hours; the files an AI document needs to be changed stay until the account is deleted or you ask us to delete them. AI requests are processed by OpenAI. The privacy policy lists every service we use and why.',
+      'Yevropa Ittifoqidagi Contabo obyekt omborida, ko‘pi bilan 24 soat; AI hujjatni o‘zgartirish uchun kerakli fayllar esa hisob o‘chirilguncha yoki ularni o‘chirishni so‘raguningizcha saqlanadi. AI so‘rovlari OpenAI orqali qayta ishlanadi. Biz foydalanadigan barcha xizmatlar va sabablari maxfiylik siyosatida keltirilgan.',
+      'В объектном хранилище Contabo в Евросоюзе, не дольше 24 часов; файлы, нужные для изменения ИИ-документа, хранятся, пока аккаунт не удалён или вы не попросите их удалить. Запросы к ИИ обрабатывает OpenAI. Все сервисы, которыми мы пользуемся, и зачем — в политике конфиденциальности.',
     ],
   },
   {

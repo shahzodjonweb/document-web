@@ -234,16 +234,22 @@ export const site = {
   siteCompareRowAi: ['AI documents, slides, CVs', 'AI hujjat, slayd, rezyume', 'Документы, слайды, резюме с ИИ'],
   siteCompareYes: ['Yes', 'Bor', 'Есть'],
 
-  // File lifecycle (home, help, tool pages compact).
+  // File lifecycle (home, help, the privacy policy and the AI CV page). Its last step names what an AI
+  // document keeps for its changes (siteToolPrivacyNote speaks for a file tool's own page).
   siteLifecycleTitle: ['What happens to your files', 'Fayllaringiz bilan nima bo‘ladi', 'Что происходит с файлами'],
   siteLifecycle1Title: ['You upload', 'Yuklaysiz', 'Вы загружаете'],
-  siteLifecycle1Text: ['The file is kept only to run your task.', 'Fayl faqat vazifangizni bajarish uchun saqlanadi.', 'Файл хранится только для вашей задачи.'],
+  siteLifecycle1Text: ['The file is used to run your task.', 'Fayl vazifangizni bajarish uchun ishlatiladi.', 'Файл используется для вашей задачи.'],
   siteLifecycle1Time: ['Start', 'Boshlanishi', 'Начало'],
   siteLifecycle2Title: ['Result is ready', 'Natija tayyor', 'Результат готов'],
   siteLifecycle2Text: ['Download it in the app or get it in Telegram.', 'Uni ilovada yuklab oling yoki Telegramʼda oling.', 'Скачайте его в приложении или получите в Telegram.'],
   siteLifecycle2Time: ['When the task ends', 'Vazifa tugaganda', 'Когда задача готова'],
   siteLifecycle3Title: ['Deleted', 'O‘chiriladi', 'Удаляется'],
-  siteLifecycle3Text: ['Uploaded files and results are removed.', 'Yuklangan fayllar va natijalar o‘chiriladi.', 'Загруженные файлы и результаты удаляются.'],
+  // Uploads and results go, but not what a change of an AI document needs (document-platform apps/studio/keeping.py).
+  siteLifecycle3KeptText: [
+    'Uploaded files and results are removed, except those an AI document needs for a change.',
+    'Yuklangan fayllar va natijalar o‘chiriladi, AI hujjatni o‘zgartirish uchun kerakli fayllar bundan mustasno.',
+    'Загруженные файлы и результаты удаляются, кроме нужных для изменения ИИ-документа.',
+  ],
   siteLifecycle3Time: ['After 24 hours', '24 soatdan keyin', 'Через 24 часа'],
 
   // PDF editor capabilities: shared by home (titles) and the editor page (titles + lines).
@@ -293,7 +299,7 @@ export const site = {
   siteHomeHeroCta: ['Get started', 'Boshlash', 'Начать работу'],
   siteHomeHeroCtaTelegram: ['Open in Telegram', 'Telegramʼda ochish', 'Открыть в Telegram'],
   siteHomeHeroChip1: ['Nothing to install', 'Hech narsa o‘rnatilmaydi', 'Ничего не нужно ставить'],
-  siteHomeHeroChip2: ['Files deleted after 24 hours', 'Fayllar 24 soatda o‘chiriladi', 'Файлы удаляются через 24 часа'],
+  siteHomeHeroChip2: ['Tool files deleted after 24 hours', 'Vosita fayllari 24 soatda o‘chiriladi', 'Файлы инструментов удаляются через 24 часа'],
   siteHomeHeroLangLine: ['Works in English, O‘zbekcha and Русский.', 'O‘zbekcha, Русский va English tillarida ishlaydi.', 'Работает на русском, узбекском и английском.'],
   // Hero vignette: decorative sample strings, matched to the page language.
   siteHomeVignetteTask: ['Merge PDF · 3 files', 'PDF birlashtirish · 3 ta fayl', 'Объединить PDF · 3 файла'],
@@ -350,12 +356,12 @@ export const site = {
   ],
   siteHomeStep3Title: ['Download the result', 'Natijani yuklab oling', 'Скачайте результат'],
   siteHomeStep3Text: [
-    'Save it to your device or get it in Telegram. Files are deleted after 24 hours.',
-    'Qurilmangizga saqlang yoki Telegramʼda oling. Fayllar 24 soatdan keyin o‘chiriladi.',
-    'Сохраните на устройство или получите в Telegram. Файлы удаляются через 24 часа.',
+    'Save it to your device or get it in Telegram. The result file is deleted after 24 hours.',
+    'Qurilmangizga saqlang yoki Telegramʼda oling. Natija fayli 24 soatdan keyin o‘chiriladi.',
+    'Сохраните на устройство или получите в Telegram. Файл результата удаляется через 24 часа.',
   ],
 
-  siteHomePrivacyTitle: ['Your files are not kept', 'Fayllaringiz saqlanib qolmaydi', 'Ваши файлы не хранятся'],
+  siteHomePrivacyTitle: ['What we keep, and for how long', 'Nimani va qancha saqlaymiz', 'Что мы храним и сколько'],
   siteHomePrivacyIntro: [
     'Concrete rules instead of badges: what we keep, for how long, and why.',
     'Belgilar o‘rniga aniq qoidalar: nimani, qancha muddat va nima uchun saqlaymiz.',
@@ -373,11 +379,11 @@ export const site = {
     'Telegram, Google yoki email va parol bilan kiring. Sayt, bot va Mini App uchun bitta hisob.',
     'Входите через Telegram, Google или по почте и паролю. Один аккаунт для сайта, бота и мини-приложения.',
   ],
-  siteHomeFactAiTitle: ['AI: 30 days', 'AI: 30 kun', 'ИИ: 30 дней'],
+  siteHomeFactAiTitle: ['AI: kept for changes', 'AI: o‘zgartirish uchun saqlanadi', 'ИИ: хранится для правок'],
   siteHomeFactAiText: [
-    'Your AI requests and results are kept for 30 days for quality review, then deleted.',
-    'AI so‘rovlaringiz va natijalar sifatni tekshirish uchun 30 kun saqlanadi, keyin o‘chiriladi.',
-    'Запросы к ИИ и результаты хранятся 30 дней для проверки качества, затем удаляются.',
+    'A document’s request and text, and what was read from its files, stay in your account so you can ask for changes; a copy kept for quality review is deleted after 30 days.',
+    'Hujjatning so‘rovi va matni hamda u yaratilgan fayllardan o‘qilgan ma’lumotlar o‘zgartirish so‘rashingiz uchun hisobingizda saqlanadi; sifatni tekshirish uchun olingan nusxa 30 kundan keyin o‘chiriladi.',
+    'Запрос и текст документа, а также то, что прочитано из его файлов, хранятся в вашем аккаунте, чтобы вы могли попросить изменения; копия для проверки качества удаляется через 30 дней.',
   ],
   siteHomePrivacyLink: ['Read the privacy policy', 'Maxfiylik siyosatini o‘qish', 'Читать политику конфиденциальности'],
 
@@ -538,9 +544,9 @@ export const site = {
   ],
   siteAiGuideButton: ['Open the prompt guide', 'Qo‘llanmani ochish', 'Открыть руководство'],
   siteAiDataNote: [
-    'AI requests are processed by OpenAI. Requests and results are kept 30 days for quality review, then deleted. Uploaded files are deleted after 24 hours.',
-    'AI so‘rovlari OpenAI orqali qayta ishlanadi. So‘rovlar va natijalar sifatni tekshirish uchun 30 kun saqlanadi, keyin o‘chiriladi. Yuklangan fayllar 24 soatdan keyin o‘chiriladi.',
-    'Запросы к ИИ обрабатывает OpenAI. Запросы и результаты хранятся 30 дней для проверки качества, затем удаляются. Загруженные файлы удаляются через 24 часа.',
+    'AI requests are processed by OpenAI. A document’s request and text, and what was read from the files it was made from, stay in your account so you can ask for changes later; a copy of requests and results is kept 30 days for quality review, then deleted. Uploaded files are deleted after 24 hours, unless a document needs them for a change.',
+    'AI so‘rovlari OpenAI orqali qayta ishlanadi. Hujjatning so‘rovi va matni hamda u yaratilgan fayllardan o‘qilgan ma’lumotlar keyinroq o‘zgartirish so‘rashingiz uchun hisobingizda saqlanadi; so‘rovlar va natijalar nusxasi sifatni tekshirish uchun 30 kun saqlanadi, keyin o‘chiriladi. Yuklangan fayllar 24 soatdan keyin o‘chiriladi, agar hujjatni o‘zgartirish uchun kerak bo‘lmasa.',
+    'Запросы к ИИ обрабатывает OpenAI. Запрос и текст документа, а также то, что прочитано из файлов, по которым он сделан, хранятся в вашем аккаунте, чтобы вы могли позже попросить изменения; копия запросов и результатов хранится 30 дней для проверки качества, затем удаляется. Загруженные файлы удаляются через 24 часа, если они не нужны для изменения документа.',
   ],
   siteAiLanguagesTitle: ['English, Uzbek or Russian', 'O‘zbek, rus yoki ingliz tilida', 'На русском, узбекском или английском'],
   siteAiLimitsNoteFree: ['On Free: 3 AI edits per file', 'Free: har bir faylga 3 ta tahrir', 'На Free: 3 правки на файл'],
@@ -793,9 +799,9 @@ export const site = {
   ],
   siteAiCvPrivacyTitle: ['A CV holds personal data', 'Rezyumeda shaxsiy maʼlumotlar bor', 'В резюме есть личные данные'],
   siteAiCvPrivacyNote: [
-    'Your request and the CV are kept 30 days for quality review. Uploaded files and results are deleted after 24 hours. Include only what you want an employer to see.',
-    'So‘rovingiz va rezyume sifatni tekshirish uchun 30 kun saqlanadi. Yuklangan fayllar va natijalar 24 soatdan keyin o‘chiriladi. Faqat ish beruvchi ko‘rishi kerak bo‘lgan maʼlumotni yozing.',
-    'Запрос и резюме хранятся 30 дней для проверки качества. Загруженные файлы и результаты удаляются через 24 часа. Указывайте только то, что должен видеть работодатель.',
+    'Your request, what was read from your files and the CV’s text stay in your account so you can ask for changes later; a copy is kept 30 days for quality review. Uploaded files and results are deleted after 24 hours, except the photo on the CV. Include only what you want an employer to see.',
+    'So‘rovingiz, fayllaringizdan o‘qilgan ma’lumotlar va rezyume matni keyinroq o‘zgartirish so‘rashingiz uchun hisobingizda saqlanadi; ularning nusxasi sifatni tekshirish uchun 30 kun saqlanadi. Yuklangan fayllar va natijalar 24 soatdan keyin o‘chiriladi, rezyumedagi rasm bundan mustasno. Faqat ish beruvchi ko‘rishi kerak bo‘lgan maʼlumotni yozing.',
+    'Запрос, то, что прочитано из ваших файлов, и текст резюме хранятся в вашем аккаунте, чтобы вы могли позже попросить изменения; копия хранится 30 дней для проверки качества. Загруженные файлы и результаты удаляются через 24 часа, кроме фото в резюме. Указывайте только то, что должен видеть работодатель.',
   ],
   siteAiCvFaqTitle: ['Questions about the AI CV', 'AI rezyume haqida savollar', 'Вопросы о резюме с ИИ'],
 

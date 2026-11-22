@@ -59,7 +59,7 @@ export function useLocale() {
     t(`${key}_${new Intl.PluralRules(locale.value).select(amount)}`, { count: amount })
   const path = (value = '') => `/${locale.value}${value}`
   const localePath = (value: string) => route.fullPath.replace(/^\/(en|uz|ru)(?=\/|$)/, `/${value}`)
-  const date = (value?: string, time = false) => {
+  const date = (value?: string | null, time = false) => {
     if (!value) return '—'
     const at = new Date(value)
     // Chromium, which Android's Telegram and Telegram Desktop run on, has no Uzbek months and

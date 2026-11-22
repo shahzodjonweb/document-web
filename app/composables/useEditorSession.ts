@@ -66,7 +66,11 @@ export interface DraftQuote {
 export interface EditorDocument {
   id: string
   version: number
-  file: { id: string; name: string; page_count: number; expires_at?: string }
+  /**
+   * `expires_at` is when the file stops opening here. A file an AI document was made from is still stored
+   * after it, for that document's changes only. Null is read as no time to show.
+   */
+  file: { id: string; name: string; page_count: number; expires_at?: string | null }
   pages: PageSize[]
   form_fields: { name: string; type: string }[]
   image_counts: number[]

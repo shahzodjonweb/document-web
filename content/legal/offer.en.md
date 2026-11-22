@@ -2,7 +2,7 @@
 title: Public offer
 version: 1.0
 effective: "{{effective}}"
-updated: 2026-11-10
+updated: 2026-11-21
 summary: The one contract for using DocMaster, free or paid, accepted by signing in or by paying.
 ---
 
@@ -108,7 +108,7 @@ AI results are made automatically and may contain mistakes, outdated facts or in
 
 The Provider does not promise that a result is original, unique, or will pass any plagiarism or AI-detection check.
 
-To review quality and prevent misuse, the Provider keeps AI requests, outlines and results for 30 days, then deletes them. Details are in the [Privacy policy](/en/legal/privacy).
+To review quality and prevent misuse, the Provider keeps copies of AI requests, outlines and results for 30 days, then deletes them. So that the User can ask for changes later, an AI document's request and text, what was read from the files it was made from, and the files a change of it needs, are kept in the Account until the Account is deleted or the User asks for them to be deleted. Details are in the [Privacy policy](/en/legal/privacy).
 
 ## 12. Intellectual property
 
@@ -120,7 +120,7 @@ The Service, its software, designs, templates and brand belong to the Provider o
 
 The Service is provided "as is". The Provider takes reasonable care to keep it working but does not promise that it will be free of errors or interruptions, or that every file can be processed.
 
-Uploaded files and results are deleted 24 hours after upload or creation. The User downloads results within that time and keeps their own copies of important files.
+Uploaded files and results are deleted 24 hours after upload or creation, except the files an AI document needs to be changed (section 11). The User downloads results within that time and keeps their own copies of important files.
 
 The Provider is not liable for indirect losses, lost profit or lost data. The Provider's total liability to a User is limited as set out below.
 

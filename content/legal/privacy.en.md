@@ -2,7 +2,7 @@
 title: Privacy policy
 version: 1.0
 effective: "{{effective}}"
-updated: 2026-11-10
+updated: 2026-11-21
 summary: What personal data DocMaster processes, why, where, for how long, and how you can control it.
 ---
 
@@ -60,8 +60,9 @@ We process personal data on these grounds:
 
 | Data | How long |
 |---|---|
-| Uploaded files and results | 24 hours after upload or creation, then deleted |
-| AI requests, outlines and results | 30 days, then deleted |
+| Uploaded files and results | 24 hours after upload or creation, then deleted, except the files an AI document needs to be changed (next row) |
+| An AI document's request and text, what was read from the files it was made from, and the files a change of it needs (its sources, logo, CV photo and slide pictures) | Until the account is deleted or you ask us to delete them |
+| Copies of AI requests, outlines and results kept for quality review | 30 days, then deleted |
 | Payment receipts | 90 days after our decision on the payment |
 | Account data | Until the account is deleted, then as required by law |
 | Payment and accounting records | As required by tax and accounting law |
@@ -101,7 +102,7 @@ We protect data with:
 - encryption of data in transit (HTTPS);
 - access limited to staff who need it for their work;
 - recorded access to AI requests and results;
-- automatic deletion of files after 24 hours;
+- automatic deletion of files after 24 hours, except those an AI document needs to be changed;
 - anti-bot checks against automated abuse.
 
 PDF passwords you enter are used for the task and not kept with your files.

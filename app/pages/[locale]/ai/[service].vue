@@ -395,7 +395,7 @@ const limitsTitle = computed(() => (s.value.key === 'Cv' ? t('siteAiLimitsTitle'
             <li v-for="[icon, n] in life" :key="n">
               <span class="site-life-dot"><AppIcon :name="icon" class="site-icon is-sm" /></span>
               <b>{{ t(`siteLifecycle${n}Title`) }}</b>
-              <p>{{ t(`siteLifecycle${n}Text`) }}</p>
+              <p>{{ t(n === 3 ? 'siteLifecycle3KeptText' : `siteLifecycle${n}Text`) }}</p>
               <span class="site-life-time">{{ t(`siteLifecycle${n}Time`) }}</span>
             </li>
           </ol>
