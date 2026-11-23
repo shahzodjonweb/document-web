@@ -1,11 +1,13 @@
 <script setup lang="ts">
 /**
- * Paying for a plan, one of two ways.
+ * Paying for a plan, the way the server offers.
  *
  * Automatically, through inPAY: the customer pays on inPAY's own page and the
  * plan switches on by itself. By card transfer: the customer sends the plan's
  * price from their own bank app to the owner's card and uploads the receipt;
- * the owner checks the transfer and switches the plan on.
+ * the owner checks the transfer and switches the plan on. The platform offers
+ * one at a time (inPAY while it works, card transfer as the fallback); the
+ * panel still shows a choice if it is ever sent both.
  *
  * Nothing here grants anything — the panel only shows what the server says,
  * and waits for inPAY's answer or the owner's decision.
@@ -26,6 +28,8 @@ const note = ref('')
 const busy = ref('')
 const error = ref('')
 const checkoutError = ref('')
+// inPAY could not open the payment and the server now offers card transfer in its place.
+const fellBack = ref(false)
 const copied = ref('')
 let timer: ReturnType<typeof setInterval> | undefined
 
@@ -127,6 +131,7 @@ watch(
   () => {
     picked.value = ''
     error.value = ''
+    fellBack.value = false
   },
 )
 // The plan is on the moment inPAY's answer arrives: the frame and the cards take it up.
@@ -144,8 +149,16 @@ async function payAutomatic() {
     try {
       created = await ws.api<Checkout>('/billing/checkout', { method: 'POST', body: { plan: props.plan } })
     } catch (e: any) {
-      // Switched off since this page loaded: show the ways to pay there are now.
-      if (e.data?.error?.code === 'checkout_disabled') load().catch(() => {})
+      // Switched off since this page loaded, or inPAY could not open the
+      // payment: show the ways to pay there are now. The server offers card
+      // transfer in inPAY's place for a while after inPAY fails.
+      const code = e.data?.error?.code
+      if (code !== 'checkout_disabled' && code !== 'checkout_unavailable') throw e
+      await load().catch(() => {})
+      if (code === 'checkout_unavailable' && method.value === 'card') {
+        fellBack.value = true
+        return
+      }
       throw e
     }
     pay.follow(created)
@@ -353,6 +366,9 @@ function pick(event: Event) {
       </fieldset>
       <p v-else-if="method" class="payment-way" data-testid="payment-way">
         {{ t(method === 'automatic' ? 'methodAutomaticBody' : 'methodCardBody') }}
+      </p>
+      <p v-if="fellBack && method === 'card'" class="info-banner" role="status" data-testid="checkout-fallback">
+        <AppIcon name="info" :size="18" /><span>{{ t('checkoutFallback') }}</span>
       </p>
       <p
         v-if="method === 'automatic' && options?.automatic?.test"
