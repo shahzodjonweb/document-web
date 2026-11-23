@@ -2055,7 +2055,6 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   methodCard: ['Card transfer', 'Karta orqali o‘tkazma', 'Перевод на карту'],
   methodCardBody: ['Send the price from your bank app (Click, Payme, Uzum or any bank) and upload the receipt. We switch your plan on after checking it, usually within a few hours.', 'Narxni bank ilovangizdan (Click, Payme, Uzum yoki istalgan bank) o‘tkazing va kvitansiyani yuklang. Tekshirgach, odatda bir necha soat ichida tarifingizni yoqamiz.', 'Переведите сумму из банковского приложения (Click, Payme, Uzum или любой банк) и загрузите квитанцию. После проверки, обычно в течение нескольких часов, мы включим тариф.'],
   methodAutomatic: ['Automatic payment', 'Avtomatik to‘lov', 'Автоматическая оплата'],
-  methodAutomaticSoon: ['Coming soon', 'Tez orada', 'Скоро'],
   paymentContinue: ['Continue', 'Davom etish', 'Продолжить'],
   cardStepSend: ['Send exactly {amount} to this card:', 'Shu kartaga aynan {amount} o‘tkazing:', 'Переведите ровно {amount} на эту карту:'],
   cardStepReceipt: ['Upload the receipt from your bank app.', 'Bank ilovangizdagi kvitansiyani yuklang.', 'Загрузите квитанцию из банковского приложения.'],
@@ -2074,6 +2073,105 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   paymentApproved: ['Payment confirmed. {plan} is active until {date}.', 'To‘lov tasdiqlandi. {plan} tarifi {date} gacha faol.', 'Оплата подтверждена. Тариф {plan} действует до {date}.'],
   paymentRejected: ['We couldn’t confirm payment {reference}:', '{reference} to‘lovini tasdiqlay olmadik:', 'Не удалось подтвердить платёж {reference}:'],
   cardPaymentsUnavailable: ['Payments aren’t available right now. Please try again later.', 'To‘lov hozircha mavjud emas. Keyinroq urinib ko‘ring.', 'Оплата сейчас недоступна. Попробуйте позже.'],
+  // Paying automatically through inPAY: the customer pays on inPAY's page with
+  // Click, Payme, Uzcard or Humo and the plan switches on by itself. Said
+  // plainly: what happens, how long it takes, and that nothing renews.
+  methodAutomaticBody: [
+    'Pay on inPAY’s page with Click, Payme, Uzcard or Humo. The plan switches on by itself, usually within a minute. Nothing renews by itself.',
+    'inPAY sahifasida Click, Payme, Uzcard yoki Humo orqali to‘lang. Tarif o‘zi yoqiladi, odatda bir daqiqa ichida. Hech narsa o‘z-o‘zidan uzaytirilmaydi.',
+    'Оплатите на странице inPAY через Click, Payme, Uzcard или Humo. Тариф включится сам, обычно в течение минуты. Ничего не продлевается само.',
+  ],
+  stepPayInpay: ['Pay on inPAY', 'inPAY orqali to‘lov', 'Оплата в inPAY'],
+  stepPlanOn: ['Plan switches on', 'Tarif yoqiladi', 'Тариф включается'],
+  // Only the owner's own account is offered a test payment.
+  checkoutTestMode: [
+    'Test mode: only you see automatic payment. No money moves and no plan is granted.',
+    'Sinov rejimi: avtomatik to‘lovni faqat siz ko‘rasiz. Pul yechilmaydi va tarif berilmaydi.',
+    'Тестовый режим: автоматическую оплату видите только вы. Деньги не списываются, тариф не выдаётся.',
+  ],
+  checkoutTestNote: [
+    'This is a test payment: no money moves and the plan does not change.',
+    'Bu sinov to‘lovi: pul yechilmaydi va tarif o‘zgarmaydi.',
+    'Это тестовый платёж: деньги не списываются, тариф не меняется.',
+  ],
+  checkoutWaiting: ['Waiting for your payment', 'To‘lovingiz kutilmoqda', 'Ждём вашу оплату'],
+  checkoutWaitingBody: [
+    'Finish the payment on inPAY’s page. The plan switches on by itself, usually within a minute of paying. This page checks by itself.',
+    'To‘lovni inPAY sahifasida yakunlang. Tarif o‘zi yoqiladi, odatda to‘lovdan keyin bir daqiqa ichida. Bu sahifa o‘zi tekshirib turadi.',
+    'Завершите оплату на странице inPAY. Тариф включится сам, обычно в течение минуты после оплаты. Эта страница проверяет сама.',
+  ],
+  checkoutWaitedOut: [
+    'This page has stopped checking by itself. The plan still switches on as soon as inPAY confirms the payment.',
+    'Bu sahifa o‘zi tekshirishni to‘xtatdi. inPAY to‘lovni tasdiqlashi bilan tarif baribir yoqiladi.',
+    'Эта страница перестала проверять сама. Тариф всё равно включится, как только inPAY подтвердит оплату.',
+  ],
+  checkoutContinue: ['Continue to payment', 'To‘lovga o‘tish', 'Перейти к оплате'],
+  checkoutCheck: ['I’ve paid — check', 'To‘ladim — tekshirish', 'Оплачено — проверить'],
+  checkoutChecking: ['Checking…', 'Tekshirilmoqda…', 'Проверяем…'],
+  checkoutNotYet: ['inPAY has not confirmed the payment yet.', 'inPAY to‘lovni hali tasdiqlamadi.', 'inPAY пока не подтвердил оплату.'],
+  checkoutCheckFailed: [
+    'We couldn’t check the payment just now. Try again in a moment.',
+    'To‘lovni hozir tekshirib bo‘lmadi. Birozdan keyin qayta urinib ko‘ring.',
+    'Не удалось проверить оплату. Попробуйте ещё раз чуть позже.',
+  ],
+  checkoutReceipt: ['Receipt', 'Chek', 'Чек'],
+  checkoutPaidPlain: ['Payment confirmed. {plan} is on.', 'To‘lov tasdiqlandi. {plan} tarifi yoqildi.', 'Оплата подтверждена. Тариф {plan} включён.'],
+  checkoutTestPaid: [
+    'The test payment went through. No money moved and the plan was not changed.',
+    'Sinov to‘lovi o‘tdi. Pul yechilmadi va tarif o‘zgarmadi.',
+    'Тестовый платёж прошёл. Деньги не списаны, тариф не изменён.',
+  ],
+  checkoutFailed: [
+    'The payment didn’t go through, so your plan has not changed. You can try again.',
+    'To‘lov o‘tmadi, shuning uchun tarifingiz o‘zgarmadi. Qayta urinib ko‘rishingiz mumkin.',
+    'Оплата не прошла, поэтому тариф не изменился. Можно попробовать ещё раз.',
+  ],
+  checkoutCancelled: [
+    'The payment was cancelled, so your plan has not changed. You can try again whenever you like.',
+    'To‘lov bekor qilindi, shuning uchun tarifingiz o‘zgarmadi. Istalgan vaqtda qayta urinib ko‘rishingiz mumkin.',
+    'Оплата отменена, поэтому тариф не изменился. Можно попробовать снова в любое время.',
+  ],
+  checkoutExpired: [
+    'The payment page expired before the payment was made, so your plan has not changed. You can start again.',
+    'To‘lov sahifasining muddati to‘lov qilinmasdan tugadi, shuning uchun tarifingiz o‘zgarmadi. Qaytadan boshlashingiz mumkin.',
+    'Срок действия страницы оплаты истёк до оплаты, поэтому тариф не изменился. Можно начать заново.',
+  ],
+  checkoutRefunded: ['This payment was refunded.', 'Bu to‘lov qaytarildi.', 'Этот платёж возвращён.'],
+  checkoutMoneyTaken: [
+    'If the money has left your account, write to support and we will sort it out.',
+    'Agar pul hisobingizdan yechilgan bo‘lsa, yordam xizmatiga yozing — hal qilamiz.',
+    'Если деньги списались, напишите в поддержку — мы разберёмся.',
+  ],
+  // The page inPAY sends the browser back to (/{locale}/app/pay/{id}), signed in or not.
+  checkoutTitle: ['Payment', 'To‘lov', 'Оплата'],
+  checkoutLooking: ['Checking your payment…', 'To‘lovingiz tekshirilmoqda…', 'Проверяем вашу оплату…'],
+  checkoutConfirmingTitle: ['Confirming your payment', 'To‘lovingiz tasdiqlanmoqda', 'Подтверждаем оплату'],
+  checkoutConfirmingBody: [
+    'inPAY is confirming the payment. This usually takes under a minute, and this page updates by itself.',
+    'inPAY to‘lovni tasdiqlamoqda. Bu odatda bir daqiqadan kam vaqt oladi, sahifa o‘zi yangilanadi.',
+    'inPAY подтверждает оплату. Обычно это занимает меньше минуты, страница обновится сама.',
+  ],
+  checkoutLaterTitle: ['Not confirmed yet', 'Hali tasdiqlanmadi', 'Пока не подтверждено'],
+  checkoutLaterBody: [
+    'Your plan will switch on as soon as inPAY confirms the payment. You can close this page.',
+    'inPAY to‘lovni tasdiqlashi bilan tarifingiz yoqiladi. Bu sahifani yopishingiz mumkin.',
+    'Тариф включится, как только inPAY подтвердит оплату. Эту страницу можно закрыть.',
+  ],
+  checkoutCheckAgain: ['Check again', 'Qayta tekshirish', 'Проверить ещё раз'],
+  checkoutPaidTitle: ['Payment received', 'To‘lov qabul qilindi', 'Оплата получена'],
+  checkoutPlanActive: ['{plan} is active until {date}.', '{plan} tarifi {date} gacha faol.', 'Тариф {plan} действует до {date}.'],
+  checkoutPlanOn: ['{plan} is on.', '{plan} tarifi yoqildi.', 'Тариф {plan} включён.'],
+  checkoutTestPaidTitle: ['Test payment complete', 'Sinov to‘lovi yakunlandi', 'Тестовый платёж завершён'],
+  checkoutNotDoneTitle: ['Payment not completed', 'To‘lov yakunlanmadi', 'Оплата не завершена'],
+  checkoutRefundedTitle: ['Payment refunded', 'To‘lov qaytarildi', 'Платёж возвращён'],
+  checkoutMissingTitle: ['Payment not found', 'To‘lov topilmadi', 'Платёж не найден'],
+  checkoutMissingBody: [
+    'This link does not match any payment. Check that the address is complete.',
+    'Bu havola hech bir to‘lovga mos kelmadi. Manzil to‘liq ekanini tekshiring.',
+    'Эта ссылка не соответствует ни одному платежу. Проверьте, что адрес указан полностью.',
+  ],
+  checkoutOpenApp: ['Open {brand}', '{brand}’ni ochish', 'Открыть {brand}'],
+  checkoutBackToTelegram: ['Back to Telegram', 'Telegram’ga qaytish', 'Вернуться в Telegram'],
   // Free and Plus accounts join the owner's Telegram channels; Premium is never asked.
   channelsTitle: ['Join our Telegram community', 'Telegram hamjamiyatimizga qo‘shiling', 'Вступите в наше Telegram-сообщество'],
   channelsBody: [

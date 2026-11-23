@@ -118,3 +118,77 @@ export interface Plan {
   limits?: Record<string, number | null>
   [key: string]: unknown
 }
+/** One paid plan as the billing page offers it: today's price and the regular one it replaces. */
+export interface BillingPlanOption {
+  plan: 'plus' | 'premium'
+  price: number
+  regular_price: number
+  discount: PlanDiscount | null
+}
+/** A card transfer: the customer pays the owner's card and uploads the receipt; the owner approves it. */
+export interface ManualPayment {
+  id: string
+  reference: string
+  plan: 'plus' | 'premium'
+  amount: number
+  currency: string
+  status: 'awaiting' | 'submitted' | 'approved' | 'rejected' | 'cancelled' | 'expired' | 'refunded'
+  channel?: string
+  card: { number: string | null; last4: string; holder: string; label: string }
+  receipt_received: boolean
+  payer_note?: string
+  created_at: string
+  expires_at: string
+  submitted_at?: string | null
+  decided_at?: string | null
+  rejection_reason?: string | null
+  starts_at?: string | null
+  active_until?: string | null
+}
+/**
+ * An automatic payment through inPAY: the customer pays on inPAY's hosted page
+ * and the plan switches on by itself. `test` is the owner trying the payment
+ * system with test keys: no money moves and no plan is granted.
+ */
+export interface Checkout {
+  id: string
+  plan: 'plus' | 'premium'
+  /** In so'm. */
+  amount: number
+  currency: string
+  status: 'pending' | 'paid' | 'failed' | 'cancelled' | 'expired' | 'refunded'
+  test: boolean
+  channel: 'web' | 'bot'
+  /** inPAY's payment page: only while pending, and only for the signed-in owner. */
+  checkout_url: string | null
+  /** The bot's address, for a payment started in Telegram. */
+  bot_url: string | null
+  created_at: string
+  expires_at: string
+  paid_at: string | null
+  /** The plan period it paid for, once paid. */
+  starts_at: string | null
+  active_until: string | null
+  /** The fiscal receipt, when inPAY provides one. */
+  receipt_url: string | null
+}
+/**
+ * `GET /billing/manual`. `enabled` is card transfer alone; `plans` are listed
+ * when either way to pay is open. An older platform sends `automatic` as
+ * `{ available: false }` and no `checkout`.
+ */
+export interface BillingOptions {
+  enabled: boolean
+  currency: string
+  period_days: number
+  plans: BillingPlanOption[]
+  automatic: { available: boolean; provider?: string; test?: boolean }
+  payment: ManualPayment | null
+  /** This customer's latest automatic payment worth showing: a pending one, or one finished in the last week. */
+  checkout?: Checkout | null
+}
+/** `checkout` of `GET /plans`: which ways to pay are open to everyone. Absent from an older platform. */
+export interface PaymentMethods {
+  automatic: boolean
+  card: boolean
+}

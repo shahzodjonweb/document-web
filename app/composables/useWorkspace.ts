@@ -1,5 +1,14 @@
 import { createPublicApi } from '../../generated/api/client'
-import type { User, Feature, Usage, Plan, Job, FileAsset, Quote } from '../../generated/api/types'
+import type {
+  User,
+  Feature,
+  Usage,
+  Plan,
+  Job,
+  FileAsset,
+  Quote,
+  PaymentMethods,
+} from '../../generated/api/types'
 let profileWrites: Promise<unknown> = Promise.resolve()
 let zoneSent = ''
 /** Refusals because this week's allowance, or a file's AI edits, ran out. */
@@ -20,6 +29,15 @@ export function plansFrom(data: { plans?: unknown } | null | undefined): Plan[] 
         .filter(([, v]) => typeof v === 'object')
         .map(([id, v]) => ({ id, ...(v as any) }))
 }
+/**
+ * The ways to pay a `/plans` answer names. Null when it names none, as an older
+ * platform does: card transfer is then the one way there is.
+ */
+export function paymentMethodsFrom(data: { checkout?: unknown } | null | undefined): PaymentMethods | null {
+  const methods = data?.checkout as Partial<PaymentMethods> | null | undefined
+  if (!methods || typeof methods !== 'object') return null
+  return { automatic: methods.automatic === true, card: methods.card === true }
+}
 export function useWorkspace() {
   const user = useState<User | null>('account', () => null)
   const sessionReady = useState('session-ready', () => false)
@@ -27,6 +45,7 @@ export function useWorkspace() {
   const features = useState<Feature[]>('features', () => [])
   const usage = useState<Usage | null>('usage', () => null)
   const plans = useState<Plan[]>('plans', () => [])
+  const paymentMethods = useState<PaymentMethods | null>('payment-methods', () => null)
   const jobs = useState<Job[]>('jobs', () => [])
   const apiError = useState('api-error', () => false)
   const csrfToken = useState('csrf-token', () => '')
@@ -120,6 +139,7 @@ export function useWorkspace() {
       throw e
     }
     plans.value = plansFrom(data)
+    paymentMethods.value = paymentMethodsFrom(data)
   }
   async function loadAccount() {
     if (!user.value) return
@@ -184,6 +204,7 @@ export function useWorkspace() {
     features,
     usage,
     plans,
+    paymentMethods,
     jobs,
     apiError,
     activeUploads,

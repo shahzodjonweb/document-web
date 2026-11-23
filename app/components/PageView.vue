@@ -58,6 +58,7 @@ const titles: [string, string][] = [
   ['/app/editor/deck', 'deckEditorTitle'],
   ['/app/editor', 'editor'],
   ['/app/billing', 'navBilling'],
+  ['/app/pay', 'checkoutTitle'],
   ['/pricing', 'pricing'],
   ['/app/settings', 'settings'],
   ['/app/support', 'navHelp'],
@@ -84,6 +85,12 @@ useHead(() =>
   <div v-if="isCustomer && !ws.sessionReady.value" class="loading-state">
     <AppIcon name="loader" class="spin" :size="28" />{{ t('loading') }}
   </div>
+  <!-- Back from inPAY's payment page. Ahead of the sign-in: a payment started in the bot returns signed out. -->
+  <PayReturnView
+    v-else-if="view === '/app/pay' || view.startsWith('/app/pay/')"
+    :key="view"
+    :checkout-id="view.slice('/app/pay/'.length)"
+  />
   <AuthPanel v-else-if="(isCustomer && !ws.user.value) || view === '/auth/telegram'" /><DashboardView
     v-else-if="view === '/app'"
   /><BatchView

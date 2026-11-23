@@ -30,8 +30,15 @@ const contacts = {
   company: { name: '"ARCANIUM TECHNOLOGIES" MCHJ', tin: '313458514', address: 'Toshkent', phone: '', email: '' },
 }
 
+// Under /automatic the same platform, once automatic payment (inPAY) is on beside card transfer.
 const stub = http.createServer((req, res) => {
-  const body = { '/api/v1/plans': plans, '/api/v1/catalog': catalog, '/api/v1/contacts': contacts }[req.url.split('?')[0]]
+  const path = req.url.split('?')[0]
+  const automatic = path.startsWith('/automatic/')
+  const body = {
+    '/api/v1/plans': automatic ? { ...plans, checkout: { automatic: true, card: true } } : plans,
+    '/api/v1/catalog': catalog,
+    '/api/v1/contacts': contacts,
+  }[path.replace(/^\/automatic/, '')]
   res.writeHead(body ? 200 : 404, { 'content-type': 'application/json' })
   res.end(JSON.stringify(body ?? { error: 'not found' }))
 })
@@ -135,7 +142,9 @@ try {
   })
 
   await check('the app renders in the browser, with Telegram’s script ahead of it', async () => {
-    for (const path of ['/en/app', '/uz/app/tools', '/ru/auth/telegram', '/en/app?file_id=1']) {
+    // The last is where inPAY sends a browser back, signed in or not, with whatever it adds to the address.
+    for (const path of ['/en/app', '/uz/app/tools', '/ru/auth/telegram', '/en/app?file_id=1',
+      '/uz/app/pay/10000000-0000-4000-8000-000000000001?status=success']) {
       const response = await get(site, path)
       assert.equal(response.status, 200, path)
       const html = await response.text()
@@ -360,6 +369,33 @@ try {
     const manifest = await (await get(site, '/site.webmanifest')).json()
     assert.equal(manifest.name, 'DocMaster')
     assert.equal(manifest.icons.length, 3)
+  })
+
+  // How to pay is said as the platform has it. One that names no ways to pay (today's) is card transfer.
+  await check('without automatic payment, the pages describe card transfer as they did', async () => {
+    const pricing = (await (await get(site, '/en/pricing')).text()).replaceAll('\u00a0', ' ')
+    for (const words of ['Transfer by card', 'Upload the receipt', 'We check and switch on', 'Mastercard', 'A member of staff checks every receipt by hand'])
+      assert.ok(pricing.includes(words), `the pricing page says “${words}”`)
+    assert.ok(!pricing.includes('inPAY'), 'and nothing of automatic payment')
+    assert.ok(!(await (await get(site, '/en')).text()).includes('inPAY'), 'nor does the home page')
+  })
+  const paying = await serve(3193, `${stubOrigin}/automatic`, {
+    NUXT_PUBLIC_SITE_ORIGIN: 'https://docmaster.live',
+    NUXT_PUBLIC_SITE_INDEXABLE: '1',
+  })
+  await check('with automatic payment on, the pricing page, the questions and the footer say so in the HTML', async () => {
+    const pricing = (await (await get(paying, '/en/pricing')).text()).replaceAll('\u00a0', ' ')
+    for (const words of ['Pay on inPAY’s page', 'The plan switches on by itself', 'You can also pay by card transfer', 'Payme',
+      'After an automatic payment, by itself, usually within a minute.'])
+      assert.ok(pricing.includes(words), `the pricing page says “${words}”`)
+    for (const words of ['Transfer by card', 'Upload the receipt', 'A member of staff checks every receipt by hand'])
+      assert.ok(!pricing.includes(words), `the pricing page no longer says “${words}”`)
+    const home = (await (await get(paying, '/en')).text()).replaceAll('\u00a0', ' ')
+    assert.ok(home.includes('On the page of inPAY, a payment service, with Click, Payme, Uzcard or Humo'), 'the home page answers “How do I pay”')
+    for (const locale of ['uz', 'ru']) {
+      const html = await (await get(paying, `/${locale}/pricing`)).text()
+      assert.ok(html.includes('inPAY') && html.includes('Payme'), `/${locale}/pricing names inPAY and Payme`)
+    }
   })
 
   // As before launch: the defaults keep search engines away.

@@ -30,6 +30,7 @@
     "test:deck-editor": "node --experimental-strip-types tests/deck-editor.mjs",
     "test:deck-editor-live": "node --experimental-strip-types tests/deck-editor-live.mjs",
     "test:payments": "node tests/manual-payment.mjs",
+    "test:checkout": "node tests/automatic-payment.mjs",
     "test:channels": "node tests/channel-gate.mjs",
     "test:frame": "node tests/app-frame.mjs",
     "test:core": "node tests/core-pages.mjs",

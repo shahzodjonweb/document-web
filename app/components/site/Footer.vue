@@ -12,6 +12,7 @@ const popular = ['merge-pdf', 'compress-pdf', 'split-pdf', 'jpg-to-pdf', 'word-t
   .map((slug) => tool(slug))
   .filter((item) => !!item)
 const year = new Date().getFullYear()
+const { automatic, names: payNames } = usePaymentMethods()
 const languages = [
   { code: 'uz', key: 'siteLangUz' },
   { code: 'ru', key: 'siteLangRu' },
@@ -106,8 +107,8 @@ const languages = [
       </section>
       <div class="site-footer-bottom">
         <span>{{ t('siteFooterCopyright', { year, company: company?.name || brand }) }}</span>
-        <div class="site-cards" :aria-label="t('siteFooterCards')">
-          <span>Uzcard</span><span>Humo</span><span>Visa</span><span>Mastercard</span>
+        <div class="site-cards" :aria-label="t(automatic ? 'sitePayWaysLabel' : 'siteFooterCards')">
+          <span v-for="name in payNames" :key="name">{{ name }}</span>
         </div>
         <nav class="site-footer-langs" :aria-label="t('siteLangLabel')">
           <a

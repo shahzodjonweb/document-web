@@ -205,10 +205,17 @@ try {
   await page.getByTestId('pay-premium').click()
   await panel.waitFor()
   assert.equal(await panel.getByTestId('manual-discount').count(), 0, 'Premium is paid at its regular price')
-  assert.equal(await panel.getByRole('radio', { name: /Automatic payment/ }).isDisabled(), true, 'automatic is not offered yet')
-  assert.equal(await panel.getByRole('radio', { name: /Card transfer/ }).isChecked(), true)
+  // This platform has no automatic payment (`automatic.available` false, no
+  // `checkout`): card transfer is the one way, so it is named and not picked.
+  assert.equal(await panel.getByRole('radio').count(), 0, 'one way to pay needs no picker')
+  assert.match(await panel.locator('.eyebrow').innerText(), /^Card transfer$/i)
+  assert.match(await panel.getByTestId('payment-way').innerText(), /^Send the price from your bank app .+ upload the receipt\./)
+  assert.doesNotMatch(await panel.innerText(), /Automatic payment|inPAY|Coming soon/, 'automatic payment is not mentioned')
+  assert.match((await page.getByTestId('pay-stepper').innerText()).replace(/\s+/g, ' '), /How to pay.*Transfer and receipt.*We check it/)
+  assert.equal(await page.getByTestId('checkout-pay').count(), 0)
+  assert.equal(await page.getByTestId('checkout-status').count(), 0)
   await audit('method')
-  checks.push('Choosing a method: card transfer, with automatic shown as coming soon')
+  checks.push('Without automatic payment, card transfer is the one way: named, with no picker and no word of automatic payment')
 
   await page.getByTestId('manual-start').click()
   await page.getByTestId('manual-card-number').waitFor()
@@ -248,6 +255,13 @@ try {
   assert.equal(await page.getByTestId('manual-payment').count(), 0, 'no card shown to someone signed out')
   assert.equal(await page.locator('.site-plan').nth(1).getByRole('link').getAttribute('href'), '/en/app/billing')
   assert.match(await page.getByTestId('discount-banner').innerText(), /Plus on discount/)
+  // How to pay, as it is without automatic payment: the four card-transfer steps and the cards.
+  assert.deepEqual(await page.locator('.site-pricing-steps h3').allInnerTexts(),
+    ['Choose a plan', 'Transfer by card', 'Upload the receipt', 'We check and switch on'])
+  assert.equal(await page.locator('.site-pricing-also').count(), 0)
+  for (const chips of ['.site-pricing-cards', '.site-footer .site-cards'])
+    assert.deepEqual(await page.locator(`${chips} span`).allInnerTexts(), ['Uzcard', 'Humo', 'Visa', 'Mastercard'])
+  assert.match(await page.locator('.site-faq').evaluate((node) => node.textContent), /A member of staff checks every receipt by hand/)
   await audit('pricing')
   checks.push('Signed out: the public pricing page shows prices and the discount banner and sends paid plans to the app to pay; no card shown')
 
@@ -266,6 +280,8 @@ try {
   }
   checks.push('Uzbek and Russian write the last day as the bot does (31-oktabrgacha, до 31 октября) and name the struck price')
 
+  // Nothing of automatic payment was asked of a platform that has none.
+  assert.ok(!requests.some((r) => r.endpoint.startsWith('/billing/checkout')), 'no automatic-payment call')
   assert.deepEqual(errors, [])
   assert.deepEqual(unexpected, [], 'every API call is covered by the fixture')
   console.log(JSON.stringify({ status: 'passed', checks }, null, 2))

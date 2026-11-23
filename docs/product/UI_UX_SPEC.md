@@ -159,7 +159,7 @@ Use a four-step wizard: Content → Outline → Style → Generate. The first st
 - Billing page separates included standard operations, included AI credits, purchased top-ups, and referral rewards. Included grants expire at the period end; purchased top-ups do not expire in v1; referral grants expire after 30 days. Show the next reset, the actual provider period, and the disclosed Free-cycle/daily reset time in the user's timezone. Never label a 30-day period as a calendar-month boundary.
 - A paid period does not renew by itself: show Paid access until DATE and offer paying again. Never delete user content as an unannounced consequence of a lapsed period.
 - A higher plan paid for while a period runs starts at once; the same or a lower plan follows the running period, so nothing already paid for is cut short. No proration.
-- Prices come from the admin panel; nothing is on sale until the card is saved there. The bot and the browser show the same card, amount and discount; automatic payment is a later addition.
+- Prices come from the admin panel; nothing is on sale until the card is saved there. The bot and the browser show the same card, amount and discount. Automatic payment through inPAY is offered when the platform says it is available: the customer pays on inPAY's page, and access starts only when the server has inPAY's confirmation — never from the address the browser returns to.
 - The product's Premium subscription is labeled Product Premium where necessary, so it is not confused with Telegram Premium.
 
 ### 4.5 Shared account and cross-channel continuity

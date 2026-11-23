@@ -1,6 +1,16 @@
 // FAQ items for the public site. q/a tuples are [en, uz, ru]; answers are plain text (they feed FAQPage JSON-LD).
 // `group` is the help-centre topic; `pages` are pages.json ids (plus ai-referat) that show the item.
-export type FaqItem = { id: string; group: string; pages: readonly string[]; q: readonly [string, string, string]; a: readonly [string, string, string] }
+// An answer about paying says card transfer in `a`; `automatic` replaces it once automatic payment (inPAY)
+// is on, and `both` once card transfer is offered beside it (the plans' `checkout`, read in useSite).
+export type FaqItem = {
+  id: string
+  group: string
+  pages: readonly string[]
+  q: readonly [string, string, string]
+  a: readonly [string, string, string]
+  automatic?: readonly [string, string, string]
+  both?: readonly [string, string, string]
+}
 export const faq = [
 
   // ── Home (6) ──
@@ -48,6 +58,16 @@ export const faq = [
       'Bank ilovangizdan karta orqali o‘tkazma bilan: Uzcard, Humo, Visa yoki Mastercard. Kvitansiyani «Tarif va to‘lov» bo‘limiga yuklang. Xodimlarimiz tekshirgach, tarif 30 kunga yoqiladi. U o‘z-o‘zidan uzaytirilmaydi.',
       'Переводом с карты из банковского приложения: Uzcard, Humo, Visa или Mastercard. Загрузите квитанцию в разделе «Тариф и оплата». После проверки сотрудниками тариф включается на 30 дней. Сам он не продлевается.',
     ],
+    automatic: [
+      'On the page of inPAY, a payment service, with Click, Payme, Uzcard or Humo. Choose a plan in Plan and billing and press Pay. The plan switches on by itself, usually within a minute, for 30 days. It never renews on its own.',
+      'inPAY to‘lov xizmati sahifasida Click, Payme, Uzcard yoki Humo orqali. «Tarif va to‘lov» bo‘limida tarifni tanlang va «To‘lash» tugmasini bosing. Tarif o‘zi yoqiladi, odatda bir daqiqa ichida, 30 kunga. U o‘z-o‘zidan uzaytirilmaydi.',
+      'На странице платёжного сервиса inPAY — через Click, Payme, Uzcard или Humo. Выберите тариф в разделе «Тариф и оплата» и нажмите «Оплатить». Тариф включится сам, обычно в течение минуты, на 30 дней. Сам он не продлевается.',
+    ],
+    both: [
+      'On the page of inPAY, a payment service, with Click, Payme, Uzcard or Humo: choose a plan in Plan and billing and press Pay, and the plan switches on by itself, usually within a minute. Or by card transfer from your bank app: upload the receipt and our staff check it before the plan starts. Either way the plan lasts 30 days and never renews on its own.',
+      'inPAY to‘lov xizmati sahifasida Click, Payme, Uzcard yoki Humo orqali: «Tarif va to‘lov» bo‘limida tarifni tanlang va «To‘lash» tugmasini bosing — tarif o‘zi yoqiladi, odatda bir daqiqa ichida. Yoki bank ilovangizdan karta orqali o‘tkazma bilan: kvitansiyani yuklang, xodimlarimiz tekshirgach tarif yoqiladi. Har ikki holatda tarif 30 kun amal qiladi va o‘z-o‘zidan uzaytirilmaydi.',
+      'На странице платёжного сервиса inPAY — через Click, Payme, Uzcard или Humo: выберите тариф в разделе «Тариф и оплата» и нажмите «Оплатить», тариф включится сам, обычно в течение минуты. Или переводом с карты из банковского приложения: загрузите квитанцию, и после проверки сотрудниками тариф включится. В обоих случаях тариф действует 30 дней и сам не продлевается.',
+    ],
   },
   {
     id: 'home-size', group: 'tools', pages: ['home', 'tools-index', 'help'],
@@ -85,6 +105,16 @@ export const faq = [
       'A member of staff checks every receipt by hand, and the plan starts as soon as it is approved. You see the status in Plan and billing. If it is taking long, write to support.',
       'Har bir kvitansiyani xodim qo‘lda tekshiradi, tasdiqlangach tarif darhol yoqiladi. Holatni «Tarif va to‘lov» bo‘limida ko‘rasiz. Uzoq cho‘zilsa, yordam xizmatiga yozing.',
       'Каждую квитанцию сотрудник проверяет вручную, и тариф включается сразу после подтверждения. Статус виден в разделе «Тариф и оплата». Если ждать приходится долго, напишите в поддержку.',
+    ],
+    automatic: [
+      'By itself, usually within a minute of the payment. You see the status in Plan and billing. If it is taking long, write to support.',
+      'O‘zi yoqiladi, odatda to‘lovdan keyin bir daqiqa ichida. Holatni «Tarif va to‘lov» bo‘limida ko‘rasiz. Uzoq cho‘zilsa, yordam xizmatiga yozing.',
+      'Тариф включается сам, обычно в течение минуты после оплаты. Статус виден в разделе «Тариф и оплата». Если ждать приходится долго, напишите в поддержку.',
+    ],
+    both: [
+      'After an automatic payment, by itself, usually within a minute. After a card transfer, a member of staff checks the receipt by hand and the plan starts as soon as it is approved. You see the status in Plan and billing. If it is taking long, write to support.',
+      'Avtomatik to‘lovdan keyin o‘zi yoqiladi, odatda bir daqiqa ichida. Karta orqali o‘tkazmada kvitansiyani xodim qo‘lda tekshiradi, tasdiqlangach tarif darhol yoqiladi. Holatni «Tarif va to‘lov» bo‘limida ko‘rasiz. Uzoq cho‘zilsa, yordam xizmatiga yozing.',
+      'После автоматической оплаты тариф включается сам, обычно в течение минуты. При переводе с карты квитанцию сотрудник проверяет вручную, и тариф включается сразу после подтверждения. Статус виден в разделе «Тариф и оплата». Если ждать приходится долго, напишите в поддержку.',
     ],
   },
   {
