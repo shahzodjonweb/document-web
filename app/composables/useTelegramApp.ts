@@ -204,6 +204,21 @@ export function useTelegramApp() {
     webApp()?.close?.()
   }
   const initData = (): string => webApp()?.initData || ''
+  /**
+   * A page outside the app opens in the phone's browser, with the Mini App left
+   * as it is. False in a plain browser, or when Telegram has no such call: the
+   * caller then goes there itself.
+   */
+  function openLink(url: string): boolean {
+    const app = miniApp.value ? webApp() : null
+    if (typeof app?.openLink !== 'function') return false
+    try {
+      app.openLink(url)
+      return true
+    } catch {
+      return false
+    }
+  }
   const colorScheme = (): string => webApp()?.colorScheme || ''
 
   function haptic(kind: Haptic) {
@@ -402,6 +417,7 @@ export function useTelegramApp() {
     ready,
     expand,
     close,
+    openLink,
     haptic,
     usePrimaryAction,
     browserPrimary,

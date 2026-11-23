@@ -13,7 +13,10 @@ export async function loadPublicData() {
   const url: string = '/_site/data'
   const data = await $fetch<{ plans: any; catalog: any; contacts: Contacts | null }>(url).catch(() => null)
   if (!data) return
-  if (data.plans) ws.plans.value = plansFrom(data.plans)
+  if (data.plans) {
+    ws.plans.value = plansFrom(data.plans)
+    ws.paymentMethods.value = paymentMethodsFrom(data.plans)
+  }
   if (data.catalog) ws.features.value = featuresFrom(data.catalog)
   if (data.contacts) {
     contacts.value = data.contacts

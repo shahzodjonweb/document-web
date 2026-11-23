@@ -1,4 +1,4 @@
-import { faq as allFaq } from '../../content/site/faq'
+import { faq as allFaq, type FaqItem } from '../../content/site/faq'
 import { tools, type SiteTool } from '../../content/site/tools'
 
 /** The tool directory's groups, in the mega menu's and the home page's order. */
@@ -31,6 +31,7 @@ export function useSite() {
   const { t, path, locale } = useLocale()
   const { contacts } = contactsState()
   const { destination } = useTools()
+  const payment = usePaymentMethods()
   const brand = String(useRuntimeConfig().public.productName)
   const plans = useState<any[]>('plans', () => [])
   const index = computed(() => (['en', 'uz', 'ru'] as const).indexOf(locale.value))
@@ -72,11 +73,14 @@ export function useSite() {
     })),
   )
 
+  /** An answer about paying follows the ways to pay that are open right now. */
+  const answer = (item: FaqItem) =>
+    (payment.automatic.value ? (payment.card.value && item.both) || item.automatic : undefined) || item.a
   /** The FAQ items a page shows, in its language. */
   const faq = (page: string) =>
     allFaq
       .filter((item) => (item.pages as readonly string[]).includes(page))
-      .map((item) => ({ id: item.id, q: fill(item.q[index.value]!), a: fill(item.a[index.value]!) }))
+      .map((item) => ({ id: item.id, q: fill(item.q[index.value]!), a: fill(answer(item)[index.value]!) }))
       .filter((item) => item.q && item.a)
 
   return { t, st, fill, path, locale, bot, tool, toolName, toolLine, toolPage, start, groups, faq, tools }

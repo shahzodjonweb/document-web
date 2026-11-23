@@ -1206,14 +1206,16 @@
   background: var(--success-tint);
   color: var(--success-ink);
 }
-.manual-payment .panel-heading {
+.manual-payment .panel-heading,
+.checkout-status .panel-heading {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-3);
   margin-bottom: var(--space-4);
 }
-.manual-payment .panel-heading h2 {
+.manual-payment .panel-heading h2,
+.checkout-status .panel-heading h2 {
   font-size: var(--text-lg);
 }
 .payment-methods {
@@ -1242,6 +1244,8 @@
   cursor: not-allowed;
 }
 .payment-method input {
+  /* Inputs may shrink to nothing (main.css), and beside its text the radio did. */
+  flex-shrink: 0;
   margin-top: 4px;
   accent-color: var(--action);
 }
@@ -1256,6 +1260,53 @@
 .payment-method small {
   color: var(--muted);
   font-size: var(--text-sm);
+}
+/* One way to pay needs no picker: it is said in a line above the button. */
+.payment-way {
+  max-width: 62ch;
+  margin: 0 0 var(--space-5);
+  color: var(--text);
+}
+.manual-payment > .warning-banner {
+  margin-bottom: var(--space-5);
+}
+/* An automatic payment: waiting for it, or how it ended. */
+.checkout-status {
+  margin-top: var(--space-6);
+  padding: var(--space-6);
+}
+.checkout-status .panel-heading {
+  flex-wrap: wrap;
+}
+.checkout-status > .muted {
+  max-width: 62ch;
+}
+.checkout-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}
+.checkout-status > .field-hint {
+  margin-top: var(--space-3);
+}
+.checkout-status > [class$='-banner'] {
+  margin-bottom: var(--space-4);
+}
+.checkout-status > [class$='-banner']:last-child {
+  margin-bottom: 0;
+}
+.checkout-status [class$='-banner'] > svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.checkout-status [class$='-banner'] .text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: inherit;
+  text-decoration: underline;
+  white-space: nowrap;
 }
 .manual-steps {
   display: grid;
@@ -1296,12 +1347,49 @@
 .manual-receipt .button {
   justify-self: start;
 }
+/* Back from inPAY's payment page: one answer, centred as the sign-in is. */
+.pay-return {
+  max-width: 480px;
+  margin: var(--space-6) auto var(--space-12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  text-align: center;
+}
+.pay-return h1 {
+  margin-top: var(--space-3);
+  font-size: var(--text-2xl);
+}
+.pay-return-lead {
+  max-width: 40ch;
+  color: var(--muted);
+  font-size: var(--text-md);
+}
+.pay-return-sum {
+  color: var(--ink);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.pay-return > [class$='-banner'] {
+  margin: var(--space-2) 0 0;
+  text-align: left;
+}
+.pay-return-actions {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
 @media (max-width: 760px) {
   .current-plan-head {
     flex-direction: column;
     align-items: flex-start;
   }
   .manual-payment,
+  .checkout-status,
   .plan-card {
     padding: var(--space-5) var(--space-4);
   }
@@ -1309,6 +1397,13 @@
     flex-direction: column;
     align-items: flex-start;
     font-size: var(--text-xs);
+  }
+  .checkout-actions .button,
+  .pay-return-actions .button {
+    flex: 1 1 100%;
+  }
+  .pay-return {
+    margin-top: var(--space-2);
   }
 }
 

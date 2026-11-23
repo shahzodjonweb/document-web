@@ -3,11 +3,16 @@
 const props = defineProps<{ keys?: string[]; guide?: boolean }>()
 const { t, path } = useLocale()
 const query = ref('')
+// The billing article ends with how plans are paid for, by the ways open right now.
+const { automatic, card } = usePaymentMethods()
+const paying = computed(() =>
+  t(automatic.value ? (card.value ? 'helpBillingPayBoth' : 'helpBillingPayAutomatic') : 'helpBillingPayCard'),
+)
 const articles = computed(() =>
   (props.keys || ['helpGetting', 'helpFormats', 'helpPrivacy', 'helpBilling']).map((key) => ({
     key,
     title: t(key),
-    body: t(`${key}Body`),
+    body: key === 'helpBilling' ? `${t(`${key}Body`)} ${paying.value}` : t(`${key}Body`),
   })),
 )
 const found = computed(() => {

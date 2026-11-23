@@ -27,6 +27,14 @@ const rows = computed(() => [
   { label: t('sitePricingRowWeb'), cells: plans.value.map(() => t('sitePricingCellWeb')) },
   { label: t('sitePricingRowBot'), cells: plans.value.map(() => t('sitePricingCellBot')) },
 ])
+// How a plan is paid for, as the platform says it is right now: on inPAY's page
+// once automatic payment is on, by card transfer and receipt until then.
+const { automatic, card, names } = usePaymentMethods()
+const paySteps = computed(() =>
+  automatic.value
+    ? ['sitePricingPayStep1', 'sitePricingAutoStep2', 'sitePricingAutoStep3']
+    : [1, 2, 3, 4].map((n) => `sitePricingPayStep${n}`),
+)
 const tiles = [
   { icon: 'gift', key: 'Invite', to: '/invite' },
   { icon: 'calendar', key: 'Renew', to: '' },
@@ -75,13 +83,14 @@ const tiles = [
       <div class="site-container">
         <SiteSectionHead id="pricing-pay" :title="t('sitePricingPayTitle')" />
         <ol class="site-steps site-pricing-steps">
-          <li v-for="n in 4" :key="n">
-            <h3 class="site-h3">{{ t(`sitePricingPayStep${n}Title`) }}</h3>
-            <p>{{ t(`sitePricingPayStep${n}Text`) }}</p>
+          <li v-for="step in paySteps" :key="step">
+            <h3 class="site-h3">{{ t(`${step}Title`) }}</h3>
+            <p>{{ t(`${step}Text`) }}</p>
           </li>
         </ol>
-        <div class="site-cards site-pricing-cards" :aria-label="t('sitePricingCardsLabel')">
-          <span>Uzcard</span><span>Humo</span><span>Visa</span><span>Mastercard</span>
+        <p v-if="automatic && card" class="site-muted site-pricing-also">{{ t('sitePricingAutoCardNote') }}</p>
+        <div class="site-cards site-pricing-cards" :aria-label="t(automatic ? 'sitePayWaysLabel' : 'sitePricingCardsLabel')">
+          <span v-for="name in names" :key="name">{{ name }}</span>
         </div>
       </div>
     </section>

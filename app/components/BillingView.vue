@@ -5,7 +5,7 @@ const ws = useWorkspace()
 const usage = computed(() => ws.usage.value)
 // The week's limits reset on Monday 00:00 in Tashkent, shown in this device's zone.
 const resetsAt = computed(() => usage.value?.week?.resets_at ?? usage.value?.resets_at)
-// So'm per 30 days for a card transfer; a discount lowers today's price.
+// So'm per 30 days, however it is paid; a discount lowers today's price.
 const { figure, money, regular, discount, price, untilLabel } = usePricing()
 /** Each plan with today's price and its discount, if any, worked out once. */
 const rows = computed(() =>
@@ -56,7 +56,7 @@ async function planChanged() {
     </div>
     <WeeklyUsage edits />
   </section>
-  <ManualPaymentPanel v-if="ws.user.value" :plan="chosen" @close="chosen = ''" @changed="planChanged" />
+  <PaymentPanel v-if="ws.user.value" :plan="chosen" @close="chosen = ''" @changed="planChanged" @choose="pay" />
   <section class="home-section">
     <div class="section-heading">
       <h2>{{ t('plansTitle') }}</h2>

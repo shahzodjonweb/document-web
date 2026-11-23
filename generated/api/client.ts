@@ -1,4 +1,5 @@
 import type { components } from './schema'
+import type { PaymentMethods } from './types'
 type Schemas = components['schemas']
 export type PublicRequest = <T = unknown>(path: string, options?: Record<string, unknown>) => Promise<T>
 /** Thin same-origin transport over the pinned, generated public OpenAPI types. */
@@ -9,6 +10,13 @@ export function createPublicApi(request: PublicRequest) {
     usage: () => request<Schemas['Usage']>('/usage'),
     jobs: () => request<{ results: Schemas['Job'][]; count: number }>('/jobs'),
     job: (id: string) => request<Schemas['Job']>(`/jobs/${encodeURIComponent(id)}`),
-    plans: () => request<{ plans: Schemas['Plan'][]; draft: boolean; currency: string; period_seconds?: number }>('/plans'),
+    plans: () =>
+      request<{
+        plans: Schemas['Plan'][]
+        draft: boolean
+        currency: string
+        period_seconds?: number
+        checkout?: PaymentMethods
+      }>('/plans'),
   }
 }

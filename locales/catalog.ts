@@ -692,9 +692,25 @@ const entries: Record<string, [string, string, string]> = {
   ],
   helpBilling: ['Usage & payments', 'Foydalanish va to‘lovlar', 'Лимиты и платежи'],
   helpBillingBody: [
-    'Every plan has every tool and the same file size and page limits. What differs is the weekly allowance of AI documents and file tasks, renewed every Monday, and the number of AI edits for each generated file. Premium also needs no channel subscription. A task counts once you start it; one that fails, or a compression that changes nothing, does not count. Plus and Premium are paid by card transfer: choose a plan in Plan & billing, transfer the amount and send the receipt, and we switch the plan on after checking it.',
-    'Har bir tarifda barcha vositalar bor, fayl hajmi va sahifalar chegarasi ham bir xil. Farqi — haftalik AI hujjatlar va fayl vazifalari limitida (u har dushanba yangilanadi) hamda har bir yaratilgan fayl uchun AI tahrirlar sonida. Bundan tashqari, Premium’da kanallarga obuna bo‘lish shart emas. Vazifa boshlanganda hisoblanadi; xato bilan tugagan vazifa yoki hech narsani o‘zgartirmagan siqish hisoblanmaydi. Plus va Premium karta orqali to‘lanadi: Tarif va to‘lov bo‘limida tarifni tanlang, summani o‘tkazing va kvitansiyani yuboring — tekshirgach tarifni yoqamiz.',
-    'В каждом тарифе есть все инструменты, а ограничения на размер файла и число страниц одинаковы. Тарифы различаются недельным лимитом ИИ-документов и задач с файлами, который обновляется по понедельникам, и числом ИИ-правок для каждого созданного файла. Кроме того, для Premium не нужна подписка на каналы. Задача засчитывается при запуске; задача с ошибкой или сжатие без изменений не считаются. Plus и Premium оплачиваются переводом на карту: выберите тариф в разделе «Тариф и оплата», переведите сумму и отправьте квитанцию — после проверки мы включим тариф.',
+    'Every plan has every tool and the same file size and page limits. What differs is the weekly allowance of AI documents and file tasks, renewed every Monday, and the number of AI edits for each generated file. Premium also needs no channel subscription. A task counts once you start it; one that fails, or a compression that changes nothing, does not count.',
+    'Har bir tarifda barcha vositalar bor, fayl hajmi va sahifalar chegarasi ham bir xil. Farqi — haftalik AI hujjatlar va fayl vazifalari limitida (u har dushanba yangilanadi) hamda har bir yaratilgan fayl uchun AI tahrirlar sonida. Bundan tashqari, Premium’da kanallarga obuna bo‘lish shart emas. Vazifa boshlanganda hisoblanadi; xato bilan tugagan vazifa yoki hech narsani o‘zgartirmagan siqish hisoblanmaydi.',
+    'В каждом тарифе есть все инструменты, а ограничения на размер файла и число страниц одинаковы. Тарифы различаются недельным лимитом ИИ-документов и задач с файлами, который обновляется по понедельникам, и числом ИИ-правок для каждого созданного файла. Кроме того, для Premium не нужна подписка на каналы. Задача засчитывается при запуске; задача с ошибкой или сжатие без изменений не считаются.',
+  ],
+  // How the plans are paid for, said after the article above: by the ways open right now.
+  helpBillingPayCard: [
+    'Plus and Premium are paid by card transfer: choose a plan in Plan & billing, transfer the amount and send the receipt, and we switch the plan on after checking it.',
+    'Plus va Premium karta orqali to‘lanadi: Tarif va to‘lov bo‘limida tarifni tanlang, summani o‘tkazing va kvitansiyani yuboring — tekshirgach tarifni yoqamiz.',
+    'Plus и Premium оплачиваются переводом на карту: выберите тариф в разделе «Тариф и оплата», переведите сумму и отправьте квитанцию — после проверки мы включим тариф.',
+  ],
+  helpBillingPayAutomatic: [
+    'Plus and Premium are paid on inPAY’s page with Click, Payme, Uzcard or Humo: choose a plan in Plan & billing and press Pay. The plan switches on by itself, usually within a minute.',
+    'Plus va Premium inPAY sahifasida Click, Payme, Uzcard yoki Humo orqali to‘lanadi: Tarif va to‘lov bo‘limida tarifni tanlang va «To‘lash» tugmasini bosing. Tarif o‘zi yoqiladi, odatda bir daqiqa ichida.',
+    'Plus и Premium оплачиваются на странице inPAY через Click, Payme, Uzcard или Humo: выберите тариф в разделе «Тариф и оплата» и нажмите «Оплатить». Тариф включится сам, обычно в течение минуты.',
+  ],
+  helpBillingPayBoth: [
+    'Plus and Premium are paid on inPAY’s page with Click, Payme, Uzcard or Humo: choose a plan in Plan & billing and press Pay, and the plan switches on by itself, usually within a minute. You can also pay by card transfer and send the receipt; we switch the plan on after checking it.',
+    'Plus va Premium inPAY sahifasida Click, Payme, Uzcard yoki Humo orqali to‘lanadi: Tarif va to‘lov bo‘limida tarifni tanlang va «To‘lash» tugmasini bosing — tarif o‘zi yoqiladi, odatda bir daqiqa ichida. Karta orqali o‘tkazib, kvitansiyani yuborish ham mumkin — tekshirgach tarifni yoqamiz.',
+    'Plus и Premium оплачиваются на странице inPAY через Click, Payme, Uzcard или Humo: выберите тариф в разделе «Тариф и оплата» и нажмите «Оплатить» — тариф включится сам, обычно в течение минуты. Можно оплатить и переводом на карту, отправив квитанцию, — после проверки мы включим тариф.',
   ],
   legalDraft: [
     'Local development information — public terms require review before launch.',

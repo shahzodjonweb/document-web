@@ -865,6 +865,25 @@ export const site = {
     'Сотрудники проверяют квитанцию. 30 дней отсчитываются с момента включения тарифа.',
   ],
   sitePricingCardsLabel: ['Cards we accept', 'Qabul qilinadigan kartalar', 'Принимаем карты'],
+  // Once automatic payment through inPAY is on (the plans' `checkout.automatic`): three steps instead of four.
+  sitePricingAutoStep2Title: ['Pay on inPAY’s page', 'inPAY sahifasida to‘lang', 'Оплатите на странице inPAY'],
+  sitePricingAutoStep2Text: [
+    'Press Pay and you go to the page of inPAY, a payment service. Pay there with Click, Payme, Uzcard or Humo.',
+    '«To‘lash» tugmasini bosing — inPAY to‘lov xizmati sahifasi ochiladi. U yerda Click, Payme, Uzcard yoki Humo orqali to‘lang.',
+    'Нажмите «Оплатить» — откроется страница платёжного сервиса inPAY. Оплатите там через Click, Payme, Uzcard или Humo.',
+  ],
+  sitePricingAutoStep3Title: ['The plan switches on by itself', 'Tarif o‘zi yoqiladi', 'Тариф включается сам'],
+  sitePricingAutoStep3Text: [
+    'Usually within a minute of the payment. The 30 days start then, and nothing renews by itself.',
+    'Odatda to‘lovdan keyin bir daqiqa ichida. 30 kun shu paytdan boshlanadi, hech narsa o‘z-o‘zidan uzaytirilmaydi.',
+    'Обычно в течение минуты после оплаты. С этого момента отсчитываются 30 дней, ничего не продлевается само.',
+  ],
+  sitePricingAutoCardNote: [
+    'You can also pay by card transfer: send the amount from your bank app and upload the receipt in the app. Our staff check it and switch the plan on.',
+    'Karta orqali o‘tkazma bilan ham to‘lash mumkin: summani bank ilovangizdan o‘tkazing va kvitansiyani ilovaga yuklang. Xodimlarimiz tekshirib, tarifni yoqadi.',
+    'Можно оплатить и переводом с карты: переведите сумму из банковского приложения и загрузите квитанцию в приложении. Сотрудники проверят её и включат тариф.',
+  ],
+  sitePayWaysLabel: ['Ways to pay', 'To‘lov usullari', 'Способы оплаты'],
   sitePricingInviteLabel: ['Invite friends', 'Do‘stlarni taklif qiling', 'Пригласите друзей'],
   sitePricingInviteValue: ['5 friends = 1 month of Plus', '5 do‘st = 1 oylik Plus tarifi', '5 друзей = месяц Plus'],
   sitePricingInviteNote: [
