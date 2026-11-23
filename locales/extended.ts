@@ -2089,6 +2089,12 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Sinov rejimi: avtomatik to‘lovni faqat siz ko‘rasiz. Pul yechilmaydi va tarif berilmaydi.',
     'Тестовый режим: автоматическую оплату видите только вы. Деньги не списываются, тариф не выдаётся.',
   ],
+  // inPAY could not open the payment, and the server offers card transfer in its place for now.
+  checkoutFallback: [
+    'Online payment isn’t working right now, so you can pay by card transfer instead.',
+    'Onlayn to‘lov hozir ishlamayapti, shuning uchun kartaga o‘tkazma orqali to‘lashingiz mumkin.',
+    'Онлайн-оплата сейчас не работает, поэтому можно оплатить переводом на карту.',
+  ],
   checkoutTestNote: [
     'This is a test payment: no money moves and the plan does not change.',
     'Bu sinov to‘lovi: pul yechilmaydi va tarif o‘zgarmaydi.',

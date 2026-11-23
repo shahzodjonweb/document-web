@@ -57,6 +57,8 @@ const state = {
   // What `POST /billing/checkout` answers with.
   created: null,
   refuse: null,
+  // Refusing with checkout_unavailable, the platform then offers card transfer in inPAY's place.
+  fallback: false,
   checkouts: new Map(),
   reads: new Map(),
 }
@@ -139,7 +141,10 @@ async function open(options = {}) {
         payment: null, checkout: state.latest ? state.checkouts.get(state.latest) : null,
       })
     if (endpoint === '/billing/checkout' && method === 'POST') {
-      if (state.refuse) return refusal(...state.refuse)
+      if (state.refuse) {
+        if (state.fallback) Object.assign(state, { card: true, automatic: { available: false } })
+        return refusal(...state.refuse)
+      }
       state.checkouts.set(state.created.id, state.created)
       state.latest = state.created.id
       return json(state.created, 201)
@@ -177,7 +182,7 @@ async function audit(page, label, part) {
 }
 const reset = (values = {}) =>
   Object.assign(state, { signedIn: true, miniApp: false, card: true, automatic: { available: true, provider: 'inpay' },
-    latest: null, created: null, refuse: null }, values)
+    latest: null, created: null, refuse: null, fallback: false }, values)
 const posted = () => requests.filter((r) => r.endpoint === '/billing/checkout' && r.method === 'POST')
 const reads = (id) => state.reads.get(id) || 0
 
@@ -288,6 +293,28 @@ try {
   assert.match(await page.getByTestId('manual-payment').getByRole('alert').innerText(), /The payment service did not answer/)
   assert.equal(await page.getByTestId('checkout-pay').isEnabled(), true)
   checks.push('A refusal from the server is shown inline')
+
+  // inPAY failing with card transfer set up: the platform offers card transfer in its place, and the panel says why.
+  reset({ card: false, fallback: true, refuse: ['checkout_unavailable', 'The payment service did not answer. Try again in a moment.', 503] })
+  await page.goto(`${origin}/en/app/billing`, { waitUntil: 'domcontentloaded' })
+  await page.getByTestId('pay-plus').click()
+  await page.getByTestId('checkout-pay').click()
+  const fallback = page.getByTestId('checkout-fallback')
+  await fallback.waitFor()
+  assert.match(await fallback.innerText(), /^Online payment isn’t working right now, so you can pay by card transfer instead\.$/)
+  const fallbackPanel = page.getByTestId('manual-payment')
+  assert.equal(await page.getByTestId('checkout-pay').count(), 0, 'no inPAY button meanwhile')
+  assert.match(await page.getByTestId('manual-start').innerText(), /^Continue$/)
+  assert.match(await fallbackPanel.locator('.eyebrow').innerText(), /^Card transfer$/i)
+  assert.equal(await fallbackPanel.getByRole('alert').count(), 0, 'not an error: there is a way on')
+  assert.equal(await fallbackPanel.getByRole('radio').count(), 0, 'one way, nothing to pick')
+  await audit(page, 'automatic-fallback', fallbackPanel)
+  // Another plan is a fresh start: the note was about the payment that failed.
+  await fallbackPanel.getByRole('button', { name: 'Close' }).click()
+  await page.getByTestId('pay-premium').click()
+  await page.getByTestId('manual-payment').waitFor()
+  assert.equal(await page.getByTestId('checkout-fallback').count(), 0)
+  checks.push('When inPAY cannot open the payment and the platform offers card transfer instead, the panel turns to it and says why')
 
   // ── One way only: no picker ──
   reset({ card: false, created: checkout(ID.created) })
