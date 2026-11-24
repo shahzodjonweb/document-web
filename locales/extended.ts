@@ -2095,6 +2095,47 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Onlayn to‘lov hozir ishlamayapti, shuning uchun kartaga o‘tkazma orqali to‘lashingiz mumkin.',
     'Онлайн-оплата сейчас не работает, поэтому можно оплатить переводом на карту.',
   ],
+  // The card saved in the bot through inPAY Avto PAY, and its monthly renewal (RenewalPanel).
+  renewalTitle: ['Auto-renewal', 'Avtomatik uzaytirish', 'Автопродление'],
+  renewalOn: [
+    'On. Next charge {date}: {price} from card •••• {last4}.',
+    'Yoqilgan. Keyingi yechim {date}: •••• {last4} kartadan {price}.',
+    'Включено. Следующее списание {date}: {price} с карты •••• {last4}.',
+  ],
+  renewalOff: [
+    'Off. Your plan runs to its end and is not charged again.',
+    'O‘chirilgan. Tarifingiz muddati oxirigacha ishlaydi va qayta yechilmaydi.',
+    'Выключено. Тариф действует до конца срока и больше не списывается.',
+  ],
+  renewalStopped: [
+    'Stopped: the last charges did not go through. Pay again to keep your plan.',
+    'To‘xtadi: oxirgi yechimlar o‘tmadi. Tarifni saqlash uchun qayta to‘lang.',
+    'Остановлено: последние списания не прошли. Оплатите снова, чтобы сохранить тариф.',
+  ],
+  renewalRetry: [
+    'The last renewal charge did not go through. Next try: {date}.',
+    'Oxirgi uzaytirish to‘lovi o‘tmadi. Keyingi urinish: {date}.',
+    'Последнее списание за продление не прошло. Следующая попытка: {date}.',
+  ],
+  renewalCard: ['Saved card: •••• {last4}', 'Saqlangan karta: •••• {last4}', 'Сохранённая карта: •••• {last4}'],
+  renewalTurnOff: ['Turn off auto-renewal', 'Avtomatik uzaytirishni o‘chirish', 'Отключить автопродление'],
+  renewalRemoveCard: ['Remove card •••• {last4}', '•••• {last4} kartani uzish', 'Отвязать карту •••• {last4}'],
+  renewalRemoveConfirm: [
+    'Remove the card? Auto-renewal stops, and nothing is charged to it again.',
+    'Kartani uzasizmi? Avtomatik uzaytirish to‘xtaydi va undan boshqa hech narsa yechilmaydi.',
+    'Отвязать карту? Автопродление остановится, и с неё больше ничего не спишется.',
+  ],
+  renewalRemoveYes: ['Remove card', 'Kartani uzish', 'Отвязать карту'],
+  renewalActionFailed: [
+    'That didn’t work. Please try again in a minute.',
+    'Bajarilmadi. Bir daqiqadan so‘ng qayta urinib ko‘ring.',
+    'Не получилось. Попробуйте ещё раз через минуту.',
+  ],
+  renewalInBot: [
+    'Cards are saved and auto-renewal turned on in the Telegram bot, when you pick a plan there.',
+    'Karta saqlash va avtomatik uzaytirishni yoqish Telegram botda, tarif tanlaganda bo‘ladi.',
+    'Карта сохраняется и автопродление включается в Telegram-боте, при выборе тарифа.',
+  ],
   checkoutTestNote: [
     'This is a test payment: no money moves and the plan does not change.',
     'Bu sinov to‘lovi: pul yechilmaydi va tarif o‘zgarmaydi.',

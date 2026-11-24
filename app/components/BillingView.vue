@@ -56,6 +56,7 @@ async function planChanged() {
     </div>
     <WeeklyUsage edits />
   </section>
+  <RenewalPanel v-if="ws.user.value" />
   <PaymentPanel v-if="ws.user.value" :plan="chosen" @close="chosen = ''" @changed="planChanged" @choose="pay" />
   <section class="home-section">
     <div class="section-heading">

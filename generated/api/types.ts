@@ -187,6 +187,30 @@ export interface BillingOptions {
   /** This customer's latest automatic payment worth showing: a pending one, or one finished in the last week. */
   checkout?: Checkout | null
 }
+/**
+ * `GET /billing/renewal`: the card a customer saved in the bot through inPAY
+ * Avto PAY, and its monthly renewal. The website shows it, turns renewal off
+ * (`DELETE /billing/renewal`) and removes the card (`DELETE /billing/cards/{id}`);
+ * saving a card and turning renewal on happen in the bot.
+ */
+export interface AutoRenewalState {
+  /** Whether this customer may save a card and renew monthly now (in the bot). */
+  offered: boolean
+  card: { id: string; masked: string; last4: string; expiry: string; consent_max: number | null } | null
+  renewal: {
+    status: 'on' | 'off' | 'stopped'
+    plan: string
+    /** When the next charge is due: the end of the paid period. */
+    renews_at: string
+    /** Today's price of the plan, in so'm; null when it is no longer sold. */
+    amount: number | null
+    /** Declined tries of this renewal so far, and when the next one is. */
+    attempts: number
+    next_try_at: string | null
+    stopped_reason: string
+    card_last4: string
+  } | null
+}
 /** `checkout` of `GET /plans`: which ways to pay are open to everyone. Absent from an older platform. */
 export interface PaymentMethods {
   automatic: boolean
