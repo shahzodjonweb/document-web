@@ -103,6 +103,8 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
       ai_documents: { limit: 5, used: 0, remaining: 5 }, file_jobs: { limit: 15, used: 0, remaining: 15 }, edits_per_file: 3,
       resets_at: '2026-10-18T19:00:00Z' })
   // The old checkout endpoints are not mocked on purpose: a call to one is unexpected.
+  // No card saved in the bot: the billing page's auto-renewal panel stays away.
+  if (endpoint === '/billing/renewal' && method === 'GET') return json({ offered: false, card: null, renewal: null })
   if (endpoint === '/billing/manual' && method === 'GET') return json(options())
   if (endpoint === '/billing/manual' && method === 'POST') {
     const { plan } = request.postDataJSON()

@@ -61,6 +61,8 @@ const state = {
   fallback: false,
   checkouts: new Map(),
   reads: new Map(),
+  // The card saved in the bot and its monthly renewal (`GET /billing/renewal`).
+  renewal: null,
 }
 const limits = (price, documents, files, edits) => ({
   weekly_ai_documents: documents, weekly_file_jobs: files, edits_per_file: edits, max_file_mib: 200,
@@ -140,6 +142,18 @@ async function open(options = {}) {
         ],
         payment: null, checkout: state.latest ? state.checkouts.get(state.latest) : null,
       })
+    const none = { offered: false, card: null, renewal: null }
+    if (endpoint === '/billing/renewal' && method === 'GET') return json(state.renewal || none)
+    if (endpoint === '/billing/renewal' && method === 'DELETE') {
+      state.renewal = { ...state.renewal, renewal: { ...state.renewal.renewal, status: 'off' } }
+      return json(state.renewal)
+    }
+    const card = endpoint.match(/^\/billing\/cards\/([^/]+)$/)
+    if (card && method === 'DELETE') {
+      if (card[1] !== state.renewal?.card?.id) return refusal('not_found', 'Not found.', 404)
+      state.renewal = { ...state.renewal, card: null, renewal: { ...state.renewal.renewal, status: 'stopped', stopped_reason: 'card_removed' } }
+      return json(state.renewal)
+    }
     if (endpoint === '/billing/checkout' && method === 'POST') {
       if (state.refuse) {
         if (state.fallback) Object.assign(state, { card: true, automatic: { available: false } })
@@ -182,7 +196,7 @@ async function audit(page, label, part) {
 }
 const reset = (values = {}) =>
   Object.assign(state, { signedIn: true, miniApp: false, card: true, automatic: { available: true, provider: 'inpay' },
-    latest: null, created: null, refuse: null, fallback: false }, values)
+    latest: null, created: null, refuse: null, fallback: false, renewal: null }, values)
 const posted = () => requests.filter((r) => r.endpoint === '/billing/checkout' && r.method === 'POST')
 const reads = (id) => state.reads.get(id) || 0
 
@@ -548,6 +562,32 @@ try {
   await page.locator('.site-pricing-steps li').nth(3).waitFor()
   assert.deepEqual(await page.locator('.site-pricing-steps h3').allInnerTexts(), ['Choose a plan', 'Transfer by card', 'Upload the receipt', 'We check and switch on'])
   checks.push('The pricing page, its questions and the footer name automatic payment once it is on, with card transfer only while it is offered')
+
+  // ── A card saved in the bot: its monthly renewal, turned off and the card removed here ──
+  const renewsAt = new Date(Date.now() + 9 * 86400000).toISOString()
+  reset({ renewal: { offered: true, card: { id: '00000000-0000-4000-8000-0000000000c1', masked: '860038******1234', last4: '1234', expiry: '09/29', consent_max: null },
+    renewal: { status: 'on', plan: 'plus', renews_at: renewsAt, amount: 15000, attempts: 0, next_try_at: null, stopped_reason: '', card_last4: '1234' } } })
+  await page.goto(`${origin}/en/app/billing`, { waitUntil: 'domcontentloaded' })
+  const renewalPanel = page.getByTestId('renewal')
+  await renewalPanel.getByTestId('renewal-on').waitFor()
+  assert.match(await renewalPanel.getByTestId('renewal-on').innerText(), /^On\. Next charge .+: 15 000 so'm from card •••• 1234\.$/)
+  assert.match(await renewalPanel.innerText(), /Saved card: •••• 1234/)
+  await audit(page, 'renewal', renewalPanel)
+  await renewalPanel.getByTestId('renewal-turn-off').click()
+  await renewalPanel.getByTestId('renewal-off').waitFor()
+  assert.equal(await renewalPanel.getByTestId('renewal-turn-off').count(), 0, 'nothing left to turn off')
+  await renewalPanel.getByTestId('card-remove').click()
+  assert.match(await renewalPanel.innerText(), /Remove the card\? Auto-renewal stops/)
+  await renewalPanel.getByTestId('card-remove-yes').click()
+  await renewalPanel.waitFor({ state: 'detached' })
+  assert.deepEqual(requests.filter((r) => r.method === 'DELETE' && /^\/billing\/(renewal|cards)/.test(r.endpoint)).map((r) => r.endpoint),
+    ['/billing/renewal', '/billing/cards/00000000-0000-4000-8000-0000000000c1'])
+  // Nothing saved: no panel at all.
+  reset()
+  await page.goto(`${origin}/en/app/billing`, { waitUntil: 'domcontentloaded' })
+  await page.getByTestId('pay-plus').waitFor()
+  assert.equal(await page.getByTestId('renewal').count(), 0)
+  checks.push('A card saved in the bot shows its renewal on the billing page, which turns it off and removes the card')
 
   assert.deepEqual(errors, [])
   assert.deepEqual(unexpected, [], 'every API call is covered by the fixture')

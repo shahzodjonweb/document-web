@@ -87,6 +87,8 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   if (endpoint === '/billing/manual' && method === 'POST' && refuseTasks)
     return json({ error: { code: 'channels_required', message: 'The Free and Plus plans are for members of our Telegram community. Join our channel, then try again — or choose Premium, which needs no channels.',
       message_params: { channels: channelState().channels } } }, 403)
+  // No card saved in the bot: the billing page's auto-renewal panel stays away.
+  if (endpoint === '/billing/renewal' && method === 'GET') return json({ offered: false, card: null, renewal: null })
   if (endpoint === '/billing/manual' && method === 'GET') return json(options())
   if (endpoint === '/billing/manual' && method === 'POST') {
     const { plan } = request.postDataJSON()
