@@ -188,15 +188,25 @@ export interface BillingOptions {
   checkout?: Checkout | null
 }
 /**
- * `GET /billing/renewal`: the card a customer saved in the bot through inPAY
- * Avto PAY, and its monthly renewal. The website shows it, turns renewal off
- * (`DELETE /billing/renewal`) and removes the card (`DELETE /billing/cards/{id}`);
- * saving a card and turning renewal on happen in the bot.
+ * `GET /billing/renewal`: the card a customer saved through inPAY Avto PAY, on
+ * the website or in the bot, and its monthly renewal. The website turns renewal
+ * on (`POST`) and off (`DELETE /billing/renewal`) and removes the card
+ * (`DELETE /billing/cards/{id}`).
  */
 export interface AutoRenewalState {
-  /** Whether this customer may save a card and renew monthly now (in the bot). */
+  /** Whether this customer may save a card on the website and renew monthly now. */
   offered: boolean
-  card: { id: string; masked: string; last4: string; expiry: string; consent_max: number | null } | null
+  card: {
+    id: string
+    masked: string
+    last4: string
+    expiry: string
+    consent_max: number | null
+    /** Saved on the website: only such a card is charged in one tap here. */
+    here: boolean
+  } | null
+  /** Renewal is off and can be turned on again from the saved card. */
+  can_turn_on: boolean
   renewal: {
     status: 'on' | 'off' | 'stopped'
     plan: string
@@ -210,6 +220,32 @@ export interface AutoRenewalState {
     stopped_reason: string
     card_last4: string
   } | null
+}
+/** One charge of a saved card: `pending` while inPAY's answer is awaited; `reason` says why a failed one failed. */
+export interface CardCharge {
+  id: string
+  status: 'pending' | 'paid' | 'failed' | 'review' | 'refunded'
+  plan: 'plus' | 'premium'
+  amount: number
+  currency: string
+  last4: string
+  reason: 'declined' | 'consent_limit' | 'card_removed' | 'unavailable' | null
+  active_until: string | null
+  /** When renewal next charges this card, for a first month that turned it on. */
+  renews_at: string | null
+}
+/**
+ * `POST /billing/cards` and `GET /billing/cards/{id}`: a card being saved on
+ * inPAY's page (`binding`, with `bind_url` while the page is open), then
+ * `active` with the first month's `charge`, or `expired`/`removed`.
+ */
+export interface SavedCardState {
+  id: string
+  status: 'binding' | 'active' | 'expired' | 'removing' | 'removed'
+  plan: 'plus' | 'premium' | null
+  last4: string
+  bind_url: string | null
+  charge: CardCharge | null
 }
 /** `checkout` of `GET /plans`: which ways to pay are open to everyone. Absent from an older platform. */
 export interface PaymentMethods {

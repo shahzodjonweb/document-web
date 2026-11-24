@@ -59,6 +59,7 @@ const titles: [string, string][] = [
   ['/app/editor', 'editor'],
   ['/app/billing', 'navBilling'],
   ['/app/pay', 'checkoutTitle'],
+  ['/app/card', 'cardReturnTitle'],
   ['/pricing', 'pricing'],
   ['/app/settings', 'settings'],
   ['/app/support', 'navHelp'],
@@ -93,6 +94,10 @@ useHead(() =>
   />
   <AuthPanel v-else-if="(isCustomer && !ws.user.value) || view === '/auth/telegram'" /><DashboardView
     v-else-if="view === '/app'"
+  /><!-- Back from inPAY's page for saving a card, started signed in on the billing page. --><CardReturnView
+    v-else-if="view.startsWith('/app/card/')"
+    :key="view"
+    :card-id="view.slice('/app/card/'.length)"
   /><BatchView
     v-else-if="view.startsWith('/app/tools/batch.')"
     :feature-id="view.slice('/app/tools/'.length)"
@@ -140,7 +145,9 @@ useHead(() =>
         {{ t(status) }}
       </button>
     </div>
-    <section class="panel"><JobList :jobs="filteredJobs" :filtered="selectedStatus !== 'statusAll'" /></section>
+    <section class="panel">
+      <JobList :jobs="filteredJobs" :filtered="selectedStatus !== 'statusAll'" />
+    </section>
   </div>
   <BillingView v-else-if="view === '/app/billing' || view === '/pricing'" /><SettingsView
     v-else-if="view === '/app/settings'"

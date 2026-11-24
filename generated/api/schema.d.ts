@@ -375,7 +375,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/billing/cards/{id}": {
+    "/billing/cards": {
         parameters: {
             query?: never;
             header?: never;
@@ -384,9 +384,44 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** @description Open inPAY's page for saving a card, to pay for the plan once it is saved and renew it every month. Follow `bind_url`; inPAY returns the customer to /<locale>/app/card/<id>. */
+        post: operations["saveCard"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/cards/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Where a card being saved stands: asks inPAY (at most every few seconds), and once the card is saved pays for its plan, once. `charge` is that first month. */
+        get: operations["getSavedCard"];
+        put?: never;
         post?: never;
         /** @description Remove a saved card at inPAY: nothing is charged to it again, and its renewal stops. */
         delete: operations["removeSavedCard"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/billing/cards/{id}/charge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Pay for a plan from a card saved on the website, in one tap. With `renew`, renewal turns on from it once paid. A second tap within two minutes returns the first charge. */
+        post: operations["chargeSavedCard"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -483,10 +518,11 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description The card saved in the bot through inPAY Avto PAY, and its monthly renewal. */
+        /** @description The customer's card saved through inPAY Avto PAY (on the website or in the bot), and its monthly renewal. */
         get: operations["getRenewal"];
         put?: never;
-        post?: never;
+        /** @description Turn monthly renewal on again from the saved card, for the plan paid now, from the end of the paid time. 409 renewal_unavailable without a paid plan. */
+        post: operations["turnOnRenewal"];
         /** @description Turn monthly renewal off: the plan runs to its end and is not charged again. The card stays saved. */
         delete: operations["turnOffRenewal"];
         options?: never;
@@ -1584,15 +1620,19 @@ export interface components {
             state: string;
         };
         AutoRenewalState: {
+            /** @description Renewal is off and can be turned on again from the saved card, for the plan paid now. */
+            can_turn_on: boolean;
             card: {
                 consent_max: number | null;
                 expiry: string;
+                /** @description Saved on the website: only such a card is charged in one tap here. A card saved in the bot renews, but is paid with in one tap in the bot. */
+                here: boolean;
                 /** Format: uuid */
                 id: string;
                 last4: string;
                 masked: string;
             } | null;
-            /** @description Whether this customer may save a card and renew monthly now (in the bot). */
+            /** @description Whether this customer may save a card on the website and renew monthly now. */
             offered: boolean;
             renewal: {
                 amount: number | null;
@@ -1682,6 +1722,26 @@ export interface components {
             /** Format: uuid */
             id: string;
             status: string;
+        };
+        CardCharge: {
+            /** Format: date-time */
+            active_until: string | null;
+            amount: number;
+            currency: string;
+            /** Format: uuid */
+            id: string;
+            last4: string;
+            /** @enum {unknown} */
+            plan: "plus" | "premium";
+            /** @enum {string|null} */
+            reason: "declined" | "consent_limit" | "card_removed" | "unavailable" | null;
+            /**
+             * Format: date-time
+             * @description When renewal next charges this card, for a first month that turned it on.
+             */
+            renews_at: string | null;
+            /** @enum {unknown} */
+            status: "pending" | "paid" | "failed" | "review" | "refunded";
         };
         Checkout: {
             /** Format: date-time */
@@ -2389,6 +2449,17 @@ export interface components {
             /** @description File tasks left this week, before this send; null when `included`. */
             left: number | null;
             limit: number | null;
+        };
+        SavedCardState: {
+            bind_url: string | null;
+            charge: components["schemas"]["CardCharge"] | null;
+            /** Format: uuid */
+            id: string;
+            last4: string;
+            /** @enum {string|null} */
+            plan: "plus" | "premium" | null;
+            /** @enum {unknown} */
+            status: "binding" | "active" | "expired" | "removing" | "removed";
         };
         SavedDefinition: {
             content?: Record<string, never>;
@@ -4189,6 +4260,121 @@ export interface operations {
             };
         };
     };
+    saveCard: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRFToken": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {unknown} */
+                    plan: "plus" | "premium";
+                };
+            };
+        };
+        responses: {
+            /** @description Success */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavedCardState"];
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    getSavedCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavedCardState"];
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     removeSavedCard: {
         parameters: {
             query?: never;
@@ -4209,6 +4395,70 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AutoRenewalState"];
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    chargeSavedCard: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRFToken": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /** @enum {unknown} */
+                    plan: "plus" | "premium";
+                    renew?: boolean;
+                };
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CardCharge"];
                 };
             };
             /** @description Invalid request */
@@ -4651,6 +4901,60 @@ export interface operations {
         parameters: {
             query?: never;
             header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AutoRenewalState"];
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    turnOnRenewal: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRFToken": string;
+            };
             path?: never;
             cookie?: never;
         };

@@ -1287,6 +1287,22 @@
   gap: var(--space-3);
   margin-top: var(--space-5);
 }
+/* One more tap before a saved card is charged: the amount and the card, then Pay or Cancel. */
+.card-confirm {
+  max-width: 62ch;
+  padding: var(--space-4);
+  border: 1.5px solid var(--action);
+  border-radius: var(--radius-md);
+}
+.card-confirm p {
+  margin: 0;
+}
+.card-confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
 .checkout-status > .field-hint {
   margin-top: var(--space-3);
 }
