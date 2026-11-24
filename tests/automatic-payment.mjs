@@ -32,6 +32,16 @@ const ID = {
   test: '10000000-0000-4000-8000-000000000005',
   unknown: '10000000-0000-4000-8000-00000000ffff',
 }
+// Cards saved through inPAY Avto PAY: on the website's billing page, or in the bot.
+const CARD = {
+  web: '20000000-0000-4000-8000-0000000000a1',
+  saved: '20000000-0000-4000-8000-0000000000a2',
+  failed: '20000000-0000-4000-8000-0000000000a3',
+  closed: '20000000-0000-4000-8000-0000000000a4',
+  later: '20000000-0000-4000-8000-0000000000a5',
+  bot: '00000000-0000-4000-8000-0000000000c1',
+  unknown: '20000000-0000-4000-8000-00000000ffff',
+}
 const activeUntil = iso(30 * 86400000)
 const checkout = (id, values = {}) => ({
   id, plan: 'plus', amount: 15000, currency: 'UZS', status: 'pending', test: false, channel: 'web',
@@ -61,8 +71,14 @@ const state = {
   fallback: false,
   checkouts: new Map(),
   reads: new Map(),
-  // The card saved in the bot and its monthly renewal (`GET /billing/renewal`).
+  // The saved card and its monthly renewal (`GET /billing/renewal`).
   renewal: null,
+  // Cards being saved on inPAY's page, by id (`GET /billing/cards/{id}`), and how often they were read.
+  cards: new Map(),
+  cardReads: 0,
+  // What `POST /billing/cards/{id}/charge` answers with, and a refusal for `POST /billing/cards`.
+  chargeAnswer: null,
+  cardRefuse: null,
 }
 const limits = (price, documents, files, edits) => ({
   weekly_ai_documents: documents, weekly_file_jobs: files, edits_per_file: edits, max_file_mib: 200,
@@ -142,16 +158,44 @@ async function open(options = {}) {
         ],
         payment: null, checkout: state.latest ? state.checkouts.get(state.latest) : null,
       })
-    const none = { offered: false, card: null, renewal: null }
+    const none = { offered: false, card: null, renewal: null, can_turn_on: false }
     if (endpoint === '/billing/renewal' && method === 'GET') return json(state.renewal || none)
     if (endpoint === '/billing/renewal' && method === 'DELETE') {
-      state.renewal = { ...state.renewal, renewal: { ...state.renewal.renewal, status: 'off' } }
+      state.renewal = { ...state.renewal, can_turn_on: true, renewal: { ...state.renewal.renewal, status: 'off' } }
       return json(state.renewal)
     }
+    if (endpoint === '/billing/renewal' && method === 'POST') {
+      state.renewal = { ...state.renewal, can_turn_on: false, renewal: { ...state.renewal.renewal, status: 'on' } }
+      return json(state.renewal)
+    }
+    if (endpoint === '/billing/cards' && method === 'POST') {
+      if (state.cardRefuse) return refusal(...state.cardRefuse)
+      const saving = { id: CARD.web, status: 'binding', plan: JSON.parse(request.postData()).plan, last4: '',
+        bind_url: `${INPAY}/cards/bind/${CARD.web}`, charge: null }
+      state.cards.set(saving.id, saving)
+      return json(saving, 201)
+    }
+    const charging = endpoint.match(/^\/billing\/cards\/([^/]+)\/charge$/)
+    if (charging && method === 'POST') {
+      if (charging[1] !== state.renewal?.card?.id) return refusal('card_unavailable', 'This saved card can’t be used any more.', 409)
+      const { plan, renew } = JSON.parse(request.postData())
+      const amount = plan === 'plus' ? 15000 : 60000
+      const answer = { ...state.chargeAnswer, plan, amount, renews_at: renew && state.chargeAnswer.status === 'paid' ? activeUntil : null }
+      if (answer.renews_at)
+        state.renewal = { ...state.renewal, can_turn_on: false, renewal: { status: 'on', plan, renews_at: activeUntil, amount, attempts: 0,
+          next_try_at: null, stopped_reason: '', card_last4: answer.last4 } }
+      return json(answer)
+    }
     const card = endpoint.match(/^\/billing\/cards\/([^/]+)$/)
+    if (card && method === 'GET') {
+      state.cardReads += 1
+      const found = state.cards.get(card[1])
+      return found ? json(found) : refusal('not_found', 'Not found.', 404)
+    }
     if (card && method === 'DELETE') {
       if (card[1] !== state.renewal?.card?.id) return refusal('not_found', 'Not found.', 404)
-      state.renewal = { ...state.renewal, card: null, renewal: { ...state.renewal.renewal, status: 'stopped', stopped_reason: 'card_removed' } }
+      state.renewal = { ...state.renewal, card: null, can_turn_on: false,
+        renewal: { ...state.renewal.renewal, status: 'stopped', stopped_reason: 'card_removed' } }
       return json(state.renewal)
     }
     if (endpoint === '/billing/checkout' && method === 'POST') {
@@ -196,7 +240,13 @@ async function audit(page, label, part) {
 }
 const reset = (values = {}) =>
   Object.assign(state, { signedIn: true, miniApp: false, card: true, automatic: { available: true, provider: 'inpay' },
-    latest: null, created: null, refuse: null, fallback: false, renewal: null }, values)
+    latest: null, created: null, refuse: null, fallback: false, renewal: null, cards: new Map(), chargeAnswer: null,
+    cardRefuse: null }, values)
+const charges = () => requests.filter((r) => /^\/billing\/cards\/[^/]+\/charge$/.test(r.endpoint)).map((r) => JSON.parse(r.body))
+// What the platform says once a saved card was charged.
+const chargeOf = (values = {}) => ({ id: '30000000-0000-4000-8000-000000000001', status: 'paid', plan: 'plus', amount: 15000,
+  currency: 'UZS', last4: '1234', reason: null, active_until: activeUntil, renews_at: null, ...values })
+const savedHere = { id: CARD.saved, masked: '860038******1234', last4: '1234', expiry: '09/29', consent_max: null, here: true }
 const posted = () => requests.filter((r) => r.endpoint === '/billing/checkout' && r.method === 'POST')
 const reads = (id) => state.reads.get(id) || 0
 
@@ -563,31 +613,158 @@ try {
   assert.deepEqual(await page.locator('.site-pricing-steps h3').allInnerTexts(), ['Choose a plan', 'Transfer by card', 'Upload the receipt', 'We check and switch on'])
   checks.push('The pricing page, its questions and the footer name automatic payment once it is on, with card transfer only while it is offered')
 
-  // ── A card saved in the bot: its monthly renewal, turned off and the card removed here ──
+  // ── Saving a card on the website: «Pay and renew every month» hands over to inPAY's page for the card ──
+  reset({ card: false, created: checkout(ID.created), renewal: { offered: true, card: null, renewal: null, can_turn_on: false } })
+  await page.goto(`${origin}/en/app/billing`, { waitUntil: 'domcontentloaded' })
+  await page.getByTestId('pay-plus').click()
+  const ways = page.getByTestId('card-ways')
+  await ways.waitFor()
+  assert.deepEqual(await ways.locator('.payment-method strong').allInnerTexts(), ['Pay once', 'Pay and renew every month'])
+  assert.equal(await ways.getByRole('radio', { name: /Pay once/ }).isChecked(), true, 'paying once is chosen to begin with: nothing renews unasked')
+  assert.match(await page.getByTestId('way-renew').innerText(),
+    /Save your card on inPAY’s page: 15 000 so'm now and every 30 days, with no SMS code\. Turn it off any time\./)
+  assert.equal(await page.getByTestId('payment-way').count(), 0, 'the ways say it: no second line')
+  assert.match(await page.getByTestId('checkout-pay').innerText(), /^Pay 15 000 so'm$/)
+  await ways.getByRole('radio', { name: /Pay and renew every month/ }).check()
+  assert.equal(await page.getByTestId('checkout-pay').count(), 0)
+  assert.match(await page.getByTestId('card-save').innerText(), /^Save card and pay 15 000 so'm$/)
+  await audit(page, 'card-ways', page.getByTestId('manual-payment'))
+  const openedBefore = posted().length
+  await page.getByTestId('card-save').click()
+  await page.waitForURL(`${INPAY}/cards/bind/${CARD.web}`)
+  assert.deepEqual(requests.filter((r) => r.endpoint === '/billing/cards' && r.method === 'POST').map((r) => JSON.parse(r.body)), [{ plan: 'plus' }])
+  assert.equal(posted().length, openedBefore, 'no one-off payment was opened')
+  checks.push('Where saved cards are offered, inPAY is «Pay once» (chosen) or «Pay and renew every month», which hands over to inPAY’s page for the card')
+
+  // ── Back from inPAY's page: waiting for the card, then the first month paid and renewal on ──
+  await page.goto(`${origin}/en/app/card/${CARD.web}`, { waitUntil: 'domcontentloaded' })
+  const cardReturn = page.getByTestId('card-return')
+  await page.locator('[data-testid="card-return"][data-state="waiting"]').waitFor()
+  assert.match(await cardReturn.innerText(), /Saving your card/)
+  // inPAY says the card is saved and the server pays for the plan: the page's next look shows it.
+  state.cards.set(CARD.web, { ...state.cards.get(CARD.web), status: 'active', last4: '1234', bind_url: null,
+    charge: chargeOf({ renews_at: activeUntil }) })
+  await page.locator('[data-testid="card-return"][data-state="paid"]').waitFor()
+  assert.match((await cardReturn.innerText()).replace(/\s+/g, ' '),
+    /Payment confirmed\. Plus is active until .+?\. Auto-renewal is on: next charge .+, 15 000 so'm from card •••• 1234\./)
+  assert.match(await page.getByTestId('card-return-billing').innerText(), /^Plan & billing$/)
+  await audit(page, 'card-return-paid', page.locator('#main-content'))
+  // A charge the card's limit was below: why, in the customer's language.
+  state.cards.set(CARD.failed, { id: CARD.failed, status: 'active', plan: null, last4: '1234', bind_url: null,
+    charge: chargeOf({ id: '30000000-0000-4000-8000-000000000002', status: 'failed', reason: 'consent_limit', active_until: null }) })
+  await page.goto(`${origin}/ru/app/card/${CARD.failed}`, { waitUntil: 'domcontentloaded' })
+  await page.locator('[data-testid="card-return"][data-state="failed"]').waitFor()
+  assert.match(await cardReturn.innerText(), /Не удалось списать с карты •••• 1234: цена выше лимита/)
+  await audit(page, 'card-return-failed', page.locator('#main-content'))
+  // inPAY's page closed without a card: nothing was charged.
+  state.cards.set(CARD.closed, { id: CARD.closed, status: 'expired', plan: 'plus', last4: '', bind_url: null, charge: null })
+  await page.goto(`${origin}/uz/app/card/${CARD.closed}`, { waitUntil: 'domcontentloaded' })
+  await page.locator('[data-testid="card-return"][data-state="closed"]').waitFor()
+  assert.match(await cardReturn.innerText(), /Karta saqlanmadi[\s\S]*hech narsa yechilmadi/)
+  for (const address of [`/en/app/card/${CARD.unknown}`, '/en/app/card/not-an-id']) {
+    await page.goto(`${origin}${address}`, { waitUntil: 'domcontentloaded' })
+    await page.locator('[data-testid="card-return"][data-state="missing"]').waitFor()
+  }
+  // inPAY has not answered for a minute: look again, or go back to inPAY's page (and nowhere else).
+  const waitingSession = await open()
+  const slow = waitingSession.page
+  await slow.clock.install()
+  state.cards.set(CARD.later, { id: CARD.later, status: 'binding', plan: 'plus', last4: '', bind_url: `${INPAY}/cards/bind/${CARD.later}`, charge: null })
+  await slow.goto(`${origin}/en/app/card/${CARD.later}`, { waitUntil: 'domcontentloaded' })
+  await slow.locator('[data-testid="card-return"][data-state="waiting"]').waitFor()
+  for (let tick = 0; tick < 20 && (await slow.getByTestId('card-return').getAttribute('data-state')) === 'waiting'; tick++) {
+    const before = state.cardReads
+    await slow.clock.fastForward(4000)
+    for (let spin = 0; spin < 100 && state.cardReads === before; spin++) await new Promise((resolve) => setTimeout(resolve, 20))
+  }
+  await slow.locator('[data-testid="card-return"][data-state="later"]').waitFor()
+  assert.equal(await slow.getByTestId('card-return-inpay').getAttribute('href'), `${INPAY}/cards/bind/${CARD.later}`)
+  assert.match(await slow.getByTestId('card-return').innerText(), /inPAY hasn’t confirmed your card yet/)
+  await audit(slow, 'card-return-later', slow.locator('#main-content'))
+  await waitingSession.context.close()
+  checks.push('Back from inPAY, /app/card/{id} waits for the card, then shows the month paid and the next charge, a failure and why, a page closed, or an unknown card')
+
+  // ── A card saved on the website pays in one tap, after a confirm ──
+  reset({ card: false, renewal: { offered: true, card: savedHere, renewal: null, can_turn_on: false }, chargeAnswer: chargeOf() })
+  await page.goto(`${origin}/en/app/billing`, { waitUntil: 'domcontentloaded' })
+  await page.getByTestId('pay-plus').click()
+  await ways.waitFor()
+  assert.deepEqual(await ways.locator('.payment-method strong').allInnerTexts(),
+    ['Pay with card •••• 1234', 'Pay with •••• 1234 and renew every month', 'Pay once with another card'])
+  assert.equal(await ways.getByRole('radio', { name: /^Pay with card •••• 1234/ }).isChecked(), true)
+  await page.getByTestId('card-pay').click()
+  const confirm = page.getByTestId('card-confirm')
+  assert.match(await confirm.innerText(), /^Charge 15 000 so'm to card •••• 1234 now\?/)
+  assert.doesNotMatch(await confirm.innerText(), /every 30 days/, 'paying once renews nothing')
+  assert.deepEqual(charges(), [], 'nothing is charged before the confirm tap')
+  await audit(page, 'card-confirm', page.getByTestId('manual-payment'))
+  await page.getByTestId('card-pay-yes').click()
+  await page.getByTestId('card-charge-paid').waitFor()
+  assert.match(await page.getByTestId('card-charge-paid').innerText(), /^Payment confirmed\. Plus is active until .+\.$/)
+  assert.equal(await page.getByTestId('manual-payment').count(), 0, 'paid: the panel closes')
+  await audit(page, 'card-charge-paid', page.getByTestId('card-charge'))
+  // Premium, renewing every month from the card.
+  await page.getByTestId('pay-premium').click()
+  assert.equal(await page.getByTestId('card-charge').count(), 0, 'a new plan, a new payment')
+  await ways.getByRole('radio', { name: /and renew every month/ }).check()
+  await page.getByTestId('card-pay').click()
+  assert.match((await confirm.innerText()).replace(/\s+/g, ' '),
+    /Charge 60 000 so'm to card •••• 1234 now\? Then 60 000 so'm every 30 days, until you turn auto-renewal off\./)
+  await page.getByTestId('card-pay-yes').click()
+  await page.getByTestId('card-charge-paid').waitFor()
+  assert.match(await page.getByTestId('card-charge-paid').innerText(), /Auto-renewal is on: next charge .+, 60 000 so'm from card •••• 1234\./)
+  await page.getByTestId('renewal').getByTestId('renewal-on').waitFor()
+  // Declined by the bank: why, and the panel stays for another way.
+  state.chargeAnswer = chargeOf({ id: '30000000-0000-4000-8000-000000000003', status: 'failed', reason: 'declined', active_until: null })
+  await page.getByTestId('pay-plus').click()
+  await page.getByTestId('card-pay').click()
+  await page.getByTestId('card-pay-yes').click()
+  await page.getByTestId('card-charge-failed').waitFor()
+  assert.match(await page.getByTestId('card-charge-failed').innerText(),
+    /^Couldn’t charge card •••• 1234: the bank declined the payment\. Check the balance, or pay with another card\.$/)
+  assert.equal(await page.getByTestId('manual-payment').count(), 1, 'still open to pay another way')
+  await audit(page, 'card-charge-failed', page.getByTestId('card-charge'))
+  assert.deepEqual(charges(), [{ plan: 'plus', renew: false }, { plan: 'premium', renew: true }, { plan: 'plus', renew: false }])
+  checks.push('A card saved on the website pays once or with renewal in one tap after a confirm, and a decline says why')
+
+  // ── A card saved in the bot: its monthly renewal, turned off, on again and the card removed here ──
   const renewsAt = new Date(Date.now() + 9 * 86400000).toISOString()
-  reset({ renewal: { offered: true, card: { id: '00000000-0000-4000-8000-0000000000c1', masked: '860038******1234', last4: '1234', expiry: '09/29', consent_max: null },
+  reset({ renewal: { offered: true, can_turn_on: false,
+    card: { id: CARD.bot, masked: '860038******1234', last4: '1234', expiry: '09/29', consent_max: null, here: false },
     renewal: { status: 'on', plan: 'plus', renews_at: renewsAt, amount: 15000, attempts: 0, next_try_at: null, stopped_reason: '', card_last4: '1234' } } })
   await page.goto(`${origin}/en/app/billing`, { waitUntil: 'domcontentloaded' })
   const renewalPanel = page.getByTestId('renewal')
   await renewalPanel.getByTestId('renewal-on').waitFor()
   assert.match(await renewalPanel.getByTestId('renewal-on').innerText(), /^On\. Next charge .+: 15 000 so'm from card •••• 1234\.$/)
   assert.match(await renewalPanel.innerText(), /Saved card: •••• 1234/)
+  assert.match(await renewalPanel.getByTestId('renewal-saved-in-bot').innerText(), /^This card was saved in the Telegram bot\./)
   await audit(page, 'renewal', renewalPanel)
+  // The bot's card is not offered for paying here in one tap.
+  await page.getByTestId('pay-plus').click()
+  await ways.waitFor()
+  assert.deepEqual(await ways.locator('.payment-method strong').allInnerTexts(), ['Pay once', 'Pay and renew every month'])
+  await page.locator('[data-testid="manual-payment"] .panel-heading .icon-button').click()
+  await page.getByTestId('manual-payment').waitFor({ state: 'detached' })
   await renewalPanel.getByTestId('renewal-turn-off').click()
   await renewalPanel.getByTestId('renewal-off').waitFor()
   assert.equal(await renewalPanel.getByTestId('renewal-turn-off').count(), 0, 'nothing left to turn off')
+  await renewalPanel.getByTestId('renewal-turn-on').click()
+  await renewalPanel.getByTestId('renewal-on').waitFor()
+  await renewalPanel.getByTestId('renewal-turn-off').click()
+  await renewalPanel.getByTestId('renewal-off').waitFor()
   await renewalPanel.getByTestId('card-remove').click()
   assert.match(await renewalPanel.innerText(), /Remove the card\? Auto-renewal stops/)
   await renewalPanel.getByTestId('card-remove-yes').click()
   await renewalPanel.waitFor({ state: 'detached' })
   assert.deepEqual(requests.filter((r) => r.method === 'DELETE' && /^\/billing\/(renewal|cards)/.test(r.endpoint)).map((r) => r.endpoint),
-    ['/billing/renewal', '/billing/cards/00000000-0000-4000-8000-0000000000c1'])
+    ['/billing/renewal', '/billing/renewal', `/billing/cards/${CARD.bot}`])
+  assert.equal(requests.filter((r) => r.method === 'POST' && r.endpoint === '/billing/renewal').length, 1)
   // Nothing saved: no panel at all.
   reset()
   await page.goto(`${origin}/en/app/billing`, { waitUntil: 'domcontentloaded' })
   await page.getByTestId('pay-plus').waitFor()
   assert.equal(await page.getByTestId('renewal').count(), 0)
-  checks.push('A card saved in the bot shows its renewal on the billing page, which turns it off and removes the card')
+  checks.push('A card saved in the bot shows its renewal on the billing page, which turns it off and on and removes the card, and is not paid with here in one tap')
 
   assert.deepEqual(errors, [])
   assert.deepEqual(unexpected, [], 'every API call is covered by the fixture')

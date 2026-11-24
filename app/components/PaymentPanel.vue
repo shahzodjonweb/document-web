@@ -11,9 +11,21 @@
  *
  * Nothing here grants anything — the panel only shows what the server says,
  * and waits for inPAY's answer or the owner's decision.
+ *
+ * Where the server offers saved cards (inPAY Avto PAY), paying through inPAY
+ * is also a choice of «Pay once» or «Pay and renew every month», which saves
+ * the card on inPAY's page and comes back to /app/card/{id}. With a card saved
+ * on the website, it pays in one tap, after a confirm.
  */
-import type { BillingOptions, Checkout, ManualPayment } from '../../generated/api/types'
+import type {
+  BillingOptions,
+  CardCharge,
+  Checkout,
+  ManualPayment,
+  SavedCardState,
+} from '../../generated/api/types'
 type Method = 'automatic' | 'card'
+type Way = 'once' | 'renew' | 'card' | 'card_renew'
 const props = defineProps<{ plan?: string }>()
 const emit = defineEmits<{ close: []; changed: []; choose: [plan: string] }>()
 const { t, date } = useLocale()
@@ -62,9 +74,50 @@ const method = computed<Method | ''>({
   get: () => (picked.value && methods.value.includes(picked.value) ? picked.value : (methods.value[0] ?? '')),
   set: (value) => (picked.value = value),
 })
+// Saved cards, where the server offers them: only for paying through inPAY.
+const renewal = useRenewal()
+const savedCard = renewal.card
+const telegram = useTelegramApp()
+const ways = computed<Way[]>(() => {
+  if (method.value !== 'automatic' || !renewal.state.value?.offered) return []
+  return savedCard.value ? ['card', 'card_renew', 'once'] : ['once', 'renew']
+})
+const pickedWay = ref<Way | ''>('')
+const way = computed<Way>({
+  get: () =>
+    pickedWay.value && ways.value.includes(pickedWay.value) ? pickedWay.value : (ways.value[0] ?? 'once'),
+  set: (value) => {
+    pickedWay.value = value
+    confirming.value = false
+  },
+})
+// One more tap before a saved card is charged.
+const confirming = ref(false)
+// How the last saved-card charge went, shown until the customer picks a plan again.
+const charge = ref<CardCharge | null>(null)
+const WAY_TITLE: Record<Way, string> = {
+  once: 'payWayOnce',
+  renew: 'payWayRenew',
+  card: 'payWayCard',
+  card_renew: 'payWayCardRenew',
+}
+const wayTitle = (value: Way) =>
+  t(value === 'once' && savedCard.value ? 'payWayOnceOther' : WAY_TITLE[value], {
+    last4: savedCard.value?.last4 ?? '',
+  })
+const wayBody = (value: Way) =>
+  value === 'once'
+    ? t('methodAutomaticBody')
+    : value === 'card'
+      ? t('payWayCardBody')
+      : t(value === 'renew' ? 'payWayRenewBody' : 'payWayCardRenewBody', { price: price(chosenPrice.value) })
 // A question only where there is a choice; one way to pay is simply named.
 const heading = computed(() =>
-  methods.value.length > 1 ? 'paymentMethod' : method.value === 'automatic' ? 'methodAutomatic' : 'methodCard',
+  methods.value.length > 1
+    ? 'paymentMethod'
+    : method.value === 'automatic'
+      ? 'methodAutomatic'
+      : 'methodCard',
 )
 // A decision is shown until the customer moves on; an old one is not news.
 const recent = computed(
@@ -110,7 +163,7 @@ async function run(task: string, fn: () => Promise<void>) {
   }
 }
 async function load() {
-  const value = await ws.api<BillingOptions>('/billing/manual')
+  const [value] = await Promise.all([ws.api<BillingOptions>('/billing/manual'), renewal.load()])
   const before = payment.value?.status
   options.value = value
   payment.value = value.payment
@@ -128,10 +181,13 @@ onMounted(() => run('load', load))
 onBeforeUnmount(() => timer && clearInterval(timer))
 watch(
   () => props.plan,
-  () => {
+  (plan) => {
     picked.value = ''
+    pickedWay.value = ''
+    confirming.value = false
     error.value = ''
     fellBack.value = false
+    if (plan) charge.value = null
   },
 )
 // The plan is on the moment inPAY's answer arrives: the frame and the cards take it up.
@@ -166,6 +222,48 @@ async function payAutomatic() {
     if (created.status === 'pending') openPayment()
   })
 }
+// Saved cards switched off, or the card gone, since the page loaded: show the ways there are now.
+async function refreshCards(e: any) {
+  if (['autopay_unavailable', 'card_unavailable', 'checkout_disabled'].includes(e.data?.error?.code))
+    await renewal.load()
+}
+/** «Pay and renew every month»: save the card on inPAY's page, which pays for the plan once saved. */
+async function saveCard() {
+  await run('card', async () => {
+    let saved: SavedCardState
+    try {
+      saved = await ws.api<SavedCardState>('/billing/cards', { method: 'POST', body: { plan: props.plan } })
+    } catch (e: any) {
+      await refreshCards(e)
+      throw e
+    }
+    // Only inPAY's own page can receive this browser navigation.
+    const destination = checkoutDestination(saved.bind_url)
+    if (!destination) throw new Error('Invalid card page')
+    if (!telegram.openLink(destination)) window.location.assign(destination)
+  })
+}
+/** Pay from the card saved on the website, after the confirm tap; with renewal, it turns on. */
+async function payWithCard() {
+  const card = savedCard.value
+  if (!card) return
+  await run('card', async () => {
+    try {
+      charge.value = await ws.api<CardCharge>(`/billing/cards/${card.id}/charge`, {
+        method: 'POST',
+        body: { plan: props.plan, renew: way.value === 'card_renew' },
+      })
+    } catch (e: any) {
+      confirming.value = false
+      await refreshCards(e)
+      throw e
+    }
+    confirming.value = false
+    await renewal.load()
+    // The plan is on: the frame and the cards take it up, and this panel closes.
+    if (charge.value.status === 'paid') emit('changed')
+  })
+}
 function openPayment() {
   checkoutError.value = ''
   try {
@@ -181,7 +279,10 @@ async function checkPayment() {
 }
 async function start() {
   await run('start', async () => {
-    payment.value = await ws.api<ManualPayment>('/billing/manual', { method: 'POST', body: { plan: props.plan } })
+    payment.value = await ws.api<ManualPayment>('/billing/manual', {
+      method: 'POST',
+      body: { plan: props.plan },
+    })
   })
 }
 async function send() {
@@ -191,7 +292,10 @@ async function send() {
     const body = new FormData()
     body.append('file', receipt.value as File)
     body.append('note', note.value)
-    payment.value = await ws.api<ManualPayment>(`/billing/manual/${current.id}/receipt`, { method: 'POST', body })
+    payment.value = await ws.api<ManualPayment>(`/billing/manual/${current.id}/receipt`, {
+      method: 'POST',
+      body,
+    })
     receipt.value = null
     note.value = ''
     // The file box would otherwise still name a receipt that has been sent.
@@ -233,6 +337,9 @@ function pick(event: Event) {
     @pay="openPayment"
     @retry="emit('choose', $event)"
   />
+  <section v-if="charge" class="panel checkout-status" data-testid="card-charge" aria-live="polite">
+    <CardChargeResult :charge="charge" />
+  </section>
   <section v-if="visible" class="panel manual-payment" data-testid="manual-payment" aria-live="polite">
     <ErrorBanner v-if="error" :message="error" />
     <ol v-if="open || plan" class="pay-stepper" data-testid="pay-stepper">
@@ -243,7 +350,9 @@ function pick(event: Event) {
         :aria-current="index === stage ? 'step' : undefined"
       >
         <span class="pay-step-number" aria-hidden="true"
-          ><AppIcon v-if="index < stage" name="check" :size="14" /><template v-else>{{ index + 1 }}</template></span
+          ><AppIcon v-if="index < stage" name="check" :size="14" /><template v-else>{{
+            index + 1
+          }}</template></span
         >{{ t(label) }}
       </li>
     </ol>
@@ -256,7 +365,8 @@ function pick(event: Event) {
           <h2>{{ planName(payment.plan) }} · {{ price(payment.amount) }}</h2>
           <p v-if="openSaving" class="discount-note" data-testid="manual-discount">
             <s class="plan-price-regular"
-              ><span class="visually-hidden">{{ t('regularPrice') + ' ' }}</span>{{ price(openSaving.regular) }}</s
+              ><span class="visually-hidden">{{ t('regularPrice') + ' ' }}</span
+              >{{ price(openSaving.regular) }}</s
             >
             <span class="discount-badge">−{{ openSaving.percent }}%</span>
             <span class="discount-until">{{ untilLabel(openSaving) }}</span>
@@ -272,7 +382,11 @@ function pick(event: Event) {
           <span>{{ t('cardStepSend', { amount: price(payment.amount) }) }}</span>
           <div class="manual-card">
             <strong data-testid="manual-card-number">{{ cardNumber }}</strong>
-            <button class="button secondary small" type="button" @click="copy(payment.card.number || '', 'card')">
+            <button
+              class="button secondary small"
+              type="button"
+              @click="copy(payment.card.number || '', 'card')"
+            >
               <AppIcon name="copy" :size="15" />{{ copied === 'card' ? t('copied') : t('copyAction') }}
             </button>
             <small>{{ [payment.card.holder, payment.card.label].filter(Boolean).join(' · ') }}</small>
@@ -309,7 +423,9 @@ function pick(event: Event) {
       <p class="field-hint">
         {{ t('paymentCode') }}: <strong>{{ payment.reference }}</strong> · {{ t('manualReviewNote') }}
       </p>
-      <button class="text-link" type="button" :disabled="!!busy" @click="cancel">{{ t('cancelPayment') }}</button>
+      <button class="text-link" type="button" :disabled="!!busy" @click="cancel">
+        {{ t('cancelPayment') }}
+      </button>
     </template>
 
     <!-- The owner's decision, shown for a few days. -->
@@ -338,7 +454,8 @@ function pick(event: Event) {
           </h2>
           <p v-if="chosenSaving" class="discount-note" data-testid="manual-discount">
             <s class="plan-price-regular"
-              ><span class="visually-hidden">{{ t('regularPrice') + ' ' }}</span>{{ price(chosenSaving.regular) }}</s
+              ><span class="visually-hidden">{{ t('regularPrice') + ' ' }}</span
+              >{{ price(chosenSaving.regular) }}</s
             >
             <span class="discount-badge">−{{ chosenSaving.percent }}%</span>
             <span class="discount-until">{{ untilLabel(chosenSaving) }}</span>
@@ -364,21 +481,86 @@ function pick(event: Event) {
           ></label
         >
       </fieldset>
-      <p v-else-if="method" class="payment-way" data-testid="payment-way">
+      <p v-else-if="method && !ways.length" class="payment-way" data-testid="payment-way">
         {{ t(method === 'automatic' ? 'methodAutomaticBody' : 'methodCardBody') }}
       </p>
-      <p v-if="fellBack && method === 'card'" class="info-banner" role="status" data-testid="checkout-fallback">
+      <!-- Through inPAY, where saved cards are offered: once, or every month from a saved card. -->
+      <fieldset v-if="ways.length" class="payment-methods" data-testid="card-ways">
+        <legend class="visually-hidden">{{ t('paymentMethod') }}</legend>
+        <label
+          v-for="value in ways"
+          :key="value"
+          class="payment-method"
+          :class="{ selected: way === value }"
+          :data-testid="`way-${value}`"
+          ><input v-model="way" type="radio" name="card-way" :value="value" />
+          <span
+            ><strong>{{ wayTitle(value) }}</strong
+            ><small>{{ wayBody(value) }}</small></span
+          ></label
+        >
+      </fieldset>
+      <p
+        v-if="fellBack && method === 'card'"
+        class="info-banner"
+        role="status"
+        data-testid="checkout-fallback"
+      >
         <AppIcon name="info" :size="18" /><span>{{ t('checkoutFallback') }}</span>
       </p>
       <p
-        v-if="method === 'automatic' && options?.automatic?.test"
+        v-if="method === 'automatic' && way === 'once' && options?.automatic?.test"
         class="warning-banner"
         data-testid="checkout-test-mode"
       >
         <AppIcon name="info" :size="18" /><span>{{ t('checkoutTestMode') }}</span>
       </p>
       <button
-        v-if="method === 'automatic'"
+        v-if="method === 'automatic' && way === 'renew'"
+        class="button primary"
+        :disabled="!!busy || !chosenPrice"
+        data-testid="card-save"
+        @click="saveCard"
+      >
+        {{ busy === 'card' ? t('working') : t('saveCardPay', { price: price(chosenPrice) })
+        }}<AppIcon name="right" :size="17" />
+      </button>
+      <template v-else-if="method === 'automatic' && savedCard && (way === 'card' || way === 'card_renew')">
+        <div v-if="confirming" class="card-confirm" role="group" data-testid="card-confirm">
+          <p>
+            <strong>{{ t('cardConfirm', { price: price(chosenPrice), last4: savedCard.last4 }) }}</strong>
+            <template v-if="way === 'card_renew'">
+              {{ ' ' + t('cardConfirmRenew', { price: price(chosenPrice) }) }}</template
+            >
+          </p>
+          <div class="card-confirm-actions">
+            <button
+              class="button primary"
+              type="button"
+              :disabled="!!busy"
+              data-testid="card-pay-yes"
+              @click="payWithCard"
+            >
+              {{ busy === 'card' ? t('working') : t('payPlan', { price: price(chosenPrice) }) }}
+            </button>
+            <button class="button secondary" type="button" :disabled="!!busy" @click="confirming = false">
+              {{ t('cancel') }}
+            </button>
+          </div>
+        </div>
+        <button
+          v-else
+          class="button primary"
+          type="button"
+          :disabled="!!busy || !chosenPrice"
+          data-testid="card-pay"
+          @click="confirming = true"
+        >
+          {{ t('payPlan', { price: price(chosenPrice) }) }}<AppIcon name="right" :size="17" />
+        </button>
+      </template>
+      <button
+        v-else-if="method === 'automatic'"
         class="button primary"
         :disabled="!!busy || !chosenPrice"
         data-testid="checkout-pay"
