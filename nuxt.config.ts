@@ -47,6 +47,8 @@ export default defineNuxtConfig({
     '~/assets/css/components.css',
     '~/assets/css/screens.css',
     '~/assets/css/frame.css',
+    // Inside Telegram (html.tg-app): after the frame, whose rules it changes there.
+    '~/assets/css/miniapp.css',
     // The public site last: its classes and tokens are its own (site-, --site-).
     '~/assets/css/site.css',
     '~/assets/css/site-tools.css',

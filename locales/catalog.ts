@@ -1,5 +1,6 @@
 import { authenticationEntries } from './authentication.ts'
 import { extendedEntries, extendedToolDescriptions, extendedToolNames } from './extended.ts'
+import { miniAppEntries } from './miniapp.ts'
 import { site } from './site.ts'
 export type Locale = 'en' | 'uz' | 'ru'
 const entries: Record<string, [string, string, string]> = {
@@ -853,6 +854,9 @@ const toolEntries: Record<string, [string, string, string, string, string, strin
   ],
 }
 Object.assign(entries, authenticationEntries)
+for (const [key, value] of Object.entries(miniAppEntries)) {
+  if (!(key in entries)) entries[key] = value
+}
 for (const [key, value] of Object.entries(extendedEntries)) {
   if (!(key in entries)) entries[key] = value
 }

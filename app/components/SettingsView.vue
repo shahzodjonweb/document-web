@@ -1,6 +1,8 @@
 <script setup lang="ts">
 const { t, localePath, timeZone } = useLocale()
 const ws = useWorkspace()
+// Inside Telegram the app wears Telegram's theme and follows it: there is no theme to pick.
+const telegram = useTelegramApp()
 const saving = ref(false)
 const error = ref('')
 const saved = ref(false)
@@ -29,14 +31,16 @@ async function save() {
       },
     })
     localStorage.setItem('docmaster-theme', form.theme)
-    document.documentElement.dataset.theme =
-      form.theme === 'system'
-        ? matchMedia('(prefers-color-scheme:dark)').matches
-          ? 'dark'
-          : 'light'
-        : form.theme
+    if (!telegram.isMiniApp.value)
+      document.documentElement.dataset.theme =
+        form.theme === 'system'
+          ? matchMedia('(prefers-color-scheme:dark)').matches
+            ? 'dark'
+            : 'light'
+          : form.theme
     saved.value = true
-    await navigateTo(localePath(form.locale))
+    // Inside Telegram Back must not lead to the pages in the old language.
+    await navigateTo(localePath(form.locale), { replace: telegram.isMiniApp.value })
   } catch (e: any) {
     error.value = e.data?.error?.message || t('genericError')
   } finally {
@@ -71,7 +75,7 @@ async function save() {
           }}</span>
         </p>
       </div>
-      <button class="button secondary small" type="button" @click="ws.logout">
+      <button v-if="!telegram.isMiniApp.value" class="button secondary small" type="button" @click="ws.logout">
         <AppIcon name="logout" :size="16" />{{ t('logout') }}
       </button>
     </section>
@@ -135,7 +139,7 @@ async function save() {
           }}</span></label
         >
       </fieldset>
-      <fieldset class="settings-group theme-selector">
+      <fieldset v-if="!telegram.isMiniApp.value" class="settings-group theme-selector">
         <legend>{{ t('theme') }}</legend>
         <div class="theme-options">
           <label

@@ -19,6 +19,52 @@ const SAFE_AREAS = '8.0'
 const FULLSCREEN = '8.0'
 const DEVICE_STORAGE = '9.0'
 const HIDE_KEYBOARD = '9.1'
+const CHROME_COLORS = '6.1'
+const POPUPS = '6.2'
+const TELEGRAM_LINKS = '6.1'
+const WRITE_ACCESS = '6.9'
+const SETTINGS_BUTTON = '7.0'
+const BOTTOM_BAR_COLOR = '7.10'
+const DOWNLOAD_FILE = '8.0'
+const ACTIVATION = '8.0'
+/**
+ * The customer's own Telegram theme on the tokens (assets/css/tokens.css) the frame reads:
+ * its surfaces, main text, links and buttons. Every text colour is held to 4.5:1 on what it
+ * sits on, as the app's own palette is: a Telegram colour short of that keeps its hue and is
+ * darkened or lightened until it reaches it (Telegram's default blue under white text is
+ * 4.2:1 in light, 3.5:1 in dark). The greys for secondary text stay the app's own, as is
+ * danger. A key a client does not send leaves the token as the app's palette has it.
+ */
+const HEX = /^#[0-9a-f]{6}$/i
+const MIN_CONTRAST = 4.5
+function luminance(hex: string) {
+  const [r, g, b] = [1, 3, 5].map((index) => {
+    const channel = parseInt(hex.slice(index, index + 2), 16) / 255
+    return channel <= 0.03928 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4
+  })
+  return 0.2126 * r! + 0.7152 * g! + 0.0722 * b!
+}
+function contrast(a: string, b: string) {
+  const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x)
+  return (light! + 0.05) / (dark! + 0.05)
+}
+function mix(hex: string, toward: string, share: number) {
+  const value = (source: string, index: number) => parseInt(source.slice(index, index + 2), 16)
+  return `#${[1, 3, 5]
+    .map((index) => Math.round(value(hex, index) + (value(toward, index) - value(hex, index)) * share))
+    .map((channel) => channel.toString(16).padStart(2, '0'))
+    .join('')}`
+}
+/** `color` moved away from `against` (darker on a light ground, lighter on a dark one) until every pair reads at 4.5:1. */
+function readable(color: string, against: string[]) {
+  const ground = against.reduce((sum, item) => sum + luminance(item), 0) / against.length
+  const toward = ground > 0.18 ? '#000000' : '#ffffff'
+  for (let step = 0; step <= 20; step += 1) {
+    const candidate = step ? mix(color, toward, step * 0.05) : color
+    if (against.every((item) => contrast(candidate, item) >= MIN_CONTRAST)) return candidate
+  }
+  return null
+}
 /** A lost pointerup must not leave Telegram's swipe switched off for good. */
 const SWIPE_SAFETY_RELEASE = 10_000
 /** Less than this between the window and what is visible is browser bars, not a keyboard. */
@@ -78,18 +124,20 @@ function driveMainButton() {
     if (!mainButtonOwned) return
     mainButtonOwned = false
     button.offClick?.(pressPrimary)
-    button.hideProgress?.()
+    if (button.isProgressVisible) button.hideProgress?.()
     button.hide?.()
     if (viewportTracked) applyViewport()
     return
   }
+  // Progress first: Telegram's hideProgress switches the button back on, so it is called
+  // only when the progress is showing, and the state the screen asks for is set after it.
+  if (action.busy) button.showProgress?.(false)
+  else if (button.isProgressVisible) button.hideProgress?.()
   button.setParams?.({
     text: action.text,
     is_active: action.enabled !== false && !action.busy,
     is_visible: true,
   })
-  if (action.busy) button.showProgress?.(false)
-  else button.hideProgress?.()
   if (!mainButtonOwned) {
     mainButtonOwned = true
     button.onClick?.(pressPrimary)
@@ -189,6 +237,57 @@ function onViewport(event?: { isStateStable?: boolean }) {
  * this one goes: only the last to go stops listening and takes the heights away.
  */
 let viewportUsers = 0
+
+/** The tokens Telegram's theme wrote last, to take back when a key goes away. */
+let painted: string[] = []
+/**
+ * Telegram's colours on the app's tokens and its own bars in the page's colour, so the
+ * frame Telegram draws and the page read as one. Called again on `themeChanged`.
+ */
+function applyTelegramTheme() {
+  const app = miniApp.value ? webApp() : null
+  if (!app) return
+  const root = document.documentElement
+  const theme: Record<string, string> = app.themeParams || {}
+  for (const name of painted) root.style.removeProperty(name)
+  painted = []
+  const color = (key: string) => (HEX.test(theme[key] || '') ? theme[key]! : '')
+  const paint = (value: string | null, tokens: string[]) => {
+    if (!value) return
+    for (const token of tokens) root.style.setProperty(token, value)
+    painted.push(...tokens)
+  }
+  // A theme with a card colour but no page colour (or the other way) would leave cards
+  // on a page of the app's own: either both come from Telegram or neither.
+  const paper = color('secondary_bg_color')
+  const surface = color('section_bg_color') || color('bg_color')
+  const surfaces = !!paper && !!surface
+  if (surfaces) {
+    paint(paper, ['--paper', '--surface-sunken'])
+    paint(surface, ['--surface', '--surface-raised'])
+    if (color('text_color')) paint(readable(color('text_color'), [paper, surface]), ['--ink'])
+    if (color('link_color')) paint(readable(color('link_color'), [paper, surface]), ['--link'])
+    if (color('section_separator_color')) paint(color('section_separator_color'), ['--hairline'])
+  }
+  const onButton = color('button_text_color')
+  if (color('button_color') && onButton) {
+    paint(readable(color('button_color'), [onButton]), ['--action', '--action-hover', '--focus'])
+    paint(onButton, ['--on-action'])
+  }
+  root.dataset.theme = app.colorScheme === 'dark' ? 'dark' : 'light'
+  const page = surfaces ? 'secondary_bg_color' : 'bg_color'
+  if (isVersionAtLeast(CHROME_COLORS)) {
+    try {
+      app.setHeaderColor?.(page)
+      app.setBackgroundColor?.(page)
+    } catch {}
+  }
+  if (isVersionAtLeast(BOTTOM_BAR_COLOR)) {
+    try {
+      app.setBottomBarColor?.(page)
+    } catch {}
+  }
+}
 
 export function useTelegramApp() {
   miniApp.value = !!webApp()?.initData
@@ -409,8 +508,115 @@ export function useTelegramApp() {
     else webApp()?.requestFullscreen?.()
   }
 
+  /** What `startapp` the app was opened with (`t.me/<bot>?startapp=…`), checked by the caller. */
+  const startParam = (): string => String(webApp()?.initDataUnsafe?.start_param || '')
+  /** The Telegram user the app was opened for, as Telegram says (checked by the server at sign-in). */
+  const telegramUserId = (): string => String(webApp()?.initDataUnsafe?.user?.id || '')
+  /** Telegram's phone, desktop or web client: `ios`, `android`, `tdesktop`, `macos`, `weba`… */
+  const platform = (): string => String(webApp()?.platform || '')
+
+  /** A t.me link inside Telegram itself, the Mini App left open. False where Telegram cannot. */
+  function openTelegramLink(url: string): boolean {
+    const app = miniApp.value && isVersionAtLeast(TELEGRAM_LINKS) ? webApp() : null
+    if (typeof app?.openTelegramLink !== 'function') return false
+    try {
+      app.openTelegramLink(url)
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  /**
+   * Telegram saves a file itself from 8.0, with its own prompt: in a web view an ordinary
+   * download link does nothing on a phone. The address must work without the session
+   * (POST /artifacts/{id}/link). Resolves true once the customer accepts, false when they
+   * cancel, null where Telegram cannot.
+   */
+  const canDownload = computed(() => miniApp.value && isVersionAtLeast(DOWNLOAD_FILE))
+  function downloadFile(url: string, fileName: string): Promise<boolean | null> {
+    const app = canDownload.value ? webApp() : null
+    if (typeof app?.downloadFile !== 'function') return Promise.resolve(null)
+    return new Promise((resolve) => {
+      try {
+        app.downloadFile({ url, file_name: fileName }, (accepted: boolean) => resolve(!!accepted))
+      } catch {
+        resolve(null)
+      }
+    })
+  }
+
+  /**
+   * The bot may write to this person: needed before a result is sent to the chat. Someone
+   * who opened the app by a link without ever starting the bot is asked once; true where
+   * nothing can be asked, as the server then says for itself whether it could send.
+   */
+  function ensureWriteAccess(): Promise<boolean> {
+    const app = miniApp.value ? webApp() : null
+    // Telegram sends the flag only when it is true.
+    if (!app || app.initDataUnsafe?.user?.allows_write_to_pm === true || !isVersionAtLeast(WRITE_ACCESS))
+      return Promise.resolve(true)
+    return new Promise((resolve) => {
+      try {
+        app.requestWriteAccess?.((allowed: boolean) => resolve(!!allowed))
+      } catch {
+        resolve(true)
+      }
+    })
+  }
+
+  /** Telegram's own confirm box (from 6.2), the browser's elsewhere. */
+  function confirm(message: string): Promise<boolean> {
+    const app = miniApp.value && isVersionAtLeast(POPUPS) ? webApp() : null
+    if (typeof app?.showConfirm !== 'function') return Promise.resolve(window.confirm(message))
+    return new Promise((resolve) => {
+      try {
+        app.showConfirm(message.slice(0, 256), (ok: boolean) => resolve(!!ok))
+      } catch {
+        resolve(window.confirm(message))
+      }
+    })
+  }
+
+  /**
+   * For the frame's lifetime: Telegram's theme on the page (and again whenever the customer
+   * changes it), Settings in the ⋮ menu, and `onActive` when the app comes back from
+   * being minimised, as anything may have finished meanwhile.
+   */
+  function useTelegramFrame(options: { onSettings?: () => void; onActive?: () => void } = {}) {
+    if (!import.meta.client || !miniApp.value) return
+    const app = webApp()
+    applyTelegramTheme()
+    app?.onEvent?.('themeChanged', applyTelegramTheme)
+    const settings = isVersionAtLeast(SETTINGS_BUTTON) && options.onSettings ? app?.SettingsButton : null
+    const openSettings = () => options.onSettings?.()
+    if (settings) {
+      settings.onClick?.(openSettings)
+      settings.show?.()
+    }
+    const active = () => options.onActive?.()
+    if (isVersionAtLeast(ACTIVATION) && options.onActive) app?.onEvent?.('activated', active)
+    onScopeDispose(() => {
+      app?.offEvent?.('themeChanged', applyTelegramTheme)
+      if (settings) {
+        settings.offClick?.(openSettings)
+        settings.hide?.()
+      }
+      if (isVersionAtLeast(ACTIVATION) && options.onActive) app?.offEvent?.('activated', active)
+    })
+  }
+
   return {
     isMiniApp: computed(() => miniApp.value),
+    startParam,
+    telegramUserId,
+    platform,
+    openTelegramLink,
+    canDownload,
+    downloadFile,
+    ensureWriteAccess,
+    confirm,
+    useTelegramFrame,
     isVersionAtLeast,
     initData,
     colorScheme,

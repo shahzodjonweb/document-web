@@ -19,6 +19,14 @@ const aiShortcuts = computed(() =>
     : [],
 )
 const popular = computed(() => sorted.value.filter((f) => !isGenerationFeature(f.id)).slice(0, 5))
+/*
+ * Inside Telegram Home is the bot's main menu as a screen: the AI services, PDF from
+ * photos and Invite friends sit at the top, as the bot's own buttons do, and files are
+ * chosen, never dropped.
+ */
+const telegram = useTelegramApp()
+const tg = telegram.isMiniApp
+const scanAvailable = computed(() => ws.features.value.some((f) => f.id === 'pdf.images_to_pdf'))
 // Free accounts are told up front which Telegram channels to join, rather than
 // only when a task is refused.
 const gate = useState<{ channels: any[] } | null>('channel-gate', () => null)
@@ -96,8 +104,8 @@ function onDrop(event: DragEvent) {
       ><AppIcon :name="busy ? 'loader' : 'upload'" :size="26" :class="{ spin: busy }"
     /></span>
     <div class="drop-copy">
-      <h2>{{ busy ? t('uploading') : t('dropTitle') }}</h2>
-      <p>{{ t('dropSub') }}</p>
+      <h2>{{ busy ? t('uploading') : t(tg ? 'tgDropTitle' : 'dropTitle') }}</h2>
+      <p>{{ t(tg ? 'tgDropSub' : 'dropSub') }}</p>
     </div>
     <div class="drop-action">
       <button class="button primary" @click="fileInput?.click()" :disabled="busy">
@@ -132,6 +140,15 @@ function onDrop(event: DragEvent) {
       /></NuxtLink>
     </div>
   </section>
+  <div v-if="tg" class="tg-shortcuts">
+    <NuxtLink v-if="scanAvailable" :to="path('/app/tools/pdf.images_to_pdf')" class="tg-shortcut panel"
+      ><span class="tool-icon"><AppIcon name="camera" :size="20" /></span
+      ><strong>{{ name('pdf.images_to_pdf') }}</strong></NuxtLink
+    ><NuxtLink :to="path('/app/referrals')" class="tg-shortcut panel" data-testid="home-invite"
+      ><span class="tool-icon gift"><AppIcon name="gift" :size="20" /></span
+      ><strong>{{ t('tgFreeGift') }}</strong></NuxtLink
+      >
+  </div>
   <section v-if="ws.usage.value?.ai_documents || ws.usage.value?.file_jobs" class="home-section">
     <div class="section-heading">
       <h2>{{ t('homePlan') }} · {{ t(ws.user.value?.plan || 'free') }}</h2>
