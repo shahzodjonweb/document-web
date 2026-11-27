@@ -34,6 +34,7 @@
     "test:channels": "node tests/channel-gate.mjs",
     "test:frame": "node tests/app-frame.mjs",
     "test:mini-app": "node tests/mini-app.mjs",
+    "test:categories": "node tests/studio-categories.mjs",
     "test:core": "node tests/core-pages.mjs",
     "test:scan": "node tests/image-pdf-scan.mjs",
     "test:storage-migration": "node tests/storage-migration.mjs"

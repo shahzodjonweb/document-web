@@ -1323,6 +1323,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/studio/categories": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description The category lists AI PDF (`ai.pdf_topic`) and AI Slides (`ai.pptx`) open with, as the bot shows them: the categories customers may pick now, a group when something under it may be picked, and Boshqa (`other`, today's description without a category). A service's list is empty while the owner's switch is off or nothing of it is ticked: the service then opens today's description. A category picked is `options.category` on `POST /generation/drafts` (a category no longer offered is `category_unavailable`, 409); Boshqa sends none. `locale` (en, uz, ru; the account's when left out) is the language of every word. */
+        get: operations["listStudioCategories"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/studio/categories/chosen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description A category's screen opened: counted as the bot counts a tap on its button, once per account and category in half an hour, for the admin's chosen-versus-made. An id the catalogue does not hold is `invalid_parameters`. */
+        post: operations["recordStudioCategoryChosen"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/studio/config": {
         parameters: {
             query?: never;
@@ -2523,6 +2557,23 @@ export interface components {
             id: string;
             revoked?: boolean;
             url?: string;
+        };
+        StudioCategory: {
+            /** @description category: whether it takes PDF, Word (.docx, .doc) or text files, uploaded with `purpose` `ai_source`. */
+            attach?: boolean;
+            /** @description group: its own list, categories and its Boshqa. */
+            children?: components["schemas"]["StudioCategory"][];
+            /** @description category: one to three descriptions it is made from, as the customer would write them. */
+            examples?: string[];
+            /** @description category and group: the line under the button in a top list; null inside a group. */
+            hint?: string | null;
+            id: string;
+            /** @enum {unknown} */
+            kind: "category" | "group" | "other";
+            /** @description The bot button's words without its emoji. */
+            label: string;
+            /** @description category: its own instructions (the bot's prompt), one paragraph each, without emoji. */
+            prompt?: string[];
         };
         Subscription: {
             /** Format: date-time */
@@ -6754,10 +6805,10 @@ export interface operations {
                     /** Format: password */
                     password?: string;
                     /**
-                     * @description `cv_source` for a file a CV is made from (an old CV or a LinkedIn profile): a Word file with links in it (an email, a LinkedIn address) is then taken. Such a file is read for the CV and refused by every file tool.
+                     * @description `cv_source` for a file a CV is made from (an old CV or a LinkedIn profile): a Word file with links in it (an email, a LinkedIn address) is then taken. Such a file is read for the CV and refused by every file tool. `ai_source` for a file an AI PDF or AI Slides of a category is made from (`attach` in `/studio/categories`): a PDF, a Word file (.docx, or an old .doc) or a text file (.txt), read for that draft and refused by every file tool; any other kind is `unsupported_file`.
                      * @enum {string}
                      */
-                    purpose?: "" | "cv_source";
+                    purpose?: "" | "cv_source" | "ai_source";
                 };
             };
         };
@@ -9397,6 +9448,127 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ShareGrant"];
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    listStudioCategories: {
+        parameters: {
+            query?: {
+                locale?: "en" | "uz" | "ru";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        features: {
+                            "ai.pdf_topic": components["schemas"]["StudioCategory"][];
+                            "ai.pptx": components["schemas"]["StudioCategory"][];
+                        };
+                    };
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    recordStudioCategoryChosen: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRFToken": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    category: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        recorded: boolean;
+                    };
                 };
             };
             /** @description Invalid request */

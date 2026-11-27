@@ -1,0 +1,556 @@
+{
+ "uz": {
+  "ai.pdf_topic": [
+   {
+    "id": "pdf.mustaqil_ish",
+    "kind": "category",
+    "label": "Mustaqil ish / Referat",
+    "hint": "Titul, reja, matn va adabiyotlar · 8–20 sahifa",
+    "prompt": [
+     "Bitta xabarda yozing: mavzu, fan va necha sahifa kerakligi (aytmasangiz, 10 sahifa; 8 dan 20 gacha). Titul, reja va adabiyotlar sahifasi ham shu songa kiradi.",
+     "Universitet, F.I.Sh., guruh va o‘qituvchi yozilsa, titul varag‘iga chiqadi; yozilmasa, qo‘lda to‘ldirish uchun chiziq qoladi.",
+     "O‘qituvchi rejasi yoki manbalaringiz bo‘lsa, PDF, Word yoki TXT fayl qilib yuboring. Adabiyotlar ro‘yxatiga faqat siz bergan manbalar yoziladi."
+    ],
+    "examples": [
+     "Tarix fanidan referat, 9-sinf: «Amir Temur davrida ilm-fan va madaniyat». 8 sahifa, sodda tilda. 21-maktab, o‘quvchi Rustamova Muslima, o‘qituvchi Shukurova X. Buxoro.",
+     "Pedagogika fanidan mustaqil ish kerak: «Boshlang‘ich sinflarda o‘quvchilarning mustaqil fikrlashini rivojlantirish». 12 sahifa, ilmiy uslubda. Misol davlat universiteti, 2-kurs, 214-guruh, Odilova Mohinur. O‘qituvchi: dotsent Nurmatov O. Toshkent. Biriktirilgan darslik faylidan foydalaning.",
+     "Ekologiya fanidan referat: «Orol dengizi muammosi va uning oqibatlari». 10 sahifa. Reja: 1) Orol dengizining qurishi sabablari; 2) Ekologik oqibatlar; 3) Muammoni hal etish yo‘llari."
+    ],
+    "attach": true
+   },
+   {
+    "id": "pdf.kurs_ishi",
+    "kind": "category",
+    "label": "Kurs ishi",
+    "hint": "Kafedra talabidagi titul, kirish, boblar va xulosa",
+    "prompt": [
+     "Kurs ishining mavzusi va fanini yozing. Sahifalar sonini ham ayting (aytmasangiz, 25; 12 dan 35 gacha). Titul varag‘i va mundarija ham shu songa kiradi.",
+     "Kafedra rejasi, raqamlaringiz yoki manbalaringiz bo‘lsa, PDF, Word yoki TXT fayl qo‘shing. Ilova kerak bo‘lsa, shuni ham yozing.",
+     "Raqam va manbalar faqat sizdan olinadi. Manba bermasangiz, adabiyotlar ro‘yxati qo‘lda to‘ldirish uchun bo‘sh qatorlar bo‘lib chiqadi."
+    ],
+    "examples": [
+     "Marketing asoslari fanidan kurs ishi kerak: «Kichik biznesda ijtimoiy tarmoqlar orqali marketing». 25 sahifa, 2 bob. Ikkinchi bobda qandolatchilik do‘konimning sotuvini tahlil qiling: 2023-yilda 120 mln, 2024-yilda 168 mln so‘m.",
+     "Pedagogika fanidan kurs ishi: «Boshlang‘ich sinflarda o‘qish ko‘nikmasini rivojlantirish». 30 sahifa. Kafedra bergan reja va manbalar ilova qilingan PDF faylda, rejaga aynan amal qiling.",
+     "Ona tili fanidan kurs ishi: «O‘zbek tilida sifatlarning ma’noviy guruhlari». 20 sahifa: 1-bob nazariy qism, 2-bob tahlil. Atamalar lug‘atini ilovaga qo‘ying."
+    ],
+    "attach": true
+   },
+   {
+    "id": "pdf.konspekt",
+    "kind": "category",
+    "label": "Konspekt / Xulosa",
+    "hint": "Mavzu, reja, asosiy atamalar va xulosa",
+    "prompt": [
+     "Mavzuni, fanni, sinf yoki kursni va necha sahifa kerakligini yozing (aytmasangiz, 4 sahifa; 2 dan 12 gacha).",
+     "Nima kerakligini ayting: konspekt, fayl bo‘yicha qisqacha mazmun yoki imtihon uchun savol-javob (savollar ro‘yxatini ham yuboring, 12 tagacha).",
+     "PDF, Word yoki TXT fayl biriktirsangiz, hujjat faqat shu fayl asosida tuziladi.",
+     "Dars ishlanmasi kerak bo‘lsa, «Dars ishlanmasi / tarqatma» bo‘limini tanlang."
+    ],
+    "examples": [
+     "9-sinf fizikasi: Nyuton qonunlari bo‘yicha o‘qib chiqish uchun konspekt kerak. Tayanch iboralar, formulalar va har bir qonunga bitta misol bo‘lsin, 3 sahifa.",
+     "Biriktirgan faylimdagi 2-bob bo‘yicha qisqacha mazmun tayyorlang: asosiy g‘oya, muhim atamalar va oxirida 5 ta asosiy fikr. Fan: marketing asoslari, 2-kurs, 2 sahifa.",
+     "Biologiya fanidan imtihonga tayyorlanish uchun savol-javob kerak: hujayra tuzilishi. 8 ta savol, har biriga qisqa javob, 3 sahifa."
+    ],
+    "attach": true
+   },
+   {
+    "id": "pdf.dars_ishlanmasi",
+    "kind": "category",
+    "label": "Dars ishlanmasi / tarqatma",
+    "hint": "Bir darslik reja va o‘quvchilarga tarqatma",
+    "prompt": [
+     "Dars ishlanmasi yoki o‘quvchilar uchun tarqatma tayyorlayman.",
+     "Bitta xabarda yozing: sinf, fan, mavzu (ixtiyoriy: o‘qituvchi, maktab, sana, dars metodlari).",
+     "Darslik sahifasini PDF, Word yoki TXT qilib qo‘shishingiz mumkin.",
+     "Sahifa soni aytilmasa: ishlanma 4 sahifa (2 dan 8 gacha), tarqatma 2 sahifa (3 tagacha)."
+    ],
+    "examples": [
+     "7-sinf fizika, «Moddaning zichligi» mavzusida bir soatlik dars ishlanmasi kerak. Aqliy hujum va kichik guruhlarda ishlash bo‘lsin, uyga vazifa ham yozing. 4 sahifa.",
+     "6-sinf biologiya, «Hujayra tuzilishi» mavzusiga tarqatma kerak: qisqa qoida, 5 ta topshiriq, ism-familiya yozadigan joy. Javoblari ham bo‘lsin.",
+     "Ochiq dars uchun dars ishlanmasi: 4-sinf ona tili, «Sifat» mavzusi, 45 daqiqa. Titul varag‘i ham kerak: Namangan shahri, 27-maktab, o‘qituvchi Komilova Lobar."
+    ],
+    "attach": true
+   },
+   {
+    "id": "pdf.test",
+    "kind": "category",
+    "label": "Test savollari",
+    "hint": "Variantli savollar, kalitlar oxirgi sahifada",
+    "prompt": [
+     "Bitta xabarda yozing: fan, sinf, mavzu va savollar soni (40 tagacha, aytilmasa 20).",
+     "Ixtiyoriy: turi (test, nazorat ishi, BSB, CHSB), vaqt, maktab nomi, yozma savollar.",
+     "Darslik yoki konspektni (PDF, Word, TXT) biriktirsangiz, savollar shundan tuziladi.",
+     "Kalitlar faylning oxirgi sahifasida."
+    ],
+    "examples": [
+     "7-sinf biologiya, “Hujayra tuzilishi” mavzusi bo‘yicha test kerak: 15 ta savol, 4 tadan javob. Vaqt — 30 daqiqa.",
+     "6-sinf matematika, “Kasrlar” bobi bo‘yicha 2-BSB kerak: 10 ta test savoli va 3 ta yozma savol. Yozma savollar uchun namunaviy javob va baholash mezonini yozing.",
+     "O‘zim tayyorlanish uchun DTM uslubida tarix testi kerak: “Amir Temur davri” mavzusida 30 ta savol, ilova qilgan konspektim asosida. Javoblarga qisqa izoh yozing."
+    ],
+    "attach": true
+   },
+   {
+    "id": "pdf.biz",
+    "kind": "group",
+    "label": "Biznes va ish",
+    "hint": "Biznes-reja, tijorat taklifi, hisobot va boshqalar",
+    "children": [
+     {
+      "id": "pdf.biz.biznes_reja",
+      "kind": "category",
+      "label": "Biznes-reja",
+      "hint": null,
+      "prompt": [
+       "Biznesingizni bitta xabarda yozing: nima qilasiz, qayerda va reja nima uchun kerak (bank krediti, grant, investor yoki o‘zingiz uchun).",
+       "Raqamlar (xarajatlar, o‘z mablag‘ingiz, kredit, narxlar) qancha ko‘p bo‘lsa, reja shuncha to‘liq chiqadi. Hajmi aytilmasa — 10 sahifagacha.",
+       "Yozmaganingiz bo‘sh chiziq bo‘lib qoladi: raqam, nom, sana va manba hech qachon o‘ylab topilmaydi. Narxlar ro‘yxati yoki eski rejani PDF, Word yoki TXT qilib qo‘shing."
+      ],
+      "examples": [
+       "Samarqandda qandolat va non sexi ochmoqchiman, bank krediti uchun biznes-reja kerak, 8 sahifa. Tort, pirog, pechenye va non tayyorlab, kafe va do‘konlarga yetkazaman. Jami 420 mln so‘m kerak: 120 mln o‘zimniki, 300 mln kredit (yillik 24%, 3 yil, 3 oy imtiyozli davr). Sohada 5 yillik tajribam bor. «Namuna Qandolat» MChJ.",
+       "Toshkentda IELTS tayyorlov onlayn markazi ochmoqchiman, investor uchun biznes-reja kerak. Dastur va 3 ta o‘qituvchim tayyor, guruhda 12 tadan o‘quvchi, kurs narxi oyiga 600 000 so‘m. Reklama va o‘quv platformasi uchun investordan 150 mln so‘m so‘rayapman.",
+       "Farg‘onada 20 sotix issiqxona uchun grant arizasiga biznes-reja kerak, 6 sahifa. Pomidor va bodring yetishtirib, mahalliy bozor va do‘konlarga sotaman. Grant 150 mln so‘m, o‘z hissam 50 mln: issiqxona qurilishi 130 mln, sug‘orish tizimi 40 mln, urug‘ va o‘g‘it 30 mln. Narxlarni ilova qilingan ro‘yxatdan oling."
+      ],
+      "attach": true
+     },
+     {
+      "id": "pdf.biz.tijorat_taklifi",
+      "kind": "category",
+      "label": "Tijorat taklifi",
+      "hint": null,
+      "prompt": [
+       "Bitta xabarda yozing: kompaniyangiz nomi, taklif kimga, nima taklif qilasiz, narxlar (har biri uchunmi yoki jamimi, yozing) va shartlar (yetkazib berish, to‘lov, amal qilish muddati).",
+       "Ixtiyoriy: manzil, telefon, rekvizitlar (STIR, hisob raqami, bank, MFO), kafolat, chegirma, imzolovchining lavozimi va ismi.",
+       "Narxlar ro‘yxatini (PDF, Word, TXT) biriktirsangiz, narxlar shu fayldan olinadi.",
+       "Taklif odatda 1 bet. Yozmagan ma’lumotingiz bo‘sh chiziq bo‘lib qoladi — qo‘lda to‘ldirasiz. Narx va raqamlar hech qachon o‘ylab topilmaydi."
+      ],
+      "examples": [
+       "Namuna Mebel MChJ nomidan 25-sonli maktab direktori Sardor Namunovga tijorat taklifi. 40 ta o‘quvchi partasi — har biri 650 000 so‘m, 40 ta stul — har biri 280 000 so‘m, 2 ta o‘qituvchi stoli — har biri 1 150 000 so‘m, narxlar QQS bilan. Yetkazib berish va o‘rnatish bepul, 10 ish kunida. To‘lov: 50% oldindan. Kafolat 3 yil, taklif 30 kun amal qiladi. Bog‘lanish: Dilnoza, +998 90 123 45 67.",
+       "Namuna Servis YaTT, ofis tozalash xizmati taklifi — mijoz kichik IT kompaniya direktori. Oyiga 2 marta chuqur tozalash — oyiga jami 1 800 000 so‘m, har kuni yengil tozalash — oyiga jami 3 200 000 so‘m, QQS siz. Birinchi oyga 10% chegirma. Shartnoma asosida, to‘lov har oyning 5-sanasigacha. Taklif 2026-yil 31-dekabrgacha amal qiladi. Aloqa: Dilnoza, dilnoza@example.com.",
+       "Namuna Print MChJ nomidan «Bahor» kafesiga tijorat taklifi: menyu va vizitkalar. 200 ta menyu — har biri 18 000 so‘m, 1 000 ta vizitka — jami 350 000 so‘m, QQS siz. Tayyorlash muddati 5 ish kuni, to‘lov 100% oldindan, taklif 14 kun amal qiladi. Imzolaydi: direktor Jasur Ergashev."
+      ],
+      "attach": true
+     },
+     {
+      "id": "pdf.biz.hisobot",
+      "kind": "category",
+      "label": "Hisobot",
+      "hint": null,
+      "prompt": [
+       "Hisobotni bitta xabarda tasvirlang: kimning hisoboti, qaysi davr uchun, nima qilingan.",
+       "Raqamlar (reja va natija), muammolar va kelgusi davr rejalari bo‘lsa, yozing; PDF, Word yoki TXT fayl ham qo‘shishingiz mumkin.",
+       "Hisobot 4 sahifagacha, yozganingizcha bo‘ladi: yozmaganingiz bo‘sh chiziq bo‘lib qoladi, hech narsa o‘ylab topilmaydi."
+      ],
+      "examples": [
+       "Savdo bo‘limining 3-chorak hisoboti kerak, direktorga, 4 sahifa. Sotuv rejasi 480 mln so‘m edi, natija 502 mln so‘m. Yangi mijozlar: reja 40 ta, natija 48 ta. Qaytarilgan tovarlar: reja 12 ta, natija 9 ta. Muammo: Qashqadaryo viloyatiga yetkazib berish 2 hafta kechikdi. Keyingi chorakda 2 ta yangi menejer olish va Buxoroda savdoni boshlash rejada. «Namuna Savdo» MChJ.",
+       "Maktab direktoriga 2024–2025-o‘quv yili bo‘yicha matematika fani metodbirlashmasining hisoboti kerak. 12 ta ochiq dars va 4 ta seminar o‘tkazildi, 9-sinfdan 7 nafar o‘quvchi tuman olimpiadasida g‘olib bo‘ldi, o‘zlashtirish 92%. Muammo: 2 ta sinf xonasida proyektor yo‘q. Kelgusi yilga reja: yangi dastur bo‘yicha o‘qituvchilarni tayyorlash va 5-sinflar uchun to‘garak ochish.",
+       "Oylik hisobotim kerak, 1 sahifa: marketing menejeri, mart oyi. 12 ta Instagram post tayyorlandi (12 soat), 2 ta reklama kampaniyasi ishga tushirildi (byudjet 6 mln so‘m, 8 soat), 450 ta yangi obunachi qo‘shildi, mijozlar bazasi 3 ta tadbir uchun yangilandi (5 soat). Muammo: dizayner javobni kech berdi. Aprelda: yangi sayt uchun matnlar."
+      ],
+      "attach": true
+     },
+     {
+      "id": "pdf.biz.yoriqnoma",
+      "kind": "category",
+      "label": "Xodimlar uchun yo‘riqnoma",
+      "hint": null,
+      "prompt": [
+       "Xodimlar uchun yo‘riqnoma: ish tartibi, mehnat muhofazasi yo‘riqnomasi yoki ichki tartib qoidalari (vazifa va huquqlar uchun «Lavozim yo‘riqnomasi»ni tanlang).",
+       "Hammasini bitta xabarda yozing. Majburiy: qaysi ish, jihoz yoki mavzu bo‘yicha.",
+       "Yaxshi chiqishi uchun: tashkilot nomi, kim uchun (xodimlar, o‘quvchilar), kim tasdiqlashi.",
+       "Ixtiyoriy: tuzuvchi va kelishuvchilar, o‘z qoidalaringiz, necha sahifa (aytmasangiz — 3; yo‘riqnoma 8, qoidalar 12 sahifagacha).",
+       "Yozmaganingiz bo‘sh chiziq bo‘lib qoladi — raqam, sana, imzo va telefonlarni qo‘lda qo‘yasiz. Talablar avtomatik tuziladi: tasdiqlashdan oldin mutaxassis bilan tekshiring."
+      ],
+      "examples": [
+       "«Namuna Savdo» MChJ ombor xodimlari uchun yuk ko‘tarish va tashishda mehnat muhofazasi yo‘riqnomasi kerak. Tuzuvchi ombor mudiri A. K. Sodiqov, tasdiqlaydi direktor B. S. Toshmatov, kelishadi mehnat muhofazasi bo‘yicha mutaxassis. Qo‘lda yuk ko‘tarish, aravachada tashish, stellajlar bilan ishlash, yong‘in bo‘lsa nima qilish. 3 sahifa.",
+       "Bahor kafesining yangi ofitsiantlari uchun ish yo‘riqnomasi kerak: mijozni kutib olish, buyurtma olish, ovqat tashish, hisob-kitob, shikoyat bo‘lsa nima qilish. Ish vaqti 10:00 dan 22:00 gacha. Sodda tilda va chiroyli ko‘rinishda, 3 sahifa. Tasdiqlaydi kafe egasi Sh. R. Karimov.",
+       "Namuna 12-sonli maktabning kimyo laboratoriyasida o‘quvchilar uchun xavfsizlik yo‘riqnomasi kerak: tajribadan oldin, tajriba vaqtida, shisha idish sinsa yoki kimyoviy modda to‘kilsa nima qilish. Tuzuvchi kimyo o‘qituvchisi, tasdiqlaydi maktab direktori."
+      ],
+      "attach": true
+     },
+     {
+      "id": "pdf.biz.lavozim_yoriqnomasi",
+      "kind": "category",
+      "label": "Lavozim yo‘riqnomasi",
+      "hint": null,
+      "prompt": [
+       "Lavozim yo‘riqnomasi: xodimning vazifalari, huquqlari va javobgarligi (ish tartibi yoki xavfsizlik bo‘yicha yo‘riqnoma uchun «Xodimlar uchun yo‘riqnoma»ni tanlang).",
+       "Hammasini bitta xabarda yozing. Majburiy: lavozim nomi.",
+       "Yaxshi chiqishi uchun: tashkilot yoki bo‘lim nomi, u kimga bo‘ysunishi, kim tasdiqlashi va kim bilan kelishilishi.",
+       "Ixtiyoriy: ma’lumot darajasi (masalan, oliy) va ish staji, asosiy vazifalar, necha sahifa (aytmasangiz — 3).",
+       "Yozmaganingiz bo‘sh chiziq bo‘lib qoladi — ism, sana va imzoni qo‘lda qo‘yasiz. Vazifalar va huquqlar ro‘yxati avtomatik tuziladi: rahbar bilan tekshiring.",
+       "Eski yo‘riqnoma bo‘lsa, PDF, Word yoki TXT qilib qo‘shing."
+      ],
+      "examples": [
+       "Samarqand shahar 12-sonli umumiy o‘rta ta’lim maktabi uchun 5–9-sinflar matematika o‘qituvchisining lavozim yo‘riqnomasi kerak. U bevosita o‘quv ishlari bo‘yicha direktor o‘rinbosariga bo‘ysunadi. Talab: oliy pedagogik ma’lumot va kamida 2 yillik ish staji. Vazifalari: dars berish, ish rejasi, sinf jurnali, matematika to‘garagi, ota-onalar bilan ishlash. Maktab direktori Z. T. Rahimov tasdiqlaydi; o‘quv ishlari bo‘yicha direktor o‘rinbosari bilan kelishiladi.",
+       "«Namuna Qurilish» MChJ uchun buxgalterning lavozim yo‘riqnomasi kerak, yo‘riqnoma raqami 7, Toshkent shahri. Bevosita bosh buxgalterga bo‘ysunadi. Talab: oliy iqtisodiy ma’lumot va kamida 3 yillik tajriba. Vazifalari: birlamchi hujjatlar, ish haqi hisobi, soliq hisobotlari, kassa operatsiyalari. U bilan moddiy javobgarlik shartnomasi tuziladi. Direktor B. S. Toshmatov tasdiqlaydi; huquqshunos bilan kelishiladi. Buxgalter K. M. Aliyeva tanishuvga imzo qo‘yadi.",
+       "Menejment fanidan topshiriq uchun Bahor Foods do‘konida sotuvchi-konsultantning lavozim yo‘riqnomasi kerak, 2 sahifa."
+      ],
+      "attach": true
+     },
+     {
+      "id": "pdf.biz.bayonnoma",
+      "kind": "category",
+      "label": "Yig‘ilish bayonnomasi",
+      "hint": null,
+      "prompt": [
+       "Yig‘ilishni bitta xabarda yozing: tashkilot, sana, rais va kotib, kimlar qatnashdi, kun tartibi, nima eshitildi va qanday qaror qilindi.",
+       "Bayonnoma odatda 2 sahifagacha, ma’lumotingiz yetganicha bo‘ladi. Yozmaganingiz bo‘sh chiziq bo‘lib qoladi: hech narsa o‘ylab topilmaydi.",
+       "Qaydlar bor PDF, Word yoki TXT faylni qo‘shing."
+      ],
+      "examples": [
+       "Namuna shahar 12-maktabi pedagogik kengashi yig‘ilishining 1-son bayonnomasi kerak, 2026-yil 28-avgust. Raislik qildi direktor R. A. Aliyev, bayonnomani o‘qituvchi N. T. Karimova yozdi, 32 a’zodan 29 nafari qatnashdi. Kun tartibi: yangi o‘quv yiliga tayyorgarlik; dars jadvali. Direktor o‘rinbosari D. S. Yusupova 38 ta sinf xonasidan 34 tasida ta’mir tugaganini ma’lum qildi. Qarorlar: ma’lumot qabul qilinsin; qolgan ta’mir 4-sentabrgacha tugatilsin, mas’ul — xo‘jalik mudiri A. K. Rahimov. Dars jadvali bir ovozdan tasdiqlandi.",
+       "«Namuna Savdo» MChJ ta’sischilar yig‘ilishi bayonnomasi: Samarqand, 2026-yil 3-noyabr, 7-son. Ta’sischilar B. S. Toshmatov (rais, direktor) va N. A. Karimova (kotib) qatnashdi, kvorum bor. Kun tartibi: 1) 3-chorak hisobotini tasdiqlash; 2) yangi ombor ijarasi. Bosh hisobchi Z. T. Rahimova hisobotni taqdim etdi, ikkala ta’sischi yoqlab ovoz berdi — tasdiqlandi. Qarorlar: ombor ijaraga olinsin; shartnomani direktor 20-noyabrgacha imzolasin.",
+       "2-«A» sinf ota-onalar yig‘ilishi bayonnomasi, 2026-yil 14-noyabr, 24 ota-onadan 21 nafari qatnashdi. Sinf rahbari Z. N. Nazarova raislik qildi, kotib — ota-ona M. R. Qosimova. Masalalar: choraklik natijalar; dekabrdagi ekskursiya. Nazarova o‘rtacha o‘zlashtirish 4,3 ekanini ma’lum qildi. Ekskursiya 6-dekabr kuni o‘tkazilsin, mas’ul — sinf rahbari."
+      ],
+      "attach": true
+     },
+     {
+      "id": "pdf.biz.marketing_reja",
+      "kind": "category",
+      "label": "Marketing reja",
+      "hint": null,
+      "prompt": [
+       "Biznes yoki mahsulotingizni bitta xabarda yozing: nima sotasiz, qayerda va kimga.",
+       "Imkon bo‘lsa, maqsad (raqamda), byudjet va muddatni ham qo‘shing: reja aniqroq chiqadi. Reja 4 sahifagacha, ma’lumotingiz yetganicha bo‘ladi.",
+       "Yozilmagan raqam, narx va nomlar o‘ylab topilmaydi: ular bo‘sh chiziq bo‘lib qoladi. Sotuv hisoboti yoki narxlar ro‘yxatini PDF, Word yoki TXT fayl qilib qo‘shishingiz mumkin."
+      ],
+      "examples": [
+       "Samarqandda yangi kofexona ochyapman, «Namuna Kofe». Marketing reja kerak.",
+       "Toshkentdagi onlayn kiyim do‘konim «Namuna Kiyim» uchun 6 oylik marketing reja kerak, 1-martdan boshlab. Hozir Instagramda 4 000 ta obunachi, oyiga 120 ta buyurtma; 6 oyda oyiga 300 ta buyurtmaga chiqmoqchiman. Byudjet 36 mln so‘m. Mijozlar — 20–35 yoshli ayollar, narx 150 000–400 000 so‘m. Raqobatchilar — Instagramdagi arzonroq do‘konlar va onlayn bozordagi sotuvchilar; bizda 7 kun ichida almashtirish bor.",
+       "Namuna Asal brendi uchun yangi mahsulot — tog‘ asali, 500 g bankada — ishga tushirish rejasi kerak, 4 sahifa. Sotuv: Telegram kanal, onlayn bozor va 2 ta do‘kon. Ishga tushirish 1-martda, byudjet 8 mln so‘m, narxi 85 000 so‘m. Birinchi oyda 300 ta banka sotmoqchimiz."
+      ],
+      "attach": true
+     },
+     {
+      "id": "other",
+      "kind": "other",
+      "label": "Boshqa hujjat"
+     }
+    ]
+   },
+   {
+    "id": "pdf.xat",
+    "kind": "group",
+    "label": "Xat va hujjatlar",
+    "hint": "Motivatsion xat, ariza, tavsifnoma va boshqalar",
+    "children": [
+     {
+      "id": "pdf.xat.motivatsion",
+      "kind": "category",
+      "label": "Motivatsion xat",
+      "hint": null,
+      "prompt": [
+       "Hammasini bitta xabarda yozing: qayerga topshirasiz (universitet, dastur yoki grant nomi), nega aynan shu dastur, o‘zingiz haqingizda (o‘qish, ish, loyiha, yutuqlar) va maqsadingiz.",
+       "Ixtiyoriy: ism-sharifingiz, aloqa ma’lumotlari, sana (aks holda bugungi), xat tili (masalan, «ingliz tilida») va sahifalar soni (1–3, odatda 1, grant yoki magistratura uchun 2).",
+       "Xatga faqat yozganingiz va biriktirgan fayllaringizdagi ma’lumot kiradi: fakt qancha ko‘p bo‘lsa, xat shuncha to‘liq chiqadi. Ism va aloqa ma’lumotlari yozilmasa, bo‘sh joy qoladi. Imzoni o‘zingiz qo‘yasiz.",
+       "CV yoki dastur tavsifini PDF, Word yoki TXT qilib qo‘shing."
+      ],
+      "examples": [
+       "Aziza Nazarova, Namuna davlat universiteti kompyuter ilmlari yo‘nalishi 4-kurs talabasiman. Namuna Texnologiya Universitetining Axborot tizimlari magistraturasiga (2027-yil kuzgi qabul) motivatsion xat kerak, qabul komissiyasiga. Nega aynan shu dastur: unda ma’lumotlar bazalari va tizim tahlili kurslari bor, ular bitiruv ishimning mavzusiga yaqin; maqsadim — kichik korxonalar uchun hisob tizimlari yaratish. 2025-yil yozida «Namuna Soft» kompaniyasida ikki oy amaliyot o‘tadim: Python va SQL bilan ishladim. Bitiruv ishim — kichik do‘konlar uchun ombor hisobi dasturi. 2024-yilda universitet dasturlash olimpiadasida 2-o‘rin. Dasturlash to‘garagiga rahbarlik qilaman, 14 nafar talaba qatnashadi. Ingliz tili B2. Telefon: +998 90 123 45 67, aziza.nazarova@example.com. CV ilova.",
+       "Xatni ingliz tilida yozing. Men Jasur Toshmatov, Samarqanddagi Namuna davlat iqtisodiyot universitetining 3-kurs iqtisodiyot talabasiman. «Namuna Ilm» jamg‘armasi tanlov komissiyasiga chet elda magistraturada o‘qish stipendiyasi uchun xat kerak: Example University of Applied Sciences’da Regional and Development Economics, 2027-yil sentabrdan. Nega aynan shu dastur: u mintaqaviy iqtisodiyot va ekonometrikani birlashtiradi, bakalavr ishim esa pul o‘tkazmalari Samarqand viloyati xonadonlarining xarajatlariga qanday ta’sir qilishi haqida. Qaytib kelib, Samarqand viloyati rivojiga ishlashni rejalashtiryapman. 2024-yildan kichik buxgalteriya idorasida yarim kunlik ishlayman. Universitet iqtisodiyot klubiga rahbarlik qilaman (22 a’zo). 2025-yilda universitet keys-tanlovida 2-o‘rin. IELTS 7.0. Oilam chet eldagi yashash xarajatlarini qoplay olmaydi. Ilova: CV, transkript, IELTS sertifikati. Telefon va e-pochta: +998 90 123 45 67, jasur.toshmatov@example.com.",
+       "Namuna universitetida almashinuv semestri uchun motivatsion xat kerak. Men Malika Ergasheva, 3-kurs «Xalqaro munosabatlar» talabasiman. Yevropa siyosati bo‘yicha kurslar qiziqtiradi: Yevropa siyosati Yevropaning o‘zida qanday o‘rganilishini ko‘rmoqchiman. Nemis tilini o‘rganyapman, hozir B1 darajasida. 2025-yil yozida Toshkentdagi xalqaro talabalar konferensiyasida ikki hafta volontyor bo‘lganman."
+      ],
+      "attach": true
+     },
+     {
+      "id": "pdf.xat.ishga_kirish",
+      "kind": "category",
+      "label": "Ishga kirish xati",
+      "hint": null,
+      "prompt": [
+       "Hammasini bitta xabarda yozing: qaysi lavozim va qaysi kompaniya uchun, ismingiz, kimligingiz (o‘qish yoki ish joyi), nimalar qilganingiz va nega aynan shu kompaniya va lavozim.",
+       "Ixtiyoriy: telefon va email, kimga yozyapsiz (masalan, «Nilufar Saidova xonim»), vakansiya raqami. Yozmaganingizni o‘ylab topmaymiz.",
+       "CV’ingizni yoki e’lon matnini fayl (PDF, Word, TXT) qilib qo‘shsangiz, ma’lumotlar undan olinadi."
+      ],
+      "examples": [
+       "Misol Soft kompaniyasiga backend dasturchi amaliyotchisi vakansiyasi uchun ishga kirish xati yozing. E’lonni ularning Telegram kanalida ko‘rdim. Men Bekzod Nazarov, Samarqand davlat universiteti kompyuter ilmlari 4-kurs talabasiman. Bitiruv loyiham — Django yordamida mehmon uylari uchun bron qilish tizimi. 2024-yil yozida dasturlash studiyasida amaliyot o‘tab, REST endpointlar va unit testlar yozdim. Python, Django, PostgreSQL, Docker, Git. Misol Soft mehmon uylari uchun dasturlar yaratadi, bu mening bitiruv loyiham mavzusiga yaqin. Email: bekzod.nazarov@example.com.",
+       "«Namuna» xususiy maktabiga ingliz tili o‘qituvchisi vakansiyasi uchun xat yozing, direktor Anna Sergeyevna Belova. E’lonni maktab saytida ko‘rdim, vakansiya raqami E-7. Men Feruza Rahimova, Toshkentdagi davlat maktabida to‘rt yildan beri 5–9-sinflarga ingliz tilidan dars beraman. 9-sinf o‘quvchilarini olimpiadaga tayyorlayman: uch o‘quvchim shahar bosqichi sovrindori bo‘ldi. IELTS — 7.5. Maktabingizning kam o‘quvchili sinflarda dars berish tamoyili menga yoqadi. Ilova: rezyume va IELTS sertifikati nusxasi. Telefon: +998 90 123 45 67, email: feruza.rahimova@example.com.",
+       "Namuna Logistika kompaniyasi kadrlar bo‘limi boshlig‘i Nilufar Saidova xonimga marketing menejeri vakansiyasi (raqami M-214) uchun xat yozing. E’lonni kompaniya saytida ko‘rdim. CV’im ilovada: ism va tajribamni undan oling. Logistika sohasiga o‘tmoqchiman: e’londa onlayn buyurtmalarni kuzatish tizimi rivojlantirilayotgani yozilgan, bu mening onlayn savdo bilan ishlash tajribamga yaqin. Uslub — rasmiy."
+      ],
+      "attach": true
+     },
+     {
+      "id": "pdf.xat.ariza",
+      "kind": "category",
+      "label": "Ariza",
+      "hint": null,
+      "prompt": [
+       "Hammasini bitta xabarda yozing: kimga ariza (tashkilot va lavozim), kimdan (ism-sharifingiz, lavozim yoki kurs), nima so‘rayapsiz va qaysi sanalarga.",
+       "Ixtiyoriy: sabab, ilova qilinadigan hujjatlar, telefon raqamingiz; davlat organiga yozsangiz — yashash manzilingiz.",
+       "Yozmagan ma’lumotingiz bo‘sh chiziq bo‘lib qoladi — qo‘lda to‘ldirasiz. Sana va imzoni ham o‘zingiz qo‘yasiz.",
+       "Muassasangizning ariza namunasi bo‘lsa, PDF, Word yoki TXT qilib qo‘shing."
+      ],
+      "examples": [
+       "Namuna davlat universiteti iqtisodiyot fakulteti dekaniga ariza yozing. Men Dilnoza Karimova, 2-kurs, 205-guruh talabasiman. 2026-yil 3-noyabrdan 12-noyabrgacha kasallik tufayli qoldirgan darslarimni uzrli deb hisoblashingizni so‘rayman. Ilova: shifokor ma’lumotnomasi. Telefon: +998 90 123 45 67.",
+       "12-maktab direktoriga ariza. Men Gulnora Aliyeva, ingliz tili o‘qituvchisiman. 2027-yil 11-yanvardan 31-yanvargacha, 21 kalendar kun, yillik mehnat ta’tili berishingizni so‘rayman.",
+       "12-maktab direktoriga ariza. Men Malika Rahimova, 6-«B» sinf o‘quvchisi Aziza Rahimovaning onasiman. Qizim Aziza Rahimovaning 2026-yil 20-noyabrdan 22-noyabrgacha oilaviy sabab bilan darslarga qatnashmasligiga ruxsat berishingizni so‘rayman."
+      ],
+      "attach": true
+     },
+     {
+      "id": "pdf.xat.tavsifnoma",
+      "kind": "category",
+      "label": "Tavsifnoma",
+      "hint": null,
+      "prompt": [
+       "Tavsifnoma kim haqida va qayerga kerak? Hammasini bitta xabarda yozing:",
+       "• F.I.Sh., tug‘ilgan yili",
+       "• sinfi, kursi yoki lavozimi",
+       "• tashkilot yoki mahalla nomi",
+       "• yutuq va fazilatlari; qachondan beri o‘qiydi, ishlaydi yoki yashaydi",
+       "• qayerga topshiriladi (sud, elchixona, litsey, ish joyi)",
+       "• imzo qo‘yuvchilar: lavozimi va F.I.Sh.",
+       "Hujjatga faqat yozganingiz kiradi: tashkilot, imzo qo‘yuvchi va sana yozilmasa bo‘sh chiziq qoladi, qolgani shunchaki tushib qoladi. Odatda 1 sahifa; xabar qisqa bo‘lsa, tavsifnoma ham qisqa chiqadi.",
+       "Kerak bo‘lsa, PDF, Word yoki TXT fayl ham qo‘shing."
+      ],
+      "examples": [
+       "Namuna shahar 12-maktabning 9-«B» sinf o‘quvchisi Aliyev Sardor Bahodir o‘g‘li (2011-yilda tug‘ilgan) uchun tavsifnoma kerak, akademik litseyga topshirish uchun. 2020-yildan shu maktabda o‘qiydi, matematikadan tuman olimpiadasida 2-o‘rinni olgan, o‘rtacha bahosi 4,7. Sinfda intizomli, o‘rtoqlariga yordam beradi. Imzo: maktab direktori Z. T. Rahimov, sinf rahbari N. A. Karimova.",
+       "Men Namuna davlat iqtisodiyot universitetining 3-kurs talabasiman (Rahimova Dilnoza Karim qizi, 2005-yilda tug‘ilganman), buxgalteriya hisobi yo‘nalishi, kunduzgi ta’lim. Universitet stipendiyasi tanlovi uchun o‘zim haqimda tavsifnoma kerak, dekanat imzolaydi. O‘rtacha bahom 4,8, 2025-yilda talabalar ilmiy konferensiyasida ma’ruza qilganman, ilmiy to‘garak a’zosiman. Intizomiy jazom va qarzdorligim yo‘q. Imzo: dekan A. B. Yusupov.",
+       "Namuna mahalla fuqarolar yig‘ini nomidan Karimov Bekzod Akmal o‘g‘li (1990-yilda tug‘ilgan) haqida Namuna tuman sudiga tavsifnoma kerak. U 2012-yildan beri Namuna ko‘chasi, 5-uyda yashaydi, biz uni 2012-yildan beri bilamiz. Mahalla faollari yig‘inlarida qatnashadi, qo‘shnilari bilan inoq. Mahallada huquqbuzarlik qayd etilmagan, shikoyat tushmagan. Imzo: fuqarolar yig‘ini raisi M. T. Abdullayev."
+      ],
+      "attach": true
+     },
+     {
+      "id": "pdf.xat.tavsiya",
+      "kind": "category",
+      "label": "Tavsiya xati",
+      "hint": null,
+      "prompt": [
+       "Hammasini bitta xabarda yozing:",
+       "• kim uchun va nima uchun tavsiya kerak (universitet, grant, ish, maktab);",
+       "• xatni kim yozadi va uni qancha vaqtdan beri biladi: o‘zingiz yozsangiz, uni kim sifatida bilasiz; ustozingiz yoki rahbaringiz imzolasa, uning ismi, lavozimi va sizni qachondan beri bilishi;",
+       "• 2–3 ta aniq yutuq.",
+       "Ixtiyoriy: kimga yo‘llanishi, telefon, sana, muhr. Yozmagan ma’lumot bo‘sh chiziq bo‘lib qoladi, qo‘lda to‘ldirasiz. Odatda 1 sahifa. Imzoni imzolovchi o‘zi qo‘yadi va xatni to‘liq o‘qib chiqishi kerak.",
+       "Dastur talablari yoki yutuqlar ro‘yxati bo‘lsa, PDF, Word yoki TXT qilib qo‘shing."
+      ],
+      "examples": [
+       "Namuna Texnologiya Universiteti magistratura qabul komissiyasiga tavsiya xati yozing: Dilnoza Karimova uchun, u axborot tizimlari magistraturasiga hujjat topshirmoqchi. Men Dilshod Rahimov, Namuna davlat universiteti axborot tizimlari kafedrasi dotsentiman. Dilnozani 2023-yildan beri «Ma’lumotlar bazalari» fanidan o‘qitaman, bitiruv ishiga ham men rahbarlik qilganman. U kafedramiz talabalar jurnali uchun ma’lumotlar bazasini yaratdi, kafedra uni hozir ham ishlatadi. Kursdagi 36 talaba orasida eng yuqori o‘rtacha bahoga ega uchtasidan biri (4,8). 2025-yilda uchta talabalar anjumanida ma’ruza qildi. Kichik kurs talabalariga SQL bo‘yicha qo‘shimcha mashg‘ulotlar o‘tkazdi. Izohlarimni har safar o‘sha haftaning o‘zida hisobga olib, ishni qayta topshiradi. Telefon: +998 90 123 45 67.",
+       "Ustozim uchun qoralama kerak: u menga magistraturaga tavsiya xati beradi. Men Dilnoza Karimova, axborot tizimlari yo‘nalishi 4-kurs talabasiman. Xatni Dilshod Rahimov imzolaydi, u Namuna davlat universiteti axborot tizimlari kafedrasi dotsenti, meni 2023-yildan beri «Ma’lumotlar bazalari» fanidan o‘qitadi. Xat Namuna Texnologiya Universiteti magistratura qabul komissiyasiga.",
+       "Namuna Savdo MChJ direktori sifatida sotuv menejeri Jasur Toshmatov uchun tavsiya xati kerak, u boshqa kompaniyaga ishga o‘tmoqchi. Men Bahodir Xolmatov, Namuna Savdo MChJ direktoriman. Jasur menda 2021-yil martidan 2026-yil oktabrigacha ishladi: onlayn sotuvni 40 foizga oshirdi, besh kishilik jamoaga rahbarlik qildi, 2024-yilda «Yilning eng yaxshi xodimi» deb tan olindi. Ishdan o‘z xohishi bilan ketdi, intizomiy jazo olmagan. Xat kompaniya blankasida bo‘ladi, muhr bilan; chiqish raqami 118, sana 2026-yil 3-noyabr. Telefon: +998 71 000 00 00."
+      ],
+      "attach": true
+     },
+     {
+      "id": "pdf.xat.tushuntirish",
+      "kind": "category",
+      "label": "Tushuntirish xati",
+      "hint": null,
+      "prompt": [
+       "Hammasini bitta xabarda yozing: kimga (lavozim va tashkilot), kimdan (ism-sharifingiz, lavozim yoki kurs), nima bo‘lgani (sana, vaqt) va sababi.",
+       "Ixtiyoriy: kimga xabar berganingiz, ilova qilinadigan hujjat (masalan, ma’lumotnoma), telefon, va’da.",
+       "Yozmagan ma’lumotingiz bo‘sh chiziq bo‘lib qoladi — qo‘lda to‘ldirasiz. Sana va imzo ham qo‘lda qo‘yiladi.",
+       "Bu bir sahifalik tushuntirish xati; diplom ishi uchun tushuntirish yozuvi emas. Fayl (PDF, Word, TXT) qo‘shsangiz, ma’lumotlar undan olinadi."
+      ],
+      "examples": [
+       "Misol Savdo direktori Rustam Aliyevga tushuntirish xati kerak. Men, buxgalter Nigora Salimova, 12-noyabr kuni ishga 40 daqiqa kech qoldim: 9:40 da keldim. Sababi: yo‘lda avtohalokat bo‘lib, ko‘cha bir soatga yopilgan edi. Bo‘lim boshlig‘iga oldindan telefon qilib aytgandim.",
+       "Dekan Sanjar Yoqubovga tushuntirish xati yozing. Men, Moliya fakultetining 2-kurs talabasi Sardor Tursunov (MB-21 guruh), 10 va 11-noyabr kunlari darslarga kelmadim: isitmalab kasal bo‘lib qolgandim. Poliklinika ma’lumotnomasi bor, ilovada ko‘rsating. Qoldirgan mavzularni mustaqil o‘rganib olishga va’da beraman.",
+       "6-«B» sinf rahbari Zarina Nazarovaga: o‘g‘lim Aziz 14-noyabr kuni tishi og‘riganidan darsga kela olmadi. Bobur Karimov."
+      ],
+      "attach": true
+     },
+     {
+      "id": "other",
+      "kind": "other",
+      "label": "Boshqa xat"
+     }
+    ]
+   },
+   {
+    "id": "other",
+    "kind": "other",
+    "label": "Boshqa"
+   }
+  ],
+  "ai.pptx": [
+   {
+    "id": "slides.mavzu",
+    "kind": "category",
+    "label": "Mavzu bo‘yicha slayd",
+    "hint": "Seminar, mustaqil ish yoki dars uchun",
+    "prompt": [
+     "Mavzu bo‘yicha slayd. Hammasini bitta xabarda yozing: mavzu, kim uchun (kurs yoki sinf) va necha slayd (aytmasangiz, 10 ta slayd bo‘ladi).",
+     "Sizda o‘z raqamlaringiz bo‘lsa (so‘rovnoma, statistika), ularni ham yozing: diagramma va sanalar faqat shulardan olinadi.",
+     "Manbalaringiz bo‘lsa, PDF, Word yoki TXT fayl qilib yuboring: slaydlar shunga tayanadi, adabiyotlar slaydiga faqat shu fayllar kiradi.",
+     "Titul slayd uchun universitet, fan, F.I.Sh. va o‘qituvchini ham yozishingiz mumkin (Bajardi: …, Qabul qildi: …)."
+    ],
+    "examples": [
+     "Ekologiya fanidan seminar uchun slayd kerak: “Qayta tiklanuvchi energiya manbalari”. 2-kurs, 8 ta slayd, oddiy tilda. Guruhdagi so‘rovnoma: 30 kishidan 17 tasi quyoshni, 8 tasi shamolni, 5 tasi suvni istiqbolli deb tanladi.\nBirinchi slaydga:\nNamuna davlat universiteti\nFan: Ekologiya\nBajardi: Karimova Dilnoza, 205-guruh\nQabul qildi: dotsent Rahimov B.\nToshkent, 2026",
+     "6-sinf geografiya darsi uchun 7 ta slayd: “Tabiatda suvning aylanishi”. Sodda tilda, rasmlar bo‘lsin. Yer yuzining 71 foizi suv bilan qoplangan, shuni ham yozing.",
+     "Hamkasblarimga 8 ta slayd kerak: “Kiberxavfsizlik asoslari” — kuchli parol, firibgarlik xabarlarini tanish, ish kompyuterini himoyalash. Biriktirilgan qo‘llanmaga tayaning. Oddiy tilda bo‘lsin."
+    ],
+    "attach": true
+   },
+   {
+    "id": "slides.himoya",
+    "kind": "category",
+    "label": "Himoya",
+    "hint": "Kurs ishi yoki bitiruv ishi himoyasi uchun",
+    "prompt": [
+     "Himoya slaydlari. Bitta xabarda yozing: ish turi (kurs ishi, BMI, dissertatsiya yoki amaliyot hisoboti), mavzu va slayd soni (aytmasangiz, 10 ta).",
+     "Ishingizni fayl (PDF, Word, TXT) qilib yuboring yoki natijalar va raqamlaringizni yozing: slaydlar faqat shularga tayanadi."
+    ],
+    "examples": [
+     "Bitiruv malakaviy ishimni himoya qilish uchun 10 ta slayd kerak: “Kichik korxonada xodimlar almashinuvini kamaytirish yo‘llari”. Ish PDF qilib biriktirilgan: kirish, natijalar va xulosani undan oling.\nNamuna davlat universiteti, Iqtisodiyot fakulteti\nBajardi: Yusupov Jasur, 412-guruh\nIlmiy rahbar: dotsent Rahimova N.\nToshkent — 2026",
+     "Kurs ishim himoyasi uchun 6 ta slayd kerak: “Python yordamida kutubxona hisobi dasturini yaratish”. Qisqa va sodda bo‘lsin. Dastur kitob qo‘shadi, nomi bo‘yicha qidiradi va hisobot chiqaradi. Sinovda 120 ta kitob kiritildi, qidiruv 1 soniyadan kam vaqt oldi.\nNamuna axborot texnologiyalari universiteti\nBajardi: Toshpo‘latova Madina, 212-guruh\nIlmiy rahbar: katta o‘qituvchi Aliyev B.",
+     "Amaliyot hisoboti himoyasi uchun 6 ta slayd kerak: shahar shifoxonasida o‘tgan 4 haftalik hamshiralik amaliyoti. 2 hafta terapiya, 2 hafta jarrohlik bo‘limida bo‘ldim. 35 ta bemorni kuzatdim, 60 ta ukol qo‘ydim, 40 marta qon bosimini o‘lchadim. Oddiy tilda yozing.\nNamuna tibbiyot kolleji\nBajardi: Hamroyeva Nilufar, 3-kurs\nAmaliyot rahbari: katta hamshira Qodirova S.\nBuxoro — 2026"
+    ],
+    "attach": true
+   },
+   {
+    "id": "slides.dars",
+    "kind": "category",
+    "label": "Dars / ochiq dars",
+    "hint": "O‘qituvchi darsda ko‘rsatadigan slaydlar",
+    "prompt": [
+     "Dars slaydlari. Bitta xabarda yozing: sinf, fan, mavzu va necha slayd (aytmasangiz, dars 10 ta, ochiq dars 12 ta bo‘ladi).",
+     "Ochiq dars bo‘lsa, shuni yozing. O‘yin, test yoki rahmat slaydi kerak bo‘lsa, ayting; o‘tgan dars mavzusini ham yozishingiz mumkin.",
+     "Darslik matnini PDF, Word yoki TXT qilib qo‘shsangiz, slaydlar shunga tayanadi.",
+     "Titul slayd uchun o‘qituvchi va maktabni ham yozishingiz mumkin."
+    ],
+    "examples": [
+     "3-sinf «Atrofimizdagi olam» darsi uchun 10 ta slayd: «Fasllar». Rasmlar ko‘p bo‘lsin, oxirida o‘yin. 7-maktab, o‘qituvchi Gulnora Ahmedova.",
+     "Ochiq dars uchun 12 ta slayd: 5-sinf ona tili, «Sifat». Dars rejasi, uchta maqsad va baholash mezonlari bo‘lsin. Usullar: savol-javob va kichik guruhlarda ishlash. 12-maktab, Samarqand, o‘qituvchi Dilbar Qodirova.",
+     "7-sinf algebra, «Bir noma’lumli chiziqli tenglama» mavzusiga 14 ta slayd. Misollar yechimi bilan, juftlikda ishlash uchun 3 ta mashq va 5 ta test savoli bo‘lsin. Darslikdagi mavzu matnini PDF qilib biriktirdim."
+    ],
+    "attach": true
+   },
+   {
+    "id": "slides.tadbir",
+    "kind": "group",
+    "label": "Tarbiyaviy soat / tadbir",
+    "hint": "Tarbiyaviy soat, bayram, ota-onalar yig‘ilishi",
+    "children": [
+     {
+      "id": "slides.tadbir.tarbiyaviy_soat",
+      "kind": "category",
+      "label": "Tarbiyaviy soat",
+      "hint": null,
+      "prompt": [
+       "Tarbiyaviy soat (Kelajak soati ham) slaydlari. Bitta xabarda yozing: sinf, mavzu va necha slayd (aytmasangiz, 10 ta bo‘ladi).",
+       "O‘yin, uyga vazifa yoki rahmat slaydi kerak bo‘lsa, ayting. Maqol, videolavha nomi yoki sinf so‘rovi raqamlari kerak bo‘lsa, ularni o‘zingiz yozing: biz o‘ylab topmaymiz.",
+       "Mashg‘ulot ssenariysini PDF, Word yoki TXT qilib qo‘shsangiz, slaydlar shunga tayanadi.",
+       "Titul slayd uchun sinf rahbari va maktabni ham yozishingiz mumkin."
+      ],
+      "examples": [
+       "7-sinf tarbiyaviy soati uchun 10 ta slayd: «Ota-onaga hurmat». Hayotiy vaziyat, muhokama savollari va o‘yin ham bo‘lsin.\nSinf rahbari: Gulchehra Rahimova\n21-maktab, Toshkent",
+       "3-sinf uchun «Yo‘lda xavfsizlik» tarbiyaviy soati: 8 ta slayd, chizma rasmlar bo‘lsin, svetofor haqida o‘yin qo‘shing.",
+       "6-sinf Kelajak soati: ssenariyni PDF qilib biriktirdim. Shu asosida 12 ta slayd tayyorlang, oxirida uyga vazifa bo‘lsin."
+      ],
+      "attach": true
+     },
+     {
+      "id": "slides.tadbir.bayram",
+      "kind": "category",
+      "label": "Bayram tadbiri",
+      "hint": null,
+      "prompt": [
+       "Bayram tadbiri slaydlari. Bitta xabarda yozing: qaysi bayram, kim uchun (sinf yoki jamoa) va, bo‘lsa, dastur va she’r matni. Slaydlar soni: aytmasangiz, 6 ta (Navro‘z, Mustaqillik kuni va O‘zbek tili bayrami uchun 10 ta).",
+       "Ssenariy yoki she’r matnini PDF, Word yoki TXT qilib qo‘shing. Ism va she’rlarni o‘zimizdan o‘ylab topmaymiz."
+      ],
+      "examples": [
+       "Navro‘z bayrami tadbiriga 10 ta slayd kerak: 21-maktab, 5-A sinf, 2026-yil 21-mart. Dastur: 10:00 ochilish so‘zi — sinf rahbari, 10:10 «Bahor keldi» she’ri — Madina, 10:20 Navro‘z tarixi va an’analari haqida suhbat — ota-onalar, 11:00 viktorina. She’r matnini faylda biriktirdim.",
+       "1-oktabr — Ustozlar va murabbiylar kuniga 5 ta slayd, maktab yig‘ilishi uchun: bayramning ma’nosi, ustozlarga minnatdorchilik, o‘quvchilardan tabrik va tilaklar. 12-maktab, Samarqand.",
+       "Xodim ayollar uchun 8-mart tabrigi: 6 ta slayd. «Bahor Foods» jamoasi, 7-mart. Jamoa nomidan tabrik, tilaklar va dastur: 17:00 ochilish va tabrik, 17:20 konsert, 17:50 sovg‘alar, 18:10 choy. Pushti ranglarda bo‘lsin."
+      ],
+      "attach": true
+     },
+     {
+      "id": "slides.tadbir.ota_onalar",
+      "kind": "category",
+      "label": "Ota-onalar yig‘ilishi",
+      "hint": null,
+      "prompt": [
+       "Ota-onalar yig‘ilishi slaydlari. Bitta xabarda yozing: sinf, sinf rahbari va maktab, yig‘ilish nima haqida (chorak yakunlari, «Farzand va telefon» kabi mavzu yoki birinchi yig‘ilish), sinf natijalari (o‘quvchilar soni, o‘zlashtirish, sifat) va necha slayd (aytmasangiz, 8 ta).",
+       "Raqamlar, yutuqlar va sanalarni o‘zingiz yozing: slaydga faqat siz aytganlar tushadi. O‘quvchilarning alohida baholari slaydga qo‘yilmaydi.",
+       "Natijalar jadvali, dars jadvali yoki maktab qoidalarini PDF, Word yoki TXT qilib qo‘shsangiz, slaydlar shunga tayanadi."
+      ],
+      "examples": [
+       "7-«B» sinf ota-onalar yig‘ilishi uchun 8 ta slayd, I chorak yakunlari. Sinfda 28 o‘quvchi, o‘zlashtirish 96%, sifat 68%, 4 nafari a’lochi. Davomat 94%. Muammolar: uy vazifasi va kechikish. 25-noyabrda ochiq dars bor. Sinf rahbari Mohira Namunova, Namunaviy maktab, Toshkent.",
+       "8-sinf ota-onalar yig‘ilishi: farzand va telefon. 8 ta slayd, ayblamasdan, oddiy maslahatlar va oilaviy qoidalar bo‘lsin. Sinf rahbari Sherzod Namunov, Namunaviy maktab, Samarqand.",
+       "1-sinf ota-onalarining birinchi yig‘ilishi, 8 ta slayd: maktabga moslashish va bolaning kun rejimi, ota-onalarga iltimoslar. Sinf rahbari Dilfuza Namunova, Namunaviy maktab, Namangan, Telegram @sinf_rahbari_misol, qabul payshanba 15:00–16:00. Dars jadvali va maktab qoidalari biriktirilgan faylda."
+      ],
+      "attach": true
+     },
+     {
+      "id": "slides.tadbir.pedkengash",
+      "kind": "category",
+      "label": "Pedagogik kengash",
+      "hint": null,
+      "prompt": [
+       "Pedagogik kengash slaydlari. Bitta xabarda yozing: mavzu yoki kun tartibi, maktab, majlis raqami va sanasi, ma’ruzachi va necha slayd kerak (aytmasangiz, 10 ta; ma’lumot berilmagan slaydlarda to‘ldirish uchun bo‘sh joy qoladi).",
+       "O‘zlashtirish, sifat, davomat kabi raqamlaringiz, yutuqlar, muammolar, takliflar va yangi yil vazifalari bo‘lsa, yozing: diagramma va jadval qilamiz. Raqam, ism va sanani biz o‘zimizdan o‘ylab topmaymiz; o‘qituvchilarning ismlari slaydlarga yozilmaydi.",
+       "Hisobot yoki jadvalni PDF, Word yoki TXT qilib qo‘shsangiz, slaydlar shunga tayanadi."
+      ],
+      "examples": [
+       "1-chorak yakunlari bo‘yicha pedagogik kengashga 8 ta slayd kerak. 21-sonli umumiy o‘rta ta’lim maktabi, 5–9-sinflar, ma’ruzachi — o‘quv ishlari bo‘yicha direktor o‘rinbosari. O‘zlashtirish 97,8%, bilim sifati 58,4% (o‘tgan yilning shu choragida 55,1%). Matematika va ingliz tilida sifat past, 23 nafar o‘quvchi qoniqarsiz baho oldi. Muammolar, takliflar va qaror loyihasi bo‘lsin.",
+       "«O‘quvchilarning o‘qish savodxonligini oshirish» mavzusida pedagogik kengashda ma’ruza qilaman, 8 ta slayd. Tinglovchilar — 5–9-sinf ona tili va adabiyot o‘qituvchilari, ma’ruzachi — metodbirlashma rahbari. Muammolar, takliflar va qaror loyihasi bo‘lsin.",
+       "Avgust pedagogik kengashi uchun 12 ta slayd: yangi o‘quv yiliga tayyorgarlik. Hisobotni Word fayl qilib biriktirdim (sinf xonalari, darsliklar, kadrlar). Kun tartibi, chora-tadbirlar jadvali, muhokama savollari va qaror loyihasi bo‘lsin. 21-maktab, 25-avgust."
+      ],
+      "attach": true
+     },
+     {
+      "id": "other",
+      "kind": "other",
+      "label": "Boshqa tadbir"
+     }
+    ]
+   },
+   {
+    "id": "slides.pitch",
+    "kind": "category",
+    "label": "Startap / Pitch",
+    "hint": "Investor yoki grant uchun taqdimot",
+    "prompt": [
+     "Startap / Pitch. Bitta xabarda yozing: loyiha nima qiladi va kim uchun, muammo, yechim, qanday daromad qilasiz, jamoa va qancha mablag‘ so‘rayotganingiz.",
+     "Raqamlaringizni (mijozlar, daromad, bozor) valyutasi bilan yozing: slaydlarga faqat shular, siz yozgandek kiradi; o‘zimizdan raqam qo‘shmaymiz, valyutani almashtirmaymiz.",
+     "Biznes-reja yoki eski taqdimotingiz bo‘lsa, PDF, Word yoki TXT qilib yuboring.",
+     "Slayd soni: aytmasangiz, 10 ta slayd bo‘ladi (tanlov uchun 8 ta).",
+     "Birinchi va oxirgi slayd uchun (ixtiyoriy): kim taqdim etadi (ism, lavozim), tanlov yoki dastur nomi va yili, aloqa. Yozmagan narsangiz slaydda bo‘lmaydi."
+    ],
+    "examples": [
+     "Investorlarga 10 ta slayd kerak. FermaBor — fermerlarni Toshkentdagi restoranlar bilan bog‘laydigan ilova.\nMuammo: kichik restoran egalari yetkazib beruvchi qidirishga haftasiga o‘rtacha 6 soat sarflaydi (40 ta restoran egasi o‘rtasidagi so‘rov); yangi mahsulot ko‘pincha kech yetib keladi.\nYechim: fermer hosilini narxi bilan ilovaga qo‘yadi, restoran ertalab bitta ro‘yxatdan buyurtma beradi, mahsulot ertasi kuni oshxonada bo‘ladi.\nNatijalar: mart, aprel, may va iyun oylarida buyurtmalar 12, 25, 46 va 72 mln so‘m bo‘ldi. Hozir 14 ta fermer va 38 ta restoran ishlaydi.\nBozor: TAM — restoran va kafelar yiliga 1,8 trln so‘mlik oziq-ovqat xarid qiladi; SAM — Toshkent va Samarqandda 410 mlrd so‘m; SOM — uch yilda mingta mijozga yetsak, 38 mlrd so‘m.\nDaromad: har buyurtmadan 8% komissiya, o‘rtacha buyurtma 1,2 mln so‘m; fermerga pul yetkazilgandan keyin bir sutkada o‘tkaziladi.\nRaqobat: restoranlar hozir bozorga borib yoki fermerlarga qo‘ng‘iroq qiladi: yangi mahsulot 3–5 kunda yetadi, buyurtma yarim soat oladi, to‘lov naqd. Bizda: ertasi kuni, 2 daqiqa, narxlar bitta ro‘yxatda, ilova orqali to‘lov.\nJamoa: Aziza Karimova — asoschi, 5 yil oziq-ovqat yetkazib berishda ishlagan; Jasur Rahimov — dasturchi, 6 yillik tajriba; Nilufar Yusupova — savdo, fermerlar bilan 14 ta shartnoma tuzgan.\nSo‘raymiz: 150 mln so‘m pre-seed, 12 oyga yetadi: 60% ilova va yetkazishga, 25% savdo jamoasiga, 15% omborga.\nBirinchi va oxirgi slayd uchun:\nTaqdim etuvchi: Aziza Karimova, asoschi\nNamuna Startap tanlovi, 2026\nAloqa: Telegram @fermabor_namuna, aziza@example.com",
+     "Yoshlar startap tanlovi uchun 3 daqiqalik chiqish, 6 ta slayd kerak. Loyiha: Savolchi — 9–11-sinf o‘quvchilari uchun Telegram-bot: har kuni 10 ta test savoli va xatolar tahlili.\nMuammo: ko‘p o‘quvchi repetitorga pul to‘laydi, tumanlarda esa yaxshi repetitor topilmaydi.\nHozircha prototip bor, 25 ta o‘quvchi sinab ko‘rdi. Jamoa: uchta talaba.\nTanlovdan mentorlik va server uchun yordam so‘raymiz.",
+     "Startap akseleratoriga ariza uchun ingliz tilida 8 ta slayd kerak. Loyiha: AgroSklad — kichik fermerlar uchun sovutgichli omborni soatlab ijaraga berish xizmati.\nMuammo: kichik fermerlar dalaga yaqin sovutgichli ombor yo‘qligi uchun hosilning 20 foizini yo‘qotadi (30 ta fermerlikka bordik).\nYechim: fermer ilovada sovutgichli konteynerni soatlab band qiladi; konteyner qishloq bozorida turadi.\nBozor: 120 000 ta kichik fermerlik (o‘zimizning baho).\nDaromad: konteynerning har soati uchun $2.\nJamoa: Dilshod Aliyev — CEO, 8 yil logistikada; Malika Nurova — muhandis.\nBiz 18 oyga $50 000 seed so‘raymiz: 50% konteynerlarga, 30% ilovaga, 20% savdoga.\nBirinchi va oxirgi slayd uchun: Dilshod Aliyev, CEO; Namuna Akselerator, 2026; Aloqa: Telegram @agrosklad_namuna"
+    ],
+    "attach": true
+   },
+   {
+    "id": "slides.hisobot",
+    "kind": "category",
+    "label": "Hisobot",
+    "hint": "Oy, chorak yoki yil hisoboti",
+    "prompt": [
+     "Hisobot: kompaniya, bo‘lim yoki loyihaning oy, chorak yoki yil natijalari (raqamlar, reja, nima bajarildi, keyingi reja). Hammasini bitta xabarda yozing, kimga ko‘rsatilishini ham; slayd soni aytilmasa, 10 ta.",
+     "Hisobot yoki jadvalingiz bo‘lsa, PDF, Word yoki TXT qilib yuboring. Maktab, ota-onalar yig‘ilishi yoki himoya hisoboti uchun boshqa tugmani tanlang."
+    ],
+    "examples": [
+     "Oylik yig‘ilishga 7 ta slayd: mening oziq-ovqat do‘konimning oktyabr hisoboti. Savdo, mln so‘m: avgust 365, sentabr 380, oktyabr 412 (reja 400). Xaridorlar 5 800 nafar (sentabrda 5 300). Yaxshi ketdi: yangi non peshtaxtasi; sut mahsulotlari savdosi oshdi. Muammo bo‘ldi: sut yetkazib berish 4 marta kechikdi; 2 nafar sotuvchi ishdan ketdi. Noyabr rejasi: savdo 430 mln so‘m, 2 ta yangi sotuvchi qabul qilish. Savdoni diagramma qilib ko‘rsating.",
+     "Rahbariyatga 3-chorak hisoboti, 10 ta slayd. Tikuvchilik sexi: 18 400 dona (reja 18 000, 2-chorakda 16 900), brak 2,1% (2-chorakda 3,4%). Oylar bo‘yicha dona: iyul 5 700, avgust 6 100, sentabr 6 600. Filiallar, reja va natija: Andijon 6 500 va 6 900, Namangan 6 000 va 6 100, Farg‘ona 5 500 va 5 400. Moliya, mln so‘m: tushum 2 300 (2-chorakda 2 050), xarajat 1 940 (1 850). Yaxshi ketdi: brak kamaydi; 12 ta yangi tikuv mashinasi o‘rnatildi. Muammo bo‘ldi: mato yetkazib berish 3 marta kechikdi; Farg‘ona rejani bajarmadi. 4-chorak rejasi: 19 500 dona, brak 1,8%. Taklif: 6 ta yangi mashina uchun 90 mln so‘m ajratish.",
+     "O‘quv markazimizning 2026-yil hisoboti, 8 ta slayd, ta’sischilar uchun. O‘quvchilar: 2024-yilda 150, 2025-yilda 190, 2026-yilda 240 nafar; kursni 168 nafari tugatdi. Daromad 1,92 mlrd so‘m (2025-yilda 1,52 mlrd), xarajat 1,61 mlrd so‘m (1,34 mlrd). Yaxshi ketdi: IELTS kursi (60 o‘quvchi); ikkita yangi o‘quv xonasi ochildi. Muammo bo‘ldi: 2 nafar o‘qituvchi ketdi; 14 nafar o‘quvchi kursni tashlab ketdi. 2027-yil rejasi: 300 o‘quvchi va yangi filial ochish."
+    ],
+    "attach": true
+   },
+   {
+    "id": "slides.kompaniya",
+    "kind": "category",
+    "label": "Kompaniya / mahsulot",
+    "hint": "Kompaniya, mahsulot yoki xizmat taqdimoti",
+    "prompt": [
+     "Kompaniya yoki mahsulot taqdimoti. Bitta xabarda yozing: nomi, nima bilan shug‘ullanishingiz, taqdimotni kimga ko‘rsatasiz (mijoz, hamkor, tender) va necha slayd (aytmasangiz, 10 ta).",
+     "Raqamlar, xizmatlar (har biriga 2–3 fakt), mijozlar, narxlar va aloqa ma’lumotlarini ham yozing: slaydlar faqat shularga tayanadi, o‘zimizdan hech narsa to‘qib chiqarmaymiz. Ma’lumot berilmagan slaydlarda to‘ldirish uchun bo‘sh joy qoladi.",
+     "Katalog, narx ro‘yxati yoki eski taqdimotni PDF, Word yoki TXT qilib qo‘shing."
+    ],
+    "examples": [
+     "Namuna Mebel kompaniyasi taqdimoti kerak, 10 ta slayd: yangi mijozlarga ko‘rsatamiz. Uy va ofis uchun buyurtma mebel ishlab chiqaramiz, Toshkentda, 2013-yildan. 28 xodim, 340+ buyurtma, 3 shahar. Mahsulotlar: oshxona mebeli, ofis mebeli, garderob. Oshxona mebeli o‘lchovdan o‘rnatishgacha: shkaflar va bar peshtaxtasi, stol usti va furnitura ro‘yxatdan tanlanadi, o‘rnatishni o‘z ustalarimiz bajaradi. Ofis mebeli joylashtirish rejasi bilan: ish stollari va javonlar, qabulxona jihozlari, rejani mijoz tasdiqlaydi. Ish tartibi: o‘lchov, loyiha, ishlab chiqarish, o‘rnatish. Afzalliklar: o‘z ustaxonamiz, usta o‘zi o‘lchaydi, muddat shartnomada yoziladi. Mijozlar: Namuna Hotel, Namuna Klinika, Namuna Maktab. Keys: Namuna Hotel 40 ta xona uchun mebel buyurtma qildi, bitta andoza bo‘yicha seriya yasadik, 3 haftada topshirdik. Telefon: +998 00 000 00 00, Telegram: @namuna_mebel.",
+     "Namuna Kassa ilovasi taqdimoti, 8 ta slayd, do‘kon egalariga ko‘rsatamiz. Ilovani Namuna Soft yaratgan. Namuna Kassa kichik do‘konlar uchun sotuv va ombor hisobi ilovasi. Muammo: hisob daftarda yuritiladi, qoldiq noma’lum, kunlik hisobot qo‘lda yig‘iladi. Imkoniyatlar: chek chiqarish, ombor qoldig‘i, kunlik hisobot. Qanday ishlaydi: ro‘yxatdan o‘tasiz, mahsulotlarni kiritasiz, sotuvni boshlaysiz. Tariflar: 99 000, 199 000 va 349 000 so‘m. Kunlik hisobot 5 daqiqada tayyor, 30 kun bepul sinov. Telegram: @namuna_kassa.",
+     "Namuna Mebel ustaxonasi interyer dizaynerlariga hamkorlik taklif qiladi, 7 ta slayd. Biz haqimizda: 2013-yildan Toshkentda buyurtma mebel yasaymiz, 28 xodim. Taklif: dizayner buyurtmani olib keladi, biz o‘lchov, ishlab chiqarish va o‘rnatishni bajaramiz. Dizayner uchun: komissiya 8%, loyiha bo‘yicha alohida hisob, o‘lchov bepul. Shartlar: oldindan to‘lov 50%, muddat shartnomada yoziladi. Qanday boshlash: Telegramga yozing, narx ro‘yxatini oling, birinchi buyurtmani kelishing. Telegram: @namuna_mebel, telefon: +998 00 000 00 00."
+    ],
+    "attach": true
+   },
+   {
+    "id": "other",
+    "kind": "other",
+    "label": "Boshqa"
+   }
+  ]
+ }
+}

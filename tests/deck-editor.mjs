@@ -1102,6 +1102,8 @@ async function openDeck({
         },
         ...usage(),
       })
+    // No category list: Create opens today's form (tests/studio-categories.mjs has the lists).
+    if (endpoint === '/studio/categories') return json({ features: { 'ai.pdf_topic': [], 'ai.pptx': [] } })
     if (endpoint === '/studio/config')
       return json({
         features: [{ id: 'ai.pptx', name: 'Slides', surface: 'generate', eligible: true, max_pages: 15 }],

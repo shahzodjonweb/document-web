@@ -72,6 +72,18 @@ Bot API 10.2 Telegram's methods do not work on another site inside the web view.
 `tools`, `jobs`, `plans`, `invite`, `settings`, `help`, `profile`, `create_pdf`,
 `create_slides`, `create_cv`, `scan`, or `job_<id without dashes>`. Anything else is Home.
 
+## AI categories on Create
+
+AI PDF and AI Slides open with the bot's category lists (`GET /studio/categories`, behind
+the owner's switch at /ops/categories): the same items, names and order, each a `.tg-cell`
+with a tile, its line and a chevron; a group opens its own list; Boshqa is today's form. A
+category's screen shows its own instructions (the bot's prompt, no emoji), the description,
+files where it takes them (`ai_source`: PDF, Word, TXT), an example, the language and the
+weekly line. Telegram's main button is Create, one tap that makes, quotes and sends it; the
+review shows only when it has something to say (the weekly limit, a clamped count). Telegram's
+Back walks up category → group → list before it leaves Create. With no list from the server,
+Create is today's form. In a browser the page draws its own button and back link.
+
 ## Known limits
 
 - Telegram Web (web.telegram.org) runs the app in an iframe, where browsers may refuse the
@@ -83,4 +95,5 @@ Bot API 10.2 Telegram's methods do not work on another site inside the web view.
 
 ## Checks
 
-`npm run test:mini-app` (needs the build served on :3002, or `MINI_APP_WEB_ORIGIN`).
+`npm run test:mini-app` (needs the build served on :3002, or `MINI_APP_WEB_ORIGIN`), and
+`npm run test:categories` for the category picker (`CATEGORIES_WEB_ORIGIN`).

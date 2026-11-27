@@ -1,5 +1,11 @@
 <script setup lang="ts">
 import type { CvFactTicks, CvFileSource, CvSource } from '../composables/useCvSources'
+import {
+  CATEGORY_FEATURES,
+  CATEGORY_FILE_KINDS,
+  categoryLook,
+  type StudioCategory,
+} from '../composables/useStudioCategories'
 const props = defineProps<{ draftId?: string }>()
 const route = useRoute()
 const { t, count, path, locale, date } = useLocale()
@@ -29,6 +35,7 @@ const quoteStage = ref<'document' | 'outline'>('document')
 const files = ref<any[]>([])
 const promptExamples = usePromptExamples()
 const cvTemplates = useCvTemplates()
+const categories = useStudioCategories()
 
 const form = reactive({
   feature_id: String(route.query.feature || 'ai.pdf_topic'),
@@ -868,6 +875,8 @@ const purposeSelect = ref<HTMLSelectElement>()
  */
 function switchService(featureId: string) {
   if (draft.value || !offered(featureId)) return
+  // Moved from today's form, the description stays in today's form: no list stands in front of it.
+  pickOther.value = true
   form.feature_id = featureId
   // The button that was pressed goes away; the select shows what changed.
   nextTick(() => purposeSelect.value?.focus())
@@ -891,7 +900,7 @@ async function run(task: string, fn: () => Promise<void>) {
     cv = photo || reading ? '' : cvRefused(e)
     refused = !reading && !photo && !cv && promptRefused(e)
     refusedRun = refused ? () => run(task, fn) : null
-    if (!reading && !refused && !photo && !cv) error.value = requestError(e)
+    if (!reading && !refused && !photo && !cv) error.value = categoryGone(e) ? t('studioCatGone') : requestError(e)
   } finally {
     busy.value = ''
   }
@@ -1011,6 +1020,180 @@ async function adoptLinkedFiles() {
   }
 }
 
+/**
+ * AI PDF and AI Slides open with the bot's list of categories (`GET
+ * /studio/categories`), shown only when the server gives one: a group opens its
+ * own list, a category its own screen, and Boshqa (`other`) today's form, which
+ * makes a document with no category exactly as before. A category is
+ * `options.category` on the new draft, pinned by the server from then on. A
+ * description already on its way here (the guide, Make again, a bot file) goes
+ * straight to today's form.
+ */
+const pickGroup = ref('')
+const pickCategory = ref(String(route.query.category || ''))
+const pickOther = ref(!!form.prompt.trim() || !!route.query.file_id)
+const categoryFeature = computed(() => (CATEGORY_FEATURES as readonly string[]).includes(form.feature_id))
+/** The list in front of this service now: none for a draft, a change, or a service without one. */
+const categoryList = computed<StudioCategory[]>(() =>
+  categoryFeature.value && !draft.value && !props.draftId ? categories.list(form.feature_id) : [],
+)
+/** The category of this screen: the draft's own, or the one picked; null for Boshqa and a change. */
+const category = computed<StudioCategory | null>(() => {
+  if (revising.value) return null
+  const id = draft.value ? String(draft.value.options?.category || '') : pickCategory.value
+  return id ? categories.find(form.feature_id, id) : null
+})
+const categoryGroup = computed(() => (category.value ? categories.groupOf(form.feature_id, category.value.id) : null))
+const openGroup = computed(() =>
+  pickGroup.value ? categoryList.value.find((node) => node.id === pickGroup.value && node.kind === 'group') || null : null,
+)
+/** The list, while the answer for this language is on its way, waits instead of flashing today's form. */
+const categoryWait = computed(
+  () => categoryFeature.value && !props.draftId && !draft.value && !pickOther.value && !categories.ready.value,
+)
+type Screen = 'list' | 'group' | 'category' | 'form'
+const screen = computed<Screen>(() => {
+  if (category.value) return 'category'
+  if (!categoryList.value.length || pickOther.value) return 'form'
+  return openGroup.value ? 'group' : 'list'
+})
+const isSlidesList = computed(() => form.feature_id === 'ai.pptx')
+const categoryName = computed(() => name(form.feature_id, selected.value?.name))
+/** One step up the picker: a category to its list, a group to the top, Boshqa back to the list. */
+function categoryUp() {
+  if (pickCategory.value) pickCategory.value = ''
+  else if (pickOther.value) pickOther.value = false
+  else pickGroup.value = ''
+}
+// Telegram's Back walks up the picker before it leaves the page; a draft's way back is the frame's.
+telegram.useBackLayer(
+  () =>
+    !draft.value &&
+    !props.draftId &&
+    (!!category.value || !!openGroup.value || (pickOther.value && categoryList.value.length > 0)),
+  categoryUp,
+)
+const categoryHeading = ref<HTMLElement>()
+function pickNode(node: StudioCategory) {
+  if (node.kind === 'group') pickGroup.value = node.id
+  else if (node.kind === 'category') pickCategory.value = node.id
+  else {
+    pickOther.value = true
+    // A question without a category holds no category's files, as in the bot: a PDF stays a source.
+    files.value = files.value.filter((file) => file.mime_type === 'application/pdf')
+  }
+  error.value = ''
+  telegram.haptic('selection')
+}
+// Each screen starts at its top, with its heading read out.
+watch(screen, () => {
+  if (!import.meta.client) return
+  window.scrollTo({ top: 0 })
+  nextTick(() => categoryHeading.value?.focus({ preventScroll: true }))
+})
+// Opening a category's screen is counted as the bot counts a tap on it; a draft was counted when it began.
+watch(
+  () => (!draft.value && !props.draftId ? category.value?.id || '' : ''),
+  (id) => {
+    if (id) categories.chosen(id)
+  },
+  { immediate: true },
+)
+// A category asked for in the address that the list does not hold is no screen: the list shows.
+watch(
+  () => categories.ready.value,
+  (ready) => {
+    if (ready && pickCategory.value && !categories.find(form.feature_id, pickCategory.value)) pickCategory.value = ''
+  },
+)
+// Another service is another list: its own top, and nothing picked in the last one.
+watch(
+  () => form.feature_id,
+  () => {
+    pickGroup.value = ''
+    pickCategory.value = ''
+  },
+)
+// The lists are the account's, in the page's language: read once it is known, and again when the language changes.
+watch(
+  [() => ws.user.value?.id, locale],
+  ([id]) => {
+    if (id && import.meta.client) categories.load()
+  },
+  { immediate: true },
+)
+
+/**
+ * A category the owner took off the list since it was shown (`category_unavailable`):
+ * said at the top, the lists read again, and the customer back on the list, where it is gone.
+ */
+function categoryGone(e: any) {
+  if (e?.data?.error?.code !== 'category_unavailable') return false
+  pickCategory.value = ''
+  categories.lists.value = null
+  categories.load()
+  return true
+}
+/**
+ * A category's files: PDF, Word (.docx, an old .doc) or text, its sources
+ * (`purpose` `ai_source`). Another kind is said beside the button before
+ * anything is sent; the server reads them when the draft is made.
+ */
+const categoryInput = ref<HTMLInputElement>()
+const categoryFileError = ref('')
+const CATEGORY_ACCEPT = '.pdf,.docx,.doc,.txt,application/pdf,text/plain'
+const fileKindOf = (file: File) => file.name.split('.').pop()?.toLowerCase() || ''
+async function uploadCategoryFiles(list: FileList | null) {
+  const picked = Array.from(list || [])
+  if (categoryInput.value) categoryInput.value.value = ''
+  if (!picked.length) return
+  categoryFileError.value = ''
+  if (picked.some((file) => !CATEGORY_FILE_KINDS.includes(fileKindOf(file)))) {
+    categoryFileError.value = t('studioCatFileKind')
+    return
+  }
+  await run('upload', async () => {
+    const refused: string[] = []
+    for (const file of picked) {
+      const body = new FormData()
+      body.append('file', file)
+      body.append('purpose', 'ai_source')
+      try {
+        files.value = [...files.value, await ws.api('/files/uploads', { method: 'POST', body })]
+      } catch (e) {
+        refused.push(`${file.name}: ${requestError(e)}`)
+      }
+    }
+    categoryFileError.value = refused.join(' ')
+  })
+}
+const categoryCreateLabel = computed(() => t(isSlidesList.value ? 'studioCatCreateSlides' : 'studioCatCreatePdf'))
+/** A picker screen in place of the page's own heading and steps. */
+const pickerShown = computed(() => categoryWait.value || (step.value === 0 && screen.value !== 'form'))
+const weeklyKnown = computed(() => typeof ws.usage.value?.ai_documents?.limit === 'number')
+const LANGUAGES = { en: 'English', uz: 'O‘zbekcha', ru: 'Русский' }
+/** A category's one tap: what is written goes, and with nothing written the description takes the focus. */
+async function createInCategory() {
+  if (!hasEssentialInput.value) {
+    promptInput.value?.focus()
+    return
+  }
+  await reviewAnd(true)
+}
+/*
+ * Inside Telegram a category's Create is Telegram's own button at the bottom; the page's
+ * gives way to it. Off until something is written, so the page does not jump when it is.
+ */
+telegram.usePrimaryAction('studio-category', () => {
+  if (!telegram.isMiniApp.value || screen.value !== 'category' || step.value !== 0) return null
+  return {
+    text: categoryCreateLabel.value,
+    enabled: canUseTool.value && hasEssentialInput.value && !busy.value && !submissionPending.value,
+    busy: busy.value === 'quote' || busy.value === 'generate',
+    onPress: createInCategory,
+  }
+})
+
 onMounted(() => {
   load().then(adoptLinkedFiles)
 })
@@ -1071,7 +1254,12 @@ async function createDraft() {
         // "Continue anyway" after a refusal: the check reads words, and a topic
         // it does not know must not block the customer. Only a new draft is
         // checked, so only this request carries it, never a later save.
-        options: topicGiven.value ? { ...fields.options, topic_given: true } : fields.options,
+        options: {
+          ...fields.options,
+          ...(topicGiven.value ? { topic_given: true } : {}),
+          // The category picked; the server pins it, so only the new draft names it.
+          ...(category.value ? { category: category.value.id } : {}),
+        },
         // Only a new draft needs this fallback. Changing an existing prompt,
         // even from empty to a service name, rebuilds its authored content.
         // A CV made from files may have no notes, and a service's name is none.
@@ -1148,7 +1336,16 @@ function moveSection(index: number, direction: number) {
   ;[rows[index], rows[to]] = [rows[to], rows[index]]
   quote.value = null
 }
-async function review() {
+function review() {
+  return reviewAnd(false)
+}
+/**
+ * The draft (made, or saved over), its quote, and then the review. `go` is a
+ * category's one tap (its screen's Create): the job is sent at once, unless the
+ * review has something to say first (no document left this week, a count
+ * larger than the category makes), which it then shows with its own button.
+ */
+async function reviewAnd(go: boolean) {
   if (busy.value || submissionPending.value || !canUseTool.value || !hasEssentialInput.value) return
   sourceError.value = ''
   cvLinkError.value = ''
@@ -1177,6 +1374,7 @@ async function review() {
     submissionKey.value = crypto.randomUUID()
     step.value = 2
     notice.value = ''
+    if (go && quote.value.affordable !== false && !clampedFrom.value) return await submit()
     if (props.draftId !== draft.value.id) {
       reviewHandoff.value = {
         draftId: draft.value.id,
@@ -1191,42 +1389,44 @@ async function review() {
 }
 async function generate() {
   if (busy.value || !quote.value || quote.value.affordable === false) return
-  await run('generate', async () => {
-    const key = submissionKey.value || (submissionKey.value = crypto.randomUUID())
-    const quoteId = quote.value.id
-    submissionPending.value = true
-    sessionStorage.setItem('docmaster-pending-job', JSON.stringify({ quote_id: quoteId, key }))
-    // Inside Telegram the finished document comes to the chat too, as the bot's does; an outline is no file.
-    const toChat =
-      quoteStage.value !== 'outline' && telegram.isMiniApp.value && (await telegram.ensureWriteAccess())
-    let job
-    try {
-      job = await ws.api('/jobs', {
-        method: 'POST',
-        headers: { 'Idempotency-Key': key },
-        body: { quote_id: quoteId, ...(toChat ? { deliver_to_chat: true } : {}) },
-      })
-    } catch (e: any) {
-      // A refused request is already decided. An uncertain one must be retried
-      // with the same quote and key so the server settles it exactly once.
-      const status = e.statusCode || e.status || e.response?.status
-      if (status >= 400 && status < 500) {
-        submissionPending.value = false
-        sessionStorage.removeItem('docmaster-pending-job')
-      }
-      throw e
+  await run('generate', submit)
+}
+/** The quoted job sent, exactly once whatever happens to the request, then its page. */
+async function submit() {
+  const key = submissionKey.value || (submissionKey.value = crypto.randomUUID())
+  const quoteId = quote.value.id
+  submissionPending.value = true
+  sessionStorage.setItem('docmaster-pending-job', JSON.stringify({ quote_id: quoteId, key }))
+  // Inside Telegram the finished document comes to the chat too, as the bot's does; an outline is no file.
+  const toChat =
+    quoteStage.value !== 'outline' && telegram.isMiniApp.value && (await telegram.ensureWriteAccess())
+  let job
+  try {
+    job = await ws.api('/jobs', {
+      method: 'POST',
+      headers: { 'Idempotency-Key': key },
+      body: { quote_id: quoteId, ...(toChat ? { deliver_to_chat: true } : {}) },
+    })
+  } catch (e: any) {
+    // A refused request is already decided. An uncertain one must be retried
+    // with the same quote and key so the server settles it exactly once.
+    const status = e.statusCode || e.status || e.response?.status
+    if (status >= 400 && status < 500) {
+      submissionPending.value = false
+      sessionStorage.removeItem('docmaster-pending-job')
     }
-    sessionStorage.removeItem('docmaster-pending-job')
-    submissionPending.value = false
-    await ws.loadAccount()
-    if (quoteStage.value === 'outline' && job.status === 'succeeded') {
-      quote.value = null
-      await load()
-      notice.value = t('outlineGenerated')
-      return
-    }
-    await navigateTo(path(`/app/jobs/${job.id}`))
-  })
+    throw e
+  }
+  sessionStorage.removeItem('docmaster-pending-job')
+  submissionPending.value = false
+  await ws.loadAccount()
+  if (quoteStage.value === 'outline' && job.status === 'succeeded') {
+    quote.value = null
+    await load()
+    notice.value = t('outlineGenerated')
+    return
+  }
+  await navigateTo(path(`/app/jobs/${job.id}`))
 }
 async function reviewOutline() {
   // A change request is planned from the document it changes; the server
@@ -1259,7 +1459,7 @@ watch([cvSource, () => cvFiles.linkedin, () => cvFiles.file], invalidateQuote, {
 </script>
 <template>
   <div class="studio-page">
-    <div class="page-heading studio-head">
+    <div v-if="!pickerShown" class="page-heading studio-head">
       <div>
         <h1>{{ t('studioTitle') }}</h1>
         <p>{{ t('studioSub') }}</p>
@@ -1298,7 +1498,44 @@ watch([cvSource, () => cvFiles.linkedin, () => cvFiles.file], invalidateQuote, {
           t(providerReady ? 'studioToolUnavailable' : 'studioUnavailable')
         }}
       </div>
-      <nav class="studio-steps" :aria-label="t('create')">
+      <div v-if="categoryWait" class="empty-state panel" data-testid="category-wait">
+        <AppIcon name="loader" :size="28" class="spin" />
+        <h2>{{ t('loading') }}</h2>
+      </div>
+      <!-- The bot's list in front of AI PDF and AI Slides: its top, or one group's. -->
+      <section
+        v-else-if="step === 0 && (screen === 'list' || screen === 'group')"
+        class="category-picker"
+        data-testid="category-picker"
+        :data-screen="screen"
+      >
+        <button v-if="openGroup" type="button" class="back-link" @click="categoryUp">
+          <AppIcon name="back" :size="16" />{{ t('studioCatBack') }}
+        </button>
+        <div class="category-head">
+          <p v-if="openGroup" class="category-eyebrow">{{ categoryName }}</p>
+          <h1 ref="categoryHeading" tabindex="-1">{{ openGroup ? openGroup.label : categoryName }}</h1>
+          <p>
+            {{
+              openGroup
+                ? t(isSlidesList ? 'studioCatGroupSlidesLead' : 'studioCatGroupPdfLead')
+                : t(isSlidesList ? 'studioCatSlidesLead' : 'studioCatPdfLead')
+            }}
+          </p>
+        </div>
+        <StudioCategoryList
+          :nodes="openGroup ? openGroup.children || [] : categoryList"
+          :label="openGroup ? openGroup.label : t(isSlidesList ? 'studioCatSlidesKinds' : 'studioCatPdfKinds')"
+          :other-hint="t(openGroup ? 'studioCatOtherGroup' : isSlidesList ? 'studioCatOtherSlides' : 'studioCatOtherPdf')"
+          :compact="!!openGroup"
+          @pick="pickNode"
+        />
+        <p v-if="!openGroup" class="category-note" data-testid="category-files-note">
+          <AppIcon name="paperclip" :size="18" />{{ t(isSlidesList ? 'studioCatSlidesFiles' : 'studioCatPdfFiles') }}
+        </p>
+      </section>
+      <template v-else>
+      <nav v-if="!(step === 0 && screen === 'category')" class="studio-steps" :aria-label="t('create')">
         <button
           :class="{ active: step !== 2, complete: step === 2 }"
           :disabled="!!busy || submissionPending"
@@ -1314,10 +1551,146 @@ watch([cvSource, () => cvFiles.linkedin, () => cvFiles.file], invalidateQuote, {
           <b>2</b>{{ t('studioReviewCreate') }}
         </button>
       </nav>
-      <div class="studio-layout">
+      <div class="studio-layout" :class="{ 'category-layout': step === 0 && screen === 'category' }">
         <div class="studio-main">
-          <section v-if="step === 0" class="panel studio-form" data-testid="studio-brief">
+          <!-- A category's own screen: its instructions, the description, its files, an example, then Create. -->
+          <section
+            v-if="step === 0 && screen === 'category' && category"
+            class="category-screen"
+            data-testid="category-screen"
+            :data-category="category.id"
+          >
+            <fieldset class="studio-fieldset category-fieldset" :disabled="!!busy || submissionPending">
+              <button v-if="!draft" type="button" class="back-link" @click="categoryUp">
+                <AppIcon name="back" :size="16" />{{ categoryGroup ? categoryGroup.label : t('studioCatBack') }}
+              </button>
+              <div class="category-title">
+                <span class="category-tile large" :data-tone="categoryLook(category).tone"
+                  ><AppIcon :name="categoryLook(category).icon" :size="22"
+                /></span>
+                <div>
+                  <p class="category-eyebrow">{{ categoryName }}</p>
+                  <h1 ref="categoryHeading" tabindex="-1">{{ category.label }}</h1>
+                </div>
+              </div>
+              <div class="category-brief" data-testid="category-brief">
+                <p v-for="(line, index) in category.prompt" :key="index" :class="{ bullet: line.startsWith('•') }">
+                  {{ line }}
+                </p>
+              </div>
+              <div class="category-card">
+                <label for="category-description" class="category-label">{{ t('studioCatDescribe') }}</label>
+                <textarea
+                  id="category-description"
+                  ref="promptInput"
+                  v-model="form.prompt"
+                  rows="5"
+                  data-testid="studio-primary-input"
+                  :maxlength="studio.config.value?.limits?.source_chars || 12000"
+                  :aria-invalid="promptError ? 'true' : undefined"
+                  :aria-describedby="promptError ? 'studio-prompt-error' : undefined"
+                  @input="delete form.options.pages"
+                />
+                <template v-if="category.attach">
+                  <div class="category-files-row">
+                    <button
+                      type="button"
+                      class="button secondary small"
+                      data-testid="category-add-file"
+                      :aria-describedby="categoryFileError ? 'category-file-error' : 'category-file-kinds'"
+                      @click="categoryInput?.click()"
+                    >
+                      <AppIcon name="paperclip" :size="16" />{{ t('studioCatAddFile') }}
+                    </button>
+                    <small id="category-file-kinds">{{ t('studioCatFileKinds') }}</small>
+                    <input
+                      ref="categoryInput"
+                      type="file"
+                      multiple
+                      class="visually-hidden"
+                      :accept="CATEGORY_ACCEPT"
+                      data-testid="category-file-input"
+                      :aria-label="t('studioCatAddFile')"
+                      @change="uploadCategoryFiles(($event.target as HTMLInputElement).files)"
+                    />
+                  </div>
+                  <div v-if="categoryFileError" class="field-error" role="alert" data-testid="category-file-error">
+                    <AppIcon name="alert" :size="17" /><span id="category-file-error">{{ categoryFileError }}</span>
+                  </div>
+                  <ul v-if="files.length" class="category-files" data-testid="category-files">
+                    <li v-for="file in files" :key="file.id" class="source-chip">
+                      <AppIcon :name="sourceIcon(file)" :size="17" /><span>{{ file.name }}</span
+                      ><button
+                        type="button"
+                        class="icon-button"
+                        :aria-label="`${t('remove')}: ${file.name}`"
+                        @click="files = files.filter((f) => f.id !== file.id)"
+                      >
+                        <AppIcon name="x" :size="15" />
+                      </button>
+                    </li>
+                  </ul>
+                </template>
+              </div>
+              <div v-if="promptError" class="field-error" data-testid="studio-prompt-error">
+                <AppIcon name="alert" :size="17" /><span id="studio-prompt-error">{{ promptError }}</span>
+                <button
+                  type="button"
+                  class="button quiet small"
+                  data-testid="studio-prompt-anyway"
+                  :disabled="!!busy"
+                  @click="continueAnyway"
+                >
+                  {{ t('studioContinueAnyway') }}
+                </button>
+              </div>
+              <section v-if="category.examples?.length" class="category-example" aria-labelledby="category-example-head">
+                <h2 id="category-example-head">{{ t('studioCatExample') }}</h2>
+                <button type="button" data-testid="category-example" @click="form.prompt = category.examples[0] || ''">
+                  {{ category.examples[0] }}
+                </button>
+              </section>
+              <div class="tg-list category-settings">
+                <label class="tg-cell tg-cell-select"
+                  ><span class="tg-cell-text"
+                    ><strong>{{ t('outputLanguage') }}</strong></span
+                  ><select
+                    v-model="form.output_locale"
+                    data-testid="studio-locale"
+                    @change="form.options.locale_chosen = true"
+                  >
+                    <option v-for="(label, value) in LANGUAGES" :key="value" :value="value">{{ label }}</option>
+                  </select></label
+                >
+                <div v-if="weeklyKnown" class="tg-cell category-week"><WeeklyLine kind="ai" /></div>
+              </div>
+              <div class="category-action tg-main-button">
+                <button
+                  type="button"
+                  class="button primary full"
+                  data-testid="category-create"
+                  :disabled="!!busy || !canUseTool || !hasEssentialInput"
+                  @click="createInCategory"
+                >
+                  <AppIcon :name="busy ? 'loader' : 'sparkle'" :size="17" :class="{ spin: !!busy }" />{{
+                    busy ? t('working') : categoryCreateLabel
+                  }}
+                </button>
+              </div>
+            </fieldset>
+          </section>
+          <section v-else-if="step === 0" class="panel studio-form" data-testid="studio-brief">
             <fieldset class="studio-fieldset" :disabled="!!busy || submissionPending">
+              <!-- Boshqa: today's form, one step up from the list in front of it. -->
+              <button
+                v-if="pickOther && categoryList.length"
+                type="button"
+                class="back-link"
+                data-testid="category-back"
+                @click="categoryUp"
+              >
+                <AppIcon name="back" :size="16" />{{ openGroup ? openGroup.label : t('studioCatBack') }}
+              </button>
               <h2>{{ t('studioYourIdea') }}</h2>
               <p class="studio-intro">{{ t('studioQuickHint') }}</p>
               <label class="form-field"
@@ -1327,6 +1700,7 @@ watch([cvSource, () => cvFiles.linkedin, () => cvFiles.file], invalidateQuote, {
                   v-model="form.feature_id"
                   :disabled="!!draft"
                   data-testid="studio-purpose"
+                  @change="pickOther = true"
                 >
                   <option v-for="feature in studio.features.value" :key="feature.id" :value="feature.id">
                     {{ name(feature.id, feature.name) }}
@@ -1996,7 +2370,8 @@ watch([cvSource, () => cvFiles.linkedin, () => cvFiles.file], invalidateQuote, {
             <span class="result-symbol"><AppIcon name="ready" :size="34" /></span>
             <h2>{{ form.title }}</h2>
             <p>
-              {{ name(form.feature_id, selected?.name) }} · {{ form.output_format.toUpperCase() }} ·
+              {{ name(form.feature_id, selected?.name) }} ·
+              <template v-if="category">{{ category.label }} · </template>{{ form.output_format.toUpperCase() }} ·
               {{ form.output_locale.toUpperCase() }}
             </p>
             <p class="field-hint">{{ t(isCv ? 'studioCvReviewHint' : 'studioReviewHint') }}</p>
@@ -2124,6 +2499,7 @@ watch([cvSource, () => cvFiles.linkedin, () => cvFiles.file], invalidateQuote, {
           </section>
         </aside>
       </div></template
+      ></template
     >
   </div>
 </template>
