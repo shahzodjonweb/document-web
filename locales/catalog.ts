@@ -62,7 +62,6 @@ const entries: Record<string, [string, string, string]> = {
   outputs_many: ['{count} files', '{count} ta fayl', '{count} файлов'],
   outputs_other: ['{count} files', '{count} ta fayl', '{count} файла'],
   noop: ['No change needed', 'O‘zgartirish kerak emas', 'Изменения не нужны'],
-  supportedBasic: ['PDF, JPG and PNG', 'PDF, JPG va PNG', 'PDF, JPG и PNG'],
   outputLanguage: ['Output language', 'Natija tili', 'Язык результата'],
   original: ['Original size', 'Asl o‘lcham', 'Исходный размер'],
   auto: ['Automatic', 'Avtomatik', 'Автоматически'],
@@ -83,13 +82,14 @@ const entries: Record<string, [string, string, string]> = {
     'Bugun qaysi hujjat ustida ishlaymiz?',
     'С какими документами поработаем сегодня?',
   ],
-  dropTitle: ['Drop files here to start', 'Boshlash uchun fayllarni shu yerga tashlang', 'Перетащите файлы сюда, чтобы начать'],
-  dropSub: [
-    'We open the right tool for them: merge, compress, convert and more.',
-    'Ular uchun mos vositani ochamiz: birlashtirish, siqish, aylantirish va boshqalar.',
-    'Мы откроем подходящий инструмент: объединить, сжать, конвертировать и другие.',
-  ],
   homePlan: ['Your plan', 'Tarifingiz', 'Ваш тариф'],
+  // Home asks for no file: what to do with one comes first, the file on the next screen.
+  homeFiles: ['Work with a file', 'Fayl bilan ishlash', 'Работа с файлом'],
+  homeFilesSub: [
+    'Pick what to do; you choose the file on the next screen.',
+    'Nima qilishni tanlang — faylni keyingi ekranda tanlaysiz.',
+    'Выберите, что сделать, — файл выберете на следующем экране.',
+  ],
   homeTools: ['Popular tools', 'Ommabop vositalar', 'Популярные инструменты'],
   weekAiDocuments: ['AI documents this week', 'Bu haftadagi AI hujjatlar', 'ИИ-документы на этой неделе'],
   weekFileJobs: ['File tasks this week', 'Bu haftadagi fayl vazifalari', 'Задачи с файлами на этой неделе'],

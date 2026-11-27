@@ -11,33 +11,6 @@
 .channel-banner > p {
   flex: 1;
 }
-.dashboard-drop {
-  display: flex;
-  align-items: center;
-  gap: var(--space-6);
-  padding: var(--space-8);
-  border: 1.5px dashed var(--blue-200);
-  border-radius: var(--radius-xl);
-  background: linear-gradient(120deg, var(--blue-50), var(--surface) 72%);
-  transition:
-    border-color var(--duration) var(--ease),
-    background var(--duration) var(--ease);
-}
-.dashboard-drop.dragging {
-  border-color: var(--action);
-  background: var(--blue-50);
-}
-.drop-icon {
-  width: 64px;
-  height: 64px;
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  border-radius: 18px;
-  background: var(--surface);
-  color: var(--link);
-  box-shadow: var(--shadow-md);
-}
 .drop-copy {
   flex: 1;
   min-width: 0;
@@ -48,20 +21,6 @@
 .drop-copy p {
   margin-top: var(--space-1);
   color: var(--muted);
-}
-.drop-action {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-2);
-}
-.drop-action .button {
-  min-width: 168px;
-}
-.drop-action small {
-  color: var(--muted);
-  font-size: var(--text-xs);
 }
 .home-section {
   margin-top: var(--space-10);
@@ -171,16 +130,6 @@
 }
 
 @media (max-width: 760px) {
-  .dashboard-drop {
-    flex-direction: column;
-    gap: var(--space-4);
-    padding: var(--space-6) var(--space-5);
-    text-align: center;
-  }
-  .drop-action,
-  .drop-action .button {
-    width: 100%;
-  }
   .ai-shortcuts {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-3);

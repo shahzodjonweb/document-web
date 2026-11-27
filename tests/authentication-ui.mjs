@@ -130,7 +130,7 @@ try {
   assert.equal(await page.getByText('Do not render server error text').count(), 0)
   rejectCode = false
   await page.getByRole('button', { name: 'Verify email', exact: true }).click()
-  await page.locator('.dashboard-drop').waitFor()
+  await page.getByTestId('home-heading').waitFor()
   checks.push(
     'Registration and 8-digit verification; localized invalid-code error; successful session enters workspace',
   )

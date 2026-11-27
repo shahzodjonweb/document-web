@@ -321,7 +321,7 @@ try {
   await ready()
   assert.equal(count('/auth/telegram/miniapp'), 0)
   await complete()
-  await page.locator('.dashboard-drop').waitFor()
+  await page.getByTestId('home-heading').waitFor()
   assert.ok(last('/auth/telegram/miniapp').body.antibot_token)
   assert.equal(last('/auth/telegram/miniapp').body.init_data, 'signed-miniapp-data')
   checks.push('Automatic Telegram MiniApp sign-in waits for the same verification before posting signed data')

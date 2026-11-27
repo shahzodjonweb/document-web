@@ -65,7 +65,7 @@ async function login(target, value) {
   await target.getByLabel('Email address', { exact: true }).fill(email)
   await target.getByLabel('Password', { exact: true }).fill(value)
   await target.locator('.auth-form').getByRole('button', { name: 'Sign in with email', exact: true }).click()
-  await target.locator('.dashboard-drop').waitFor()
+  await target.getByTestId('home-heading').waitFor()
 }
 async function logout() {
   await page.goto(`${origin}/en/app/settings`, { waitUntil: 'domcontentloaded' })
@@ -91,7 +91,7 @@ try {
   await page.getByText('That code is incorrect. Check your email and try again.', { exact: true }).waitFor()
   await page.getByLabel('8-digit verification code').fill(verificationCode)
   await page.getByRole('button', { name: 'Verify email', exact: true }).click()
-  await page.locator('.dashboard-drop').waitFor()
+  await page.getByTestId('home-heading').waitFor()
   const initial = (await session()).user
   assert.ok(initial.id)
   assert.equal(initial.email, email)

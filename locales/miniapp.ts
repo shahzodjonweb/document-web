@@ -34,12 +34,6 @@ export const miniAppEntries: Record<string, [string, string, string]> = {
     'Odamga yozing, ko‘p beriladigan savollar javoblarini o‘qing',
     'Напишите человеку, прочитайте ответы на частые вопросы',
   ],
-  tgDropTitle: ['Choose a file to start', 'Boshlash uchun fayl tanlang', 'Выберите файл, чтобы начать'],
-  tgDropSub: [
-    'PDF, photos, Word or PowerPoint: we suggest what to do with it.',
-    'PDF, rasm, Word yoki PowerPoint: u bilan nima qilishni taklif qilamiz.',
-    'PDF, фото, Word или PowerPoint — подскажем, что с ним сделать.',
-  ],
   tgChooseFiles: ['Choose your files', 'Fayllaringizni tanlang', 'Выберите файлы'],
   tgFreeGift: ['Free gift', 'Bepul sovg‘a', 'Бесплатный подарок'],
   saveToPhone: ['Save to phone', 'Telefonga saqlash', 'Сохранить на телефон'],
