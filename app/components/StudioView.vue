@@ -4,6 +4,7 @@ const props = defineProps<{ draftId?: string }>()
 const route = useRoute()
 const { t, count, path, locale, date } = useLocale()
 const ws = useWorkspace()
+const telegram = useTelegramApp()
 const studio = useStudio()
 const { name } = useTools()
 const input = ref<HTMLInputElement>()
@@ -1195,12 +1196,15 @@ async function generate() {
     const quoteId = quote.value.id
     submissionPending.value = true
     sessionStorage.setItem('docmaster-pending-job', JSON.stringify({ quote_id: quoteId, key }))
+    // Inside Telegram the finished document comes to the chat too, as the bot's does; an outline is no file.
+    const toChat =
+      quoteStage.value !== 'outline' && telegram.isMiniApp.value && (await telegram.ensureWriteAccess())
     let job
     try {
       job = await ws.api('/jobs', {
         method: 'POST',
         headers: { 'Idempotency-Key': key },
-        body: { quote_id: quoteId },
+        body: { quote_id: quoteId, ...(toChat ? { deliver_to_chat: true } : {}) },
       })
     } catch (e: any) {
       // A refused request is already decided. An uncertain one must be retried

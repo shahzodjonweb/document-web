@@ -3,6 +3,7 @@ import type { Job } from '../../generated/api/types'
 const props = defineProps<{ jobId: string }>()
 const { t, count, path, date, timeZone } = useLocale()
 const ws = useWorkspace()
+const telegram = useTelegramApp()
 const { name, destination } = useTools()
 /** Slides sent from the deck editor are not a tool of their own: a new one is a new deck. */
 const nextRoute = computed(() =>
@@ -227,8 +228,11 @@ async function cancel() {
 }
 async function refresh() {
   try {
+    const wasActive = !!job.value && !!active.value
     job.value = await ws.api(`/jobs/${props.jobId}`)
     error.value = ''
+    // Inside Telegram the phone answers a task that finishes while it is watched.
+    if (wasActive && !active.value) telegram.haptic(success.value || noop.value ? 'success' : 'error')
     if (active.value) timer = setTimeout(refresh, 1800)
     else await ws.loadAccount()
   } catch (e: any) {
@@ -251,6 +255,49 @@ watch(
 )
 function downloadUrl(url: string | undefined, id: string) {
   return url || `/api/v1/artifacts/${id}/download`
+}
+/*
+ * Inside Telegram a download link does nothing on a phone, and a PDF opened in the web
+ * view has no way back: Telegram saves the file itself, from a link that needs no
+ * session (POST /artifacts/{id}/link). A task started here is in the chat already.
+ */
+const tg = telegram.isMiniApp
+const inChat = computed(() => tg.value && job.value?.origin_channel === 'mini_app')
+const saving = ref('')
+const saved = ref('')
+async function saveToPhone(artifact: any) {
+  if (saving.value) return
+  saving.value = artifact.id
+  error.value = ''
+  try {
+    const link = await ws.api<{ url: string; name: string }>(`/artifacts/${artifact.id}/link`, {
+      method: 'POST',
+      body: {},
+    })
+    const accepted = await telegram.downloadFile(new URL(link.url, location.origin).href, link.name)
+    if (accepted) {
+      saved.value = artifact.id
+      telegram.haptic('success')
+    }
+  } catch (e: any) {
+    error.value = e.data?.error?.message || t('genericError')
+    telegram.haptic('error')
+  } finally {
+    saving.value = ''
+  }
+}
+// One file, Telegram's own button at the bottom saves it; several keep a button each.
+telegram.usePrimaryAction('job-result', () =>
+  tg.value && success.value && outputs.value.length === 1 && telegram.canDownload.value && servable(outputs.value[0])
+    ? {
+        text: t(saved.value ? 'savedToPhone' : 'saveToPhone'),
+        busy: !!saving.value,
+        onPress: () => saveToPhone(outputs.value[0]),
+      }
+    : null,
+)
+function servable(artifact: any) {
+  return artifact?.state !== 'expired'
 }
 </script>
 <template>
@@ -313,10 +360,24 @@ function downloadUrl(url: string | undefined, id: string) {
             <strong>{{ artifact.name || artifact.filename || 'PDF' }}</strong
             ><small>{{ Math.max(1, Math.round((artifact.size_bytes || artifact.size || 0) / 1024)) }} KB</small>
           </div>
-          <a class="button primary" :href="downloadUrl(artifact.download_url, artifact.id)" download
+          <button
+            v-if="tg && telegram.canDownload.value && servable(artifact) && outputs.length > 1"
+            class="button primary"
+            type="button"
+            :disabled="!!saving"
+            @click="saveToPhone(artifact)"
+          >
+            <AppIcon :name="saving === artifact.id ? 'loader' : 'download'" :size="17" :class="{ spin: saving === artifact.id }" />{{
+              t(saved === artifact.id ? 'savedToPhone' : 'saveToPhone')
+            }}
+          </button>
+          <a v-else-if="!tg" class="button primary" :href="downloadUrl(artifact.download_url, artifact.id)" download
             ><AppIcon name="download" :size="17" />{{ t('download') }}</a
           >
         </div>
+        <p v-if="inChat" class="info-banner tg-in-chat" data-testid="result-in-chat">
+          <AppIcon name="send" :size="18" />{{ t('resultInChat') }}
+        </p>
         <ArtifactActions
           v-for="artifact in outputs"
           :key="`actions-${artifact.id}`"

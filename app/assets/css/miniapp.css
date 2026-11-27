@@ -1,0 +1,295 @@
+/*
+ * The app inside Telegram (a Mini App; docs/design/MINI_APP.md).
+ *
+ * `html.tg-app` is set by layouts/default.vue when Telegram gave launch data, and
+ * `html.tg-tabs` while the three-place bar is on screen. Telegram draws the top bar,
+ * Close and Back, and the main button at the bottom; the page keeps one narrow column
+ * whatever the window's width (Telegram Desktop opens wide), on the customer's own
+ * Telegram colours (useTelegramApp's applyTelegramTheme writes them into the tokens).
+ *
+ * The Profile list (`.tg-section`, `.tg-cell`) is drawn here for the browser too, as
+ * /app/account answers there as well.
+ */
+
+/* ------------------------------------------------------------ the frame */
+
+html.tg-app,
+html.tg-app body {
+  background: var(--paper);
+  /* A pull past the top or bottom is Telegram's to answer (minimise), not a bounce. */
+  overscroll-behavior: none;
+}
+html.tg-app .app-shell {
+  display: block;
+}
+html.tg-app .main-content {
+  max-width: 720px;
+  padding: var(--space-4) var(--space-4)
+    calc(var(--space-8) + var(--tg-safe-area-inset-bottom, env(safe-area-inset-bottom)));
+}
+html.tg-app.tg-tabs .main-content {
+  padding-bottom: calc(
+    var(--phonebar-height) + var(--tg-safe-area-inset-bottom, env(safe-area-inset-bottom)) + var(--space-6)
+  );
+}
+html.tg-app .main-content.main-content-wide {
+  max-width: none;
+  padding: 0;
+}
+/* Telegram's Back is the only way back. */
+html.tg-app .back-link {
+  display: none;
+}
+/* The page's own step buttons give way to Telegram's main button (ToolWorkspace). */
+html.tg-app .tg-main-button > .button {
+  display: none;
+}
+html.tg-app .tg-main-button {
+  justify-content: center;
+}
+/* iOS zooms into a field whose text is smaller than 16px and never zooms back. */
+html.tg-app input:not([type='checkbox']):not([type='radio']),
+html.tg-app select,
+html.tg-app textarea {
+  font-size: max(16px, 1em);
+}
+html.tg-app .page-heading h1 {
+  font-size: var(--text-xl);
+}
+
+/* ------------------------------------------------------------ the bar */
+
+html.tg-app .mobile-nav.tg-tabbar {
+  position: fixed;
+  z-index: 40;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  height: calc(var(--phonebar-height) + var(--tg-safe-area-inset-bottom, env(safe-area-inset-bottom)));
+  padding: var(--space-1) var(--space-2) var(--tg-safe-area-inset-bottom, env(safe-area-inset-bottom));
+  border-top: 1px solid var(--hairline);
+  background: var(--surface);
+}
+html.tg-app .tg-tabbar > a {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  color: var(--muted);
+  font: 600 11px/1.2 var(--font-body);
+  -webkit-tap-highlight-color: transparent;
+}
+html.tg-app .tg-tabbar span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+html.tg-app .tg-tabbar svg {
+  box-sizing: content-box;
+  padding: 3px 18px;
+  border-radius: var(--radius-pill);
+  transition: background var(--duration-fast) var(--ease);
+}
+html.tg-app .tg-tabbar > .active {
+  color: var(--link);
+}
+html.tg-app .tg-tabbar > .active svg {
+  background: var(--glow);
+  background: color-mix(in srgb, var(--action) 14%, transparent);
+}
+
+/* ------------------------------------------------------------ Home */
+
+.tg-shortcuts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+.tg-shortcut {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  color: var(--ink);
+  text-decoration: none;
+}
+.tg-shortcut strong {
+  min-width: 0;
+  font-size: var(--text-sm);
+  line-height: 1.25;
+}
+.tg-shortcut .tool-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+}
+.tg-shortcut .tool-icon.gift {
+  background: var(--warning-tint);
+  color: var(--warning-ink);
+}
+html.tg-app .dashboard-drop .drop-icon {
+  display: none;
+}
+.tg-in-chat {
+  margin: var(--space-3) 0 0;
+}
+
+/* ------------------------------------------------------------ Profile */
+
+.profile-page {
+  display: grid;
+  gap: var(--space-5);
+  max-width: 640px;
+  margin: 0 auto;
+}
+.profile-card {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+}
+.profile-who {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.profile-who h1 {
+  margin: 0;
+  color: var(--ink);
+  font: 700 var(--text-lg) / 1.25 var(--font-display);
+  overflow-wrap: anywhere;
+}
+.profile-who p {
+  margin: 2px 0 0;
+}
+.profile-avatar {
+  width: 52px;
+  height: 52px;
+  font-size: 20px;
+}
+.profile-plan {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+  color: var(--text);
+  font: 600 var(--text-xs) / 1.6 var(--font-body);
+}
+.profile-card .week-reset {
+  margin: 0;
+}
+.tg-section {
+  display: grid;
+  gap: var(--space-2);
+}
+.tg-section-head {
+  margin: 0;
+  padding: 0 var(--space-4);
+  color: var(--muted);
+  font: 600 var(--text-xs) / 1.4 var(--font-body);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.tg-list {
+  overflow: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+.tg-cell {
+  position: relative;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  color: var(--ink);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+/* A hairline between rows starts where the words do, as Telegram's own lists draw it. */
+.tg-cell + .tg-cell::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: calc(var(--space-4) + 32px + var(--space-3));
+  right: 0;
+  border-top: 1px solid var(--hairline);
+}
+.tg-cell:active {
+  background: var(--surface-sunken);
+}
+@media (hover: hover) and (pointer: fine) {
+  .tg-cell:hover {
+    background: var(--surface-sunken);
+  }
+}
+.tg-cell-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--action);
+  color: var(--on-action);
+}
+.tg-cell-icon[data-tone='referrals'] {
+  background: #e8833a;
+  color: #ffffff;
+}
+.tg-cell-icon[data-tone='settings'],
+.tg-cell-icon[data-tone='workflows'] {
+  background: #7d8b99;
+  color: #ffffff;
+}
+.tg-cell-icon[data-tone='language'],
+.tg-cell-icon[data-tone='guide'] {
+  background: #2e9e63;
+  color: #ffffff;
+}
+.tg-cell-icon[data-tone='support'] {
+  background: #8a5cd6;
+  color: #ffffff;
+}
+.tg-cell-text {
+  min-width: 0;
+  flex: 1;
+  display: grid;
+  gap: 1px;
+}
+.tg-cell-text strong {
+  font: 500 var(--text-md) / 1.3 var(--font-body);
+}
+.tg-cell-text small {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  line-height: 1.35;
+}
+.tg-cell-chevron {
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.tg-cell-select select {
+  max-width: 45%;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  text-align: right;
+  cursor: pointer;
+}
+.profile-signout {
+  justify-self: center;
+}
+
+/* The editor's start screen (before a file is open) sits in the wide frame: keep it off the edges. */
+html.tg-app .editor-launcher {
+  padding: var(--space-4);
+}

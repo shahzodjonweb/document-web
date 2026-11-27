@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Quote } from '../../generated/api/types'
 const props = defineProps<{ toolId: string }>()
+const telegram = useTelegramApp()
 const { t, count, path, date } = useLocale()
 const ws = useWorkspace()
 const { icon, name, description } = useTools()
@@ -212,6 +213,8 @@ async function submit() {
   if (!ws.quote.value) return
   error.value = ''
   busy.value = 'job'
+  // Inside Telegram the result comes to the chat too, as the bot's would: the bot must be allowed to write.
+  const toChat = telegram.isMiniApp.value && (await telegram.ensureWriteAccess())
   const id = ws.quote.value.id
   if (!idempotency.value[id]) idempotency.value[id] = crypto.randomUUID()
   sessionStorage.setItem(
@@ -222,7 +225,7 @@ async function submit() {
     const job = await ws.api('/jobs', {
       method: 'POST',
       headers: { 'Idempotency-Key': idempotency.value[id] },
-      body: { quote_id: id },
+      body: { quote_id: id, ...(toChat ? { deliver_to_chat: true } : {}) },
     })
     sessionStorage.removeItem('docmaster-pending-job')
     ws.quote.value = null
@@ -240,6 +243,28 @@ function onDrop(event: DragEvent) {
   dragging.value = false
   upload(event.dataTransfer?.files || null)
 }
+/*
+ * Inside Telegram the step's one action is Telegram's own button at the bottom (Check,
+ * then Start); the page's buttons give way to it. Shown disabled while it cannot run
+ * yet, so the page does not jump when it can.
+ */
+telegram.usePrimaryAction('tool', () => {
+  if (!telegram.isMiniApp.value || !supported.value) return null
+  if (ws.quote.value)
+    return {
+      text: t('startProcessing'),
+      // Off while anything else is under way: a file still uploading changes what is quoted.
+      enabled: ws.quote.value.affordable !== false && !busy.value,
+      busy: busy.value === 'job',
+      onPress: submit,
+    }
+  return {
+    text: t('getQuote'),
+    enabled: validInput.value && !busy.value && !(props.toolId === 'pdf.protect' && !password.value),
+    busy: busy.value === 'quote',
+    onPress: review,
+  }
+})
 </script>
 <template>
   <div v-if="supported" class="tool-page">
@@ -296,7 +321,7 @@ function onDrop(event: DragEvent) {
               :class="{ spin: busy === 'upload' }"
           /></span>
           <div class="drop-copy">
-            <h3>{{ busy === 'upload' ? t('uploading') : t('dropFiles') }}</h3>
+            <h3>{{ busy === 'upload' ? t('uploading') : t(telegram.isMiniApp.value ? 'tgChooseFiles' : 'dropFiles') }}</h3>
             <small
               >{{ isImages ? t('images') : isOffice ? t('officeFiles') : t('pdfFiles')
               }}<template v-if="limits.max_file_mib">
@@ -524,7 +549,7 @@ function onDrop(event: DragEvent) {
         </template>
       </li>
     </ol>
-    <div class="tool-action">
+    <div class="tool-action" :class="{ 'tg-main-button': telegram.isMiniApp.value }">
       <template v-if="ws.quote.value"
         ><button
           class="button primary"

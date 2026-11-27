@@ -66,6 +66,7 @@ const titles: [string, string][] = [
   ['/app/guide', 'guide'],
   ['/app/workflows', 'workflows'],
   ['/app/referrals', 'referrals'],
+  ['/app/account', 'navProfile'],
   ['/help', 'help'],
 ]
 // The public pages take their titles from useSiteSeo (app.vue); this names the app's own.
@@ -117,7 +118,7 @@ useHead(() =>
   /><LazyEditorShell
     v-else-if="view === '/app/editor' || view.startsWith('/app/editor/')"
     :document-id="view.split('/')[3]"
-  /><ReferralsView v-else-if="view === '/app/referrals'" /><BotView
+  /><ReferralsView v-else-if="view === '/app/referrals'" /><AccountHubView v-else-if="view === '/app/account'" /><BotView
     v-else-if="view === '/app/bot'"
   /><ToolsView v-else-if="view === '/app/tools' || view === '/tools'" /><PublicToolView
     v-else-if="view.startsWith('/tools/')"

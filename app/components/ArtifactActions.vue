@@ -29,7 +29,7 @@ const editLink = computed(() =>
   ),
 )
 /** Inside Telegram the bot is the chat this app was opened from. */
-const inChat = computed(() => editorV2.value && telegram.isMiniApp.value)
+const inChat = computed(() => telegram.isMiniApp.value)
 /**
  * A result past its day is sent to the chat and shared no more, one still stored for an AI
  * document's changes too: the server refuses both, so neither is offered.

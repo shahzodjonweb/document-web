@@ -36,6 +36,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/artifacts/{id}/link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description A download link for Telegram to fetch the file itself (the Mini App's WebApp.downloadFile), without the session cookie. It serves this one result of this account for `expires_in` seconds, and stops when the account signs out everywhere. Refused with `file_expired` (410) for a file that is gone. */
+        post: operations["createArtifactDownloadLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/artifacts/{id}/preview": {
         parameters: {
             query?: never;
@@ -2670,7 +2687,10 @@ export interface operations {
     };
     downloadArtifact: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description A link from `POST /artifacts/{id}/link`, in place of the session. */
+                link?: string;
+            };
             header?: never;
             path: {
                 id: string;
@@ -2686,6 +2706,72 @@ export interface operations {
                 };
                 content: {
                     "application/octet-stream": string;
+                };
+            };
+            /** @description Invalid request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        error?: components["schemas"]["Error"];
+                    };
+                };
+            };
+            /** @description Authentication required */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Permission or CSRF validation failed */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description State conflict or quota unavailable */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    createArtifactDownloadLink: {
+        parameters: {
+            query?: never;
+            header: {
+                "X-CSRFToken": string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Success */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description Seconds the link works for. */
+                        expires_in: number;
+                        name: string;
+                        /** @description `/api/v1/artifacts/{id}/download?link=…`, which needs no session. */
+                        url: string;
+                    };
                 };
             };
             /** @description Invalid request */

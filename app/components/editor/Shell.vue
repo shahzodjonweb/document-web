@@ -83,7 +83,8 @@ async function openLinkedFile() {
       method: 'POST',
       body: { file_id: id },
     })
-    await navigateTo(path(`/app/editor/${created.id}`))
+    // The `?file_id` address was only a hand-off: going back to it would open the same draft again.
+    await navigateTo(path(`/app/editor/${created.id}`), { replace: true })
   } catch (e) {
     // Expired, deleted, encrypted or not ours. Today's editor falls back to the launcher;
     // the new frame says which, with the way on where there is one.
