@@ -204,8 +204,12 @@ try {
     assert.equal((await telegramButton(page, 'SettingsButton')).isVisible, true)
     assert.equal((await telegramButton(page, 'BackButton')).isVisible, false, 'a tab is a root: Telegram shows Close')
     assert.ok(await page.getByTestId('home-invite').isVisible(), 'Free gift sits on Home, as in the bot')
+    // Home asks for no file: what to do with one comes first, the file on the tool's own screen.
+    assert.equal(await page.locator('main input[type="file"]').count(), 0, 'no file is asked for on Home')
+    assert.ok(await page.getByTestId('home-files').isVisible(), 'the file tools follow the AI services')
+    assert.match(await page.getByTestId('home-files').innerText(), /Fayl bilan ishlash/)
     await shot(page, 'home-light')
-    checks.push('Telegram’s colours on the tokens and its bars, Settings in the ⋮ menu, Free gift on Home')
+    checks.push('Telegram’s colours on the tokens and its bars, Settings in the ⋮ menu, Free gift on Home, and no file asked for there')
 
     // Telegram's own theme switch is followed at once.
     await page.evaluate((theme) => {

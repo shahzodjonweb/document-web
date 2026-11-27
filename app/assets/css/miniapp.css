@@ -134,9 +134,6 @@ html.tg-app .tg-tabbar > .active svg {
   background: var(--warning-tint);
   color: var(--warning-ink);
 }
-html.tg-app .dashboard-drop .drop-icon {
-  display: none;
-}
 .tg-in-chat {
   margin: var(--space-3) 0 0;
 }

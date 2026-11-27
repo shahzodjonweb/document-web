@@ -1,13 +1,13 @@
 <script setup lang="ts">
+/*
+ * Home leads with what people come for, and asks for no file: the AI services, then
+ * what can be done with a file. A file is chosen on the next screen, once the customer
+ * has said what to do with it (the tool's own page).
+ */
 const { t, path, date, timeZone } = useLocale()
 const ws = useWorkspace()
 const studio = useStudio()
 const { sorted, name, description } = useTools()
-const fileInput = ref<HTMLInputElement>()
-const busy = ref(false)
-const error = ref('')
-const dragging = ref(false)
-const officeAvailable = computed(() => ws.features.value.some((f) => f.id === 'convert.word_to_pdf'))
 const firstName = computed(() => (ws.user.value?.display_name || '').trim().split(/\s+/)[0] || '')
 // The week's limits reset on Monday 00:00 in Tashkent, shown in this device's zone.
 const resetsAt = computed(() => ws.usage.value?.week?.resets_at ?? ws.usage.value?.resets_at)
@@ -18,15 +18,19 @@ const aiShortcuts = computed(() =>
     ? studio.features.value.filter((f) => ['ai.pdf_topic', 'ai.pptx', 'ai.cv'].includes(f.id)).slice(0, 3)
     : [],
 )
-const popular = computed(() => sorted.value.filter((f) => !isGenerationFeature(f.id)).slice(0, 5))
 /*
  * Inside Telegram Home is the bot's main menu as a screen: the AI services, PDF from
- * photos and Invite friends sit at the top, as the bot's own buttons do, and files are
- * chosen, never dropped.
+ * photos and Invite friends sit at the top, as the bot's own buttons do.
  */
 const telegram = useTelegramApp()
 const tg = telegram.isMiniApp
 const scanAvailable = computed(() => ws.features.value.some((f) => f.id === 'pdf.images_to_pdf'))
+// The file tools, the AI services aside; inside Telegram PDF from photos has its own shortcut above them.
+const popular = computed(() =>
+  sorted.value
+    .filter((f) => !isGenerationFeature(f.id) && !(tg.value && scanAvailable.value && f.id === 'pdf.images_to_pdf'))
+    .slice(0, 5),
+)
 // Free accounts are told up front which Telegram channels to join, rather than
 // only when a task is refused.
 const gate = useState<{ channels: any[] } | null>('channel-gate', () => null)
@@ -43,43 +47,9 @@ onMounted(async () => {
 watch(gate, (value) => {
   if (value?.channels?.every((c: any) => c.joined)) channels.value = null
 })
-async function upload(files: FileList | File[] | null) {
-  if (!files?.length) return
-  busy.value = true
-  error.value = ''
-  try {
-    ws.activeUploads.value = []
-    for (const file of Array.from(files)) {
-      const form = new FormData()
-      form.append('file', file)
-      ws.activeUploads.value.push(await ws.api('/files/uploads', { method: 'POST', body: form }))
-    }
-    ws.activeTool.value = Array.from(files)[0]?.name.toLowerCase().endsWith('.docx')
-      ? 'convert.word_to_pdf'
-      : Array.from(files)[0]?.name.toLowerCase().endsWith('.pptx')
-        ? 'convert.pptx_to_pdf'
-        : Array.from(files).every((f) => f.type.startsWith('image/'))
-          ? 'pdf.images_to_pdf'
-          : files.length > 1
-            ? 'pdf.merge'
-            : 'pdf.compress'
-    ws.activeParameters.value = {}
-    ws.quote.value = null
-    ws.persistDraft()
-    await navigateTo(path(`/app/tools/${ws.activeTool.value}`))
-  } catch (e: any) {
-    error.value = e.data?.error?.message || e.data?.message || t('genericError')
-  } finally {
-    busy.value = false
-  }
-}
-function onDrop(event: DragEvent) {
-  dragging.value = false
-  upload(event.dataTransfer?.files || null)
-}
 </script>
 <template>
-  <div class="page-heading">
+  <div class="page-heading" data-testid="home-heading">
     <div>
       <h1>{{ firstName ? t('homeHello', { name: firstName }) : t('navHome') }}</h1>
       <p>{{ t('homeSub') }}</p>
@@ -92,36 +62,6 @@ function onDrop(event: DragEvent) {
       {{ t('channelsBannerAction') }}
     </button>
   </div>
-  <ErrorBanner v-if="error" :message="error" />
-  <section
-    class="dashboard-drop"
-    :class="{ dragging }"
-    @dragover.prevent="dragging = true"
-    @dragleave.prevent="dragging = false"
-    @drop.prevent="onDrop"
-  >
-    <span class="drop-icon" aria-hidden="true"
-      ><AppIcon :name="busy ? 'loader' : 'upload'" :size="26" :class="{ spin: busy }"
-    /></span>
-    <div class="drop-copy">
-      <h2>{{ busy ? t('uploading') : t(tg ? 'tgDropTitle' : 'dropTitle') }}</h2>
-      <p>{{ t(tg ? 'tgDropSub' : 'dropSub') }}</p>
-    </div>
-    <div class="drop-action">
-      <button class="button primary" @click="fileInput?.click()" :disabled="busy">
-        {{ t('chooseFiles') }}</button
-      ><small>{{ t(officeAvailable ? 'supported' : 'supportedBasic') }}</small>
-    </div>
-    <input
-      ref="fileInput"
-      class="visually-hidden"
-      type="file"
-      multiple
-      :accept="officeAvailable ? '.pdf,.jpg,.jpeg,.png,.docx,.pptx' : '.pdf,.jpg,.jpeg,.png'"
-      @change="upload(($event.target as HTMLInputElement).files)"
-      :aria-label="t('chooseFiles')"
-    />
-  </section>
   <section v-if="aiShortcuts.length" class="home-section">
     <div class="section-heading">
       <h2>{{ t('navCreate') }}</h2>
@@ -149,6 +89,21 @@ function onDrop(event: DragEvent) {
       ><strong>{{ t('tgFreeGift') }}</strong></NuxtLink
       >
   </div>
+  <section class="home-section" data-testid="home-files">
+    <div class="section-heading">
+      <div>
+        <h2>{{ t('homeFiles') }}</h2>
+        <p>{{ t('homeFilesSub') }}</p>
+      </div>
+      <NuxtLink :to="path('/app/tools')" class="text-link"
+        >{{ t('viewAll') }}<AppIcon name="right" :size="16"
+      /></NuxtLink>
+    </div>
+    <div v-if="popular.length" class="quick-tools">
+      <ToolCard v-for="feature in popular" :key="feature.id" :feature="feature" compact />
+    </div>
+    <p v-else class="muted">{{ t('noCatalog') }}</p>
+  </section>
   <section v-if="ws.usage.value?.ai_documents || ws.usage.value?.file_jobs" class="home-section">
     <div class="section-heading">
       <h2>{{ t('homePlan') }} · {{ t(ws.user.value?.plan || 'free') }}</h2>
@@ -158,18 +113,6 @@ function onDrop(event: DragEvent) {
     </div>
     <WeeklyUsage class="panel" />
     <p v-if="resetsAt" class="week-reset">{{ t('weekResets') }} {{ date(resetsAt, true) }} · {{ timeZone }}</p>
-  </section>
-  <section class="home-section">
-    <div class="section-heading">
-      <h2>{{ t('homeTools') }}</h2>
-      <NuxtLink :to="path('/app/tools')" class="text-link"
-        >{{ t('viewAll') }}<AppIcon name="right" :size="16"
-      /></NuxtLink>
-    </div>
-    <div v-if="popular.length" class="quick-tools">
-      <ToolCard v-for="feature in popular" :key="feature.id" :feature="feature" compact />
-    </div>
-    <p v-else class="muted">{{ t('noCatalog') }}</p>
   </section>
   <section class="home-section">
     <div class="section-heading">
