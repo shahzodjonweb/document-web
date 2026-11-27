@@ -293,3 +293,267 @@ html.tg-app .dashboard-drop .drop-icon {
 html.tg-app .editor-launcher {
   padding: var(--space-4);
 }
+
+/* ------------------------------------------------------------ AI categories (Create) */
+
+/*
+ * The bot's AI PDF and AI Slides lists in front of Create (StudioView, studio/CategoryList),
+ * in the Mini App and in a browser alike: Telegram's list rows with a tile for each kind,
+ * then a category's own screen. One narrow column on every screen.
+ */
+.category-picker,
+.category-screen {
+  max-width: 640px;
+  margin: 0 auto;
+}
+.category-picker,
+.category-fieldset {
+  display: grid;
+  gap: var(--space-4);
+}
+.category-layout {
+  display: block;
+}
+button.back-link {
+  justify-self: start;
+  margin-bottom: 0;
+  padding: var(--space-1) 0;
+  border: 0;
+  background: none;
+  font-family: inherit;
+  cursor: pointer;
+}
+.studio-form > .studio-fieldset > button.back-link {
+  margin-bottom: var(--space-3);
+}
+.category-head {
+  display: grid;
+  gap: 6px;
+}
+.category-head h1,
+.category-title h1 {
+  margin: 0;
+  color: var(--ink);
+  font: 800 24px / 1.2 var(--font-display);
+  outline: none;
+}
+.category-title h1 {
+  font-size: var(--text-xl);
+}
+.category-head > p:last-child {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--text-base);
+  line-height: 1.45;
+}
+.category-eyebrow {
+  margin: 0;
+  color: var(--muted);
+  font: 600 var(--text-sm) / 1.3 var(--font-body);
+}
+.category-cell {
+  width: 100%;
+  min-height: 64px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.category-list.compact .category-cell {
+  min-height: 56px;
+}
+.category-list:not(.compact) .tg-cell + .tg-cell::before {
+  left: calc(var(--space-4) + 36px + var(--space-3));
+}
+.category-cell .tg-cell-text strong {
+  font-weight: 600;
+}
+.category-list.compact .tg-cell-text strong {
+  font-weight: 500;
+}
+.category-tile {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #2074b8;
+  color: #ffffff;
+}
+.category-list.compact .category-tile {
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+}
+.category-tile.large {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+}
+/* The tones under white icons; each is 4.5:1 or more against white. */
+.category-tile[data-tone='violet'] {
+  background: #7a4fc4;
+}
+.category-tile[data-tone='teal'] {
+  background: #0f7a80;
+}
+.category-tile[data-tone='green'] {
+  background: #23804f;
+}
+.category-tile[data-tone='amber'] {
+  background: #b85a14;
+}
+.category-tile[data-tone='slate'] {
+  background: #44607a;
+}
+.category-tile[data-tone='rose'] {
+  background: #b8324a;
+}
+.category-tile[data-tone='grey'] {
+  background: #5f6b78;
+}
+.category-count {
+  flex-shrink: 0;
+  padding: 0 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+  color: var(--text);
+  font: 600 var(--text-xs) / 1.6 var(--font-body);
+}
+.category-note {
+  margin: 0;
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.category-note svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--link);
+}
+.category-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.category-title > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+/* The category's own instructions, as the bot writes them: a quiet note in the action's hue. */
+.category-brief {
+  display: grid;
+  gap: var(--space-2);
+  padding: 14px;
+  border: 1px solid var(--info-border);
+  border: 1px solid color-mix(in srgb, var(--action) 30%, transparent);
+  border-radius: var(--radius-lg);
+  background: var(--info-tint);
+  background: color-mix(in srgb, var(--action) 9%, var(--surface));
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.category-brief p {
+  margin: 0;
+}
+.category-brief p.bullet {
+  padding-left: var(--space-3);
+}
+.category-brief p.bullet + p.bullet {
+  margin-top: calc(-1 * var(--space-2) + 2px);
+}
+.category-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--hairline);
+  border-radius: 16px;
+  background: var(--surface);
+}
+.category-label {
+  color: var(--ink);
+  font: 600 var(--text-base) / 1.3 var(--font-body);
+}
+.category-card textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 132px;
+  resize: vertical;
+  padding: 12px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  font: 400 16px / 1.45 var(--font-body);
+}
+.category-files-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-3);
+}
+.category-files-row .button {
+  min-height: 40px;
+}
+.category-files-row small {
+  color: var(--muted);
+  font-size: var(--text-xs);
+}
+.category-files {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.category-example {
+  display: grid;
+  gap: var(--space-2);
+}
+.category-example h2 {
+  margin: 0;
+  padding: 0 4px;
+  color: var(--muted);
+  font: 600 var(--text-xs) / 1.4 var(--font-body);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.category-example button {
+  padding: 12px 14px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  color: var(--text);
+  font: 400 14px / 1.45 var(--font-body);
+  text-align: left;
+  cursor: pointer;
+}
+.category-example button:hover {
+  border-color: var(--hairline-strong);
+}
+.category-settings .tg-cell + .tg-cell::before {
+  left: var(--space-4);
+}
+.category-settings .tg-cell-select select {
+  font-size: 16px;
+}
+.category-week .weekly-line {
+  flex: 1;
+  padding: 0;
+  border: 0;
+  font-size: 14px;
+}
+.category-action .button {
+  min-height: 50px;
+}

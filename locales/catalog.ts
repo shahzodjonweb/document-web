@@ -1,4 +1,5 @@
 import { authenticationEntries } from './authentication.ts'
+import { categoryEntries } from './categories.ts'
 import { extendedEntries, extendedToolDescriptions, extendedToolNames } from './extended.ts'
 import { miniAppEntries } from './miniapp.ts'
 import { site } from './site.ts'
@@ -855,6 +856,9 @@ const toolEntries: Record<string, [string, string, string, string, string, strin
 }
 Object.assign(entries, authenticationEntries)
 for (const [key, value] of Object.entries(miniAppEntries)) {
+  if (!(key in entries)) entries[key] = value
+}
+for (const [key, value] of Object.entries(categoryEntries)) {
   if (!(key in entries)) entries[key] = value
 }
 for (const [key, value] of Object.entries(extendedEntries)) {

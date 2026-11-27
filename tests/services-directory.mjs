@@ -73,6 +73,8 @@ await page.route('**/*', async (route) => {
       features: catalogIds.map((id) => ({ id, name: id, category: 'pdf', eligible: true })),
       draft: true,
     })
+  // No category list: Create opens today's form (tests/studio-categories.mjs has the lists).
+  if (endpoint === '/studio/categories') return json({ features: { 'ai.pdf_topic': [], 'ai.pptx': [] } })
   if (endpoint === '/studio/config') {
     // Mirrors the server: signed-out visitors never reach this endpoint.
     if (!signedIn) return json({ error: { code: 'not_authenticated' } }, 401)

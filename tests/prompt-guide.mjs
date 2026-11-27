@@ -75,6 +75,8 @@ await page.route('**/*', async (route) => {
       ai_documents: { limit: 5, used: 0, remaining: 5 }, file_jobs: { limit: 15, used: 0, remaining: 15 }, edits_per_file: 3 })
   if (endpoint === '/jobs') return json({ results: [], count: 0 })
   if (endpoint === '/generation/drafts') return json({ results: [] })
+  // No category list: Create opens today's form (tests/studio-categories.mjs has the lists).
+  if (endpoint === '/studio/categories') return json({ features: { 'ai.pdf_topic': [], 'ai.pptx': [] } })
   if (endpoint === '/studio/config')
     return json({
       provider: { mode: 'openai', configured: true },

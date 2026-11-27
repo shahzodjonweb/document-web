@@ -483,6 +483,8 @@ await context.route(`${origin}/api/v1/**`, async (route) => {
   if (endpoint === '/catalog') return json({ features: [], draft: false })
   if (endpoint === '/plans') return json({ plans: [], draft: false })
   if (endpoint === '/usage') return json({ plan: 'free', week, ...weekUsage() })
+  // No category list: Create opens today's form (tests/studio-categories.mjs has the lists).
+  if (endpoint === '/studio/categories') return json({ features: { 'ai.pdf_topic': [], 'ai.pptx': [] } })
   if (endpoint === '/studio/config')
     return json(
       legacyCv
@@ -2085,7 +2087,16 @@ try {
     await open('ai.cv')
     await primary().fill('Dilnoza Rahimova, +998 90 111 22 33\nTeacher at School 12, 2019–2024')
     await reviewNew()
-    assert.equal((await canAdd()).replace(/^You can still add\s+/, ''), said, `the review reads ${JSON.stringify(facts)}`)
+    // The review moves to the draft's own address and draws its rail again: read it once it has settled.
+    await page.waitForURL(/\/app\/create\/[^/?]+/)
+    await quotePanel().waitFor()
+    let read = ''
+    for (let tries = 0; tries < 40; tries += 1) {
+      read = (await canAdd()).replace(/^You can still add\s+/, '')
+      if (read === said) break
+      await page.waitForTimeout(50)
+    }
+    assert.equal(read, said, `the review reads ${JSON.stringify(facts)}`)
   }
   draftCvFacts = null
   const rows = () =>
