@@ -999,6 +999,42 @@
   gap: var(--space-4);
   align-items: stretch;
 }
+/* Monthly or yearly, above the plan cards: two radios drawn as one pill. */
+.term-switch {
+  display: inline-flex;
+  align-self: center;
+  padding: 3px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface-sunken);
+}
+.term-switch label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  color: var(--muted);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  cursor: pointer;
+}
+.term-switch label.selected {
+  background: var(--surface-raised);
+  color: var(--ink);
+  box-shadow: var(--shadow-sm);
+}
+.term-switch label:focus-within {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.term-switch input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
 .plan-card {
   display: flex;
   flex-direction: column;

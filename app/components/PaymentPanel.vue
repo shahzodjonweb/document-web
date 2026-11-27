@@ -16,6 +16,10 @@
  * is also a choice of «Pay once» or «Pay and renew every month», which saves
  * the card on inPAY's page and comes back to /app/card/{id}. With a card saved
  * on the website, it pays in one tap, after a confirm.
+ *
+ * A plan bought for a year (`term`) is paid once, at the server's yearly price:
+ * on inPAY's page, or by card transfer while that is the way. It never renews
+ * from a saved card, so a year skips the «once or every month» choice.
  */
 import type {
   BillingOptions,
@@ -26,8 +30,8 @@ import type {
 } from '../../generated/api/types'
 type Method = 'automatic' | 'card'
 type Way = 'once' | 'renew' | 'card' | 'card_renew'
-const props = defineProps<{ plan?: string }>()
-const emit = defineEmits<{ close: []; changed: []; choose: [plan: string] }>()
+const props = defineProps<{ plan?: string; term?: 'month' | 'year' }>()
+const emit = defineEmits<{ close: []; changed: []; choose: [plan: string, term: 'month' | 'year'] }>()
 const { t, date } = useLocale()
 const ws = useWorkspace()
 const options = ref<BillingOptions | null>(null)
@@ -46,22 +50,36 @@ const copied = ref('')
 let timer: ReturnType<typeof setInterval> | undefined
 
 const open = computed(() => ['awaiting', 'submitted'].includes(payment.value?.status || ''))
-const { money: price, discount, untilLabel } = usePricing()
+const { money: price, discount, yearly, untilLabel } = usePricing()
 const planName = (plan: string) => t(plan)
+/** "Plus", or "Plus · 1 year" for a plan bought for a year. */
+const termName = (plan: string, term?: string | null) =>
+  term === 'year' ? t('planOneYear', { plan: planName(plan) }) : planName(plan)
 const option = (plan: string) => options.value?.plans?.find((p) => p.plan === plan)
-// The server's price for the chosen plan today: discounted while a discount is on.
-const chosenPrice = computed(() => Number(option(props.plan || '')?.price) || 0)
+const byYear = computed(() => props.term === 'year')
+// The chosen plan's year, as the server prices it: none means it is not sold by the year now.
+const chosenYear = computed(() => (byYear.value ? yearly(option(props.plan || '')) : null))
+// The server's price for the chosen plan today: discounted while a discount is
+// on, or the year's price, which no discount lowers.
+// What the server is asked to open: a month is the plan alone, as it always was; a year says so.
+const chosenBody = computed(() => (byYear.value ? { plan: props.plan, term: 'year' } : { plan: props.plan }))
+const chosenPrice = computed(() =>
+  byYear.value ? (chosenYear.value?.price ?? 0) : Number(option(props.plan || '')?.price) || 0,
+)
 /**
  * The discount to name beside an amount: only while the plan's discount is
  * live and the amount is the discounted price. A request opened before the
  * discount, or at the regular price, is shown plainly.
  */
-const saving = (plan: string, amount: number) => {
+const saving = (plan: string, amount: number, term?: string | null) => {
+  if (term === 'year') return null
   const deal = discount(option(plan))
   return deal && deal.price === Number(amount) ? deal : null
 }
-const chosenSaving = computed(() => (props.plan ? saving(props.plan, chosenPrice.value) : null))
-const openSaving = computed(() => (payment.value ? saving(payment.value.plan, payment.value.amount) : null))
+const chosenSaving = computed(() => (props.plan ? saving(props.plan, chosenPrice.value, props.term) : null))
+const openSaving = computed(() =>
+  payment.value ? saving(payment.value.plan, payment.value.amount, payment.value.term) : null,
+)
 const cardNumber = computed(() => (payment.value?.card?.number || '').replace(/(\d{4})(?=\d)/g, '$1 '))
 // The ways to pay the server offers this customer, automatic first. An older
 // platform never offers automatic, so card transfer is then the only one.
@@ -79,7 +97,7 @@ const renewal = useRenewal()
 const savedCard = renewal.card
 const telegram = useTelegramApp()
 const ways = computed<Way[]>(() => {
-  if (method.value !== 'automatic' || !renewal.state.value?.offered) return []
+  if (method.value !== 'automatic' || !renewal.state.value?.offered || byYear.value) return []
   return savedCard.value ? ['card', 'card_renew', 'once'] : ['once', 'renew']
 })
 const pickedWay = ref<Way | ''>('')
@@ -180,8 +198,8 @@ async function load() {
 onMounted(() => run('load', load))
 onBeforeUnmount(() => timer && clearInterval(timer))
 watch(
-  () => props.plan,
-  (plan) => {
+  () => [props.plan, props.term] as const,
+  ([plan]) => {
     picked.value = ''
     pickedWay.value = ''
     confirming.value = false
@@ -203,7 +221,10 @@ async function payAutomatic() {
   await run('checkout', async () => {
     let created: Checkout
     try {
-      created = await ws.api<Checkout>('/billing/checkout', { method: 'POST', body: { plan: props.plan } })
+      created = await ws.api<Checkout>('/billing/checkout', {
+        method: 'POST',
+        body: chosenBody.value,
+      })
     } catch (e: any) {
       // Switched off since this page loaded, or inPAY could not open the
       // payment: show the ways to pay there are now. The server offers card
@@ -281,7 +302,7 @@ async function start() {
   await run('start', async () => {
     payment.value = await ws.api<ManualPayment>('/billing/manual', {
       method: 'POST',
-      body: { plan: props.plan },
+      body: chosenBody.value,
     })
   })
 }
@@ -335,7 +356,7 @@ function pick(event: Event) {
     :error="checkoutError"
     @check="checkPayment"
     @pay="openPayment"
-    @retry="emit('choose', $event)"
+    @retry="(plan, term) => emit('choose', plan, term)"
   />
   <section v-if="charge" class="panel checkout-status" data-testid="card-charge" aria-live="polite">
     <CardChargeResult :charge="charge" />
@@ -362,7 +383,7 @@ function pick(event: Event) {
       <div class="panel-heading">
         <div>
           <span class="eyebrow">{{ t('payByCard') }} · {{ payment.reference }}</span>
-          <h2>{{ planName(payment.plan) }} · {{ price(payment.amount) }}</h2>
+          <h2>{{ termName(payment.plan, payment.term) }} · {{ price(payment.amount) }}</h2>
           <p v-if="openSaving" class="discount-note" data-testid="manual-discount">
             <s class="plan-price-regular"
               ><span class="visually-hidden">{{ t('regularPrice') + ' ' }}</span
@@ -450,8 +471,14 @@ function pick(event: Event) {
         <div>
           <span class="eyebrow">{{ t(heading) }}</span>
           <h2>
-            {{ planName(plan) }}<template v-if="chosenPrice"> · {{ price(chosenPrice) }}</template>
+            {{ termName(plan, term) }}<template v-if="chosenPrice"> · {{ price(chosenPrice) }}</template>
           </h2>
+          <p v-if="chosenYear" class="discount-note" data-testid="year-note">
+            <span class="discount-badge">−{{ chosenYear.percent }}%</span>
+            <span class="discount-until"
+              >{{ price(chosenYear.perMonth) }} {{ t('perMonthShort') }} · {{ t('yearPaidOnce') }}</span
+            >
+          </p>
           <p v-if="chosenSaving" class="discount-note" data-testid="manual-discount">
             <s class="plan-price-regular"
               ><span class="visually-hidden">{{ t('regularPrice') + ' ' }}</span

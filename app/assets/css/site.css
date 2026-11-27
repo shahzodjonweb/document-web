@@ -676,6 +676,7 @@ html { -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--site-heade
 /* A plan's regular price: only the amount is struck, its label reads normally. */
 .site-plan-regular { color: var(--muted); font-size: 15px; }
 .site-plan-regular s { color: inherit; }
+.site-plan-price .site-plan-yearly { color: var(--ink); font-size: 14px; font-weight: 600; margin-top: 6px; }
 /* The AI cards' slide vignette fits the narrower stage on a tablet. */
 @media (max-width: 1000px) {
   .site-ai-stage .site-mini-slide { width: 176px; }

@@ -12,7 +12,7 @@ const props = defineProps<{
   notYet?: boolean
   error?: string
 }>()
-const emit = defineEmits<{ check: []; pay: []; retry: [plan: string] }>()
+const emit = defineEmits<{ check: []; pay: []; retry: [plan: string, term: 'month' | 'year'] }>()
 const { t, path, date } = useLocale()
 const { money } = usePricing()
 const payable = computed(() => !!checkoutDestination(props.checkout.checkout_url))
@@ -41,7 +41,10 @@ const ENDED: Record<string, string> = {
       <div class="panel-heading">
         <div>
           <span class="eyebrow">{{ t('methodAutomatic') }}</span>
-          <h2>{{ t(checkout.plan) }} · {{ money(checkout.amount) }}</h2>
+          <h2>
+            {{ checkout.term === 'year' ? t('planOneYear', { plan: t(checkout.plan) }) : t(checkout.plan) }} ·
+            {{ money(checkout.amount) }}
+          </h2>
         </div>
         <span class="status-badge" data-testid="checkout-waiting"
           ><AppIcon name="clock" :size="15" />{{ t('checkoutWaiting') }}</span
@@ -104,7 +107,7 @@ const ENDED: Record<string, string> = {
         class="button secondary"
         type="button"
         data-testid="checkout-retry"
-        @click="emit('retry', checkout.plan)"
+        @click="emit('retry', checkout.plan, checkout.term === 'year' ? 'year' : 'month')"
       >
         {{ t('retry') }}
       </button>
