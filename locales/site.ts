@@ -2,7 +2,6 @@
 // {brand} and {formerBrand} are filled by the site; {{…}} tokens are owner placeholders listed in
 // docs/site/copy/facts-checklist.md. Numbers come from origin/main of document-platform or owner decisions.
 export const site = {
-
   // ── Header and navigation (spec §9) ──
   siteNavLabel: ['Main navigation', 'Asosiy menyu', 'Основное меню'],
   siteNavSkip: ['Skip to content', 'Asosiy qismga o‘tish', 'Перейти к содержанию'],
@@ -34,15 +33,35 @@ export const site = {
 
   // AI dropdown: name + one line each.
   siteMenuAiDocuments: ['AI documents', 'AI hujjatlar', 'Документы с ИИ'],
-  siteMenuAiDocumentsLine: ['A PDF on any topic, up to 35 pages', 'Istalgan mavzuda PDF, 35 sahifagacha', 'PDF на любую тему, до 35 страниц'],
+  siteMenuAiDocumentsLine: [
+    'A PDF on any topic, up to 35 pages',
+    'Istalgan mavzuda PDF, 35 sahifagacha',
+    'PDF на любую тему, до 35 страниц',
+  ],
   siteMenuAiReferat: ['Referat', 'Referat va mustaqil ish', 'Реферат'],
-  siteMenuAiReferatLine: ['A draft report with a plan to build on', 'Reja, kirish va xulosali qoralama', 'Черновик с планом, введением и выводами'],
+  siteMenuAiReferatLine: [
+    'A draft report with a plan to build on',
+    'Reja, kirish va xulosali qoralama',
+    'Черновик с планом, введением и выводами',
+  ],
   siteMenuAiSlides: ['AI presentations', 'AI taqdimotlar', 'Презентации с ИИ'],
-  siteMenuAiSlidesLine: ['Editable PowerPoint, up to 60 slides', 'Tahrirlanadigan PowerPoint, 60 slaydgacha', 'Редактируемый PowerPoint, до 60 слайдов'],
+  siteMenuAiSlidesLine: [
+    'Editable PowerPoint, up to 60 slides',
+    'Tahrirlanadigan PowerPoint, 60 slaydgacha',
+    'Редактируемый PowerPoint, до 60 слайдов',
+  ],
   siteMenuAiCv: ['AI CV', 'AI rezyume', 'Резюме с ИИ'],
-  siteMenuAiCvLine: ['50 templates, one or two pages', '50 ta shablon, 1–2 sahifa', '50 шаблонов, 1–2 страницы'],
+  siteMenuAiCvLine: [
+    '50 templates, one or two pages',
+    '50 ta shablon, 1–2 sahifa',
+    '50 шаблонов, 1–2 страницы',
+  ],
   siteMenuGuide: ['Prompt guide', 'So‘rov yozish qo‘llanmasi', 'Как писать запросы'],
-  siteMenuGuideLine: ['How to ask for a better result', 'Yaxshiroq natija uchun qanday yozish kerak', 'Как точнее описать, что нужно'],
+  siteMenuGuideLine: [
+    'How to ask for a better result',
+    'Yaxshiroq natija uchun qanday yozish kerak',
+    'Как точнее описать, что нужно',
+  ],
 
   // ── Language switch ──
   siteLangLabel: ['Language', 'Til', 'Язык'],
@@ -90,11 +109,19 @@ export const site = {
   siteFooterEmail: ['Email', 'Elektron pochta', 'Эл. почта'],
   siteFooterSupport: ['Support', 'Yordam xizmati', 'Поддержка'],
   siteFooterCards: ['We accept cards', 'Qabul qilinadigan kartalar', 'Принимаем карты'],
-  siteFooterCopyright: ['© {year} {company}. All rights reserved.', '© {year} {company}. Barcha huquqlar himoyalangan.', '© {year} {company}. Все права защищены.'],
+  siteFooterCopyright: [
+    '© {year} {company}. All rights reserved.',
+    '© {year} {company}. Barcha huquqlar himoyalangan.',
+    '© {year} {company}. Все права защищены.',
+  ],
   siteValueMissing: ['To be added', 'Tez orada qo‘shiladi', 'Скоро добавим'],
 
   // Company, as the law asks for it on every page (sitemap §5.2).
-  siteCompanyName: ['ARCANIUM TECHNOLOGIES LLC', '“ARCANIUM TECHNOLOGIES” MCHJ', 'ООО «ARCANIUM TECHNOLOGIES»'],
+  siteCompanyName: [
+    'ARCANIUM TECHNOLOGIES LLC',
+    '“ARCANIUM TECHNOLOGIES” MCHJ',
+    'ООО «ARCANIUM TECHNOLOGIES»',
+  ],
   siteCompanyAddress: [
     '25 Markaz-4, Qashqar mahalla, Yunusobod district, Tashkent, Uzbekistan',
     'Toshkent shahri, Yunusobod tumani, Qashqar MFY, Markaz 4 mavzesi, 25-uy',
@@ -139,7 +166,11 @@ export const site = {
     'Этот инструмент работает на сайте. Войдите туда через свой Telegram.',
   ],
   siteToolLimitsPlanLabel: ['Free plan', 'Free tarifi', 'Тариф Free'],
-  siteToolLimitsPlanValue: ['{count} file tasks a week', 'Haftasiga {count} ta fayl vazifasi', '{count} задач с файлами в неделю'],
+  siteToolLimitsPlanValue: [
+    '{count} file tasks a week',
+    'Haftasiga {count} ta fayl vazifasi',
+    '{count} задач с файлами в неделю',
+  ],
   siteToolLimitsPlanNote: [
     'Week starts Monday 00:00 Tashkent time. Plus and Premium: no weekly file-task limit.',
     'Hafta dushanba kuni soat 00:00 da (Toshkent vaqti) boshlanadi. Plus va Premiumʼda haftalik fayl vazifalari cheklanmagan.',
@@ -150,7 +181,11 @@ export const site = {
     'Yuklangan fayllar va natijalar 24 soatdan keyin o‘chiriladi. Natijani shu vaqtgacha yuklab oling.',
     'Загруженные файлы и результаты удаляются через 24 часа. Скачайте результат до этого.',
   ],
-  siteToolPrivacyLink: ['How we handle your data', 'Maʼlumotlaringiz qanday saqlanadi', 'Как мы обращаемся с данными'],
+  siteToolPrivacyLink: [
+    'How we handle your data',
+    'Maʼlumotlaringiz qanday saqlanadi',
+    'Как мы обращаемся с данными',
+  ],
   siteToolFaqTitle: ['Questions about this tool', 'Bu vosita haqida savollar', 'Вопросы об этом инструменте'],
   siteToolEditorMoreLink: ['About the PDF editor', 'PDF muharriri haqida', 'О редакторе PDF'],
   siteToolSignInNote: [
@@ -170,17 +205,29 @@ export const site = {
 
   // ── Shared AI cards (home, AI hub) ──
   siteAiCardDocsTitle: ['AI documents', 'AI hujjatlar', 'Документы с ИИ'],
-  siteAiCardDocsLine: ['Describe a topic and get a finished PDF.', 'Mavzuni yozing va tayyor PDF oling.', 'Опишите тему и получите готовый PDF.'],
+  siteAiCardDocsLine: [
+    'Describe a topic and get a finished PDF.',
+    'Mavzuni yozing va tayyor PDF oling.',
+    'Опишите тему и получите готовый PDF.',
+  ],
   siteAiCardDocsChip1: ['Up to 35 pages', '35 sahifagacha', 'До 35 страниц'],
   siteAiCardDocsChip2: ['PDF file', 'PDF fayl', 'Файл PDF'],
   siteAiCardDocsChip3: ['uz · ru · en', 'uz · ru · en', 'uz · ru · en'],
   siteAiCardSlidesTitle: ['AI presentations', 'AI taqdimotlar', 'Презентации с ИИ'],
-  siteAiCardSlidesLine: ['A PowerPoint deck you can still edit.', 'Keyin ham tahrirlash mumkin bo‘lgan PowerPoint.', 'Презентация PowerPoint, которую можно править.'],
+  siteAiCardSlidesLine: [
+    'A PowerPoint deck you can still edit.',
+    'Keyin ham tahrirlash mumkin bo‘lgan PowerPoint.',
+    'Презентация PowerPoint, которую можно править.',
+  ],
   siteAiCardSlidesChip1: ['Up to 60 slides', '60 slaydgacha', 'До 60 слайдов'],
   siteAiCardSlidesChip2: ['110 designs', '110 ta dizayn', '110 дизайнов'],
   siteAiCardSlidesChip3: ['Editable .pptx', 'Tahrirlanadigan .pptx', 'Редактируемый .pptx'],
   siteAiCardCvTitle: ['AI CV', 'AI rezyume', 'Резюме с ИИ'],
-  siteAiCardCvLine: ['From a message, LinkedIn or your old CV.', 'Xabar, LinkedIn yoki eski rezyumedan.', 'Из сообщения, LinkedIn или старого резюме.'],
+  siteAiCardCvLine: [
+    'From a message, LinkedIn or your old CV.',
+    'Xabar, LinkedIn yoki eski rezyumedan.',
+    'Из сообщения, LinkedIn или старого резюме.',
+  ],
   siteAiCardCvChip1: ['50 templates', '50 ta shablon', '50 шаблонов'],
   siteAiCardCvChip2: ['1–2 pages', '1–2 sahifa', '1–2 страницы'],
   siteAiCardCvChip3: ['3 ways to start', 'Boshlashning 3 usuli', '3 способа начать'],
@@ -194,21 +241,63 @@ export const site = {
   ],
 
   // ── Shared plan cards (home teaser, pricing) — numbers and prices come from `plans` ──
-  sitePlanFreeBody: ['Every tool, with a weekly allowance', 'Barcha vositalar, haftalik limit bilan', 'Все инструменты с недельным лимитом'],
-  sitePlanPlusBody: ['More each week for regular work', 'Muntazam ish uchun haftasiga ko‘proq', 'Больше в неделю для регулярной работы'],
+  sitePlanFreeBody: [
+    'Every tool, with a weekly allowance',
+    'Barcha vositalar, haftalik limit bilan',
+    'Все инструменты с недельным лимитом',
+  ],
+  sitePlanPlusBody: [
+    'More each week for regular work',
+    'Muntazam ish uchun haftasiga ko‘proq',
+    'Больше в неделю для регулярной работы',
+  ],
   sitePlanPremiumBody: ['No weekly limits at all', 'Haftalik cheklovlarsiz', 'Без недельных лимитов'],
   sitePlanPrice: ['{price}', '{price}', '{price}'],
   sitePlanPeriod: ['for 30 days', '30 kunga', 'за 30 дней'],
   sitePlanFreePeriod: ['no payment needed', 'to‘lov talab qilinmaydi', 'оплата не нужна'],
-  sitePlanDiscountPeriod: ['for 30 days. Offer ends {date}', '30 kunga. Taklif {date}gacha', 'за 30 дней. Предложение до {date}'],
+  sitePlanDiscountPeriod: [
+    'for 30 days. Offer ends {date}',
+    '30 kunga. Taklif {date}gacha',
+    'за 30 дней. Предложение до {date}',
+  ],
   sitePlanRegular: ['Regular price {price}', 'Odatdagi narx {price}', 'Обычная цена {price}'],
-  sitePlanAiDocs: ['{count} AI documents a week', 'Haftasiga {count} ta AI hujjat', '{count} документов с ИИ в неделю'],
-  sitePlanAiDocsUnlimited: ['Unlimited AI documents', 'AI hujjatlar cheklanmagan', 'Документы с ИИ без лимита'],
-  sitePlanFileTasks: ['{count} file tasks a week', 'Haftasiga {count} ta fayl vazifasi', '{count} задач с файлами в неделю'],
-  sitePlanFileTasksUnlimited: ['Unlimited file tasks', 'Fayl vazifalari cheklanmagan', 'Задачи с файлами без лимита'],
-  sitePlanEdits: ['{count} AI edits per file', 'Har bir faylga {count} ta AI tahrir', '{count} правок с ИИ на файл'],
+  // The year paid at once, under the monthly price: the server's yearly price and saving.
+  sitePlanYearly: [
+    "Or {perMonth} so'm a month, billed {price} so'm once a year (−{percent}%)",
+    "Yoki oyiga {perMonth} so'm — yiliga bir yo‘la {price} so'm (−{percent}%)",
+    "Или {perMonth} so'm в месяц при оплате {price} so'm сразу за год (−{percent}%)",
+  ],
+  sitePlanAiDocs: [
+    '{count} AI documents a week',
+    'Haftasiga {count} ta AI hujjat',
+    '{count} документов с ИИ в неделю',
+  ],
+  sitePlanAiDocsUnlimited: [
+    'Unlimited AI documents',
+    'AI hujjatlar cheklanmagan',
+    'Документы с ИИ без лимита',
+  ],
+  sitePlanFileTasks: [
+    '{count} file tasks a week',
+    'Haftasiga {count} ta fayl vazifasi',
+    '{count} задач с файлами в неделю',
+  ],
+  sitePlanFileTasksUnlimited: [
+    'Unlimited file tasks',
+    'Fayl vazifalari cheklanmagan',
+    'Задачи с файлами без лимита',
+  ],
+  sitePlanEdits: [
+    '{count} AI edits per file',
+    'Har bir faylga {count} ta AI tahrir',
+    '{count} правок с ИИ на файл',
+  ],
   sitePlanEditsUnlimited: ['Unlimited AI edits', 'AI tahrirlar cheklanmagan', 'Правки с ИИ без лимита'],
-  sitePlanChannel: ['Join our Telegram channels', 'Telegram kanallarimizga obuna', 'Подписка на наши Telegram-каналы'],
+  sitePlanChannel: [
+    'Join our Telegram channels',
+    'Telegram kanallarimizga obuna',
+    'Подписка на наши Telegram-каналы',
+  ],
   sitePlanNoChannel: ['No channels to join', 'Kanallarga obuna shart emas', 'Подписка на каналы не нужна'],
   sitePlanFreeButton: ['Get started', 'Boshlash', 'Начать работу'],
   sitePlanPlusButton: ['Choose Plus', 'Plus tanlash', 'Выбрать Plus'],
@@ -217,7 +306,11 @@ export const site = {
   sitePlanNoRenewal: ['No auto-renewal', 'Avtomatik uzaytirilmaydi', 'Без автопродления'],
 
   // Shared Website / Telegram comparison (home, telegram page).
-  siteCompareCaption: ['Website and Telegram bot compared', 'Sayt va Telegram bot farqi', 'Сайт и Telegram-бот: сравнение'],
+  siteCompareCaption: [
+    'Website and Telegram bot compared',
+    'Sayt va Telegram bot farqi',
+    'Сайт и Telegram-бот: сравнение',
+  ],
   siteCompareColWeb: ['Website', 'Sayt', 'Сайт'],
   siteCompareColBot: ['Telegram bot', 'Telegram bot', 'Telegram-бот'],
   siteCompareRowAccount: ['Account and plan', 'Hisob va tarif', 'Аккаунт и тариф'],
@@ -227,21 +320,45 @@ export const site = {
   siteCompareSizeBot: ['Up to 20 MB per file', 'Har bir fayl 20 MB gacha', 'До 20 МБ на файл'],
   siteCompareRowTools: ['File tools', 'Fayl vositalari', 'Инструменты для файлов'],
   siteCompareToolsWeb: ['Every tool', 'Barcha vositalar', 'Все инструменты'],
-  siteCompareToolsBot: ['Most tools; some are web only', 'Ko‘pchiligi; ayrimlari faqat saytda', 'Большинство; часть только на сайте'],
+  siteCompareToolsBot: [
+    'Most tools; some are web only',
+    'Ko‘pchiligi; ayrimlari faqat saytda',
+    'Большинство; часть только на сайте',
+  ],
   siteCompareRowEditor: ['PDF editor', 'PDF muharriri', 'Редактор PDF'],
   siteCompareEditorWeb: ['In the browser', 'Brauzerda', 'В браузере'],
-  siteCompareEditorBot: ['As a Telegram Mini App', 'Telegram Mini App sifatida', 'Как мини-приложение Telegram'],
-  siteCompareRowAi: ['AI documents, slides, CVs', 'AI hujjat, slayd, rezyume', 'Документы, слайды, резюме с ИИ'],
+  siteCompareEditorBot: [
+    'As a Telegram Mini App',
+    'Telegram Mini App sifatida',
+    'Как мини-приложение Telegram',
+  ],
+  siteCompareRowAi: [
+    'AI documents, slides, CVs',
+    'AI hujjat, slayd, rezyume',
+    'Документы, слайды, резюме с ИИ',
+  ],
   siteCompareYes: ['Yes', 'Bor', 'Есть'],
 
   // File lifecycle (home, help, the privacy policy and the AI CV page). Its last step names what an AI
   // document keeps for its changes (siteToolPrivacyNote speaks for a file tool's own page).
-  siteLifecycleTitle: ['What happens to your files', 'Fayllaringiz bilan nima bo‘ladi', 'Что происходит с файлами'],
+  siteLifecycleTitle: [
+    'What happens to your files',
+    'Fayllaringiz bilan nima bo‘ladi',
+    'Что происходит с файлами',
+  ],
   siteLifecycle1Title: ['You upload', 'Yuklaysiz', 'Вы загружаете'],
-  siteLifecycle1Text: ['The file is used to run your task.', 'Fayl vazifangizni bajarish uchun ishlatiladi.', 'Файл используется для вашей задачи.'],
+  siteLifecycle1Text: [
+    'The file is used to run your task.',
+    'Fayl vazifangizni bajarish uchun ishlatiladi.',
+    'Файл используется для вашей задачи.',
+  ],
   siteLifecycle1Time: ['Start', 'Boshlanishi', 'Начало'],
   siteLifecycle2Title: ['Result is ready', 'Natija tayyor', 'Результат готов'],
-  siteLifecycle2Text: ['Download it in the app or get it in Telegram.', 'Uni ilovada yuklab oling yoki Telegramʼda oling.', 'Скачайте его в приложении или получите в Telegram.'],
+  siteLifecycle2Text: [
+    'Download it in the app or get it in Telegram.',
+    'Uni ilovada yuklab oling yoki Telegramʼda oling.',
+    'Скачайте его в приложении или получите в Telegram.',
+  ],
   siteLifecycle2Time: ['When the task ends', 'Vazifa tugaganda', 'Когда задача готова'],
   siteLifecycle3Title: ['Deleted', 'O‘chiriladi', 'Удаляется'],
   // Uploads and results go, but not what a change of an AI document needs (document-platform apps/studio/keeping.py).
@@ -254,21 +371,57 @@ export const site = {
 
   // PDF editor capabilities: shared by home (titles) and the editor page (titles + lines).
   siteEditorCapAddTextTitle: ['Add text', 'Matn qo‘shish', 'Добавить текст'],
-  siteEditorCapAddTextLine: ['Type new text anywhere on a page.', 'Sahifaning istalgan joyiga yangi matn yozing.', 'Напишите текст в любом месте страницы.'],
+  siteEditorCapAddTextLine: [
+    'Type new text anywhere on a page.',
+    'Sahifaning istalgan joyiga yangi matn yozing.',
+    'Напишите текст в любом месте страницы.',
+  ],
   siteEditorCapEditTextTitle: ['Edit existing text', 'Mavjud matnni o‘zgartirish', 'Править готовый текст'],
-  siteEditorCapEditTextLine: ['Change words already in the PDF, in their own font.', 'PDF dagi so‘zlarni o‘sha shriftda o‘zgartiring.', 'Меняйте слова, которые уже есть в PDF, тем же шрифтом.'],
+  siteEditorCapEditTextLine: [
+    'Change words already in the PDF, in their own font.',
+    'PDF dagi so‘zlarni o‘sha shriftda o‘zgartiring.',
+    'Меняйте слова, которые уже есть в PDF, тем же шрифтом.',
+  ],
   siteEditorCapHighlightTitle: ['Highlight', 'Ajratib ko‘rsatish', 'Выделение'],
-  siteEditorCapHighlightLine: ['Mark the lines that matter in colour.', 'Muhim qatorlarni rang bilan belgilang.', 'Отметьте важные строки цветом.'],
+  siteEditorCapHighlightLine: [
+    'Mark the lines that matter in colour.',
+    'Muhim qatorlarni rang bilan belgilang.',
+    'Отметьте важные строки цветом.',
+  ],
   siteEditorCapAnnotateTitle: ['Notes and drawings', 'Izoh va chizmalar', 'Заметки и рисунки'],
-  siteEditorCapAnnotateLine: ['Leave notes, shapes and drawings on the page.', 'Sahifada izoh, shakl va chizmalar qoldiring.', 'Оставляйте заметки, фигуры и рисунки на странице.'],
+  siteEditorCapAnnotateLine: [
+    'Leave notes, shapes and drawings on the page.',
+    'Sahifada izoh, shakl va chizmalar qoldiring.',
+    'Оставляйте заметки, фигуры и рисунки на странице.',
+  ],
   siteEditorCapFormsTitle: ['Fill in forms', 'Formalarni to‘ldirish', 'Заполнение форм'],
-  siteEditorCapFormsLine: ['Type into the fields of a PDF form; they stay editable.', 'PDF forma maydonlarini to‘ldiring, ular tahrirlanadigan bo‘lib qoladi.', 'Заполните поля PDF-формы — они останутся редактируемыми.'],
+  siteEditorCapFormsLine: [
+    'Type into the fields of a PDF form; they stay editable.',
+    'PDF forma maydonlarini to‘ldiring, ular tahrirlanadigan bo‘lib qoladi.',
+    'Заполните поля PDF-формы — они останутся редактируемыми.',
+  ],
   siteEditorCapSignatureTitle: ['Signature image', 'Imzo rasmi', 'Изображение подписи'],
-  siteEditorCapSignatureLine: ['Place a picture of your signature where it belongs.', 'Imzongiz rasmini kerakli joyga qo‘ying.', 'Поставьте изображение подписи в нужное место.'],
-  siteEditorCapImagesTitle: ['Insert or swap images', 'Rasm qo‘shish va almashtirish', 'Вставка и замена картинок'],
-  siteEditorCapImagesLine: ['Add a logo, photo or stamp, or replace a picture.', 'Logotip, surat yoki muhr qo‘shing yoki rasmni almashtiring.', 'Добавьте логотип, фото или печать или замените картинку.'],
+  siteEditorCapSignatureLine: [
+    'Place a picture of your signature where it belongs.',
+    'Imzongiz rasmini kerakli joyga qo‘ying.',
+    'Поставьте изображение подписи в нужное место.',
+  ],
+  siteEditorCapImagesTitle: [
+    'Insert or swap images',
+    'Rasm qo‘shish va almashtirish',
+    'Вставка и замена картинок',
+  ],
+  siteEditorCapImagesLine: [
+    'Add a logo, photo or stamp, or replace a picture.',
+    'Logotip, surat yoki muhr qo‘shing yoki rasmni almashtiring.',
+    'Добавьте логотип, фото или печать или замените картинку.',
+  ],
   siteEditorCapRedactTitle: ['Redact', 'Maxfiy joylarni yashirish', 'Скрыть данные'],
-  siteEditorCapRedactLine: ['Black out private details so they cannot be recovered.', 'Shaxsiy maʼlumotlarni tiklab bo‘lmaydigan qilib yashiring.', 'Скройте личные данные без возможности восстановления.'],
+  siteEditorCapRedactLine: [
+    'Black out private details so they cannot be recovered.',
+    'Shaxsiy maʼlumotlarni tiklab bo‘lmaydigan qilib yashiring.',
+    'Скройте личные данные без возможности восстановления.',
+  ],
 
   // ── 404 (design/pages/not-found.md, H1 from meta.json) ──
   siteNotFoundTitle: ['We couldn’t find that page', 'Bu sahifa topilmadi', 'Такой страницы нет'],
@@ -284,7 +437,6 @@ export const site = {
   siteNotFoundAi: ['AI', 'Sunʼiy intellekt', 'ИИ'],
   siteNotFoundHelp: ['Help', 'Yordam', 'Помощь'],
 
-
   // ── Home (/{locale}) — design/pages/home.md; H1 from meta.json ──
   siteHomeHeroTitle: [
     'PDF tools, AI documents, slides and CVs in one place',
@@ -299,8 +451,16 @@ export const site = {
   siteHomeHeroCta: ['Get started', 'Boshlash', 'Начать работу'],
   siteHomeHeroCtaTelegram: ['Open in Telegram', 'Telegramʼda ochish', 'Открыть в Telegram'],
   siteHomeHeroChip1: ['Nothing to install', 'Hech narsa o‘rnatilmaydi', 'Ничего не нужно ставить'],
-  siteHomeHeroChip2: ['Tool files deleted after 24 hours', 'Vosita fayllari 24 soatda o‘chiriladi', 'Файлы инструментов удаляются через 24 часа'],
-  siteHomeHeroLangLine: ['Works in English, O‘zbekcha and Русский.', 'O‘zbekcha, Русский va English tillarida ishlaydi.', 'Работает на русском, узбекском и английском.'],
+  siteHomeHeroChip2: [
+    'Tool files deleted after 24 hours',
+    'Vosita fayllari 24 soatda o‘chiriladi',
+    'Файлы инструментов удаляются через 24 часа',
+  ],
+  siteHomeHeroLangLine: [
+    'Works in English, O‘zbekcha and Русский.',
+    'O‘zbekcha, Русский va English tillarida ishlaydi.',
+    'Работает на русском, узбекском и английском.',
+  ],
   // Hero vignette: decorative sample strings, matched to the page language.
   siteHomeVignetteTask: ['Merge PDF · 3 files', 'PDF birlashtirish · 3 ta fayl', 'Объединить PDF · 3 файла'],
   siteHomeVignetteFile1: ['contract.pdf', 'shartnoma.pdf', 'dogovor.pdf'],
@@ -310,7 +470,11 @@ export const site = {
   siteHomeVignetteStatus: ['Ready', 'Tayyor', 'Готово'],
   siteHomeVignetteDocTitle: ['Rental agreement', 'Ijara shartnomasi', 'Договор аренды'],
 
-  siteHomeToolsTitle: ['Pick a tool and get to work', 'Vositani tanlang va ishga kirishing', 'Выберите инструмент и начинайте'],
+  siteHomeToolsTitle: [
+    'Pick a tool and get to work',
+    'Vositani tanlang va ishga kirishing',
+    'Выберите инструмент и начинайте',
+  ],
   siteHomeToolsIntro: [
     'Every tool opens on its own page with the steps and limits. All of them are on every plan.',
     'Har bir vositaning alohida sahifasi bor: qadamlar va cheklovlar o‘sha yerda. Barchasi har bir tarifda mavjud.',
@@ -318,7 +482,11 @@ export const site = {
   ],
   siteHomeToolsAll: ['See all tools', 'Barcha vositalar', 'Все инструменты'],
 
-  siteHomeAiTitle: ['Describe it, get the document', 'Yozing — hujjatni oling', 'Опишите — получите документ'],
+  siteHomeAiTitle: [
+    'Describe it, get the document',
+    'Yozing — hujjatni oling',
+    'Опишите — получите документ',
+  ],
   siteHomeAiIntro: [
     'Three AI services that write for you. You check the result and refine it with AI edits.',
     'Siz uchun yozadigan uchta AI xizmati. Natijani tekshirasiz va AI tahrirlar bilan aniqlashtirasiz.',
@@ -333,7 +501,11 @@ export const site = {
   ],
   siteHomeEditorCta: ['Open the PDF editor', 'PDF muharririni ochish', 'Открыть редактор PDF'],
 
-  siteHomeTelegramTitle: ['The same account in Telegram', 'Telegramʼda ham o‘sha hisob', 'Тот же аккаунт в Telegram'],
+  siteHomeTelegramTitle: [
+    'The same account in Telegram',
+    'Telegramʼda ham o‘sha hisob',
+    'Тот же аккаунт в Telegram',
+  ],
   siteHomeTelegramIntro: [
     'Send a file to the bot from your phone and get the result in the chat. Your plan and history are shared with the website.',
     'Telefondan botga fayl yuboring va natijani chatda oling. Tarif va tarix sayt bilan umumiy.',
@@ -361,7 +533,11 @@ export const site = {
     'Сохраните на устройство или получите в Telegram. Файл результата удаляется через 24 часа.',
   ],
 
-  siteHomePrivacyTitle: ['What we keep, and for how long', 'Nimani va qancha saqlaymiz', 'Что мы храним и сколько'],
+  siteHomePrivacyTitle: [
+    'What we keep, and for how long',
+    'Nimani va qancha saqlaymiz',
+    'Что мы храним и сколько',
+  ],
   siteHomePrivacyIntro: [
     'Concrete rules instead of badges: what we keep, for how long, and why.',
     'Belgilar o‘rniga aniq qoidalar: nimani, qancha muddat va nima uchun saqlaymiz.',
@@ -379,15 +555,27 @@ export const site = {
     'Telegram, Google yoki email va parol bilan kiring. Sayt, bot va Mini App uchun bitta hisob.',
     'Входите через Telegram, Google или по почте и паролю. Один аккаунт для сайта, бота и мини-приложения.',
   ],
-  siteHomeFactAiTitle: ['AI: kept for changes', 'AI: o‘zgartirish uchun saqlanadi', 'ИИ: хранится для правок'],
+  siteHomeFactAiTitle: [
+    'AI: kept for changes',
+    'AI: o‘zgartirish uchun saqlanadi',
+    'ИИ: хранится для правок',
+  ],
   siteHomeFactAiText: [
     'A document’s request and text, and what was read from its files, stay in your account so you can ask for changes; a copy kept for quality review is deleted after 30 days.',
     'Hujjatning so‘rovi va matni hamda u yaratilgan fayllardan o‘qilgan ma’lumotlar o‘zgartirish so‘rashingiz uchun hisobingizda saqlanadi; sifatni tekshirish uchun olingan nusxa 30 kundan keyin o‘chiriladi.',
     'Запрос и текст документа, а также то, что прочитано из его файлов, хранятся в вашем аккаунте, чтобы вы могли попросить изменения; копия для проверки качества удаляется через 30 дней.',
   ],
-  siteHomePrivacyLink: ['Read the privacy policy', 'Maxfiylik siyosatini o‘qish', 'Читать политику конфиденциальности'],
+  siteHomePrivacyLink: [
+    'Read the privacy policy',
+    'Maxfiylik siyosatini o‘qish',
+    'Читать политику конфиденциальности',
+  ],
 
-  siteHomePricingTitle: ['Plans that differ only in weekly volume', 'Tariflar faqat haftalik hajmda farq qiladi', 'Тарифы отличаются только объёмом в неделю'],
+  siteHomePricingTitle: [
+    'Plans that differ only in weekly volume',
+    'Tariflar faqat haftalik hajmda farq qiladi',
+    'Тарифы отличаются только объёмом в неделю',
+  ],
   siteHomePricingIntro: [
     'Every tool is on every plan. Paid plans last 30 days and do not renew on their own.',
     'Barcha vositalar har bir tarifda bor. Pullik tariflar 30 kun amal qiladi va o‘z-o‘zidan uzaytirilmaydi.',
@@ -397,7 +585,11 @@ export const site = {
 
   siteHomeFaqTitle: ['Common questions', 'Ko‘p so‘raladigan savollar', 'Частые вопросы'],
 
-  siteHomeFinalTitle: ['Start with the file in front of you', 'Qo‘lingizdagi fayldan boshlang', 'Начните с файла, который под рукой'],
+  siteHomeFinalTitle: [
+    'Start with the file in front of you',
+    'Qo‘lingizdagi fayldan boshlang',
+    'Начните с файла, который под рукой',
+  ],
   siteHomeFinalLine: [
     'Sign in with Telegram, Google or email, and run your first task.',
     'Telegram, Google yoki email orqali kiring va birinchi vazifani bajaring.',
@@ -414,7 +606,11 @@ export const site = {
   siteToolsSearch: ['Search tools', 'Vositani qidirish', 'Найти инструмент'],
   siteToolsFilterLabel: ['Filter by group', 'Guruh bo‘yicha', 'Фильтр по группам'],
   siteToolsFilterAll: ['All', 'Hammasi', 'Все'],
-  siteToolsResultCount: ['Tools found: {count}', 'Topilgan vositalar: {count}', 'Найдено инструментов: {count}'],
+  siteToolsResultCount: [
+    'Tools found: {count}',
+    'Topilgan vositalar: {count}',
+    'Найдено инструментов: {count}',
+  ],
   siteToolsEmpty: [
     'No tool matches “{query}”. Try “merge”, “word” or “jpg”.',
     '«{query}» bo‘yicha vosita topilmadi. «birlashtirish», «word» yoki «jpg» deb yozib ko‘ring.',
@@ -423,8 +619,16 @@ export const site = {
   siteToolsEmptyLink: ['Show all tools', 'Barcha vositalarni ko‘rsatish', 'Показать все инструменты'],
   siteToolsBotLabel: ['Also in Telegram', 'Telegramʼda ham bor', 'Есть и в Telegram'],
   siteToolsWebOnlyLabel: ['Website only', 'Faqat saytda', 'Только на сайте'],
-  siteToolsLimitsTitle: ['Limits for every tool', 'Barcha vositalar uchun cheklovlar', 'Ограничения для всех инструментов'],
-  siteToolsAiTitle: ['Need a document, not a tool?', 'Vosita emas, hujjat kerakmi?', 'Нужен не инструмент, а документ?'],
+  siteToolsLimitsTitle: [
+    'Limits for every tool',
+    'Barcha vositalar uchun cheklovlar',
+    'Ограничения для всех инструментов',
+  ],
+  siteToolsAiTitle: [
+    'Need a document, not a tool?',
+    'Vosita emas, hujjat kerakmi?',
+    'Нужен не инструмент, а документ?',
+  ],
   siteToolsAiLine: [
     'Describe a topic and get a PDF, a PowerPoint deck or a CV written with AI.',
     'Mavzuni yozing va AI yordamida PDF, PowerPoint taqdimot yoki rezyume oling.',
@@ -441,7 +645,11 @@ export const site = {
   ],
   siteEditorHeroCta: ['Open the PDF editor', 'PDF muharririni ochish', 'Открыть редактор PDF'],
   siteEditorHeroCtaTelegram: ['Open in Telegram', 'Telegramʼda ochish', 'Открыть в Telegram'],
-  siteEditorCapsTitle: ['What you can do in the editor', 'Muharrirda nimalar qilish mumkin', 'Что можно сделать в редакторе'],
+  siteEditorCapsTitle: [
+    'What you can do in the editor',
+    'Muharrirda nimalar qilish mumkin',
+    'Что можно сделать в редакторе',
+  ],
   siteEditorHowTitle: ['How to edit a PDF', 'PDF ni qanday tahrirlash mumkin', 'Как отредактировать PDF'],
   siteEditorStep1Title: ['Open your PDF', 'PDF ni oching', 'Откройте PDF'],
   siteEditorStep1Text: [
@@ -461,7 +669,11 @@ export const site = {
     'Tahrirlangan faylni yuklab oling. Asl fayl o‘zgarmaydi.',
     'Скачайте отредактированный файл. Исходный останется как был.',
   ],
-  siteEditorChannelsTitle: ['In the browser or inside Telegram', 'Brauzerda yoki Telegram ichida', 'В браузере или прямо в Telegram'],
+  siteEditorChannelsTitle: [
+    'In the browser or inside Telegram',
+    'Brauzerda yoki Telegram ichida',
+    'В браузере или прямо в Telegram',
+  ],
   siteEditorChannelsIntro: [
     'The editor opens on the website and as a Telegram Mini App. Both use the same account and plan.',
     'Muharrir saytda va Telegram Mini App sifatida ochiladi. Ikkalasida ham hisob va tarif bir xil.',
@@ -485,8 +697,11 @@ export const site = {
     'Fayllar 24 soatdan keyin o‘chiriladi. Yashirish tanlangan qismni faylning o‘zidan olib tashlaydi, shunchaki ustini yopmaydi.',
     'Файлы удаляются через 24 часа. Скрытие удаляет выбранный фрагмент из самого файла, а не просто закрашивает его.',
   ],
-  siteEditorFaqTitle: ['Questions about the PDF editor', 'PDF muharriri haqida savollar', 'Вопросы о редакторе PDF'],
-
+  siteEditorFaqTitle: [
+    'Questions about the PDF editor',
+    'PDF muharriri haqida savollar',
+    'Вопросы о редакторе PDF',
+  ],
 
   // ── AI hub (/{locale}/ai) — design/pages/ai-hub.md ──
   // uz H1 changed from meta.json: it repeated the ai-documents H1 word for word.
@@ -502,7 +717,11 @@ export const site = {
   ],
   siteAiHubHeroCta: ['Create with AI', 'AI bilan yaratish', 'Создать с ИИ'],
   siteAiHubHeroCtaTelegram: ['Open in Telegram', 'Telegramʼda ochish', 'Открыть в Telegram'],
-  siteAiHubServicesTitle: ['Three services, one account', 'Uchta xizmat, bitta hisob', 'Три сервиса, один аккаунт'],
+  siteAiHubServicesTitle: [
+    'Three services, one account',
+    'Uchta xizmat, bitta hisob',
+    'Три сервиса, один аккаунт',
+  ],
   siteAiHubServicesIntro: [
     'Each one asks for what it needs, shows you the plan first where it helps, and gives you a file you can keep working on.',
     'Har biri kerakli maʼlumotni so‘raydi, kerak joyda avval rejani ko‘rsatadi va ustida ishlashni davom ettirsa bo‘ladigan fayl beradi.',
@@ -513,13 +732,21 @@ export const site = {
     'Referat yoki mustaqil ish yozyapsizmi? Qoralamani qanday tayyorlashni ko‘ring.',
     'Пишете реферат? Посмотрите, как подготовить черновик.',
   ],
-  siteAiHubEditsTitle: ['Not quite right? Ask for an edit', 'Nimadir yoqmadimi? Tahrir so‘rang', 'Что-то не так? Попросите правку'],
+  siteAiHubEditsTitle: [
+    'Not quite right? Ask for an edit',
+    'Nimadir yoqmadimi? Tahrir so‘rang',
+    'Что-то не так? Попросите правку',
+  ],
   siteAiHubEditsBody: [
     'Write what to change in plain words: shorten a section, add an example, rewrite slide 6. You get an updated file each time.',
     'Nimani o‘zgartirish kerakligini oddiy so‘zlar bilan yozing: bo‘limni qisqartiring, misol qo‘shing, 6-slaydni qayta yozing. Har safar yangilangan fayl olasiz.',
     'Напишите обычными словами, что изменить: сократить раздел, добавить пример, переписать 6-й слайд. Каждый раз вы получаете обновлённый файл.',
   ],
-  siteAiHubEditsPrompt: ['Make slide 6 shorter and add an example', '6-slaydni qisqartiring va misol qo‘shing', 'Сократи 6-й слайд и добавь пример'],
+  siteAiHubEditsPrompt: [
+    'Make slide 6 shorter and add an example',
+    '6-slaydni qisqartiring va misol qo‘shing',
+    'Сократи 6-й слайд и добавь пример',
+  ],
   siteAiHubEditsPlans: [
     'AI edits per file: 3 on Free, 10 on Plus, unlimited on Premium.',
     'Har bir faylga AI tahrirlar: Free — 3 ta, Plus — 10 ta, Premium — cheklanmagan.',
@@ -548,13 +775,33 @@ export const site = {
     'AI so‘rovlari OpenAI orqali qayta ishlanadi. Hujjatning so‘rovi va matni hamda u yaratilgan fayllardan o‘qilgan ma’lumotlar keyinroq o‘zgartirish so‘rashingiz uchun hisobingizda saqlanadi; so‘rovlar va natijalar nusxasi sifatni tekshirish uchun 30 kun saqlanadi, keyin o‘chiriladi. Yuklangan fayllar 24 soatdan keyin o‘chiriladi, agar hujjatni o‘zgartirish uchun kerak bo‘lmasa.',
     'Запросы к ИИ обрабатывает OpenAI. Запрос и текст документа, а также то, что прочитано из файлов, по которым он сделан, хранятся в вашем аккаунте, чтобы вы могли позже попросить изменения; копия запросов и результатов хранится 30 дней для проверки качества, затем удаляется. Загруженные файлы удаляются через 24 часа, если они не нужны для изменения документа.',
   ],
-  siteAiLanguagesTitle: ['English, Uzbek or Russian', 'O‘zbek, rus yoki ingliz tilida', 'На русском, узбекском или английском'],
-  siteAiLimitsNoteFree: ['On Free: 3 AI edits per file', 'Free: har bir faylga 3 ta tahrir', 'На Free: 3 правки на файл'],
-  siteAiLimitsNotePlus: ['On Plus: 10 AI edits per file', 'Plus: har bir faylga 10 ta tahrir', 'На Plus: 10 правок на файл'],
-  siteAiLimitsNotePremium: ['On Premium: unlimited edits', 'Premium: tahrirlar cheklanmagan', 'На Premium: правки без лимита'],
+  siteAiLanguagesTitle: [
+    'English, Uzbek or Russian',
+    'O‘zbek, rus yoki ingliz tilida',
+    'На русском, узбекском или английском',
+  ],
+  siteAiLimitsNoteFree: [
+    'On Free: 3 AI edits per file',
+    'Free: har bir faylga 3 ta tahrir',
+    'На Free: 3 правки на файл',
+  ],
+  siteAiLimitsNotePlus: [
+    'On Plus: 10 AI edits per file',
+    'Plus: har bir faylga 10 ta tahrir',
+    'На Plus: 10 правок на файл',
+  ],
+  siteAiLimitsNotePremium: [
+    'On Premium: unlimited edits',
+    'Premium: tahrirlar cheklanmagan',
+    'На Premium: правки без лимита',
+  ],
 
   // ── AI documents (/{locale}/ai/documents) — H1 from meta.json ──
-  siteAiDocsHeroTitle: ['AI document generator', 'Sunʼiy intellekt bilan hujjat tayyorlash', 'Документ по теме с помощью ИИ'],
+  siteAiDocsHeroTitle: [
+    'AI document generator',
+    'Sunʼiy intellekt bilan hujjat tayyorlash',
+    'Документ по теме с помощью ИИ',
+  ],
   siteAiDocsHeroLead: [
     'Write a topic and who it is for. Check the outline, then get a finished PDF of up to 35 pages: a guide, a report, an essay or lesson notes.',
     'Mavzuni va kim uchun ekanini yozing. Rejani tekshiring va 35 sahifagacha tayyor PDF oling: qo‘llanma, hisobot, esse yoki dars matni.',
@@ -564,7 +811,11 @@ export const site = {
   siteAiDocsHeroChip1: ['Up to 35 pages', '35 sahifagacha', 'До 35 страниц'],
   siteAiDocsHeroChip2: ['uz · ru · en', 'uz · ru · en', 'uz · ru · en'],
   siteAiDocsHeroChip3: ['PDF file', 'PDF fayl', 'Файл PDF'],
-  siteAiDocsHowTitle: ['How to create a document with AI', 'AI bilan hujjat qanday tayyorlanadi', 'Как создать документ с ИИ'],
+  siteAiDocsHowTitle: [
+    'How to create a document with AI',
+    'AI bilan hujjat qanday tayyorlanadi',
+    'Как создать документ с ИИ',
+  ],
   siteAiDocsStep1Title: ['Describe the topic', 'Mavzuni yozing', 'Опишите тему'],
   siteAiDocsStep1Text: [
     'Say what it is about, for whom, how long and in which language. Add your notes or files if you have them.',
@@ -589,22 +840,54 @@ export const site = {
     'Один запрос — три языка на выбор. Вот как один и тот же заголовок выглядит на каждом.',
   ],
   // Language tiles: the same sample heading in each language; identical in every UI locale on purpose.
-  siteAiSampleHeadingEn: ['Climate change and farming in Central Asia', 'Climate change and farming in Central Asia', 'Climate change and farming in Central Asia'],
-  siteAiSampleHeadingUz: ['Markaziy Osiyoda iqlim o‘zgarishi va qishloq xo‘jaligi', 'Markaziy Osiyoda iqlim o‘zgarishi va qishloq xo‘jaligi', 'Markaziy Osiyoda iqlim o‘zgarishi va qishloq xo‘jaligi'],
-  siteAiSampleHeadingRu: ['Изменение климата и сельское хозяйство в Центральной Азии', 'Изменение климата и сельское хозяйство в Центральной Азии', 'Изменение климата и сельское хозяйство в Центральной Азии'],
-  siteAiDocsExamplesTitle: ['Pages made with {brand}', '{brand} yordamida tayyorlangan sahifalar', 'Страницы, созданные в {brand}'],
+  siteAiSampleHeadingEn: [
+    'Climate change and farming in Central Asia',
+    'Climate change and farming in Central Asia',
+    'Climate change and farming in Central Asia',
+  ],
+  siteAiSampleHeadingUz: [
+    'Markaziy Osiyoda iqlim o‘zgarishi va qishloq xo‘jaligi',
+    'Markaziy Osiyoda iqlim o‘zgarishi va qishloq xo‘jaligi',
+    'Markaziy Osiyoda iqlim o‘zgarishi va qishloq xo‘jaligi',
+  ],
+  siteAiSampleHeadingRu: [
+    'Изменение климата и сельское хозяйство в Центральной Азии',
+    'Изменение климата и сельское хозяйство в Центральной Азии',
+    'Изменение климата и сельское хозяйство в Центральной Азии',
+  ],
+  siteAiDocsExamplesTitle: [
+    'Pages made with {brand}',
+    '{brand} yordamida tayyorlangan sahifalar',
+    'Страницы, созданные в {brand}',
+  ],
   siteAiDocsExamplesIntro: [
     'Covers and inner pages from real documents. Your result follows your topic and request.',
     'Haqiqiy hujjatlardan muqova va ichki sahifalar. Sizning natijangiz mavzu va so‘rovingizga qarab bo‘ladi.',
     'Обложки и страницы из настоящих документов. Ваш результат зависит от темы и запроса.',
   ],
-  siteAiDocsExamplesSoon: ['Examples will appear here soon.', 'Namunalar tez orada shu yerda bo‘ladi.', 'Примеры скоро появятся здесь.'],
-  siteAiDocsLimitsTitle: ['How many documents a week', 'Haftasiga nechta hujjat', 'Сколько документов в неделю'],
-  siteAiDocsFaqTitle: ['Questions about AI documents', 'AI hujjatlar haqida savollar', 'Вопросы о документах с ИИ'],
+  siteAiDocsExamplesSoon: [
+    'Examples will appear here soon.',
+    'Namunalar tez orada shu yerda bo‘ladi.',
+    'Примеры скоро появятся здесь.',
+  ],
+  siteAiDocsLimitsTitle: [
+    'How many documents a week',
+    'Haftasiga nechta hujjat',
+    'Сколько документов в неделю',
+  ],
+  siteAiDocsFaqTitle: [
+    'Questions about AI documents',
+    'AI hujjatlar haqida savollar',
+    'Вопросы о документах с ИИ',
+  ],
   siteGalleryAlt: ['{name} design', '«{name}» dizayni', 'Дизайн «{name}»'],
 
   // ── Referat (/{locale}/ai/referat) — proposed page, keywords.md §3; H1 from meta.json ──
-  siteAiReferatHeroTitle: ['Write a report with AI', 'Sunʼiy intellekt yordamida referat tayyorlash', 'Написать реферат с помощью ИИ'],
+  siteAiReferatHeroTitle: [
+    'Write a report with AI',
+    'Sunʼiy intellekt yordamida referat tayyorlash',
+    'Написать реферат с помощью ИИ',
+  ],
   siteAiReferatHeroLead: [
     'Enter your topic and get a draft with a plan, introduction, sections and conclusion, as a PDF of up to 35 pages. Then make it your own.',
     'Mavzuni yozing va reja, kirish, bo‘limlar hamda xulosadan iborat qoralamani 35 sahifagacha PDF ko‘rinishida oling. Keyin uni o‘zingiznikiga aylantiring.',
@@ -614,7 +897,11 @@ export const site = {
   siteAiReferatHeroChip1: ['Up to 35 pages', '35 sahifagacha', 'До 35 страниц'],
   siteAiReferatHeroChip2: ['Plan you can check', 'Rejani oldindan ko‘rasiz', 'План можно проверить'],
   siteAiReferatHeroChip3: ['uz · ru · en', 'uz · ru · en', 'uz · ru · en'],
-  siteAiReferatHowTitle: ['How to prepare a referat draft', 'Referat qoralamasini qanday tayyorlash mumkin', 'Как подготовить черновик реферата'],
+  siteAiReferatHowTitle: [
+    'How to prepare a referat draft',
+    'Referat qoralamasini qanday tayyorlash mumkin',
+    'Как подготовить черновик реферата',
+  ],
   siteAiReferatStep1Title: ['Give the topic and size', 'Mavzu va hajmni yozing', 'Укажите тему и объём'],
   siteAiReferatStep1Text: [
     'Name the subject, the number of pages and the language. Add your teacher’s requirements if you have them.',
@@ -633,7 +920,11 @@ export const site = {
     'Qoralamani o‘qing, har bir faktni tekshiring va topshirishdan oldin o‘z so‘zlaringiz bilan qayta yozing.',
     'Прочитайте черновик, проверьте каждый факт и перепишите своими словами, прежде чем что-то сдавать.',
   ],
-  siteAiReferatStructureTitle: ['What the draft is made of', 'Qoralama nimalardan iborat', 'Из чего состоит черновик'],
+  siteAiReferatStructureTitle: [
+    'What the draft is made of',
+    'Qoralama nimalardan iborat',
+    'Из чего состоит черновик',
+  ],
   siteAiReferatStructureIntro: [
     'The usual parts of a student report, in the order your request asks for.',
     'Talaba referatining odatiy qismlari, so‘rovingizdagi tartibda.',
@@ -653,7 +944,11 @@ export const site = {
     'Taʼlim muassasangiz talab qiladigan titul varag‘ini PDF muharririda yoki Wordʼda qo‘shing.',
     'Титульный лист по требованиям вашего вуза добавьте в редакторе PDF или в Word.',
   ],
-  siteAiReferatMustaqilTitle: ['Self-study assignments too', 'Mustaqil ish ham tayyorlanadi', 'Подходит и для самостоятельной работы'],
+  siteAiReferatMustaqilTitle: [
+    'Self-study assignments too',
+    'Mustaqil ish ham tayyorlanadi',
+    'Подходит и для самостоятельной работы',
+  ],
   siteAiReferatMustaqilBody: [
     'The same flow works for a mustaqil ish: name the subject and the questions you were given, check the plan, and get a draft to work from.',
     'Mustaqil ish uchun ham xuddi shunday: fan va berilgan savollarni yozing, rejani tekshiring va ishlash uchun qoralama oling.',
@@ -682,12 +977,24 @@ export const site = {
     'Сделайте по той же теме редактируемую презентацию PowerPoint до 60 слайдов.',
   ],
   siteAiReferatSlidesButton: ['Make a presentation', 'Taqdimot tayyorlash', 'Сделать презентацию'],
-  siteAiReferatLimitsTitle: ['How many drafts a week', 'Haftasiga nechta qoralama', 'Сколько черновиков в неделю'],
-  siteAiReferatFaqTitle: ['Questions about referat drafts', 'Referat qoralamasi haqida savollar', 'Вопросы о черновиках рефератов'],
+  siteAiReferatLimitsTitle: [
+    'How many drafts a week',
+    'Haftasiga nechta qoralama',
+    'Сколько черновиков в неделю',
+  ],
+  siteAiReferatFaqTitle: [
+    'Questions about referat drafts',
+    'Referat qoralamasi haqida savollar',
+    'Вопросы о черновиках рефератов',
+  ],
 
   // ── AI presentations (/{locale}/ai/slides) ──
   // ru H1 changed from meta.json: "за несколько минут" promised a speed the product does not state.
-  siteAiSlidesHeroTitle: ['AI presentation maker', 'Sunʼiy intellekt bilan prezentatsiya tayyorlash', 'Сделать презентацию с помощью ИИ'],
+  siteAiSlidesHeroTitle: [
+    'AI presentation maker',
+    'Sunʼiy intellekt bilan prezentatsiya tayyorlash',
+    'Сделать презентацию с помощью ИИ',
+  ],
   siteAiSlidesHeroLead: [
     'Give a topic, pick one of 110 designs and get a PowerPoint deck of up to 60 slides. Every slide stays editable, in the deck editor or in PowerPoint.',
     'Mavzuni yozing, 110 ta dizayndan birini tanlang va 60 slaydgacha PowerPoint taqdimot oling. Har bir slaydni slayd muharririda yoki PowerPointʼda tahrirlash mumkin.',
@@ -698,7 +1005,11 @@ export const site = {
   siteAiSlidesHeroChip2: ['110 designs', '110 ta dizayn', '110 дизайнов'],
   siteAiSlidesHeroChip3: ['Editable .pptx', 'Tahrirlanadigan .pptx', 'Редактируемый .pptx'],
   siteAiSlidesVignetteChip: ['Slide 4 of 18', '18 tadan 4-slayd', 'Слайд 4 из 18'],
-  siteAiSlidesHowTitle: ['How to make a presentation with AI', 'AI bilan taqdimot qanday tayyorlanadi', 'Как сделать презентацию с ИИ'],
+  siteAiSlidesHowTitle: [
+    'How to make a presentation with AI',
+    'AI bilan taqdimot qanday tayyorlanadi',
+    'Как сделать презентацию с ИИ',
+  ],
   siteAiSlidesStep1Title: ['Give the topic', 'Mavzuni yozing', 'Напишите тему'],
   siteAiSlidesStep1Text: [
     'Say what the talk is about, who will watch it and how many slides you need.',
@@ -717,27 +1028,55 @@ export const site = {
     'Slaydlarni slayd muharririda o‘zgartiring, AI tahrir so‘rang yoki .pptx ni yuklab PowerPointʼda oching.',
     'Меняйте слайды в редакторе, просите правки с ИИ или скачайте .pptx и откройте его в PowerPoint.',
   ],
-  siteAiSlidesDesignsTitle: ['110 designs to choose from', 'Tanlash uchun 110 ta dizayn', '110 дизайнов на выбор'],
+  siteAiSlidesDesignsTitle: [
+    '110 designs to choose from',
+    'Tanlash uchun 110 ta dizayn',
+    '110 дизайнов на выбор',
+  ],
   siteAiSlidesDesignsIntro: [
     'A few of them below. Each design sets the colours, fonts and the way content sits on the slide.',
     'Quyida ulardan bir nechtasi. Har bir dizayn ranglar, shriftlar va slayddagi joylashuvni belgilaydi.',
     'Ниже несколько из них. Дизайн задаёт цвета, шрифты и то, как содержимое расположено на слайде.',
   ],
-  siteAiSlidesDesignsAll: ['See all 110 in the app', 'Barcha 110 tasini ilovada ko‘rish', 'Все 110 — в приложении'],
-  siteAiSlidesEditableTitle: ['A real PowerPoint file, not pictures', 'Rasm emas, haqiqiy PowerPoint fayl', 'Настоящий файл PowerPoint, а не картинки'],
+  siteAiSlidesDesignsAll: [
+    'See all 110 in the app',
+    'Barcha 110 tasini ilovada ko‘rish',
+    'Все 110 — в приложении',
+  ],
+  siteAiSlidesEditableTitle: [
+    'A real PowerPoint file, not pictures',
+    'Rasm emas, haqiqiy PowerPoint fayl',
+    'Настоящий файл PowerPoint, а не картинки',
+  ],
   siteAiSlidesEditableBody: [
     'Text stays text and every slide can be changed. Fix a word in the deck editor on the web, ask for an AI edit, or finish it in PowerPoint.',
     'Matn matnligicha qoladi va har bir slaydni o‘zgartirish mumkin. So‘zni saytdagi slayd muharririda tuzating, AI tahrir so‘rang yoki PowerPointʼda yakunlang.',
     'Текст остаётся текстом, каждый слайд можно изменить. Поправьте слово в редакторе слайдов на сайте, попросите правку с ИИ или доделайте в PowerPoint.',
   ],
   siteAiSlidesPillFile: ['presentation.pptx', 'taqdimot.pptx', 'prezentaciya.pptx'],
-  siteAiSlidesPillEdit: ['Edit text and layout', 'Matn va joylashuvni tahrirlash', 'Правка текста и раскладки'],
+  siteAiSlidesPillEdit: [
+    'Edit text and layout',
+    'Matn va joylashuvni tahrirlash',
+    'Правка текста и раскладки',
+  ],
   siteAiSlidesPillAi: ['“Shorten slide 6”', '«6-slaydni qisqartir»', '«Сократи 6-й слайд»'],
-  siteAiSlidesLimitsTitle: ['How many presentations a week', 'Haftasiga nechta taqdimot', 'Сколько презентаций в неделю'],
-  siteAiSlidesFaqTitle: ['Questions about AI presentations', 'AI taqdimotlar haqida savollar', 'Вопросы о презентациях с ИИ'],
+  siteAiSlidesLimitsTitle: [
+    'How many presentations a week',
+    'Haftasiga nechta taqdimot',
+    'Сколько презентаций в неделю',
+  ],
+  siteAiSlidesFaqTitle: [
+    'Questions about AI presentations',
+    'AI taqdimotlar haqida savollar',
+    'Вопросы о презентациях с ИИ',
+  ],
 
   // ── AI CV (/{locale}/ai/cv) — H1 from meta.json ──
-  siteAiCvHeroTitle: ['AI CV builder', 'Sunʼiy intellekt bilan rezyume (CV) yaratish', 'Конструктор резюме с ИИ'],
+  siteAiCvHeroTitle: [
+    'AI CV builder',
+    'Sunʼiy intellekt bilan rezyume (CV) yaratish',
+    'Конструктор резюме с ИИ',
+  ],
   siteAiCvHeroLead: [
     'Start from a message about yourself, a LinkedIn PDF or screenshots, or your old CV. Pick one of 50 templates and get a CV of one or two pages.',
     'O‘zingiz haqingizdagi xabar, LinkedIn PDF yoki skrinshotlari yoxud eski rezyumedan boshlang. 50 ta shablondan birini tanlang va 1–2 sahifalik rezyume oling.',
@@ -747,7 +1086,11 @@ export const site = {
   siteAiCvHeroChip1: ['50 templates', '50 ta shablon', '50 шаблонов'],
   siteAiCvHeroChip2: ['3 ways to start', 'Boshlashning 3 usuli', '3 способа начать'],
   siteAiCvHeroChip3: ['uz · ru · en', 'uz · ru · en', 'uz · ru · en'],
-  siteAiCvModesTitle: ['Start from what you already have', 'Qo‘lingizda bor narsadan boshlang', 'Начните с того, что уже есть'],
+  siteAiCvModesTitle: [
+    'Start from what you already have',
+    'Qo‘lingizda bor narsadan boshlang',
+    'Начните с того, что уже есть',
+  ],
   siteAiCvModeMessageTitle: ['From a message', 'Xabardan', 'Из сообщения'],
   siteAiCvModeMessageText: [
     'Write a few lines about your work, studies and skills. Plain words are enough.',
@@ -772,8 +1115,16 @@ export const site = {
     'Birinchi rezyumedan tortib rahbarlik lavozimigacha — ko‘p sohalarga mos sokin shablonlar. Quyida bir nechtasi.',
     'Спокойные шаблоны для большинства профессий — от первого резюме до руководящей должности. Ниже несколько из них.',
   ],
-  siteAiCvTemplatesAll: ['See all 50 in the app', 'Barcha 50 tasini ilovada ko‘rish', 'Все 50 — в приложении'],
-  siteAiCvHowTitle: ['How to make a CV with AI', 'AI bilan rezyume qanday tayyorlanadi', 'Как сделать резюме с ИИ'],
+  siteAiCvTemplatesAll: [
+    'See all 50 in the app',
+    'Barcha 50 tasini ilovada ko‘rish',
+    'Все 50 — в приложении',
+  ],
+  siteAiCvHowTitle: [
+    'How to make a CV with AI',
+    'AI bilan rezyume qanday tayyorlanadi',
+    'Как сделать резюме с ИИ',
+  ],
   siteAiCvStep1Title: ['Choose how to start', 'Boshlash usulini tanlang', 'Выберите, с чего начать'],
   siteAiCvStep1Text: [
     'A message, your LinkedIn PDF or screenshots, or an old CV.',
@@ -797,7 +1148,11 @@ export const site = {
     'Ish beruvchi o‘qiydigan tilda topshiring. Rezyume uchta tilning istalganida yoziladi.',
     'Отправляйте резюме на языке работодателя: его можно написать на любом из трёх.',
   ],
-  siteAiCvPrivacyTitle: ['A CV holds personal data', 'Rezyumeda shaxsiy maʼlumotlar bor', 'В резюме есть личные данные'],
+  siteAiCvPrivacyTitle: [
+    'A CV holds personal data',
+    'Rezyumeda shaxsiy maʼlumotlar bor',
+    'В резюме есть личные данные',
+  ],
   siteAiCvPrivacyNote: [
     'Your request, what was read from your files and the CV’s text stay in your account so you can ask for changes later; a copy is kept 30 days for quality review. Uploaded files and results are deleted after 24 hours, except the photo on the CV. Include only what you want an employer to see.',
     'So‘rovingiz, fayllaringizdan o‘qilgan ma’lumotlar va rezyume matni keyinroq o‘zgartirish so‘rashingiz uchun hisobingizda saqlanadi; ularning nusxasi sifatni tekshirish uchun 30 kun saqlanadi. Yuklangan fayllar va natijalar 24 soatdan keyin o‘chiriladi, rezyumedagi rasm bundan mustasno. Faqat ish beruvchi ko‘rishi kerak bo‘lgan maʼlumotni yozing.',
@@ -806,11 +1161,14 @@ export const site = {
   siteAiCvFaqTitle: ['Questions about the AI CV', 'AI rezyume haqida savollar', 'Вопросы о резюме с ИИ'],
 
   // ── Prompt guide (/{locale}/guide) keeps GuideView; only the site wrapper strings ──
-  siteGuideTitle: ['How to write a good AI request', 'Yaxshi natija uchun so‘rovni qanday yozish kerak', 'Как писать запросы для документов и презентаций'],
+  siteGuideTitle: [
+    'How to write a good AI request',
+    'Yaxshi natija uchun so‘rovni qanday yozish kerak',
+    'Как писать запросы для документов и презентаций',
+  ],
   siteGuideCtaTitle: ['Ready to try it?', 'Sinab ko‘rasizmi?', 'Готовы попробовать?'],
   siteGuideCtaDocs: ['Create a document', 'Hujjat yaratish', 'Создать документ'],
   siteGuideCtaSlides: ['Create a presentation', 'Taqdimot yaratish', 'Создать презентацию'],
-
 
   // ── Pricing (/{locale}/pricing) — design/pages/pricing.md; H1 from meta.json with {brand} ──
   sitePricingTitle: ['{brand} plans and prices', '{brand} tariflari va narxlari', 'Тарифы {brand}'],
@@ -819,7 +1177,11 @@ export const site = {
     'Barcha imkoniyatlar har bir tarifda bor, faqat haftalik limitlar farq qiladi. Pullik tariflar narxi 30 kun uchun so‘mda ko‘rsatilgan va o‘z-o‘zidan uzaytirilmaydi.',
     'Все функции есть на каждом тарифе, различаются только недельные лимиты. Цены платных тарифов указаны в сумах за 30 дней, сами они не продлеваются.',
   ],
-  sitePricingVatNote: ['Prices are final. VAT is not charged.', 'Narxlar yakuniy. QQS undirilmaydi.', 'Цены окончательные. НДС не взимается.'],
+  sitePricingVatNote: [
+    'Prices are final. VAT is not charged.',
+    'Narxlar yakuniy. QQS undirilmaydi.',
+    'Цены окончательные. НДС не взимается.',
+  ],
   sitePricingTableTitle: ['Compare the limits', 'Limitlarni solishtiring', 'Сравните лимиты'],
   sitePricingTableCaption: [
     'Weekly limits reset every Monday at 00:00 Tashkent time. Everything else is the same on every plan.',
@@ -866,13 +1228,21 @@ export const site = {
   ],
   sitePricingCardsLabel: ['Cards we accept', 'Qabul qilinadigan kartalar', 'Принимаем карты'],
   // Once automatic payment through inPAY is on (the plans' `checkout.automatic`): three steps instead of four.
-  sitePricingAutoStep2Title: ['Pay on inPAY’s page', 'inPAY sahifasida to‘lang', 'Оплатите на странице inPAY'],
+  sitePricingAutoStep2Title: [
+    'Pay on inPAY’s page',
+    'inPAY sahifasida to‘lang',
+    'Оплатите на странице inPAY',
+  ],
   sitePricingAutoStep2Text: [
     'Press Pay and you go to the page of inPAY, a payment service. Pay there with Click, Payme, Uzcard or Humo.',
     '«To‘lash» tugmasini bosing — inPAY to‘lov xizmati sahifasi ochiladi. U yerda Click, Payme, Uzcard yoki Humo orqali to‘lang.',
     'Нажмите «Оплатить» — откроется страница платёжного сервиса inPAY. Оплатите там через Click, Payme, Uzcard или Humo.',
   ],
-  sitePricingAutoStep3Title: ['The plan switches on by itself', 'Tarif o‘zi yoqiladi', 'Тариф включается сам'],
+  sitePricingAutoStep3Title: [
+    'The plan switches on by itself',
+    'Tarif o‘zi yoqiladi',
+    'Тариф включается сам',
+  ],
   sitePricingAutoStep3Text: [
     'Usually within a minute of the payment. The 30 days start then, and nothing renews by itself.',
     'Odatda to‘lovdan keyin bir daqiqa ichida. 30 kun shu paytdan boshlanadi, hech narsa o‘z-o‘zidan uzaytirilmaydi.',
@@ -885,7 +1255,11 @@ export const site = {
   ],
   sitePayWaysLabel: ['Ways to pay', 'To‘lov usullari', 'Способы оплаты'],
   sitePricingInviteLabel: ['Invite friends', 'Do‘stlarni taklif qiling', 'Пригласите друзей'],
-  sitePricingInviteValue: ['5 friends = 1 month of Plus', '5 do‘st = 1 oylik Plus tarifi', '5 друзей = месяц Plus'],
+  sitePricingInviteValue: [
+    '5 friends = 1 month of Plus',
+    '5 do‘st = 1 oylik Plus tarifi',
+    '5 друзей = месяц Plus',
+  ],
   sitePricingInviteNote: [
     'Every five friends who sign up with your link and finish a first task earn you Plus, one month more each time.',
     'Havolangiz orqali ro‘yxatdan o‘tib, birinchi vazifani bajargan har 5 do‘st uchun Plus tarifi beriladi — har safar bir oy ko‘proq.',
@@ -899,13 +1273,21 @@ export const site = {
     'После 30 дней ничего не списывается. Чтобы продолжить, оплатите следующий период.',
   ],
   sitePricingRefundLabel: ['Refunds', 'Pulni qaytarish', 'Возврат'],
-  sitePricingRefundValue: ['Within 3 days of activation', 'Faollashtirilgandan keyin 3 kun ichida', 'В течение 3 дней после включения'],
+  sitePricingRefundValue: [
+    'Within 3 days of activation',
+    'Faollashtirilgandan keyin 3 kun ichida',
+    'В течение 3 дней после включения',
+  ],
   sitePricingRefundNote: [
     'Full refund within 3 days if you haven’t run a task on the paid plan. See the refund policy and the public offer.',
     '3 kun ichida so‘rasangiz va pullik tarifda vazifa bajarmagan bo‘lsangiz, pul to‘liq qaytariladi. Batafsil — qaytarish siyosati va ommaviy ofertada.',
     'Полный возврат, если вы обратились в течение 3 дней и не запускали задач на платном тарифе. Подробнее — в политике возврата и публичной оферте.',
   ],
-  sitePricingFaqTitle: ['Questions about plans and payment', 'Tariflar va to‘lov haqida savollar', 'Вопросы о тарифах и оплате'],
+  sitePricingFaqTitle: [
+    'Questions about plans and payment',
+    'Tariflar va to‘lov haqida savollar',
+    'Вопросы о тарифах и оплате',
+  ],
 
   // ── Telegram (/{locale}/telegram) — design/pages/telegram.md; H1 from meta.json ──
   siteTgHeroTitle: ['PDF bot in Telegram', 'PDF bot Telegramʼda', 'PDF-бот в Telegram'],
@@ -915,9 +1297,17 @@ export const site = {
     'Отправьте боту файл или запрос и получите результат в том же чате. Инструменты для файлов, документы с ИИ и редактор PDF — с тем же аккаунтом, что на сайте.',
   ],
   siteTgHeroCta: ['Open {{bot.username}}', '{{bot.username}} ni ochish', 'Открыть {{bot.username}}'],
-  siteTgQrCaption: ['Scan with your phone camera', 'Telefon kamerasi bilan skanerlang', 'Наведите камеру телефона'],
+  siteTgQrCaption: [
+    'Scan with your phone camera',
+    'Telefon kamerasi bilan skanerlang',
+    'Наведите камеру телефона',
+  ],
   // Chat vignette: decorative, written as the bot speaks.
-  siteTgChatReady: ['Your document is ready: report.pdf', 'Hujjatingiz tayyor: hisobot.pdf', 'Ваш документ готов: otchet.pdf'],
+  siteTgChatReady: [
+    'Your document is ready: report.pdf',
+    'Hujjatingiz tayyor: hisobot.pdf',
+    'Ваш документ готов: otchet.pdf',
+  ],
   siteTgChatFile: ['report.pdf', 'hisobot.pdf', 'otchet.pdf'],
   siteTgChatButtonEdit: ['Edit', 'Tahrirlash', 'Изменить'],
   siteTgChatButtonNew: ['New task', 'Yangi vazifa', 'Новая задача'],
@@ -928,17 +1318,33 @@ export const site = {
   siteTgColAiSlides: ['PowerPoint presentations', 'PowerPoint taqdimotlar', 'Презентации PowerPoint'],
   siteTgColAiCv: ['CVs from 50 templates', '50 ta shablonda rezyume', 'Резюме по 50 шаблонам'],
   siteTgColEditorTitle: ['PDF editor', 'PDF muharriri', 'Редактор PDF'],
-  siteTgColEditorItem1: ['Opens as a Mini App', 'Mini App sifatida ochiladi', 'Открывается как мини-приложение'],
+  siteTgColEditorItem1: [
+    'Opens as a Mini App',
+    'Mini App sifatida ochiladi',
+    'Открывается как мини-приложение',
+  ],
   siteTgColEditorItem2: ['Text, forms, signature image', 'Matn, forma, imzo rasmi', 'Текст, формы, подпись'],
-  siteTgColEditorItem3: ['No need to leave Telegram', 'Telegramdan chiqish shart emas', 'Не выходя из Telegram'],
+  siteTgColEditorItem3: [
+    'No need to leave Telegram',
+    'Telegramdan chiqish shart emas',
+    'Не выходя из Telegram',
+  ],
   siteTgLimitsTitle: ['Bot or website?', 'Botmi yoki saytmi?', 'Бот или сайт?'],
   siteTgLimitsIntro: [
     'Telegram lets bots take files up to 20 MB. For bigger files and a few tools, use the website with the same account.',
     'Telegram botlarga 20 MB gacha fayl qabul qilishga ruxsat beradi. Kattaroq fayllar va ayrim vositalar uchun o‘sha hisob bilan saytdan foydalaning.',
     'Telegram позволяет ботам принимать файлы до 20 МБ. Для файлов побольше и нескольких инструментов используйте сайт с тем же аккаунтом.',
   ],
-  siteTgWebOnlyTitle: ['Tools on the website only', 'Faqat saytdagi vositalar', 'Инструменты только на сайте'],
-  siteTgAccountTitle: ['One account in both places', 'Ikkala joyda bitta hisob', 'Один аккаунт в обоих местах'],
+  siteTgWebOnlyTitle: [
+    'Tools on the website only',
+    'Faqat saytdagi vositalar',
+    'Инструменты только на сайте',
+  ],
+  siteTgAccountTitle: [
+    'One account in both places',
+    'Ikkala joyda bitta hisob',
+    'Один аккаунт в обоих местах',
+  ],
   siteTgAccountBody: [
     'Your plan, weekly limits and results are shared. To open the website, sign in with Telegram and you land in the same account.',
     'Tarif, haftalik limitlar va natijalar umumiy. Saytga Telegram orqali kirsangiz, o‘sha hisobga tushasiz.',
@@ -954,13 +1360,21 @@ export const site = {
   siteTgFaqTitle: ['Questions about the bot', 'Bot haqida savollar', 'Вопросы о боте'],
 
   // ── Invite (/{locale}/invite) — rules from apps/commerce/referrals.py; H1 from meta.json with {brand} ──
-  siteInviteTitle: ['Invite friends to {brand}', 'Do‘stlarni taklif qilish dasturi', 'Приглашайте друзей в {brand}'],
+  siteInviteTitle: [
+    'Invite friends to {brand}',
+    'Do‘stlarni taklif qilish dasturi',
+    'Приглашайте друзей в {brand}',
+  ],
   siteInviteLead: [
     'Share your link. Every five friends who join and finish a first task earn you Plus: one month, then two, then three, and so on.',
     'Havolangizni ulashing. Qo‘shilib, birinchi vazifani bajargan har besh do‘st uchun Plus tarifini olasiz: avval 1 oylik, keyin 2 oylik, keyin 3 oylik va hokazo.',
     'Делитесь ссылкой. За каждых пятерых друзей, которые присоединились и выполнили первую задачу, вы получаете Plus: сначала на месяц, потом на два, на три и так далее.',
   ],
-  siteInviteLadderLabel: ['Rewards for invited friends', 'Taklif qilingan do‘stlar uchun mukofotlar', 'Награды за приглашённых друзей'],
+  siteInviteLadderLabel: [
+    'Rewards for invited friends',
+    'Taklif qilingan do‘stlar uchun mukofotlar',
+    'Награды за приглашённых друзей',
+  ],
   siteInviteStep1Count: ['5 friends', '5 do‘st', '5 друзей'],
   siteInviteStep1Reward: ['1 month of Plus', '1 oylik Plus tarifi', 'Plus на 1 месяц'],
   siteInviteStep2Count: ['10 friends', '10 do‘st', '10 друзей'],
@@ -981,7 +1395,11 @@ export const site = {
     'Награда — это период тарифа Plus, а не деньги. Месяц здесь — 30 дней, как при оплате.',
   ],
   siteInviteStepsTitle: ['How to invite', 'Qanday taklif qilinadi', 'Как пригласить'],
-  siteInviteHowStep1Title: ['Open Invite friends', '«Do‘stlarni taklif qilish»ni oching', 'Откройте «Пригласить друзей»'],
+  siteInviteHowStep1Title: [
+    'Open Invite friends',
+    '«Do‘stlarni taklif qilish»ni oching',
+    'Откройте «Пригласить друзей»',
+  ],
   siteInviteHowStep1Text: [
     'The section is in the app menu, and the bot has it in its main menu.',
     'Bu bo‘lim ilova menyusida, botda esa asosiy menyuda bor.',
@@ -1035,13 +1453,25 @@ export const site = {
     'Har bir xabarni odam o‘qiydi va javob beradi.',
     'Каждое сообщение читает и отвечает человек.',
   ],
-  siteHelpHours: ['Working hours: {{support.hours}}', 'Ish vaqti: {{support.hours}}', 'Часы работы: {{support.hours}}'],
+  siteHelpHours: [
+    'Working hours: {{support.hours}}',
+    'Ish vaqti: {{support.hours}}',
+    'Часы работы: {{support.hours}}',
+  ],
 
   // Contact tiles (help, about): label + hint.
   siteContactTelegram: ['Telegram support', 'Telegramʼda yordam', 'Поддержка в Telegram'],
-  siteContactTelegramHint: ['The quickest way to reach us', 'Biz bilan bog‘lanishning eng tez yo‘li', 'Самый быстрый способ связи'],
+  siteContactTelegramHint: [
+    'The quickest way to reach us',
+    'Biz bilan bog‘lanishning eng tez yo‘li',
+    'Самый быстрый способ связи',
+  ],
   siteContactEmail: ['Email', 'Elektron pochta', 'Эл. почта'],
-  siteContactEmailHint: ['For documents and formal requests', 'Hujjatlar va rasmiy murojaatlar uchun', 'Для документов и официальных запросов'],
+  siteContactEmailHint: [
+    'For documents and formal requests',
+    'Hujjatlar va rasmiy murojaatlar uchun',
+    'Для документов и официальных запросов',
+  ],
   siteContactPhone: ['Phone', 'Telefon', 'Телефон'],
   siteContactPhoneHint: ['During working hours', 'Ish vaqtida', 'В рабочее время'],
   siteContactInApp: ['Support in the app', 'Ilovada yordam', 'Поддержка в приложении'],
@@ -1066,14 +1496,30 @@ export const site = {
   siteAboutCopied: ['Copied', 'Nusxalandi', 'Скопировано'],
   siteAboutContactsTitle: ['Contacts', 'Aloqa', 'Контакты'],
   siteAboutLegalTitle: ['Documents', 'Hujjatlar', 'Документы'],
-  siteAboutLegalOfferLine: ['The contract for using {brand}, on any plan', '{brand} dan foydalanish shartnomasi', 'Договор об использовании {brand}'],
-  siteAboutLegalPrivacyLine: ['What data we process and for how long', 'Qanday maʼlumotlar va qancha saqlanadi', 'Какие данные мы обрабатываем и сколько храним'],
-  siteAboutLegalRefundsLine: ['When and how we return a payment', 'To‘lov qachon va qanday qaytariladi', 'Когда и как мы возвращаем оплату'],
+  siteAboutLegalOfferLine: [
+    'The contract for using {brand}, on any plan',
+    '{brand} dan foydalanish shartnomasi',
+    'Договор об использовании {brand}',
+  ],
+  siteAboutLegalPrivacyLine: [
+    'What data we process and for how long',
+    'Qanday maʼlumotlar va qancha saqlanadi',
+    'Какие данные мы обрабатываем и сколько храним',
+  ],
+  siteAboutLegalRefundsLine: [
+    'When and how we return a payment',
+    'To‘lov qachon va qanday qaytariladi',
+    'Когда и как мы возвращаем оплату',
+  ],
 
   // ── Legal pages chrome (design/pages/legal.md); document text lives in content/legal ──
   siteLegalOfferTitle: ['Public offer', 'Ommaviy oferta', 'Публичная оферта'],
   siteLegalPrivacyTitle: ['Privacy policy', 'Maxfiylik siyosati', 'Политика конфиденциальности'],
-  siteLegalRefundsTitle: ['Refunds and cancellation', 'To‘lovni qaytarish va bekor qilish', 'Возврат средств и отмена'],
+  siteLegalRefundsTitle: [
+    'Refunds and cancellation',
+    'To‘lovni qaytarish va bekor qilish',
+    'Возврат средств и отмена',
+  ],
   // Until the signed-off legal texts are published (step W5): the rules already in force, plainly.
   siteLegalPendingLead: [
     'The full text is being finalised with our lawyer and will be published here. Until then, these are the rules we already follow.',
@@ -1081,8 +1527,16 @@ export const site = {
     'Полный текст согласуется с юристом и будет опубликован здесь. А пока — правила, которым мы уже следуем.',
   ],
   siteLegalFilesTitle: ['Your files and data', 'Fayllaringiz va maʼlumotlaringiz', 'Ваши файлы и данные'],
-  siteLegalPlansTitle: ['Plans, payment and refunds', 'Tariflar, to‘lov va pulni qaytarish', 'Тарифы, оплата и возврат'],
-  siteLegalQuestionsTitle: ['Questions about this page?', 'Bu sahifa bo‘yicha savollar bormi?', 'Вопросы по этой странице?'],
+  siteLegalPlansTitle: [
+    'Plans, payment and refunds',
+    'Tariflar, to‘lov va pulni qaytarish',
+    'Тарифы, оплата и возврат',
+  ],
+  siteLegalQuestionsTitle: [
+    'Questions about this page?',
+    'Bu sahifa bo‘yicha savollar bormi?',
+    'Вопросы по этой странице?',
+  ],
   siteLegalQuestionsLine: [
     'Write to our support on Telegram, or see the company details and contacts.',
     'Telegram orqali yordam xizmatimizga yozing yoki kompaniya rekvizitlari va aloqa maʼlumotlarini ko‘ring.',
@@ -1101,15 +1555,30 @@ export const site = {
   siteLegalReadUzbek: ['Read the Uzbek text', 'O‘zbekcha matn', 'Читать текст на узбекском'],
   siteLegalContents: ['Contents', 'Mundarija', 'Содержание'],
   siteLegalPrint: ['Print', 'Chop etish', 'Распечатать'],
-  siteLegalDraftBanner: ['Draft — not yet in force', 'Qoralama — hali kuchga kirmagan', 'Черновик — ещё не вступил в силу'],
+  siteLegalDraftBanner: [
+    'Draft — not yet in force',
+    'Qoralama — hali kuchga kirmagan',
+    'Черновик — ещё не вступил в силу',
+  ],
   siteLegalBackToTop: ['Back to top', 'Yuqoriga', 'Наверх'],
-
 
   // ── merge-pdf ──
   siteToolMergePdfName: ['Merge PDF', 'PDF birlashtirish', 'Объединить PDF'],
-  siteToolMergePdfLine: ['Combine several PDFs into one', 'Bir nechta PDF ni bittaga jamlang', 'Несколько PDF в один файл'],
-  siteToolMergePdfDesc: ['Join 2 to 50 PDFs in the order you choose', '2 tadan 50 tagacha PDF ni kerakli tartibda jamlang', 'Соедините от 2 до 50 PDF в нужном порядке'],
-  siteToolMergePdfH1: ['Merge PDF files into one', 'PDF fayllarni birlashtirish', 'Объединить PDF-файлы в один'],
+  siteToolMergePdfLine: [
+    'Combine several PDFs into one',
+    'Bir nechta PDF ni bittaga jamlang',
+    'Несколько PDF в один файл',
+  ],
+  siteToolMergePdfDesc: [
+    'Join 2 to 50 PDFs in the order you choose',
+    '2 tadan 50 tagacha PDF ni kerakli tartibda jamlang',
+    'Соедините от 2 до 50 PDF в нужном порядке',
+  ],
+  siteToolMergePdfH1: [
+    'Merge PDF files into one',
+    'PDF fayllarni birlashtirish',
+    'Объединить PDF-файлы в один',
+  ],
   siteToolMergePdfLead: [
     'Put contracts, scans and chapters into a single PDF. Add the files, set their order and download one document that is easy to send.',
     'Shartnoma, skaner va boblarni bitta PDF ga jamlang. Fayllarni qo‘shing, tartibini belgilang va yuborishga qulay bitta hujjatni yuklab oling.',
@@ -1125,7 +1594,11 @@ export const site = {
     'Kamida ikkita PDF. Vazifa boshlanishidan oldin Telegram, email yoki Google orqali kirasiz.',
     'Два PDF или больше. Перед запуском войдите через Telegram, почту или Google.',
   ],
-  siteToolMergePdfHowToTitle: ['How to merge PDF files', 'PDF fayllarni qanday birlashtirish mumkin', 'Как объединить PDF-файлы'],
+  siteToolMergePdfHowToTitle: [
+    'How to merge PDF files',
+    'PDF fayllarni qanday birlashtirish mumkin',
+    'Как объединить PDF-файлы',
+  ],
   siteToolMergePdfStep1Title: ['Add your PDFs', 'PDF larni qo‘shing', 'Добавьте PDF'],
   siteToolMergePdfStep1Text: [
     'Upload two or more files from your phone or computer.',
@@ -1144,7 +1617,11 @@ export const site = {
     'Barcha sahifalar bitta faylda: yuborish yoki chop etishga tayyor.',
     'Все страницы в одном файле: можно отправить или распечатать.',
   ],
-  siteToolMergePdfDetailsTitle: ['One file, pages in your order', 'Bitta fayl, sahifalar siz xohlagan tartibda', 'Один файл, страницы в вашем порядке'],
+  siteToolMergePdfDetailsTitle: [
+    'One file, pages in your order',
+    'Bitta fayl, sahifalar siz xohlagan tartibda',
+    'Один файл, страницы в вашем порядке',
+  ],
   siteToolMergePdfDetailsBody: [
     'Every page of every file is copied into the new PDF as it is, file by file in the order you set. Your originals stay unchanged. A password-protected PDF has to be unlocked first.',
     'Har bir faylning barcha sahifalari yangi PDF ga o‘zgarishsiz, siz belgilagan tartibda ko‘chiriladi. Asl fayllar o‘zgarmaydi. Parol qo‘yilgan PDF ni avval qulfdan chiqarish kerak.',
@@ -1168,8 +1645,16 @@ export const site = {
 
   // ── compress-pdf ──
   siteToolCompressPdfName: ['Compress PDF', 'PDF siqish', 'Сжать PDF'],
-  siteToolCompressPdfLine: ['Make a PDF smaller to send', 'Yuborish uchun PDF ni kichraytiring', 'Уменьшите PDF перед отправкой'],
-  siteToolCompressPdfDesc: ['Reduce file size without lowering quality', 'Sifatni pasaytirmasdan fayl hajmini kamaytiring', 'Уменьшите размер файла без потери качества'],
+  siteToolCompressPdfLine: [
+    'Make a PDF smaller to send',
+    'Yuborish uchun PDF ni kichraytiring',
+    'Уменьшите PDF перед отправкой',
+  ],
+  siteToolCompressPdfDesc: [
+    'Reduce file size without lowering quality',
+    'Sifatni pasaytirmasdan fayl hajmini kamaytiring',
+    'Уменьшите размер файла без потери качества',
+  ],
   siteToolCompressPdfH1: ['Compress a PDF file', 'PDF hajmini kichraytirish', 'Сжать PDF-файл'],
   siteToolCompressPdfLead: [
     'Shrink a PDF for email, a portal upload or the Telegram bot’s 20 MB limit. Compression is lossless: text and images keep their quality.',
@@ -1186,7 +1671,11 @@ export const site = {
     'Bir vazifada bitta PDF. Ishga tushirish uchun Telegram, email yoki Google orqali kiring.',
     'Один PDF за задачу. Для запуска войдите через Telegram, почту или Google.',
   ],
-  siteToolCompressPdfHowToTitle: ['How to reduce PDF size', 'PDF hajmini qanday kichraytirish mumkin', 'Как уменьшить размер PDF'],
+  siteToolCompressPdfHowToTitle: [
+    'How to reduce PDF size',
+    'PDF hajmini qanday kichraytirish mumkin',
+    'Как уменьшить размер PDF',
+  ],
   siteToolCompressPdfStep1Title: ['Upload the PDF', 'PDF ni yuklang', 'Загрузите PDF'],
   siteToolCompressPdfStep1Text: [
     'Choose the file you need to make smaller.',
@@ -1205,7 +1694,11 @@ export const site = {
     'Yangi hajmni ko‘ring va yengilroq faylni yuklab oling.',
     'Посмотрите новый размер и скачайте облегчённый файл.',
   ],
-  siteToolCompressPdfDetailsTitle: ['How much smaller will it get?', 'Fayl qanchalik kichrayadi?', 'Насколько уменьшится файл?'],
+  siteToolCompressPdfDetailsTitle: [
+    'How much smaller will it get?',
+    'Fayl qanchalik kichrayadi?',
+    'Насколько уменьшится файл?',
+  ],
   siteToolCompressPdfDetailsBody: [
     'It depends on what is inside. Files with repeated elements or loosely packed pages shrink the most; an already compact PDF may barely change. If the saving is under 1%, you get “no change needed” and the task doesn’t count.',
     'Bu fayl ichidagi narsaga bog‘liq. Takrorlanuvchi elementlari ko‘p yoki zich joylanmagan fayllar ko‘proq kichrayadi, ixcham PDF esa deyarli o‘zgarmasligi mumkin. Tejash 1% dan kam bo‘lsa, «O‘zgartirish kerak emas» deb chiqadi va vazifa hisoblanmaydi.',
@@ -1229,8 +1722,16 @@ export const site = {
 
   // ── split-pdf ──
   siteToolSplitPdfName: ['Split PDF', 'PDF ni qismlarga bo‘lish', 'Разделить PDF'],
-  siteToolSplitPdfLine: ['Cut one PDF into several files', 'Bitta PDF ni bir nechta faylga bo‘ling', 'Один PDF — несколько файлов'],
-  siteToolSplitPdfDesc: ['Split by page ranges or into single pages', 'Sahifa oraliqlari yoki har sahifa bo‘yicha bo‘ling', 'По диапазонам страниц или по одной странице'],
+  siteToolSplitPdfLine: [
+    'Cut one PDF into several files',
+    'Bitta PDF ni bir nechta faylga bo‘ling',
+    'Один PDF — несколько файлов',
+  ],
+  siteToolSplitPdfDesc: [
+    'Split by page ranges or into single pages',
+    'Sahifa oraliqlari yoki har sahifa bo‘yicha bo‘ling',
+    'По диапазонам страниц или по одной странице',
+  ],
   siteToolSplitPdfH1: ['Split a PDF file', 'PDF faylni ajratish', 'Разделить PDF-файл'],
   siteToolSplitPdfLead: [
     'Break a long PDF into parts: chapters, separate invoices or one file per page. Each range you set becomes its own PDF.',
@@ -1247,7 +1748,11 @@ export const site = {
     '200 MB gacha bitta PDF. Vazifani boshlash uchun Telegram, email yoki Google orqali kiring.',
     'Один PDF до 200 МБ. Для запуска войдите через Telegram, почту или Google.',
   ],
-  siteToolSplitPdfHowToTitle: ['How to split a PDF into parts', 'PDF ni qanday qismlarga bo‘lish mumkin', 'Как разделить PDF на части'],
+  siteToolSplitPdfHowToTitle: [
+    'How to split a PDF into parts',
+    'PDF ni qanday qismlarga bo‘lish mumkin',
+    'Как разделить PDF на части',
+  ],
   siteToolSplitPdfStep1Title: ['Upload the PDF', 'PDF ni yuklang', 'Загрузите PDF'],
   siteToolSplitPdfStep1Text: [
     'Choose the document you want to divide.',
@@ -1266,7 +1771,11 @@ export const site = {
     'Har bir oraliq tartib raqami bilan alohida PDF bo‘lib keladi.',
     'Каждый диапазон приходит отдельным PDF с порядковым номером.',
   ],
-  siteToolSplitPdfDetailsTitle: ['Split or extract: which one?', 'Bo‘lish yoki ajratib olish?', 'Разделить или извлечь?'],
+  siteToolSplitPdfDetailsTitle: [
+    'Split or extract: which one?',
+    'Bo‘lish yoki ajratib olish?',
+    'Разделить или извлечь?',
+  ],
   siteToolSplitPdfDetailsBody: [
     'Split gives you several files at once, one per range. If you only need a few pages in one new file, Extract pages is quicker. Ranges may overlap, so one page can appear in two parts.',
     'Bo‘lish bir yo‘la bir nechta fayl beradi: har oraliq uchun bittadan. Bitta yangi faylda bir necha sahifa kerak bo‘lsa, «Sahifalarni ajratib olish» tezroq. Oraliqlar ustma-ust tushishi mumkin, shunda bitta sahifa ikki qismda bo‘ladi.',
@@ -1290,15 +1799,31 @@ export const site = {
 
   // ── extract-pdf-pages ──
   siteToolExtractPdfPagesName: ['Extract pages', 'Sahifalarni ajratib olish', 'Извлечь страницы'],
-  siteToolExtractPdfPagesLine: ['Keep only the pages you need', 'Faqat kerakli sahifalarni oling', 'Только нужные страницы'],
-  siteToolExtractPdfPagesDesc: ['Copy chosen pages into a new PDF', 'Tanlangan sahifalarni yangi PDF ga ko‘chiring', 'Выбранные страницы — в новый PDF'],
-  siteToolExtractPdfPagesH1: ['Extract pages from a PDF', 'PDF dan kerakli sahifalarni ajratib olish', 'Извлечь нужные страницы из PDF'],
+  siteToolExtractPdfPagesLine: [
+    'Keep only the pages you need',
+    'Faqat kerakli sahifalarni oling',
+    'Только нужные страницы',
+  ],
+  siteToolExtractPdfPagesDesc: [
+    'Copy chosen pages into a new PDF',
+    'Tanlangan sahifalarni yangi PDF ga ko‘chiring',
+    'Выбранные страницы — в новый PDF',
+  ],
+  siteToolExtractPdfPagesH1: [
+    'Extract pages from a PDF',
+    'PDF dan kerakli sahifalarni ajratib olish',
+    'Извлечь нужные страницы из PDF',
+  ],
   siteToolExtractPdfPagesLead: [
     'Take a few pages out of a long document: the signed page of a contract, one chapter, a single certificate. You get a new PDF with just those pages.',
     'Uzun hujjatdan bir necha sahifani ajratib oling: shartnomaning imzoli sahifasi, bitta bob yoki bitta sertifikat. Faqat shu sahifalardan iborat yangi PDF olasiz.',
     'Возьмите из длинного документа несколько страниц: подписанный лист договора, одну главу, отдельную справку. Вы получите новый PDF только с ними.',
   ],
-  siteToolExtractPdfPagesChip1: ['Any pages, e.g. 1,3,5-7', 'Istalgan sahifa: 1,3,5-7', 'Любые страницы: 1,3,5-7'],
+  siteToolExtractPdfPagesChip1: [
+    'Any pages, e.g. 1,3,5-7',
+    'Istalgan sahifa: 1,3,5-7',
+    'Любые страницы: 1,3,5-7',
+  ],
   siteToolExtractPdfPagesChip2: ['Original stays unchanged', 'Asl fayl o‘zgarmaydi', 'Оригинал не меняется'],
   siteToolExtractPdfPagesChip3: ['Up to 1,000 pages', '1 000 sahifagacha', 'До 1000 страниц'],
   siteToolExtractPdfPagesDropTitle: ['Add the source PDF', 'Manba PDF ni qo‘shing', 'Добавьте исходный PDF'],
@@ -1308,7 +1833,11 @@ export const site = {
     '200 MB gacha bitta PDF. Vazifani boshlash uchun Telegram, email yoki Google orqali kiring.',
     'Один PDF до 200 МБ. Для запуска войдите через Telegram, почту или Google.',
   ],
-  siteToolExtractPdfPagesHowToTitle: ['How to extract pages from a PDF', 'PDF dan sahifalarni qanday ajratib olish mumkin', 'Как извлечь страницы из PDF'],
+  siteToolExtractPdfPagesHowToTitle: [
+    'How to extract pages from a PDF',
+    'PDF dan sahifalarni qanday ajratib olish mumkin',
+    'Как извлечь страницы из PDF',
+  ],
   siteToolExtractPdfPagesStep1Title: ['Upload the PDF', 'PDF ni yuklang', 'Загрузите PDF'],
   siteToolExtractPdfPagesStep1Text: [
     'Choose the document that holds the pages you need.',
@@ -1321,13 +1850,21 @@ export const site = {
     'Ularni vergul va chiziqcha bilan yozing, masalan: 2,5,8-10.',
     'Перечислите их через запятую и дефис, например 2,5,8-10.',
   ],
-  siteToolExtractPdfPagesStep3Title: ['Download the new PDF', 'Yangi PDF ni yuklab oling', 'Скачайте новый PDF'],
+  siteToolExtractPdfPagesStep3Title: [
+    'Download the new PDF',
+    'Yangi PDF ni yuklab oling',
+    'Скачайте новый PDF',
+  ],
   siteToolExtractPdfPagesStep3Text: [
     'Only the chosen pages, in one file. The source stays complete.',
     'Faqat tanlangan sahifalar, bitta faylda. Manba fayl to‘liq qoladi.',
     'Только выбранные страницы в одном файле. Исходник остаётся целым.',
   ],
-  siteToolExtractPdfPagesDetailsTitle: ['A new file, the original untouched', 'Yangi fayl, asl nusxa butun', 'Новый файл, оригинал цел'],
+  siteToolExtractPdfPagesDetailsTitle: [
+    'A new file, the original untouched',
+    'Yangi fayl, asl nusxa butun',
+    'Новый файл, оригинал цел',
+  ],
   siteToolExtractPdfPagesDetailsBody: [
     'Extracting copies the pages you list into a fresh PDF and leaves your upload as it was. Pages can be far apart, like 2, 9 and 15. Need several files at once? Use Split PDF.',
     'Ajratib olishda siz yozgan sahifalar yangi PDF ga ko‘chiriladi, yuklagan faylingiz esa o‘zgarmaydi. Sahifalar bir-biridan uzoq bo‘lishi mumkin, masalan 2, 9 va 15. Bir yo‘la bir nechta fayl kerakmi? «PDF ni qismlarga bo‘lish»dan foydalaning.',
@@ -1351,15 +1888,31 @@ export const site = {
 
   // ── delete-pdf-pages ──
   siteToolDeletePdfPagesName: ['Delete pages', 'Sahifalarni o‘chirish', 'Удалить страницы'],
-  siteToolDeletePdfPagesLine: ['Remove blank or extra pages', 'Bo‘sh va ortiqcha sahifalarni olib tashlang', 'Уберите пустые и лишние страницы'],
-  siteToolDeletePdfPagesDesc: ['Drop the pages you don’t need, keep the rest', 'Keraksiz sahifalarni olib tashlang, qolgani saqlanadi', 'Удалите лишнее, остальное сохранится'],
-  siteToolDeletePdfPagesH1: ['Remove pages from a PDF', 'PDF dan sahifalarni olib tashlash', 'Удалить лишние страницы из PDF'],
+  siteToolDeletePdfPagesLine: [
+    'Remove blank or extra pages',
+    'Bo‘sh va ortiqcha sahifalarni olib tashlang',
+    'Уберите пустые и лишние страницы',
+  ],
+  siteToolDeletePdfPagesDesc: [
+    'Drop the pages you don’t need, keep the rest',
+    'Keraksiz sahifalarni olib tashlang, qolgani saqlanadi',
+    'Удалите лишнее, остальное сохранится',
+  ],
+  siteToolDeletePdfPagesH1: [
+    'Remove pages from a PDF',
+    'PDF dan sahifalarni olib tashlash',
+    'Удалить лишние страницы из PDF',
+  ],
   siteToolDeletePdfPagesLead: [
     'Remove blank pages, duplicates or an old cover from a PDF. Choose the pages to take out and download the document without them.',
     'PDF dagi bo‘sh sahifalar, takrorlar yoki eski muqovani olib tashlang. Keraksiz sahifalarni belgilang va hujjatni ularsiz yuklab oling.',
     'Уберите из PDF пустые страницы, дубли или старую обложку. Отметьте лишние страницы и скачайте документ без них.',
   ],
-  siteToolDeletePdfPagesChip1: ['Pages like 2,7,10-12', '2,7,10-12 kabi sahifalar', 'Страницы вида 2,7,10-12'],
+  siteToolDeletePdfPagesChip1: [
+    'Pages like 2,7,10-12',
+    '2,7,10-12 kabi sahifalar',
+    'Страницы вида 2,7,10-12',
+  ],
   siteToolDeletePdfPagesChip2: ['Original stays unchanged', 'Asl fayl o‘zgarmaydi', 'Оригинал не меняется'],
   siteToolDeletePdfPagesChip3: ['Up to 200 MB per file', 'Har bir fayl 200 MB gacha', 'До 200 МБ на файл'],
   siteToolDeletePdfPagesDropTitle: ['Add the PDF to clean up', 'Tozalanadigan PDF', 'PDF для очистки'],
@@ -1369,14 +1922,22 @@ export const site = {
     '1 000 sahifagacha bitta PDF. Vazifani boshlash uchun Telegram, email yoki Google orqali kiring.',
     'Один PDF до 1000 страниц. Для запуска войдите через Telegram, почту или Google.',
   ],
-  siteToolDeletePdfPagesHowToTitle: ['How to remove pages from a PDF', 'PDF dan sahifalarni qanday olib tashlash mumkin', 'Как удалить страницы из PDF'],
+  siteToolDeletePdfPagesHowToTitle: [
+    'How to remove pages from a PDF',
+    'PDF dan sahifalarni qanday olib tashlash mumkin',
+    'Как удалить страницы из PDF',
+  ],
   siteToolDeletePdfPagesStep1Title: ['Upload the PDF', 'PDF ni yuklang', 'Загрузите PDF'],
   siteToolDeletePdfPagesStep1Text: [
     'Choose the document with pages you want gone.',
     'Ortiqcha sahifalari bor hujjatni tanlang.',
     'Выберите документ с лишними страницами.',
   ],
-  siteToolDeletePdfPagesStep2Title: ['Mark pages to remove', 'O‘chiriladiganlarni belgilang', 'Отметьте лишние страницы'],
+  siteToolDeletePdfPagesStep2Title: [
+    'Mark pages to remove',
+    'O‘chiriladiganlarni belgilang',
+    'Отметьте лишние страницы',
+  ],
   siteToolDeletePdfPagesStep2Text: [
     'Enter their numbers, for example 1 for the cover or 8-9 for blank pages.',
     'Raqamlarini yozing, masalan muqova uchun 1 yoki bo‘sh sahifalar uchun 8-9.',
@@ -1388,7 +1949,11 @@ export const site = {
     'Qolgan sahifalar yangi PDF da o‘z tartibini saqlaydi.',
     'Оставшиеся страницы сохранят порядок в новом PDF.',
   ],
-  siteToolDeletePdfPagesDetailsTitle: ['Nothing is lost for good', 'Hech narsa butunlay yo‘qolmaydi', 'Ничего не теряется навсегда'],
+  siteToolDeletePdfPagesDetailsTitle: [
+    'Nothing is lost for good',
+    'Hech narsa butunlay yo‘qolmaydi',
+    'Ничего не теряется навсегда',
+  ],
   siteToolDeletePdfPagesDetailsBody: [
     'Deleting works on a copy. Your uploaded file stays complete, so if you remove the wrong page, run the task again with a different list. Remaining pages keep their order.',
     'O‘chirish nusxa ustida bajariladi. Yuklagan faylingiz to‘liq qoladi: noto‘g‘ri sahifani olib tashlasangiz, vazifani boshqa ro‘yxat bilan qayta boshlang. Qolgan sahifalar tartibi saqlanadi.',
@@ -1411,10 +1976,26 @@ export const site = {
   ],
 
   // ── reorder-pdf-pages ──
-  siteToolReorderPdfPagesName: ['Reorder pages', 'Sahifalar tartibini o‘zgartirish', 'Поменять страницы местами'],
-  siteToolReorderPdfPagesLine: ['Put pages in the right order', 'Sahifalarni to‘g‘ri tartibga keltiring', 'Расставьте страницы по порядку'],
-  siteToolReorderPdfPagesDesc: ['Set a new page order, nothing else changes', 'Yangi tartib bering, boshqa hech narsa o‘zgarmaydi', 'Новый порядок страниц, остальное как было'],
-  siteToolReorderPdfPagesH1: ['Rearrange PDF pages', 'PDF sahifalarini qayta tartiblash', 'Изменить порядок страниц PDF'],
+  siteToolReorderPdfPagesName: [
+    'Reorder pages',
+    'Sahifalar tartibini o‘zgartirish',
+    'Поменять страницы местами',
+  ],
+  siteToolReorderPdfPagesLine: [
+    'Put pages in the right order',
+    'Sahifalarni to‘g‘ri tartibga keltiring',
+    'Расставьте страницы по порядку',
+  ],
+  siteToolReorderPdfPagesDesc: [
+    'Set a new page order, nothing else changes',
+    'Yangi tartib bering, boshqa hech narsa o‘zgarmaydi',
+    'Новый порядок страниц, остальное как было',
+  ],
+  siteToolReorderPdfPagesH1: [
+    'Rearrange PDF pages',
+    'PDF sahifalarini qayta tartiblash',
+    'Изменить порядок страниц PDF',
+  ],
   siteToolReorderPdfPagesLead: [
     'Scanned pages came out of order, or an appendix belongs at the end? Set the order you want and download the same PDF with its pages rearranged.',
     'Skanerlangan sahifalar aralashib ketdimi yoki ilova oxirda turishi kerakmi? Kerakli tartibni bering va sahifalari qayta joylashgan o‘sha PDF ni yuklab oling.',
@@ -1423,14 +2004,22 @@ export const site = {
   siteToolReorderPdfPagesChip1: ['Any new page order', 'Istalgan yangi tartib', 'Любой новый порядок'],
   siteToolReorderPdfPagesChip2: ['Content stays as it is', 'Mazmun o‘zgarmaydi', 'Содержимое не меняется'],
   siteToolReorderPdfPagesChip3: ['Up to 1,000 pages', '1 000 sahifagacha', 'До 1000 страниц'],
-  siteToolReorderPdfPagesDropTitle: ['Add the PDF to rearrange', 'Tartiblanadigan PDF', 'PDF для перестановки'],
+  siteToolReorderPdfPagesDropTitle: [
+    'Add the PDF to rearrange',
+    'Tartiblanadigan PDF',
+    'PDF для перестановки',
+  ],
   siteToolReorderPdfPagesDropButton: ['Choose a PDF', 'PDF tanlash', 'Выбрать PDF'],
   siteToolReorderPdfPagesDropNote: [
     'One PDF up to 200 MB. Sign in with Telegram, email or Google to run the task.',
     '200 MB gacha bitta PDF. Vazifani boshlash uchun Telegram, email yoki Google orqali kiring.',
     'Один PDF до 200 МБ. Для запуска войдите через Telegram, почту или Google.',
   ],
-  siteToolReorderPdfPagesHowToTitle: ['How to rearrange PDF pages', 'PDF sahifalarini qanday qayta tartiblash mumkin', 'Как изменить порядок страниц PDF'],
+  siteToolReorderPdfPagesHowToTitle: [
+    'How to rearrange PDF pages',
+    'PDF sahifalarini qanday qayta tartiblash mumkin',
+    'Как изменить порядок страниц PDF',
+  ],
   siteToolReorderPdfPagesStep1Title: ['Upload the PDF', 'PDF ni yuklang', 'Загрузите PDF'],
   siteToolReorderPdfPagesStep1Text: [
     'Choose the document whose pages are mixed up.',
@@ -1449,7 +2038,11 @@ export const site = {
     'O‘sha sahifalar, o‘sha mazmun, endi siz bergan tartibda.',
     'Те же страницы и то же содержимое, но в вашем порядке.',
   ],
-  siteToolReorderPdfPagesDetailsTitle: ['Only the order changes', 'Faqat tartib o‘zgaradi', 'Меняется только порядок'],
+  siteToolReorderPdfPagesDetailsTitle: [
+    'Only the order changes',
+    'Faqat tartib o‘zgaradi',
+    'Меняется только порядок',
+  ],
   siteToolReorderPdfPagesDetailsBody: [
     'Pages are moved, not redrawn: text, images and page size stay exactly as they were. To turn a sideways page upright, use Rotate PDF; to drop a page, use Delete pages.',
     'Sahifalar qayta chizilmaydi, faqat joyi o‘zgaradi: matn, rasmlar va sahifa o‘lchami avvalgidek qoladi. Yonboshlagan sahifani to‘g‘rilash uchun «PDF sahifalarini burish», ortiqchasini olib tashlash uchun «Sahifalarni o‘chirish» bor.',
@@ -1473,8 +2066,16 @@ export const site = {
 
   // ── rotate-pdf ──
   siteToolRotatePdfName: ['Rotate PDF', 'PDF sahifalarini burish', 'Повернуть PDF'],
-  siteToolRotatePdfLine: ['Turn sideways pages upright', 'Yonboshlagan sahifalarni to‘g‘rilang', 'Выровняйте боковые страницы'],
-  siteToolRotatePdfDesc: ['Turn all or chosen pages by 90, 180 or 270°', 'Barcha yoki tanlangan sahifalarni 90, 180, 270° ga buring', 'Поворот всех или выбранных страниц на 90, 180, 270°'],
+  siteToolRotatePdfLine: [
+    'Turn sideways pages upright',
+    'Yonboshlagan sahifalarni to‘g‘rilang',
+    'Выровняйте боковые страницы',
+  ],
+  siteToolRotatePdfDesc: [
+    'Turn all or chosen pages by 90, 180 or 270°',
+    'Barcha yoki tanlangan sahifalarni 90, 180, 270° ga buring',
+    'Поворот всех или выбранных страниц на 90, 180, 270°',
+  ],
   siteToolRotatePdfH1: ['Rotate PDF pages', 'PDF sahifalarini burish', 'Повернуть страницы PDF'],
   siteToolRotatePdfLead: [
     'A landscape table or a page scanned upside down? Turn the pages you choose by 90, 180 or 270 degrees and keep the PDF that way for good.',
@@ -1491,14 +2092,22 @@ export const site = {
     '200 MB gacha bitta PDF. Vazifani boshlash uchun Telegram, email yoki Google orqali kiring.',
     'Один PDF до 200 МБ. Для запуска войдите через Telegram, почту или Google.',
   ],
-  siteToolRotatePdfHowToTitle: ['How to rotate PDF pages', 'PDF sahifalarini qanday burish mumkin', 'Как повернуть страницы PDF'],
+  siteToolRotatePdfHowToTitle: [
+    'How to rotate PDF pages',
+    'PDF sahifalarini qanday burish mumkin',
+    'Как повернуть страницы PDF',
+  ],
   siteToolRotatePdfStep1Title: ['Upload the PDF', 'PDF ni yuklang', 'Загрузите PDF'],
   siteToolRotatePdfStep1Text: [
     'Choose the document with pages facing the wrong way.',
     'Sahifalari noto‘g‘ri turgan hujjatni tanlang.',
     'Выберите документ со страницами, повёрнутыми не туда.',
   ],
-  siteToolRotatePdfStep2Title: ['Choose pages and angle', 'Sahifa va burchakni tanlang', 'Выберите страницы и угол'],
+  siteToolRotatePdfStep2Title: [
+    'Choose pages and angle',
+    'Sahifa va burchakni tanlang',
+    'Выберите страницы и угол',
+  ],
   siteToolRotatePdfStep2Text: [
     'Pick the pages, or all of them, and turn them by 90, 180 or 270 degrees.',
     'Sahifalarni yoki hammasini tanlab, 90, 180 yoki 270 gradusga buring.',
@@ -1510,7 +2119,11 @@ export const site = {
     'Yangi holat PDF da saqlanadi va istalgan dasturda shunday ochiladi.',
     'Новая ориентация сохраняется в PDF и видна в любой программе.',
   ],
-  siteToolRotatePdfDetailsTitle: ['Rotation that stays put', 'Burilish saqlanib qoladi', 'Поворот сохраняется'],
+  siteToolRotatePdfDetailsTitle: [
+    'Rotation that stays put',
+    'Burilish saqlanib qoladi',
+    'Поворот сохраняется',
+  ],
   siteToolRotatePdfDetailsBody: [
     'Unlike turning the view in a reader, this changes the page itself, so the PDF opens the right way for everyone. Nothing else on the page changes, and other pages stay as they were.',
     'Bu ko‘rish dasturida ekranni burish emas: sahifaning o‘zi buriladi, shuning uchun PDF hammada to‘g‘ri ochiladi. Sahifadagi boshqa narsalar o‘zgarmaydi, qolgan sahifalar ham avvalgidek qoladi.',
@@ -1535,8 +2148,16 @@ export const site = {
   // ── jpg-to-pdf ──
   siteToolJpgToPdfName: ['JPG to PDF', 'Rasmni PDF qilish', 'JPG в PDF'],
   siteToolJpgToPdfLine: ['Turn photos into one PDF', 'Suratlardan bitta PDF yarating', 'Фото — в один PDF'],
-  siteToolJpgToPdfDesc: ['JPG, PNG or WEBP into a PDF, photos straightened', 'JPG, PNG, WEBP dan PDF, hujjat suratlari tekislanadi', 'JPG, PNG, WEBP в PDF с выравниванием фото'],
-  siteToolJpgToPdfH1: ['Convert images to PDF', 'Rasmlarni PDF ga aylantirish', 'Конвертировать фото и JPG в PDF'],
+  siteToolJpgToPdfDesc: [
+    'JPG, PNG or WEBP into a PDF, photos straightened',
+    'JPG, PNG, WEBP dan PDF, hujjat suratlari tekislanadi',
+    'JPG, PNG, WEBP в PDF с выравниванием фото',
+  ],
+  siteToolJpgToPdfH1: [
+    'Convert images to PDF',
+    'Rasmlarni PDF ga aylantirish',
+    'Конвертировать фото и JPG в PDF',
+  ],
   siteToolJpgToPdfLead: [
     'Photograph a contract, receipts or homework and get a neat PDF. Photos of documents are straightened automatically, so phone shots look like scanned pages.',
     'Shartnoma, cheklar yoki uy vazifasini suratga oling va tartibli PDF oling. Hujjat suratlari avtomatik tekislanadi, telefon surati skanerdagidek ko‘rinadi.',
@@ -1552,7 +2173,11 @@ export const site = {
     'JPG, PNG yoki WEBP, 50 tagacha rasm. Vazifani boshlash uchun Telegram, email yoki Google orqali kiring.',
     'JPG, PNG или WEBP, до 50 изображений. Для запуска войдите через Telegram, почту или Google.',
   ],
-  siteToolJpgToPdfHowToTitle: ['How to convert images to PDF', 'Rasmlarni qanday PDF ga aylantirish mumkin', 'Как сделать PDF из фото'],
+  siteToolJpgToPdfHowToTitle: [
+    'How to convert images to PDF',
+    'Rasmlarni qanday PDF ga aylantirish mumkin',
+    'Как сделать PDF из фото',
+  ],
   siteToolJpgToPdfStep1Title: ['Add your photos', 'Suratlarni qo‘shing', 'Добавьте фото'],
   siteToolJpgToPdfStep1Text: [
     'Upload pictures from your gallery or computer.',
@@ -1571,7 +2196,11 @@ export const site = {
     'Hujjat suratlari tekislangan holda chiqadi va yuborishga tayyor bo‘ladi.',
     'Фото документов получаются выровненными и готовыми к отправке.',
   ],
-  siteToolJpgToPdfDetailsTitle: ['Phone photos that look scanned', 'Skanerdek ko‘rinadigan telefon suratlari', 'Фото с телефона как скан'],
+  siteToolJpgToPdfDetailsTitle: [
+    'Phone photos that look scanned',
+    'Skanerdek ko‘rinadigan telefon suratlari',
+    'Фото с телефона как скан',
+  ],
   siteToolJpgToPdfDetailsBody: [
     'When a photo shows a document, its edges are found and the page is straightened. Other images keep their shape. Pages fit the picture by default, or you can choose A4, Letter or the original size.',
     'Suratda hujjat bo‘lsa, uning chetlari topiladi va sahifa tekislanadi. Boshqa rasmlar o‘z shaklini saqlaydi. Sahifa odatda rasmga moslashadi, xohlasangiz A4, Letter yoki asl o‘lchamni tanlang.',
@@ -1595,16 +2224,32 @@ export const site = {
 
   // ── pdf-to-jpg ──
   siteToolPdfToJpgName: ['PDF to JPG', 'PDF ni rasmga aylantirish', 'PDF в JPG'],
-  siteToolPdfToJpgLine: ['Save each page as an image', 'Har sahifani rasm qilib saqlang', 'Каждая страница — картинка'],
-  siteToolPdfToJpgDesc: ['Pages as JPG or PNG images, all or chosen', 'Barcha yoki tanlangan sahifalar JPG yoki PNG da', 'Страницы в JPG или PNG, все или выбранные'],
-  siteToolPdfToJpgH1: ['Convert PDF to JPG images', 'PDF sahifalarini JPG rasmga aylantirish', 'Конвертировать PDF в JPG'],
+  siteToolPdfToJpgLine: [
+    'Save each page as an image',
+    'Har sahifani rasm qilib saqlang',
+    'Каждая страница — картинка',
+  ],
+  siteToolPdfToJpgDesc: [
+    'Pages as JPG or PNG images, all or chosen',
+    'Barcha yoki tanlangan sahifalar JPG yoki PNG da',
+    'Страницы в JPG или PNG, все или выбранные',
+  ],
+  siteToolPdfToJpgH1: [
+    'Convert PDF to JPG images',
+    'PDF sahifalarini JPG rasmga aylantirish',
+    'Конвертировать PDF в JPG',
+  ],
   siteToolPdfToJpgLead: [
     'Need a page for a slide, a post or a chat? Turn PDF pages into JPG or PNG images, every page or only the ones you choose.',
     'Sahifa slayd, post yoki chat uchun kerakmi? PDF sahifalarini JPG yoki PNG rasmga aylantiring: hammasini yoki faqat tanlanganlarini.',
     'Нужна страница для слайда, поста или чата? Превратите страницы PDF в картинки JPG или PNG — все или только выбранные.',
   ],
   siteToolPdfToJpgChip1: ['JPG or PNG', 'JPG yoki PNG', 'JPG или PNG'],
-  siteToolPdfToJpgChip2: ['All pages or chosen ones', 'Barcha yoki tanlangan sahifa', 'Все или выбранные страницы'],
+  siteToolPdfToJpgChip2: [
+    'All pages or chosen ones',
+    'Barcha yoki tanlangan sahifa',
+    'Все или выбранные страницы',
+  ],
   siteToolPdfToJpgChip3: ['Up to 1,000 pages', '1 000 sahifagacha', 'До 1000 страниц'],
   siteToolPdfToJpgDropTitle: ['Add the PDF to convert', 'Aylantiriladigan PDF', 'PDF для конвертации'],
   siteToolPdfToJpgDropButton: ['Choose a PDF', 'PDF tanlash', 'Выбрать PDF'],
@@ -1613,14 +2258,22 @@ export const site = {
     '200 MB gacha bitta PDF. Vazifani boshlash uchun Telegram, email yoki Google orqali kiring.',
     'Один PDF до 200 МБ. Для запуска войдите через Telegram, почту или Google.',
   ],
-  siteToolPdfToJpgHowToTitle: ['How to convert PDF to JPG', 'PDF ni qanday JPG ga aylantirish mumkin', 'Как конвертировать PDF в JPG'],
+  siteToolPdfToJpgHowToTitle: [
+    'How to convert PDF to JPG',
+    'PDF ni qanday JPG ga aylantirish mumkin',
+    'Как конвертировать PDF в JPG',
+  ],
   siteToolPdfToJpgStep1Title: ['Upload the PDF', 'PDF ni yuklang', 'Загрузите PDF'],
   siteToolPdfToJpgStep1Text: [
     'Choose the document you want as pictures.',
     'Rasm ko‘rinishida kerak bo‘lgan hujjatni tanlang.',
     'Выберите документ, который нужен в виде картинок.',
   ],
-  siteToolPdfToJpgStep2Title: ['Pick format and pages', 'Format va sahifalarni tanlang', 'Выберите формат и страницы'],
+  siteToolPdfToJpgStep2Title: [
+    'Pick format and pages',
+    'Format va sahifalarni tanlang',
+    'Выберите формат и страницы',
+  ],
   siteToolPdfToJpgStep2Text: [
     'JPG for lighter files, PNG for crisp text and lines. All pages or a few.',
     'Yengil fayl uchun JPG, aniq matn va chiziqlar uchun PNG. Hamma sahifa yoki bir nechtasi.',
@@ -1632,7 +2285,11 @@ export const site = {
     'Tanlangan har bir sahifa alohida rasm bo‘lib keladi.',
     'Каждая выбранная страница приходит отдельной картинкой.',
   ],
-  siteToolPdfToJpgDetailsTitle: ['JPG or PNG: which to pick', 'JPG yoki PNG: qaysi biri?', 'JPG или PNG: что выбрать'],
+  siteToolPdfToJpgDetailsTitle: [
+    'JPG or PNG: which to pick',
+    'JPG yoki PNG: qaysi biri?',
+    'JPG или PNG: что выбрать',
+  ],
   siteToolPdfToJpgDetailsBody: [
     'JPG files are lighter and suit photos and sharing in chats. PNG keeps text, charts and thin lines crisp. Each page becomes one image; the PDF itself is not changed.',
     'JPG yengilroq, suratlar va chatda ulashish uchun qulay. PNG matn, diagramma va ingichka chiziqlarni aniq saqlaydi. Har sahifa bitta rasm bo‘ladi, PDF ning o‘zi esa o‘zgarmaydi.',
@@ -1657,7 +2314,11 @@ export const site = {
   // ── word-to-pdf ──
   siteToolWordToPdfName: ['Word to PDF', 'Word ni PDF ga aylantirish', 'Word в PDF'],
   siteToolWordToPdfLine: ['Turn a .docx into a PDF', '.docx faylni PDF ga o‘tkazing', 'Из .docx в PDF'],
-  siteToolWordToPdfDesc: ['Convert a .docx document into a PDF to send', '.docx hujjatni yuborishga tayyor PDF ga aylantiring', 'Документ .docx в PDF для отправки'],
+  siteToolWordToPdfDesc: [
+    'Convert a .docx document into a PDF to send',
+    '.docx hujjatni yuborishga tayyor PDF ga aylantiring',
+    'Документ .docx в PDF для отправки',
+  ],
   siteToolWordToPdfH1: ['Convert Word to PDF', 'Word faylni PDF ga o‘tkazish', 'Конвертировать Word в PDF'],
   siteToolWordToPdfLead: [
     'Send a CV, an application or a report as a PDF that opens the same on every device. Upload a .docx file and download the PDF.',
@@ -1674,7 +2335,11 @@ export const site = {
     'Bitta .docx fayl. Vazifani boshlash uchun Telegram, email yoki Google orqali kiring.',
     'Один файл .docx. Для запуска войдите через Telegram, почту или Google.',
   ],
-  siteToolWordToPdfHowToTitle: ['How to convert Word to PDF', 'Word faylni qanday PDF ga o‘tkazish mumkin', 'Как конвертировать Word в PDF'],
+  siteToolWordToPdfHowToTitle: [
+    'How to convert Word to PDF',
+    'Word faylni qanday PDF ga o‘tkazish mumkin',
+    'Как конвертировать Word в PDF',
+  ],
   siteToolWordToPdfStep1Title: ['Upload the .docx', '.docx ni yuklang', 'Загрузите .docx'],
   siteToolWordToPdfStep1Text: [
     'Choose your document from your phone or computer.',
@@ -1693,7 +2358,11 @@ export const site = {
     'Uni yuboring, chop eting yoki portalga yuklang.',
     'Отправьте, распечатайте или загрузите на портал.',
   ],
-  siteToolWordToPdfDetailsTitle: ['Only .docx, without macros', 'Faqat .docx, makrossiz', 'Только .docx и без макросов'],
+  siteToolWordToPdfDetailsTitle: [
+    'Only .docx, without macros',
+    'Faqat .docx, makrossiz',
+    'Только .docx и без макросов',
+  ],
   siteToolWordToPdfDetailsBody: [
     'The tool accepts the modern .docx format; save an older .doc file as .docx first. Files with macros or external content are refused for safety. A font that isn’t available may be replaced with a similar one.',
     'Vosita zamonaviy .docx formatini qabul qiladi, eski .doc faylni avval .docx qilib saqlang. Makros yoki tashqi kontentli fayllar xavfsizlik uchun qabul qilinmaydi. Mavjud bo‘lmagan shrift o‘xshashiga almashishi mumkin.',
@@ -1717,25 +2386,49 @@ export const site = {
 
   // ── powerpoint-to-pdf ──
   siteToolPowerpointToPdfName: ['PowerPoint to PDF', 'Taqdimotni PDF ga o‘tkazish', 'PowerPoint в PDF'],
-  siteToolPowerpointToPdfLine: ['Send slides as one PDF', 'Slaydlarni bitta PDF qilib yuboring', 'Слайды одним PDF-файлом'],
-  siteToolPowerpointToPdfDesc: ['Convert a .pptx deck into a PDF, slide by slide', '.pptx taqdimotni slaydma-slayd PDF ga o‘tkazing', 'Презентация .pptx в PDF, слайд за слайдом'],
-  siteToolPowerpointToPdfH1: ['Convert PowerPoint to PDF', 'Taqdimotni PDF ga o‘tkazish', 'Конвертировать презентацию PowerPoint в PDF'],
+  siteToolPowerpointToPdfLine: [
+    'Send slides as one PDF',
+    'Slaydlarni bitta PDF qilib yuboring',
+    'Слайды одним PDF-файлом',
+  ],
+  siteToolPowerpointToPdfDesc: [
+    'Convert a .pptx deck into a PDF, slide by slide',
+    '.pptx taqdimotni slaydma-slayd PDF ga o‘tkazing',
+    'Презентация .pptx в PDF, слайд за слайдом',
+  ],
+  siteToolPowerpointToPdfH1: [
+    'Convert PowerPoint to PDF',
+    'Taqdimotni PDF ga o‘tkazish',
+    'Конвертировать презентацию PowerPoint в PDF',
+  ],
   siteToolPowerpointToPdfLead: [
     'Share a presentation that opens anywhere, even without PowerPoint. Upload a .pptx file and get a PDF with one page per slide.',
     'Taqdimotni PowerPoint bo‘lmagan joyda ham ochiladigan qilib ulashing. .pptx faylni yuklang va har slayd bitta sahifa bo‘lgan PDF oling.',
     'Поделитесь презентацией, которая откроется где угодно, даже без PowerPoint. Загрузите файл .pptx и получите PDF: страница на каждый слайд.',
   ],
   siteToolPowerpointToPdfChip1: ['Accepts .pptx files', '.pptx fayllar uchun', 'Принимает файлы .pptx'],
-  siteToolPowerpointToPdfChip2: ['One page per slide', 'Har slayd — bitta sahifa', 'Страница на каждый слайд'],
+  siteToolPowerpointToPdfChip2: [
+    'One page per slide',
+    'Har slayd — bitta sahifa',
+    'Страница на каждый слайд',
+  ],
   siteToolPowerpointToPdfChip3: ['Up to 200 MB per file', 'Har bir fayl 200 MB gacha', 'До 200 МБ на файл'],
-  siteToolPowerpointToPdfDropTitle: ['Add your presentation', 'Taqdimotingizni qo‘shing', 'Добавьте презентацию'],
+  siteToolPowerpointToPdfDropTitle: [
+    'Add your presentation',
+    'Taqdimotingizni qo‘shing',
+    'Добавьте презентацию',
+  ],
   siteToolPowerpointToPdfDropButton: ['Choose a .pptx file', '.pptx faylni tanlash', 'Выбрать файл .pptx'],
   siteToolPowerpointToPdfDropNote: [
     'One .pptx file. Sign in with Telegram, email or Google to run the task.',
     'Bitta .pptx fayl. Vazifani boshlash uchun Telegram, email yoki Google orqali kiring.',
     'Один файл .pptx. Для запуска войдите через Telegram, почту или Google.',
   ],
-  siteToolPowerpointToPdfHowToTitle: ['How to convert PowerPoint to PDF', 'Taqdimotni qanday PDF ga o‘tkazish mumkin', 'Как сохранить презентацию в PDF'],
+  siteToolPowerpointToPdfHowToTitle: [
+    'How to convert PowerPoint to PDF',
+    'Taqdimotni qanday PDF ga o‘tkazish mumkin',
+    'Как сохранить презентацию в PDF',
+  ],
   siteToolPowerpointToPdfStep1Title: ['Upload the .pptx', '.pptx ni yuklang', 'Загрузите .pptx'],
   siteToolPowerpointToPdfStep1Text: [
     'Choose the presentation you want to share.',
@@ -1754,7 +2447,11 @@ export const site = {
     'Uni o‘qituvchi, mijoz yoki guruh chatiga yuboring.',
     'Отправьте преподавателю, клиенту или в групповой чат.',
   ],
-  siteToolPowerpointToPdfDetailsTitle: ['Easy to open, easy to print', 'Ochish va chop etish oson', 'Легко открыть и распечатать'],
+  siteToolPowerpointToPdfDetailsTitle: [
+    'Easy to open, easy to print',
+    'Ochish va chop etish oson',
+    'Легко открыть и распечатать',
+  ],
   siteToolPowerpointToPdfDetailsBody: [
     'A PDF looks the same on phones, laptops and printers. Animations and transitions don’t carry over, since each slide becomes a still page. Only .pptx is accepted; save an older .ppt as .pptx first.',
     'PDF telefonda, noutbukda va printerda bir xil ko‘rinadi. Animatsiya va o‘tishlar saqlanmaydi, chunki har slayd harakatsiz sahifaga aylanadi. Faqat .pptx qabul qilinadi, eski .ppt ni avval .pptx qilib saqlang.',
@@ -1778,8 +2475,16 @@ export const site = {
 
   // ── pdf-to-word ──
   siteToolPdfToWordName: ['PDF to Word', 'PDF ni Word ga aylantirish', 'PDF в Word'],
-  siteToolPdfToWordLine: ['Get editable text from a PDF', 'PDF dan tahrirlanadigan matn oling', 'Редактируемый текст из PDF'],
-  siteToolPdfToWordDesc: ['Turn PDF text into an editable .docx file', 'PDF matnini tahrirlanadigan .docx ga aylantiring', 'Текст PDF в редактируемый файл .docx'],
+  siteToolPdfToWordLine: [
+    'Get editable text from a PDF',
+    'PDF dan tahrirlanadigan matn oling',
+    'Редактируемый текст из PDF',
+  ],
+  siteToolPdfToWordDesc: [
+    'Turn PDF text into an editable .docx file',
+    'PDF matnini tahrirlanadigan .docx ga aylantiring',
+    'Текст PDF в редактируемый файл .docx',
+  ],
   siteToolPdfToWordH1: ['Convert PDF to Word', 'PDF faylni Word ga o‘tkazish', 'Конвертировать PDF в Word'],
   siteToolPdfToWordLead: [
     'Need to reuse text from a PDF? Convert it to a Word file and edit it freely. The text comes over; the original layout does not.',
@@ -1796,7 +2501,11 @@ export const site = {
     'Belgilab bo‘ladigan matnli bitta PDF. Vazifani boshlash uchun Telegram, email yoki Google orqali kiring.',
     'Один PDF с настоящим, выделяемым текстом. Для запуска войдите через Telegram, почту или Google.',
   ],
-  siteToolPdfToWordHowToTitle: ['How to convert PDF to Word', 'PDF ni qanday Word ga o‘tkazish mumkin', 'Как конвертировать PDF в Word'],
+  siteToolPdfToWordHowToTitle: [
+    'How to convert PDF to Word',
+    'PDF ni qanday Word ga o‘tkazish mumkin',
+    'Как конвертировать PDF в Word',
+  ],
   siteToolPdfToWordStep1Title: ['Upload the PDF', 'PDF ni yuklang', 'Загрузите PDF'],
   siteToolPdfToWordStep1Text: [
     'Choose a PDF whose text you can select in a viewer.',
@@ -1815,7 +2524,11 @@ export const site = {
     '.docx ni Word yoki Google Docs da oching va keraklisini o‘zgartiring.',
     'Откройте .docx в Word или Google Docs и измените что нужно.',
   ],
-  siteToolPdfToWordDetailsTitle: ['Text comes over, layout doesn’t', 'Matn ko‘chadi, maket saqlanmaydi', 'Текст переносится, вёрстка — нет'],
+  siteToolPdfToWordDetailsTitle: [
+    'Text comes over, layout doesn’t',
+    'Matn ko‘chadi, maket saqlanmaydi',
+    'Текст переносится, вёрстка — нет',
+  ],
   siteToolPdfToWordDetailsBody: [
     'The result is a plain editable document: text flows in paragraphs, while columns, images and exact positions are not rebuilt. A scan holds pictures, not text, so run OCR first.',
     'Natija oddiy tahrirlanadigan hujjat: matn xatboshilar bo‘yicha joylashadi, ustunlar, rasmlar va aniq joylashuv qayta tiklanmaydi. Skanerda matn emas, rasm bo‘ladi, shuning uchun avval OCR dan o‘tkazing.',
@@ -1839,9 +2552,21 @@ export const site = {
 
   // ── pdf-to-excel ──
   siteToolPdfToExcelName: ['PDF to Excel', 'PDF ni Excel ga aylantirish', 'PDF в Excel'],
-  siteToolPdfToExcelLine: ['Move PDF tables into a sheet', 'PDF jadvallarini Excel ga ko‘chiring', 'Таблицы из PDF в Excel'],
-  siteToolPdfToExcelDesc: ['Pull text-based tables into an .xlsx file', 'Matnli jadvallarni .xlsx faylga o‘tkazing', 'Текстовые таблицы — в файл .xlsx'],
-  siteToolPdfToExcelH1: ['Convert PDF to Excel', 'PDF jadvallarini Excel ga o‘tkazish', 'Конвертировать PDF в Excel'],
+  siteToolPdfToExcelLine: [
+    'Move PDF tables into a sheet',
+    'PDF jadvallarini Excel ga ko‘chiring',
+    'Таблицы из PDF в Excel',
+  ],
+  siteToolPdfToExcelDesc: [
+    'Pull text-based tables into an .xlsx file',
+    'Matnli jadvallarni .xlsx faylga o‘tkazing',
+    'Текстовые таблицы — в файл .xlsx',
+  ],
+  siteToolPdfToExcelH1: [
+    'Convert PDF to Excel',
+    'PDF jadvallarini Excel ga o‘tkazish',
+    'Конвертировать PDF в Excel',
+  ],
   siteToolPdfToExcelLead: [
     'Price lists, statements and reports in PDF become an Excel workbook, one sheet per table. Works with tables that hold real text, not scans.',
     'PDF dagi narxnoma, ko‘chirma va hisobotlar Excel kitobiga aylanadi: har jadval alohida varaqda. Skaner emas, haqiqiy matnli jadvallar bilan ishlaydi.',
@@ -1850,14 +2575,22 @@ export const site = {
   siteToolPdfToExcelChip1: ['.xlsx workbook', '.xlsx fayl', 'Книга .xlsx'],
   siteToolPdfToExcelChip2: ['Text-based tables only', 'Faqat matnli jadvallar', 'Только текстовые таблицы'],
   siteToolPdfToExcelChip3: ['On the website only', 'Faqat veb-saytda', 'Только на сайте'],
-  siteToolPdfToExcelDropTitle: ['Add a PDF with tables', 'Jadvalli PDF ni qo‘shing', 'Добавьте PDF с таблицами'],
+  siteToolPdfToExcelDropTitle: [
+    'Add a PDF with tables',
+    'Jadvalli PDF ni qo‘shing',
+    'Добавьте PDF с таблицами',
+  ],
   siteToolPdfToExcelDropButton: ['Choose a PDF', 'PDF tanlash', 'Выбрать PDF'],
   siteToolPdfToExcelDropNote: [
     'One PDF whose table text you can select. Sign in with Telegram, email or Google to run it.',
     'Jadval matnini belgilab bo‘ladigan bitta PDF. Boshlash uchun Telegram, email yoki Google orqali kiring.',
     'Один PDF, текст таблиц в котором выделяется. Для запуска войдите через Telegram, почту или Google.',
   ],
-  siteToolPdfToExcelHowToTitle: ['How to convert PDF to Excel', 'PDF ni qanday Excel ga o‘tkazish mumkin', 'Как перенести таблицу из PDF в Excel'],
+  siteToolPdfToExcelHowToTitle: [
+    'How to convert PDF to Excel',
+    'PDF ni qanday Excel ga o‘tkazish mumkin',
+    'Как перенести таблицу из PDF в Excel',
+  ],
   siteToolPdfToExcelStep1Title: ['Upload the PDF', 'PDF ni yuklang', 'Загрузите PDF'],
   siteToolPdfToExcelStep1Text: [
     'Choose a file whose tables you can select as text.',
@@ -1876,7 +2609,11 @@ export const site = {
     '.xlsx ni oching va raqamlardan foydalanishdan oldin kataklarni tekshiring.',
     'Откройте .xlsx и проверьте ячейки, прежде чем работать с цифрами.',
   ],
-  siteToolPdfToExcelDetailsTitle: ['Check the cells before you count', 'Hisoblashdan oldin kataklarni tekshiring', 'Проверьте ячейки перед расчётами'],
+  siteToolPdfToExcelDetailsTitle: [
+    'Check the cells before you count',
+    'Hisoblashdan oldin kataklarni tekshiring',
+    'Проверьте ячейки перед расчётами',
+  ],
   siteToolPdfToExcelDetailsBody: [
     'Each table gets a sheet named by page and table number. Text outside tables is left out, and cells come in as text, so convert numbers before you calculate. Scanned tables are pictures and can’t be read.',
     'Har jadval sahifa va jadval raqami bilan nomlangan varaqqa tushadi. Jadvaldan tashqaridagi matn olinmaydi, kataklar esa matn sifatida keladi: hisoblashdan oldin raqamlarga o‘tkazing. Skanerlangan jadvallar rasm bo‘lgani uchun o‘qilmaydi.',
@@ -1900,9 +2637,21 @@ export const site = {
 
   // ── ocr-pdf ──
   siteToolOcrPdfName: ['Extract text (OCR)', 'Rasmdan matn olish (OCR)', 'Распознать текст'],
-  siteToolOcrPdfLine: ['Get text out of scans and photos', 'Skaner va suratlardan matn oling', 'Текст со сканов и фото'],
-  siteToolOcrPdfDesc: ['Recognise Uzbek, Russian and English text', 'O‘zbek, rus va ingliz tilidagi matnni taniydi', 'Узбекский, русский и английский текст'],
-  siteToolOcrPdfH1: ['Extract text from scans and images (OCR)', 'Skaner va rasmdan matnni ajratib olish', 'Распознавание текста (OCR) из PDF и фото'],
+  siteToolOcrPdfLine: [
+    'Get text out of scans and photos',
+    'Skaner va suratlardan matn oling',
+    'Текст со сканов и фото',
+  ],
+  siteToolOcrPdfDesc: [
+    'Recognise Uzbek, Russian and English text',
+    'O‘zbek, rus va ingliz tilidagi matnni taniydi',
+    'Узбекский, русский и английский текст',
+  ],
+  siteToolOcrPdfH1: [
+    'Extract text from scans and images (OCR)',
+    'Skaner va rasmdan matnni ajratib olish',
+    'Распознавание текста (OCR) из PDF и фото',
+  ],
   siteToolOcrPdfLead: [
     'Turn a scanned PDF or a photo of a page into text you can copy, edit and search. Recognises Uzbek, Russian and English.',
     'Skanerlangan PDF yoki sahifa suratini nusxalash, tahrirlash va qidirish mumkin bo‘lgan matnga aylantiring. O‘zbek, rus va ingliz tillarini taniydi.',
@@ -1918,7 +2667,11 @@ export const site = {
     'Skanerlangan PDF yoki rasm (JPG, PNG, WEBP). Boshlash uchun Telegram, email yoki Google orqali kiring.',
     'Скан PDF или изображение (JPG, PNG, WEBP). Для запуска войдите через Telegram, почту или Google.',
   ],
-  siteToolOcrPdfHowToTitle: ['How to extract text from a scan', 'Skanerdan matnni qanday ajratib olish mumkin', 'Как распознать текст со скана'],
+  siteToolOcrPdfHowToTitle: [
+    'How to extract text from a scan',
+    'Skanerdan matnni qanday ajratib olish mumkin',
+    'Как распознать текст со скана',
+  ],
   siteToolOcrPdfStep1Title: ['Upload the scan', 'Skanerni yuklang', 'Загрузите скан'],
   siteToolOcrPdfStep1Text: [
     'A scanned PDF or a clear photo of a page.',
@@ -1937,7 +2690,11 @@ export const site = {
     'Hujjat, chat yoki shaklga qo‘yish uchun .txt fayl oling.',
     'Получите файл .txt, чтобы вставить текст в документ, чат или форму.',
   ],
-  siteToolOcrPdfDetailsTitle: ['Text out, the scan stays a scan', 'Matn olinadi, skaner o‘zgarmaydi', 'Текст отдельно, скан как был'],
+  siteToolOcrPdfDetailsTitle: [
+    'Text out, the scan stays a scan',
+    'Matn olinadi, skaner o‘zgarmaydi',
+    'Текст отдельно, скан как был',
+  ],
   siteToolOcrPdfDetailsBody: [
     'OCR gives you the words as a separate text file. To keep the scanned look and still search and copy inside the PDF, use Make PDF searchable. Clear, straight, well-lit pages give the most accurate result.',
     'OCR so‘zlarni alohida matn fayli qilib beradi. Skaner ko‘rinishini saqlab, PDF ichida qidirish va nusxalash uchun «Skanerni qidiriladigan PDF qilish»dan foydalaning. Aniq, tekis va yorug‘ sahifalar eng to‘g‘ri natija beradi.',
@@ -1961,16 +2718,32 @@ export const site = {
 
   // ── searchable-pdf ──
   siteToolSearchablePdfName: ['Make PDF searchable', 'Qidiriladigan PDF qilish', 'PDF с поиском по тексту'],
-  siteToolSearchablePdfLine: ['Search and copy inside a scan', 'Skaner ichida qidiring va nusxalang', 'Поиск и копирование в скане'],
-  siteToolSearchablePdfDesc: ['Add a text layer, keep the scanned look', 'Matn qatlami qo‘shiladi, skaner ko‘rinishi qoladi', 'Текстовый слой без изменения вида скана'],
-  siteToolSearchablePdfH1: ['Make scanned PDFs searchable', 'Skaner PDF ga matn qatlamini qo‘shish', 'Сделать скан PDF с поиском по тексту'],
+  siteToolSearchablePdfLine: [
+    'Search and copy inside a scan',
+    'Skaner ichida qidiring va nusxalang',
+    'Поиск и копирование в скане',
+  ],
+  siteToolSearchablePdfDesc: [
+    'Add a text layer, keep the scanned look',
+    'Matn qatlami qo‘shiladi, skaner ko‘rinishi qoladi',
+    'Текстовый слой без изменения вида скана',
+  ],
+  siteToolSearchablePdfH1: [
+    'Make scanned PDFs searchable',
+    'Skaner PDF ga matn qatlamini qo‘shish',
+    'Сделать скан PDF с поиском по тексту',
+  ],
   siteToolSearchablePdfLead: [
     'Make a scanned PDF work like a typed one: find words with search and copy lines, while the pages look as scanned. Uzbek, Russian and English.',
     'Skanerlangan PDF ni yozilgan hujjatdek ishlating: so‘zlarni qidiring va qatorlarni nusxalang, sahifalar esa skanerdagidek qoladi. O‘zbek, rus va ingliz tillari.',
     'Пусть скан PDF работает как набранный документ: ищите слова и копируйте строки, а страницы выглядят как в скане. Узбекский, русский и английский.',
   ],
   siteToolSearchablePdfChip1: ['Scanned look kept', 'Ko‘rinish saqlanadi', 'Вид скана сохраняется'],
-  siteToolSearchablePdfChip2: ['Uzbek, Russian, English', 'O‘zbek, rus, ingliz', 'Узбекский, русский, английский'],
+  siteToolSearchablePdfChip2: [
+    'Uzbek, Russian, English',
+    'O‘zbek, rus, ingliz',
+    'Узбекский, русский, английский',
+  ],
   siteToolSearchablePdfChip3: ['On the website only', 'Faqat veb-saytda', 'Только на сайте'],
   siteToolSearchablePdfDropTitle: ['Add a scanned PDF', 'Skaner PDF ni qo‘shing', 'Добавьте скан PDF'],
   siteToolSearchablePdfDropButton: ['Choose a PDF', 'PDF tanlash', 'Выбрать PDF'],
@@ -1979,7 +2752,11 @@ export const site = {
     '200 MB gacha skanerlangan PDF. Vazifani boshlash uchun Telegram, email yoki Google orqali kiring.',
     'Скан PDF до 200 МБ. Для запуска войдите через Telegram, почту или Google.',
   ],
-  siteToolSearchablePdfHowToTitle: ['How to make a scanned PDF searchable', 'Skaner PDF ni qanday qidiriladigan qilish mumkin', 'Как сделать скан PDF с поиском'],
+  siteToolSearchablePdfHowToTitle: [
+    'How to make a scanned PDF searchable',
+    'Skaner PDF ni qanday qidiriladigan qilish mumkin',
+    'Как сделать скан PDF с поиском',
+  ],
   siteToolSearchablePdfStep1Title: ['Upload the scan', 'Skanerni yuklang', 'Загрузите скан'],
   siteToolSearchablePdfStep1Text: [
     'Choose a PDF made with a scanner or from phone photos.',
@@ -1998,7 +2775,11 @@ export const site = {
     'O‘sha sahifalar, endi ulardagi matnni qidirish, belgilash va nusxalash mumkin.',
     'Те же страницы, но текст в них можно искать, выделять и копировать.',
   ],
-  siteToolSearchablePdfDetailsTitle: ['Looks the same, works like text', 'Ko‘rinishi o‘sha, matn kabi ishlaydi', 'Выглядит так же, работает как текст'],
+  siteToolSearchablePdfDetailsTitle: [
+    'Looks the same, works like text',
+    'Ko‘rinishi o‘sha, matn kabi ishlaydi',
+    'Выглядит так же, работает как текст',
+  ],
   siteToolSearchablePdfDetailsBody: [
     'The pages keep their scanned look, stamps and signatures included. An invisible text layer is added on top; how accurate it is depends on how clear the scan is.',
     'Sahifalar skanerdagi ko‘rinishini, muhr va imzolari bilan birga saqlaydi. Ustiga ko‘rinmas matn qatlami qo‘shiladi, uning aniqligi skaner sifatiga bog‘liq.',
@@ -2022,9 +2803,21 @@ export const site = {
 
   // ── protect-pdf ──
   siteToolProtectPdfName: ['Protect PDF', 'PDF ga parol qo‘yish', 'Поставить пароль на PDF'],
-  siteToolProtectPdfLine: ['Lock a PDF with a password', 'PDF ni parol bilan qulflang', 'Закройте PDF паролем'],
-  siteToolProtectPdfDesc: ['Add a password with AES-256 encryption', 'AES-256 shifrlash bilan parol qo‘ying', 'Пароль с шифрованием AES-256'],
-  siteToolProtectPdfH1: ['Protect a PDF with a password', 'PDF faylni parol bilan himoyalash', 'Защитить PDF паролем'],
+  siteToolProtectPdfLine: [
+    'Lock a PDF with a password',
+    'PDF ni parol bilan qulflang',
+    'Закройте PDF паролем',
+  ],
+  siteToolProtectPdfDesc: [
+    'Add a password with AES-256 encryption',
+    'AES-256 shifrlash bilan parol qo‘ying',
+    'Пароль с шифрованием AES-256',
+  ],
+  siteToolProtectPdfH1: [
+    'Protect a PDF with a password',
+    'PDF faylni parol bilan himoyalash',
+    'Защитить PDF паролем',
+  ],
   siteToolProtectPdfLead: [
     'Send a contract, a bank statement or a passport scan so that only people with the password can open it. The file is encrypted with AES-256.',
     'Shartnoma, bank ko‘chirmasi yoki pasport skanerini faqat parolni biladiganlar ocha oladigan qilib yuboring. Fayl AES-256 bilan shifrlanadi.',
@@ -2040,7 +2833,11 @@ export const site = {
     '200 MB gacha bitta PDF. Telegram, email yoki Google orqali kiring, keyin parol qo‘ying.',
     'Один PDF до 200 МБ. Войдите через Telegram, почту или Google, затем задайте пароль.',
   ],
-  siteToolProtectPdfHowToTitle: ['How to put a password on a PDF', 'PDF ga qanday parol qo‘yish mumkin', 'Как поставить пароль на PDF'],
+  siteToolProtectPdfHowToTitle: [
+    'How to put a password on a PDF',
+    'PDF ga qanday parol qo‘yish mumkin',
+    'Как поставить пароль на PDF',
+  ],
   siteToolProtectPdfStep1Title: ['Upload the PDF', 'PDF ni yuklang', 'Загрузите PDF'],
   siteToolProtectPdfStep1Text: [
     'Choose the document you want to keep private.',
@@ -2059,7 +2856,11 @@ export const site = {
     'Faylni yuboring, parolni esa boshqa yo‘l bilan alohida bering.',
     'Отправьте файл, а пароль передайте отдельно, другим способом.',
   ],
-  siteToolProtectPdfDetailsTitle: ['We can’t recover a lost password', 'Unutilgan parolni tiklay olmaymiz', 'Забытый пароль не восстановить'],
+  siteToolProtectPdfDetailsTitle: [
+    'We can’t recover a lost password',
+    'Unutilgan parolni tiklay olmaymiz',
+    'Забытый пароль не восстановить',
+  ],
   siteToolProtectPdfDetailsBody: [
     'If the password is forgotten, we cannot recover it or open the file for you. Keep the unprotected original until you are sure the password works. A protected PDF has to be unlocked before other tools can change it.',
     'Parol unutilsa, biz uni tiklay olmaymiz va faylni ochib bera olmaymiz. Parol ishlashiga ishonch hosil qilguningizcha himoyasiz aslini saqlab turing. Himoyalangan PDF ni boshqa vositalarda o‘zgartirishdan oldin qulfdan chiqarish kerak.',
@@ -2083,9 +2884,21 @@ export const site = {
 
   // ── unlock-pdf ──
   siteToolUnlockPdfName: ['Unlock PDF', 'PDF parolini olib tashlash', 'Снять пароль с PDF'],
-  siteToolUnlockPdfLine: ['Remove a password you know', 'Bilgan parolingizni olib tashlang', 'Снимите известный вам пароль'],
-  siteToolUnlockPdfDesc: ['Save an open copy when you know the password', 'Parolni bilsangiz, ochiq nusxasini saqlang', 'Открытая копия, если вы знаете пароль'],
-  siteToolUnlockPdfH1: ['Unlock a PDF you have the password for', 'PDF qulfini ochish (parol maʼlum bo‘lsa)', 'Снять защиту с PDF, если вы знаете пароль'],
+  siteToolUnlockPdfLine: [
+    'Remove a password you know',
+    'Bilgan parolingizni olib tashlang',
+    'Снимите известный вам пароль',
+  ],
+  siteToolUnlockPdfDesc: [
+    'Save an open copy when you know the password',
+    'Parolni bilsangiz, ochiq nusxasini saqlang',
+    'Открытая копия, если вы знаете пароль',
+  ],
+  siteToolUnlockPdfH1: [
+    'Unlock a PDF you have the password for',
+    'PDF qulfini ochish (parol maʼlum bo‘lsa)',
+    'Снять защиту с PDF, если вы знаете пароль',
+  ],
   siteToolUnlockPdfLead: [
     'Tired of typing the password each time you open a statement? Enter it once and download a copy of the PDF that opens without it.',
     'Ko‘chirmani har ochganda parol terishdan charchadingizmi? Uni bir marta kiriting va parolsiz ochiladigan PDF nusxasini yuklab oling.',
@@ -2101,7 +2914,11 @@ export const site = {
     'Parolli PDF va uning paroli. Boshlash uchun Telegram, email yoki Google orqali kiring.',
     'PDF с паролем и сам пароль. Для запуска войдите через Telegram, почту или Google.',
   ],
-  siteToolUnlockPdfHowToTitle: ['How to remove a password from a PDF', 'PDF dan parolni qanday olib tashlash mumkin', 'Как снять пароль с PDF'],
+  siteToolUnlockPdfHowToTitle: [
+    'How to remove a password from a PDF',
+    'PDF dan parolni qanday olib tashlash mumkin',
+    'Как снять пароль с PDF',
+  ],
   siteToolUnlockPdfStep1Title: ['Upload the PDF', 'PDF ni yuklang', 'Загрузите PDF'],
   siteToolUnlockPdfStep1Text: [
     'Choose the protected file.',
@@ -2114,13 +2931,21 @@ export const site = {
     'Hozir faylni ochishda ishlatadigan parolni yozing.',
     'Введите пароль, которым открываете файл сейчас.',
   ],
-  siteToolUnlockPdfStep3Title: ['Download the open copy', 'Ochiq nusxani yuklab oling', 'Скачайте открытую копию'],
+  siteToolUnlockPdfStep3Title: [
+    'Download the open copy',
+    'Ochiq nusxani yuklab oling',
+    'Скачайте открытую копию',
+  ],
   siteToolUnlockPdfStep3Text: [
     'The new PDF opens without a password; the content is the same.',
     'Yangi PDF parolsiz ochiladi, mazmuni o‘zgarmaydi.',
     'Новый PDF открывается без пароля, содержимое то же.',
   ],
-  siteToolUnlockPdfDetailsTitle: ['Only with the password you know', 'Faqat siz bilgan parol bilan', 'Только с известным паролем'],
+  siteToolUnlockPdfDetailsTitle: [
+    'Only with the password you know',
+    'Faqat siz bilgan parol bilan',
+    'Только с известным паролем',
+  ],
   siteToolUnlockPdfDetailsBody: [
     'This tool removes protection when you enter the right password. It does not guess, crack or bypass unknown passwords. If you have lost the password, ask the person or organisation that sent the file.',
     'Bu vosita to‘g‘ri parolni kiritganingizdagina himoyani olib tashlaydi. U nomaʼlum parollarni topmaydi, buzmaydi va chetlab o‘tmaydi. Parol yo‘qolgan bo‘lsa, faylni yuborgan odam yoki tashkilotdan so‘rang.',
@@ -2144,8 +2969,16 @@ export const site = {
 
   // ── sign-pdf (editor-backed) ──
   siteToolSignPdfName: ['Sign PDF', 'PDF ga imzo qo‘yish', 'Подписать PDF'],
-  siteToolSignPdfLine: ['Place your signature image', 'Imzo rasmini joylashtiring', 'Изображение подписи на PDF'],
-  siteToolSignPdfDesc: ['Add a picture of your signature in the editor', 'Muharrirda imzongiz rasmini qo‘ying', 'Изображение подписи в редакторе'],
+  siteToolSignPdfLine: [
+    'Place your signature image',
+    'Imzo rasmini joylashtiring',
+    'Изображение подписи на PDF',
+  ],
+  siteToolSignPdfDesc: [
+    'Add a picture of your signature in the editor',
+    'Muharrirda imzongiz rasmini qo‘ying',
+    'Изображение подписи в редакторе',
+  ],
   siteToolSignPdfH1: ['Sign a PDF', 'PDF hujjatga imzo qo‘yish', 'Поставить подпись на PDF'],
   siteToolSignPdfLead: [
     'Put your signature on an application, an act or a letter without printing it. Add a picture of your signature in the PDF editor and download the file.',
@@ -2181,7 +3014,11 @@ export const site = {
     'Imzolangan faylni saqlang va yuboring.',
     'Сохраните подписанный файл и отправьте дальше.',
   ],
-  siteToolSignPdfDetailsTitle: ['An image of a signature, not an e-signature', 'Bu imzo rasmi, ERI emas', 'Изображение подписи, а не ЭЦП'],
+  siteToolSignPdfDetailsTitle: [
+    'An image of a signature, not an e-signature',
+    'Bu imzo rasmi, ERI emas',
+    'Изображение подписи, а не ЭЦП',
+  ],
   siteToolSignPdfDetailsBody: [
     'The editor places a picture of your handwritten signature on the page. It is not an electronic digital signature (ERI) and carries no certificate. Whether an image signature is accepted depends on who receives the document.',
     'Muharrir qo‘lda qo‘yilgan imzongiz rasmini sahifaga joylaydi. Bu elektron raqamli imzo (ERI) emas va sertifikatga ega emas. Imzo rasmi qabul qilinishi hujjatni oluvchiga bog‘liq.',
@@ -2197,7 +3034,11 @@ export const site = {
     'Formani imzolayapsizmi? Imzodan oldin uning maydonlarini o‘sha muharrirda to‘ldiring.',
     'Подписываете форму? Заполните её поля в том же редакторе, прежде чем ставить подпись.',
   ],
-  siteToolSignPdfEditorMoreTitle: ['More you can do in the editor', 'Muharrirda yana nimalar bor', 'Что ещё умеет редактор'],
+  siteToolSignPdfEditorMoreTitle: [
+    'More you can do in the editor',
+    'Muharrirda yana nimalar bor',
+    'Что ещё умеет редактор',
+  ],
   siteToolSignPdfEditorMoreBody: [
     'Add or change text, highlight lines, leave notes, insert or replace images and black out private details. Open the PDF editor to do it all in one file.',
     'Matn qo‘shing yoki o‘zgartiring, qatorlarni ajratib ko‘rsating, izoh qoldiring, rasm qo‘shing yoki almashtiring, maxfiy maʼlumotlarni yashiring. Hammasini bitta faylda qilish uchun PDF muharririni oching.',
@@ -2207,15 +3048,27 @@ export const site = {
   // ── fill-pdf-form (editor-backed) ──
   siteToolFillPdfFormName: ['Fill PDF form', 'PDF formani to‘ldirish', 'Заполнить PDF-форму'],
   siteToolFillPdfFormLine: ['Type into form fields', 'Forma maydonlariga yozing', 'Впишите данные в поля'],
-  siteToolFillPdfFormDesc: ['Fill the fields of an interactive PDF form', 'Interaktiv PDF forma maydonlarini to‘ldiring', 'Поля интерактивной PDF-формы'],
-  siteToolFillPdfFormH1: ['Fill in a PDF form', 'PDF ariza va formalarni to‘ldirish', 'Заполнить PDF-документ онлайн'],
+  siteToolFillPdfFormDesc: [
+    'Fill the fields of an interactive PDF form',
+    'Interaktiv PDF forma maydonlarini to‘ldiring',
+    'Поля интерактивной PDF-формы',
+  ],
+  siteToolFillPdfFormH1: [
+    'Fill in a PDF form',
+    'PDF ariza va formalarni to‘ldirish',
+    'Заполнить PDF-документ онлайн',
+  ],
   siteToolFillPdfFormLead: [
     'Fill in an application, a questionnaire or a bank form right in the PDF. Type into its fields and download the file; the fields stay editable.',
     'Ariza, anketa yoki bank formasini to‘g‘ridan-to‘g‘ri PDF da to‘ldiring. Maydonlarga yozing va faylni yuklab oling, maydonlar tahrirlanadigan bo‘lib qoladi.',
     'Заполните заявление, анкету или банковскую форму прямо в PDF. Впишите данные в поля и скачайте файл — поля останутся редактируемыми.',
   ],
   siteToolFillPdfFormChip1: ['Fields stay editable', 'Maydonlar tahrirlanadi', 'Поля можно править'],
-  siteToolFillPdfFormChip2: ['Web and Telegram Mini App', 'Veb va Telegram Mini App', 'Сайт и Telegram Mini App'],
+  siteToolFillPdfFormChip2: [
+    'Web and Telegram Mini App',
+    'Veb va Telegram Mini App',
+    'Сайт и Telegram Mini App',
+  ],
   siteToolFillPdfFormChip3: ['Up to 200 MB per file', 'Har bir fayl 200 MB gacha', 'До 200 МБ на файл'],
   siteToolFillPdfFormDropTitle: ['Add the PDF form', 'PDF formani qo‘shing', 'Добавьте PDF-форму'],
   siteToolFillPdfFormDropButton: ['Open in the editor', 'Muharrirda ochish', 'Открыть в редакторе'],
@@ -2224,7 +3077,11 @@ export const site = {
     'Maydonlari bor PDF. Telegram, email yoki Google orqali kirganingizdan keyin PDF muharririda ochiladi.',
     'PDF с полями формы. Откроется в редакторе после входа через Telegram, почту или Google.',
   ],
-  siteToolFillPdfFormHowToTitle: ['How to fill in a PDF form', 'PDF formani qanday to‘ldirish mumkin', 'Как заполнить PDF-форму'],
+  siteToolFillPdfFormHowToTitle: [
+    'How to fill in a PDF form',
+    'PDF formani qanday to‘ldirish mumkin',
+    'Как заполнить PDF-форму',
+  ],
   siteToolFillPdfFormStep1Title: ['Open the form', 'Formani oching', 'Откройте форму'],
   siteToolFillPdfFormStep1Text: [
     'Upload the PDF to the editor, on the web or in Telegram.',
@@ -2243,7 +3100,11 @@ export const site = {
     'To‘ldirilgan formani saqlang, javoblarni keyin ham o‘zgartirish mumkin.',
     'Сохраните заполненную форму — ответы можно будет изменить позже.',
   ],
-  siteToolFillPdfFormDetailsTitle: ['Works with real form fields', 'Haqiqiy forma maydonlari uchun', 'Для форм с настоящими полями'],
+  siteToolFillPdfFormDetailsTitle: [
+    'Works with real form fields',
+    'Haqiqiy forma maydonlari uchun',
+    'Для форм с настоящими полями',
+  ],
   siteToolFillPdfFormDetailsBody: [
     'Interactive PDF forms have fields you can type into, and the editor fills those. A scanned or flat form has no fields; there you can type on top of the page with the editor’s text tool instead.',
     'Interaktiv PDF formalarda yozish mumkin bo‘lgan maydonlar bor, muharrir aynan ularni to‘ldiradi. Skanerlangan yoki tekis formada maydon yo‘q, unda muharrirning matn vositasi bilan sahifa ustiga yozasiz.',
@@ -2259,7 +3120,11 @@ export const site = {
     'Imzo ham kerakmi? O‘sha muharrirda imzo rasmini joylashtiring.',
     'Нужна ещё и подпись? Поставьте изображение подписи в том же редакторе.',
   ],
-  siteToolFillPdfFormEditorMoreTitle: ['More you can do in the editor', 'Muharrirda yana nimalar bor', 'Что ещё умеет редактор'],
+  siteToolFillPdfFormEditorMoreTitle: [
+    'More you can do in the editor',
+    'Muharrirda yana nimalar bor',
+    'Что ещё умеет редактор',
+  ],
   siteToolFillPdfFormEditorMoreBody: [
     'Add text where a form has no field, highlight, leave notes, place a signature image or black out private details. Open the PDF editor for everything else.',
     'Maydon yo‘q joyga matn qo‘shing, ajratib ko‘rsating, izoh qoldiring, imzo rasmini qo‘ying yoki maxfiy maʼlumotlarni yashiring. Qolgan hammasi uchun PDF muharririni oching.',

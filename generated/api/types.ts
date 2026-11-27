@@ -108,12 +108,28 @@ export interface PlanDiscount {
   percent: number
   until: string
 }
+/**
+ * A plan bought for a year at once: `price` so'm for 365 days, `per_month` that
+ * price spread over twelve months, `regular` twelve months at the regular
+ * monthly price and `percent` the whole per cent saved. No discount lowers it.
+ */
+export interface PlanYearly {
+  price: number
+  per_month: number
+  regular: number
+  percent: number
+  days: number
+}
+/** How long a payment buys: 30 days, or 365 at the yearly price. */
+export type PlanTerm = 'month' | 'year'
 /** Prices are in UZS; a null price is a free plan. `discount` is null when no promotion is running. */
 export interface Plan {
   id: string
   name?: string
   price_uzs: number | null
   discount: PlanDiscount | null
+  /** Absent from an older platform; null when the plan is sold by the month only. */
+  yearly?: PlanYearly | null
   /** Plan limits by key (weekly_ai_documents, weekly_file_jobs, edits_per_file, …); null is unlimited. */
   limits?: Record<string, number | null>
   [key: string]: unknown
@@ -124,12 +140,15 @@ export interface BillingPlanOption {
   price: number
   regular_price: number
   discount: PlanDiscount | null
+  yearly?: PlanYearly | null
 }
 /** A card transfer: the customer pays the owner's card and uploads the receipt; the owner approves it. */
 export interface ManualPayment {
   id: string
   reference: string
   plan: 'plus' | 'premium'
+  /** Absent from an older platform, which sells months only. */
+  term?: PlanTerm
   amount: number
   currency: string
   status: 'awaiting' | 'submitted' | 'approved' | 'rejected' | 'cancelled' | 'expired' | 'refunded'
@@ -153,6 +172,8 @@ export interface ManualPayment {
 export interface Checkout {
   id: string
   plan: 'plus' | 'premium'
+  /** Absent from an older platform, which sells months only. */
+  term?: PlanTerm
   /** In so'm. */
   amount: number
   currency: string

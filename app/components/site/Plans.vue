@@ -1,10 +1,11 @@
 <script setup lang="ts">
 // The three plans as marketing cards, from the live plans: today's price (with
-// the regular one struck through while a discount runs), the weekly allowances
-// and the channel rule. Nothing renders until the plans are known.
+// the regular one struck through while a discount runs), the year paid at once
+// beneath it, the weekly allowances and the channel rule. Nothing renders until
+// the plans are known.
 const { t, path } = useSite()
 const ws = useWorkspace()
-const { figure, discount, price, regular, dayLabel } = usePricing()
+const { figure, discount, price, regular, yearly, dayLabel } = usePricing()
 const ORDER = ['free', 'plus', 'premium']
 const plans = computed(() =>
   ORDER.map((id) => ws.plans.value.find((plan: any) => plan.id === id)).filter((plan): plan is any => !!plan),
@@ -12,10 +13,13 @@ const plans = computed(() =>
 const capitalized = (id: string) => id[0]!.toUpperCase() + id.slice(1)
 const limit = (plan: any, field: string, key: string) => {
   const value = plan.limits?.[field]
-  return value === null || value === undefined ? t(`${key}Unlimited`) : t(key, { count: figure(Number(value)) })
+  return value === null || value === undefined
+    ? t(`${key}Unlimited`)
+    : t(key, { count: figure(Number(value)) })
 }
 const card = (plan: any) => {
   const deal = discount(plan)
+  const year = yearly(plan)
   return {
     id: plan.id,
     name: t(plan.id),
@@ -30,6 +34,14 @@ const card = (plan: any) => {
         : t('sitePlanPeriod')
       : t('sitePlanFreePeriod'),
     percent: deal?.percent ?? 0,
+    // "Or 11 000 so'm a month, billed 132 000 so'm once a year (−45%)": no discount touches it.
+    yearly: year
+      ? t('sitePlanYearly', {
+          perMonth: figure(year.perMonth),
+          price: figure(year.price),
+          percent: year.percent,
+        })
+      : '',
     rows: [
       limit(plan, 'weekly_ai_documents', 'sitePlanAiDocs'),
       limit(plan, 'weekly_file_jobs', 'sitePlanFileTasks'),
@@ -54,7 +66,11 @@ const card = (plan: any) => {
         <span v-if="plan.regular" class="site-plan-regular"
           >{{ plan.regularLabel[0] }}<s>{{ plan.regular }} so'm</s>{{ plan.regularLabel[1] }}</span
         >
-        <strong>{{ plan.price }}<small>so'm</small></strong><span>{{ plan.period }}</span>
+        <strong>{{ plan.price }}<small>so'm</small></strong
+        ><span>{{ plan.period }}</span>
+        <span v-if="plan.yearly" class="site-plan-yearly" :data-testid="`site-yearly-${plan.id}`">{{
+          plan.yearly
+        }}</span>
       </div>
       <ul>
         <li class="is-note"><AppIcon name="info" class="site-icon" />{{ plan.body }}</li>

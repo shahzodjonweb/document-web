@@ -30,6 +30,7 @@ const ID = {
   failed: '10000000-0000-4000-8000-000000000003',
   bot: '10000000-0000-4000-8000-000000000004',
   test: '10000000-0000-4000-8000-000000000005',
+  year: '10000000-0000-4000-8000-000000000006',
   unknown: '10000000-0000-4000-8000-00000000ffff',
 }
 // Cards saved through inPAY Avto PAY: on the website's billing page, or in the bot.
@@ -90,8 +91,8 @@ const discount = { price: 15000, regular: 20000, percent: 25,
   until: [until.getFullYear(), until.getMonth() + 1, until.getDate()].map((n) => String(n).padStart(2, '0')).join('-') }
 const plans = [
   { id: 'free', name: 'Free', price_uzs: null, discount: null, limits: limits(null, 5, 15, 3) },
-  { id: 'plus', name: 'Plus', price_uzs: 20000, discount, limits: limits(20000, 20, null, 10) },
-  { id: 'premium', name: 'Premium', price_uzs: 60000, discount: null, limits: limits(60000, null, null, null) },
+  { id: 'plus', name: 'Plus', price_uzs: 20000, discount, yearly: { price: 132000, per_month: 11000, regular: 240000, percent: 45, days: 365 }, limits: limits(20000, 20, null, 10) },
+  { id: 'premium', name: 'Premium', price_uzs: 60000, discount: null, yearly: { price: 396000, per_month: 33000, regular: 720000, percent: 45, days: 365 }, limits: limits(60000, null, null, null) },
 ]
 // Telegram's own script, as far as the app reads it inside a Mini App.
 const TELEGRAM = `window.Telegram={WebApp:{initData:'fixture',version:'8.0',platform:'android',isVersionAtLeast:()=>true,
@@ -153,8 +154,8 @@ async function open(options = {}) {
       return json({
         enabled: state.card, currency: 'UZS', period_days: 30, automatic: state.automatic,
         plans: [
-          { plan: 'plus', price: 15000, regular_price: 20000, discount },
-          { plan: 'premium', price: 60000, regular_price: 60000, discount: null },
+          { plan: 'plus', price: 15000, regular_price: 20000, discount, yearly: { price: 132000, per_month: 11000, regular: 240000, percent: 45, days: 365 } },
+          { plan: 'premium', price: 60000, regular_price: 60000, discount: null, yearly: { price: 396000, per_month: 33000, regular: 720000, percent: 45, days: 365 } },
         ],
         payment: null, checkout: state.latest ? state.checkouts.get(state.latest) : null,
       })
@@ -765,6 +766,41 @@ try {
   await page.getByTestId('pay-plus').waitFor()
   assert.equal(await page.getByTestId('renewal').count(), 0)
   checks.push('A card saved in the bot shows its renewal on the billing page, which turns it off and on and removes the card, and is not paid with here in one tap')
+
+  // ── A year paid at once: the switch, the per-month figure, one payment for 365 days ──
+  // Saved cards are offered, yet a year is paid once on inPAY's page: no «renew every month».
+  reset({ card: false, created: checkout(ID.year, { term: 'year', amount: 132000 }),
+    renewal: { offered: true, card: savedHere, renewal: null, can_turn_on: false } })
+  await page.goto(`${origin}/en/app/billing`, { waitUntil: 'domcontentloaded' })
+  await page.getByTestId('term-switch').waitFor()
+  assert.equal(await page.getByRole('radio', { name: 'Monthly' }).isChecked(), true, 'the month is shown first')
+  assert.match(await page.getByTestId('pay-plus').innerText(), /^Pay 15 000 so'm$/)
+  await page.getByTestId('term-year').click()
+  assert.equal(await page.getByTestId('year-month-plus').innerText(), '11 000')
+  assert.equal(await page.getByTestId('year-month-premium').innerText(), '33 000')
+  assert.equal(await page.getByTestId('year-saving-plus').innerText(), 'Save 45%')
+  assert.equal(await page.getByTestId('year-total-plus').innerText(), "billed 132 000 so'm once a year")
+  assert.equal(await page.getByTestId('discount-plus').count(), 0, 'the month’s discount is not the year’s')
+  assert.match(await page.getByTestId('pay-plus').innerText(), /^Pay 132 000 so'm$/)
+  await audit(page, 'yearly-plans', page.locator('.plan-grid'))
+  await page.getByTestId('pay-plus').click()
+  const yearPanel = page.getByTestId('manual-payment')
+  await yearPanel.waitFor()
+  assert.match(await yearPanel.locator('h2').innerText(), /^Plus · 1 year · 132 000 so'm$/)
+  assert.match((await yearPanel.getByTestId('year-note').innerText()).replace(/\s+/g, ' '),
+    /^−45% 11 000 so'm a month · Paid once for 365 days\. Nothing renews by itself\.$/)
+  assert.equal(await yearPanel.getByTestId('manual-discount').count(), 0)
+  assert.equal(await yearPanel.getByTestId('card-ways').count(), 0, 'no saved-card choice for a year')
+  assert.match(await page.getByTestId('checkout-pay').innerText(), /^Pay 132 000 so'm$/)
+  await audit(page, 'yearly-method', yearPanel)
+  const askedBefore = posted().length
+  await page.getByTestId('checkout-pay').click()
+  await page.waitForURL(`${INPAY}/**`)
+  assert.deepEqual(posted().slice(askedBefore).map((r) => JSON.parse(r.body)), [{ plan: 'plus', term: 'year' }])
+  await page.goto(`${origin}/en/app/billing`, { waitUntil: 'domcontentloaded' })
+  await page.getByTestId('checkout-status').getByTestId('checkout-waiting').waitFor()
+  assert.match(await page.getByTestId('checkout-status').innerText(), /Plus · 1 year · 132 000 so'm/)
+  checks.push('Yearly: the switch shows 11 000 so\'m a month billed 132 000 once a year (Save 45%), and paying asks for one 365-day payment with no renewal choice')
 
   assert.deepEqual(errors, [])
   assert.deepEqual(unexpected, [], 'every API call is covered by the fixture')

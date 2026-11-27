@@ -715,7 +715,11 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Размер изменён на {width} × {height} мм',
   ],
   editorTextPlaceholder: ['Type here', 'Shu yerga yozing', 'Введите текст'],
-  editorWrapToPage: ['Break lines to fit the page', 'Sahifaga sig‘dirib qatorlarga bo‘lish', 'Разбить на строки по ширине'],
+  editorWrapToPage: [
+    'Break lines to fit the page',
+    'Sahifaga sig‘dirib qatorlarga bo‘lish',
+    'Разбить на строки по ширине',
+  ],
   editorTextOverflow: [
     'This text runs past the page edge. Shorten it, reduce the size, or break the lines.',
     'Bu matn sahifa chetidan chiqib ketmoqda. Qisqartiring, o‘lchamini kichraytiring yoki qatorlarga bo‘ling.',
@@ -774,7 +778,11 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Значения вписываются в рамку поля. Слишком длинные значения будут отклонены при создании нового файла.',
   ],
   editorLocked: ['Not available', 'Mavjud emas', 'Недоступно'],
-  editorLockedTool: ['Not available right now: {tool}.', '{tool} hozircha mavjud emas.', 'Сейчас недоступно: {tool}.'],
+  editorLockedTool: [
+    'Not available right now: {tool}.',
+    '{tool} hozircha mavjud emas.',
+    'Сейчас недоступно: {tool}.',
+  ],
   editorRedactIntro: [
     'Draw over anything that must be removed. In the new file every page becomes a picture, so selectable text, forms and notes are gone from the result.',
     'Olib tashlanishi kerak bo‘lgan joylarni belgilang. Yangi faylda har bir sahifa rasmga aylanadi, shuning uchun natijada tanlanadigan matn, shakllar va izohlar qolmaydi.',
@@ -846,15 +854,31 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Bu qoralama hajm chegarasiga yetdi. Matnni qisqartiring yoki bitta o‘zgarishni olib tashlang.',
     'Черновик достиг предела размера. Сократите текст или уберите одно изменение.',
   ],
-  editorIssueOutOfBounds: ['This sits outside the page.', 'Bu sahifadan tashqarida.', 'Находится за пределами страницы.'],
-  editorIssueEmptyText: ['Add some text, or remove this.', 'Matn qo‘shing yoki buni olib tashlang.', 'Добавьте текст или удалите это.'],
+  editorIssueOutOfBounds: [
+    'This sits outside the page.',
+    'Bu sahifadan tashqarida.',
+    'Находится за пределами страницы.',
+  ],
+  editorIssueEmptyText: [
+    'Add some text, or remove this.',
+    'Matn qo‘shing yoki buni olib tashlang.',
+    'Добавьте текст или удалите это.',
+  ],
   editorIssueNoImage: ['Choose an image for this.', 'Buning uchun rasm tanlang.', 'Выберите изображение.'],
   editorIssueEmptyField: ['Choose a form field.', 'Shakl maydonini tanlang.', 'Выберите поле формы.'],
-  editorIssueEmptyFind: ['Enter the text to find.', 'Topiladigan matnni kiriting.', 'Введите текст для поиска.'],
+  editorIssueEmptyFind: [
+    'Enter the text to find.',
+    'Topiladigan matnni kiriting.',
+    'Введите текст для поиска.',
+  ],
   editorIssueShortLine: ['Draw a longer line.', 'Uzunroq chiziq chizing.', 'Нарисуйте более длинную линию.'],
   editorNothingToExport: ['Add a change first.', 'Avval o‘zgarish qo‘shing.', 'Сначала добавьте изменение.'],
   editorRecentDocuments: ['Continue editing', 'Tahrirni davom ettirish', 'Продолжить редактирование'],
-  editorDeleteDocument: ['Delete this editing session', 'Bu tahrir seansini o‘chirish', 'Удалить эту сессию редактирования'],
+  editorDeleteDocument: [
+    'Delete this editing session',
+    'Bu tahrir seansini o‘chirish',
+    'Удалить эту сессию редактирования',
+  ],
   editorExportSummary: ['Summary of the new file', 'Yangi fayl xulosasi', 'Сводка нового файла'],
   editorChangesOnPage: ['{count} on this page', 'Bu sahifada {count} ta', '{count} на этой странице'],
 
@@ -987,7 +1011,11 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   editorBlackOutCards: ['Cards', 'Kartalar', 'Карты'],
   editorBlackOutPassports: ['Passports', 'Pasportlar', 'Паспорта'],
   editorBlackOutPinfl: ['PINFL', 'JSHSHIR', 'ПИНФЛ'],
-  editorBlackOutLooking: ['Looking through the pages…', 'Sahifalar ko‘rib chiqilmoqda…', 'Ищем на страницах…'],
+  editorBlackOutLooking: [
+    'Looking through the pages…',
+    'Sahifalar ko‘rib chiqilmoqda…',
+    'Ищем на страницах…',
+  ],
   editorBlackOutNothing: [
     'Nothing found in the pages’ words. Words in a picture of a page cannot be found: tap them to cover them.',
     'Sahifalardagi so‘zlardan hech narsa topilmadi. Sahifa rasmidagi so‘zlarni topib bo‘lmaydi: ularni yopish uchun bosing.',
@@ -998,7 +1026,11 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Topilganlarning hammasi bo‘yab yopildi.',
     'Всё найденное закрашено.',
   ],
-  editorBlackOutMoreLater: ['later pages not looked through', 'keyingi sahifalar ko‘rilmadi', 'дальше не просмотрено'],
+  editorBlackOutMoreLater: [
+    'later pages not looked through',
+    'keyingi sahifalar ko‘rilmadi',
+    'дальше не просмотрено',
+  ],
   editorBlackOutFirstCovered: [
     'The first {count} found are blacked out; later pages were not looked through.',
     'Topilgan dastlabki {count} tasi bo‘yab yopildi; keyingi sahifalar ko‘rilmadi.',
@@ -1013,16 +1045,28 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   editorBlackOutFound_few: ['{count} matches', '{count} ta topildi', '{count} совпадения'],
   editorBlackOutFound_many: ['{count} matches', '{count} ta topildi', '{count} совпадений'],
   editorBlackOutFound_other: ['{count} matches', '{count} ta topildi', '{count} совпадения'],
-  editorBlackOutAll: ['Black out all {count}', 'Hammasini bo‘yab yopish ({count})', 'Закрасить все ({count})'],
+  editorBlackOutAll: [
+    'Black out all {count}',
+    'Hammasini bo‘yab yopish ({count})',
+    'Закрасить все ({count})',
+  ],
   editorBlackOutKeeps: [
     'Page {page}: the other words stay text',
     '{page}-sahifa: qolgan so‘zlar matn bo‘lib qoladi',
     'Страница {page}: остальные слова останутся текстом',
   ],
-  editorBlackOutBecomes: ['Page {page} becomes a picture', '{page}-sahifa rasmga aylanadi', 'Страница {page} станет картинкой'],
+  editorBlackOutBecomes: [
+    'Page {page} becomes a picture',
+    '{page}-sahifa rasmga aylanadi',
+    'Страница {page} станет картинкой',
+  ],
   editorBlackOutWhyScan: ['It is a scan.', 'Bu skanerlangan sahifa.', 'Это скан.'],
   editorBlackOutWhyPicture: ['A box covers a picture.', 'Quti rasmni yopadi.', 'Плашка закрывает картинку.'],
-  editorBlackOutWhyMark: ['A box is under another change.', 'Quti boshqa o‘zgarish ostida.', 'Плашка под другим изменением.'],
+  editorBlackOutWhyMark: [
+    'A box is under another change.',
+    'Quti boshqa o‘zgarish ostida.',
+    'Плашка под другим изменением.',
+  ],
   editorBlackOutWhyAround: [
     'Covering it would also take lines or shapes beside it.',
     'Uni yopish yonidagi chiziq yoki shakllarni ham olib tashlaydi.',
@@ -1033,7 +1077,11 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Uning so‘zlarini boshqa yo‘l bilan xavfsiz olib tashlab bo‘lmadi.',
     'Иначе надёжно убрать слова не получилось.',
   ],
-  editorBlackOutChecking: ['Page {page}: checking…', '{page}-sahifa: tekshirilmoqda…', 'Страница {page}: проверяем…'],
+  editorBlackOutChecking: [
+    'Page {page}: checking…',
+    '{page}-sahifa: tekshirilmoqda…',
+    'Страница {page}: проверяем…',
+  ],
   editorBlackOutMaybe: [
     'Page {page} may become a picture',
     '{page}-sahifa rasmga aylanishi mumkin',
@@ -1119,16 +1167,32 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Tanlangan sahifalarni yangi faylga ajratish',
     'Извлечь выбранные страницы в новый файл',
   ],
-  editorPagesReset: ['Undo all page changes', 'Sahifa o‘zgarishlarini bekor qilish', 'Отменить все изменения страниц'],
+  editorPagesReset: [
+    'Undo all page changes',
+    'Sahifa o‘zgarishlarini bekor qilish',
+    'Отменить все изменения страниц',
+  ],
   editorPagesApply: ['Apply page changes', 'Sahifa o‘zgarishlarini qo‘llash', 'Применить изменения страниц'],
-  editorPagesPlan: ['This runs as {feature}.', 'Bu {feature} sifatida bajariladi.', 'Выполняется как {feature}.'],
+  editorPagesPlan: [
+    'This runs as {feature}.',
+    'Bu {feature} sifatida bajariladi.',
+    'Выполняется как {feature}.',
+  ],
   editorPagesMultiStep: [
     'These changes need {count} separate new files, because each one runs a single operation. Apply them one at a time, or simplify the changes.',
     'Bu o‘zgarishlar uchun {count} ta alohida yangi fayl kerak, chunki har biri bitta amalni bajaradi. Ularni birma-bir qo‘llang yoki o‘zgarishlarni soddalashtiring.',
     'Для этих изменений нужно {count} отдельных новых файла, так как каждый выполняет одну операцию. Применяйте их по очереди или упростите изменения.',
   ],
-  editorPagesNoChange: ['No page changes yet.', 'Hozircha sahifa o‘zgarishlari yo‘q.', 'Изменений страниц пока нет.'],
-  editorPagesKeepOne: ['Keep at least one page.', 'Kamida bitta sahifa qoldiring.', 'Оставьте хотя бы одну страницу.'],
+  editorPagesNoChange: [
+    'No page changes yet.',
+    'Hozircha sahifa o‘zgarishlari yo‘q.',
+    'Изменений страниц пока нет.',
+  ],
+  editorPagesKeepOne: [
+    'Keep at least one page.',
+    'Kamida bitta sahifa qoldiring.',
+    'Оставьте хотя бы одну страницу.',
+  ],
   editorPagesBlockedByEdits: [
     'You have content edits on this document. Page changes create a new file and would leave those edits behind.',
     'Bu hujjatda mazmun o‘zgarishlari bor. Sahifa o‘zgarishlari yangi fayl yaratadi va bu tahrirlar unga o‘tmaydi.',
@@ -1171,8 +1235,16 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   editorShortcutsDocument: ['Document', 'Hujjat', 'Документ'],
   editorShortcutNudge: ['Move a little', 'Biroz siljitish', 'Немного сдвинуть'],
   editorShortcutNudgeFar: ['Move further', 'Ko‘proq siljitish', 'Сдвинуть дальше'],
-  editorShortcutEdit: ['Edit the selected change', 'Tanlangan o‘zgarishni tahrirlash', 'Редактировать выбранное'],
-  editorShortcutDelete: ['Remove the selected change', 'Tanlangan o‘zgarishni o‘chirish', 'Удалить выбранное'],
+  editorShortcutEdit: [
+    'Edit the selected change',
+    'Tanlangan o‘zgarishni tahrirlash',
+    'Редактировать выбранное',
+  ],
+  editorShortcutDelete: [
+    'Remove the selected change',
+    'Tanlangan o‘zgarishni o‘chirish',
+    'Удалить выбранное',
+  ],
   // Pages in the draft, sent in the same job as the marks.
   editorKindPageTurn: ['Page turned', 'Sahifa burildi', 'Страница повёрнута'],
   editorKindPageRemoved: ['Page removed', 'Sahifa olib tashlandi', 'Страница удалена'],
@@ -1507,7 +1579,11 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   sendToChat: ['Send to chat', 'Chatga yuborish', 'Отправить в чат'],
   sentToChat: ['Sent to the chat', 'Chatga yuborildi', 'Отправлено в чат'],
   editorShortcutEscape: ['Put the tool down', 'Asbobni qo‘yish', 'Отложить инструмент'],
-  editorShortcutNext: ['Go to the next change', 'Keyingi o‘zgarishga o‘tish', 'Перейти к следующему изменению'],
+  editorShortcutNext: [
+    'Go to the next change',
+    'Keyingi o‘zgarishga o‘tish',
+    'Перейти к следующему изменению',
+  ],
   editorShortcutZoom: ['Zoom in or out', 'Kattalashtirish yoki kichiklashtirish', 'Увеличить или уменьшить'],
 
   // Document shape: how long it is and how tightly the page is set
@@ -1539,12 +1615,24 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   'ai.pptx': ['PowerPoint Slides', 'PowerPoint slaydlar', 'PowerPoint слайды'],
   'ai.cv': ['CV (résumé)', 'CV (rezyume)', 'Резюме (CV)'],
   studioDescribe: ['Describe what you want', 'Nima kerakligini yozing', 'Опишите, что нужно'],
-  studioDescribeHint: ['Everything in one description: the subject, who it is for, the tone, and how many pages. No page count means {pages}; the most is {max}.', 'Hammasi bitta tavsifda: mavzu, kim uchun, uslub va necha sahifa. Sahifa soni ko‘rsatilmasa — {pages} ta; eng ko‘pi {max} ta.', 'Всё в одном описании: тема, для кого, тон и сколько страниц. Без указания — {pages}; максимум {max}.'],
-  studioDescribePlaceholder: ['A 6 page introduction to tide tables for secondary school students, plain language, with a worked example on each page.', 'O‘rta maktab o‘quvchilari uchun 6 sahifalik kirish, sodda tilda, har sahifada misol bilan.', 'Введение на 6 страниц для старшеклассников, простым языком, с примером на каждой странице.'],
+  studioDescribeHint: [
+    'Everything in one description: the subject, who it is for, the tone, and how many pages. No page count means {pages}; the most is {max}.',
+    'Hammasi bitta tavsifda: mavzu, kim uchun, uslub va necha sahifa. Sahifa soni ko‘rsatilmasa — {pages} ta; eng ko‘pi {max} ta.',
+    'Всё в одном описании: тема, для кого, тон и сколько страниц. Без указания — {pages}; максимум {max}.',
+  ],
+  studioDescribePlaceholder: [
+    'A 6 page introduction to tide tables for secondary school students, plain language, with a worked example on each page.',
+    'O‘rta maktab o‘quvchilari uchun 6 sahifalik kirish, sodda tilda, har sahifada misol bilan.',
+    'Введение на 6 страниц для старшеклассников, простым языком, с примером на каждой странице.',
+  ],
   studioTryOne: ['Start from an example', 'Namunadan boshlang', 'Начните с примера'],
   studioGuideLink: ['How to describe it', 'Qanday yozish kerak', 'Как описать'],
   studioPagesReading: ['{count} pages', '{count} sahifa', '{count} страниц'],
-  studioPagesClamped: ['You asked for {asked}; the most is {given}.', 'Siz {asked} ta so‘radingiz; eng ko‘pi {given} ta.', 'Вы запросили {asked}; максимум — {given}.'],
+  studioPagesClamped: [
+    'You asked for {asked}; the most is {given}.',
+    'Siz {asked} ta so‘radingiz; eng ko‘pi {given} ta.',
+    'Вы запросили {asked}; максимум — {given}.',
+  ],
   studioFewer: ['One fewer', 'Bittaga kamroq', 'На одну меньше'],
   studioMore: ['One more', 'Bittaga ko‘proq', 'На одну больше'],
   studioSeePlans: ['See plans', 'Tariflarni ko‘rish', 'Посмотреть тарифы'],
@@ -1601,7 +1689,11 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   ],
   deckSetupCategories: ['Design categories', 'Dizayn turkumlari', 'Категории дизайнов'],
   deckSetupPhoto: ['Photo', 'Foto', 'Фото'],
-  deckSetupSave: ['Save: {count} slides, {design}', 'Saqlash: {count} ta slayd, {design}', 'Сохранить: {count} слайдов, {design}'],
+  deckSetupSave: [
+    'Save: {count} slides, {design}',
+    'Saqlash: {count} ta slayd, {design}',
+    'Сохранить: {count} слайдов, {design}',
+  ],
   deckSetupSaved: [
     'Saved. The review in the chat shows the new settings.',
     'Saqlandi. Chatdagi ko‘rib chiqishda yangi sozlamalar ko‘rsatilgan.',
@@ -1612,7 +1704,11 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Bu taqdimot endi ochiq emas. Uni botda qaytadan tasvirlab bering.',
     'Эта презентация больше не открыта. Опишите её в боте заново.',
   ],
-  deckSetupNotDeck: ['Only slides have a design to choose.', 'Dizayn faqat slaydlar uchun tanlanadi.', 'Дизайн выбирается только для слайдов.'],
+  deckSetupNotDeck: [
+    'Only slides have a design to choose.',
+    'Dizayn faqat slaydlar uchun tanlanadi.',
+    'Дизайн выбирается только для слайдов.',
+  ],
   // CV setup, opened from the bot's review as a Mini App: the template only.
   // A CV's length is the template's to fit, so there is no count to choose.
   cvSetupTitle: ['CV template', 'Rezyume shabloni', 'Шаблон резюме'],
@@ -1647,7 +1743,11 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Bu rezyume endi ochiq emas. Botga o‘zingiz haqingizda qaytadan yozing.',
     'Это резюме больше не открыто. Напишите боту о себе заново.',
   ],
-  cvSetupNotCv: ['Only a CV has a template to choose.', 'Shablon faqat rezyume uchun tanlanadi.', 'Шаблон выбирается только для резюме.'],
+  cvSetupNotCv: [
+    'Only a CV has a template to choose.',
+    'Shablon faqat rezyume uchun tanlanadi.',
+    'Шаблон выбирается только для резюме.',
+  ],
   // The CV service in Create with AI: one message about the person, an
   // optional portrait and a template. Nothing here is counted in pages.
   studioCvDescribeHint: [
@@ -1759,7 +1859,11 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   // Where a CV starts from, chosen first: a description, the LinkedIn profile
   // (its Save to PDF, or screenshots) or an old CV. In the last two the text
   // the customer types is notes on top of the files.
-  studioCvStartFrom: ['How do you want to make your CV?', 'Rezyumeni qanday tuzamiz?', 'Как составим резюме?'],
+  studioCvStartFrom: [
+    'How do you want to make your CV?',
+    'Rezyumeni qanday tuzamiz?',
+    'Как составим резюме?',
+  ],
   studioCvFromText: ['Describe yourself', 'O‘zingiz haqingizda yozing', 'Рассказать о себе'],
   studioCvFromTextHint: [
     'Write about yourself in one message.',
@@ -1919,22 +2023,54 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Yana muvaffaqiyatsiz bo‘lsa, tavsifda kimligingiz va nima ish qilganingiz yozilganini tekshiring: ismingiz, ish joylari va sanalari, taʼlim va ko‘nikmalar.',
     'Если снова не получится, проверьте, что в описании есть, кто вы и чем занимались: имя, места работы с датами, образование и навыки.',
   ],
-  guideTitle: ['How to describe what you want', 'Nimani xohlashingizni qanday yozish kerak', 'Как описать, что вам нужно'],
-  guideSub: ['One description is the whole brief. Here is what it understands.', 'Bitta tavsif — butun topshiriq. U nimani tushunishini ko‘ring.', 'Одно описание — всё задание. Вот что оно понимает.'],
-  guideLead: ['Write it as you would explain it to a colleague. Say what the document is about, who will read it, how it should sound, and how long it should be. There is nothing else to fill in.', 'Hamkasbingizga tushuntirgandek yozing. Hujjat nima haqida, kim o‘qiydi, qanday ohangda va qancha hajmda bo‘lishini ayting. Boshqa hech narsa to‘ldirilmaydi.', 'Пишите так, как объяснили бы коллеге. О чём документ, кто его прочитает, каким тоном и какого объёма. Больше ничего заполнять не нужно.'],
+  guideTitle: [
+    'How to describe what you want',
+    'Nimani xohlashingizni qanday yozish kerak',
+    'Как описать, что вам нужно',
+  ],
+  guideSub: [
+    'One description is the whole brief. Here is what it understands.',
+    'Bitta tavsif — butun topshiriq. U nimani tushunishini ko‘ring.',
+    'Одно описание — всё задание. Вот что оно понимает.',
+  ],
+  guideLead: [
+    'Write it as you would explain it to a colleague. Say what the document is about, who will read it, how it should sound, and how long it should be. There is nothing else to fill in.',
+    'Hamkasbingizga tushuntirgandek yozing. Hujjat nima haqida, kim o‘qiydi, qanday ohangda va qancha hajmda bo‘lishini ayting. Boshqa hech narsa to‘ldirilmaydi.',
+    'Пишите так, как объяснили бы коллеге. О чём документ, кто его прочитает, каким тоном и какого объёма. Больше ничего заполнять не нужно.',
+  ],
   guideUnderstands: ['What it understands', 'U nimani tushunadi', 'Что оно понимает'],
   guideExamples: ['Descriptions you can use', 'Tayyor tavsiflar', 'Готовые описания'],
   guideUse: ['Use this', 'Shundan foydalanish', 'Использовать'],
   guideRowPages: ['Length', 'Hajm', 'Объём'],
-  guideRowPagesBody: ['“in 8 pages”, “a 3-page summary”, “12 slides”. Without one you get {pages}.', '«8 sahifada», «3 sahifalik xulosa», «12 slayd». Ko‘rsatilmasa — {pages} ta.', '«на 8 страниц», «краткое изложение на 3 страницы», «12 слайдов». Без указания — {pages}.'],
+  guideRowPagesBody: [
+    '“in 8 pages”, “a 3-page summary”, “12 slides”. Without one you get {pages}.',
+    '«8 sahifada», «3 sahifalik xulosa», «12 slayd». Ko‘rsatilmasa — {pages} ta.',
+    '«на 8 страниц», «краткое изложение на 3 страницы», «12 слайдов». Без указания — {pages}.',
+  ],
   guideRowAudience: ['Who it is for', 'Kim uchun', 'Для кого'],
-  guideRowAudienceBody: ['“for secondary school students”, “for a board of directors”, “for new staff on day one”.', '«o‘rta maktab o‘quvchilari uchun», «direktorlar kengashi uchun», «birinchi kungi yangi xodimlar uchun».', '«для старшеклассников», «для совета директоров», «для новых сотрудников в первый день».'],
+  guideRowAudienceBody: [
+    '“for secondary school students”, “for a board of directors”, “for new staff on day one”.',
+    '«o‘rta maktab o‘quvchilari uchun», «direktorlar kengashi uchun», «birinchi kungi yangi xodimlar uchun».',
+    '«для старшеклассников», «для совета директоров», «для новых сотрудников в первый день».',
+  ],
   guideRowTone: ['Tone', 'Uslub', 'Тон'],
-  guideRowToneBody: ['“plain language”, “formal”, “friendly and direct”, “academic, defining terms on first use”.', '«sodda tilda», «rasmiy», «do‘stona va aniq», «ilmiy, atamalar birinchi marta izohlanadi».', '«простым языком», «формально», «дружелюбно и по делу», «академично, с пояснением терминов».'],
+  guideRowToneBody: [
+    '“plain language”, “formal”, “friendly and direct”, “academic, defining terms on first use”.',
+    '«sodda tilda», «rasmiy», «do‘stona va aniq», «ilmiy, atamalar birinchi marta izohlanadi».',
+    '«простым языком», «формально», «дружелюбно и по делу», «академично, с пояснением терминов».',
+  ],
   guideRowStructure: ['Structure', 'Tuzilishi', 'Структура'],
-  guideRowStructureBody: ['“one idea per page”, “start with the problem, end with the numbers”, “a worked example on each page”.', '«har sahifada bitta fikr», «muammodan boshlang, raqamlar bilan tugating», «har sahifada misol».', '«одна мысль на страницу», «начните с проблемы, закончите цифрами», «на каждой странице пример».'],
+  guideRowStructureBody: [
+    '“one idea per page”, “start with the problem, end with the numbers”, “a worked example on each page”.',
+    '«har sahifada bitta fikr», «muammodan boshlang, raqamlar bilan tugating», «har sahifada misol».',
+    '«одна мысль на страницу», «начните с проблемы, закончите цифрами», «на каждой странице пример».',
+  ],
   guideRowLook: ['How a deck looks', 'Taqdimot ko‘rinishi', 'Вид презентации'],
-  guideRowLookBody: ['“a dark deck”, “bold, in navy”, “minimal, in burgundy”. Slides only — a document has one fixed style.', '«qorong‘i taqdimot», «yorqin, ko‘k rangda», «sodda, bordo rangda». Faqat slaydlar uchun — hujjat uslubi o‘zgarmas.', '«тёмная презентация», «ярко, в синем», «минимально, бордовый». Только для слайдов — у документа один стиль.'],
+  guideRowLookBody: [
+    '“a dark deck”, “bold, in navy”, “minimal, in burgundy”. Slides only — a document has one fixed style.',
+    '«qorong‘i taqdimot», «yorqin, ko‘k rangda», «sodda, bordo rangda». Faqat slaydlar uchun — hujjat uslubi o‘zgarmas.',
+    '«тёмная презентация», «ярко, в синем», «минимально, бордовый». Только для слайдов — у документа один стиль.',
+  ],
   guideRowQuestions: ['Questions', 'Savollar', 'Вопросы'],
   guideRowQuestionsBody: [
     '“with 10 review questions at the end”. Questions are only added when you ask.',
@@ -1942,17 +2078,37 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     '«10 вопросов для повторения в конце». Вопросы добавляются только по запросу.',
   ],
   guideRowSources: ['Your own material', 'O‘z materialingiz', 'Ваш материал'],
-  guideRowSourcesBody: ['Paste it into the description, or attach PDFs. Anything you supply is used as the source rather than invented.', 'Tavsifga joylashtiring yoki PDF biriktiring. Bergan materialingiz manba sifatida ishlatiladi, to‘qib chiqarilmaydi.', 'Вставьте его в описание или приложите PDF. То, что вы дали, используется как источник, а не выдумывается.'],
+  guideRowSourcesBody: [
+    'Paste it into the description, or attach PDFs. Anything you supply is used as the source rather than invented.',
+    'Tavsifga joylashtiring yoki PDF biriktiring. Bergan materialingiz manba sifatida ishlatiladi, to‘qib chiqarilmaydi.',
+    'Вставьте его в описание или приложите PDF. То, что вы дали, используется как источник, а не выдумывается.',
+  ],
   guideRowSkip: ['What to leave out', 'Nimani yozmaslik kerak', 'Что не нужно писать'],
-  guideRowSkipBody: ['Fonts, margins and page size are set for you, and every page is filled to the bottom except the last.', 'Shrift, chekka va sahifa o‘lchami tayyor; oxirgisidan tashqari har sahifa to‘liq to‘ldiriladi.', 'Шрифты, поля и размер страницы заданы; каждая страница заполняется до конца, кроме последней.'],
+  guideRowSkipBody: [
+    'Fonts, margins and page size are set for you, and every page is filled to the bottom except the last.',
+    'Shrift, chekka va sahifa o‘lchami tayyor; oxirgisidan tashqari har sahifa to‘liq to‘ldiriladi.',
+    'Шрифты, поля и размер страницы заданы; каждая страница заполняется до конца, кроме последней.',
+  ],
   guide: ['Prompt guide', 'Tavsif qo‘llanmasi', 'Руководство по описанию'],
   reviseTitle: ['Need something changed?', 'Biror narsani o‘zgartirish kerakmi?', 'Нужно что-то изменить?'],
-  reviseBody: ['Say what should change. Everything you do not mention stays exactly as it is.', 'Nimani o‘zgartirish kerakligini yozing. Siz aytmagan hamma narsa o‘z holicha qoladi.', 'Напишите, что изменить. Всё, о чём вы не упомянете, останется как есть.'],
-  reviseSelectedBanner: ['AI will update only page/slide {pages}. Other content will be kept.', 'AI faqat {pages}-sahifa/slaydni yangilaydi. Boshqa mazmun saqlanadi.', 'ИИ обновит только страницу/слайд {pages}. Остальное содержимое сохранится.'],
+  reviseBody: [
+    'Say what should change. Everything you do not mention stays exactly as it is.',
+    'Nimani o‘zgartirish kerakligini yozing. Siz aytmagan hamma narsa o‘z holicha qoladi.',
+    'Напишите, что изменить. Всё, о чём вы не упомянете, останется как есть.',
+  ],
+  reviseSelectedBanner: [
+    'AI will update only page/slide {pages}. Other content will be kept.',
+    'AI faqat {pages}-sahifa/slaydni yangilaydi. Boshqa mazmun saqlanadi.',
+    'ИИ обновит только страницу/слайд {pages}. Остальное содержимое сохранится.',
+  ],
   reviseScope: ['Where to apply it', 'Qayerni o‘zgartiramiz', 'Где изменить'],
   reviseWhole: ['Whole document', 'Butun hujjat', 'Весь документ'],
   reviseUntitled: ['Untitled', 'Sarlavhasiz', 'Без названия'],
-  reviseScopeHint: ['Choose a page or slide to keep all others unchanged. Use the whole document to change its title, questions or length.', 'Boshqalari o‘zgarmasligi uchun sahifa yoki slaydni tanlang. Sarlavha, savollar yoki hajmni o‘zgartirish uchun butun hujjatni tanlang.', 'Выберите страницу или слайд — остальные сохранятся. Для изменения названия, вопросов или объёма выберите весь документ.'],
+  reviseScopeHint: [
+    'Choose a page or slide to keep all others unchanged. Use the whole document to change its title, questions or length.',
+    'Boshqalari o‘zgarmasligi uchun sahifa yoki slaydni tanlang. Sarlavha, savollar yoki hajmni o‘zgartirish uchun butun hujjatni tanlang.',
+    'Выберите страницу или слайд — остальные сохранятся. Для изменения названия, вопросов или объёма выберите весь документ.',
+  ],
   generationRetryTitle: ['Continue generation', 'Yaratishni davom ettirish', 'Продолжить создание'],
   generationRetryBody: [
     'Completed AI work is reused when the draft and settings are unchanged. A failed attempt doesn’t count against your week.',
@@ -1975,11 +2131,23 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   generationRetryReview: ['Review & retry', 'Ko‘rib chiqish va qayta urinish', 'Проверить и повторить'],
   generationRetryConfirm: ['Confirm & continue', 'Tasdiqlash va davom etish', 'Подтвердить и продолжить'],
   reviseLabel: ['What should change?', 'Nimani o‘zgartiramiz?', 'Что изменить?'],
-  revisePlaceholder: ['Make the second section shorter and add an example to each page.', 'Ikkinchi bo‘limni qisqartiring va har sahifaga misol qo‘shing.', 'Сократите второй раздел и добавьте пример на каждую страницу.'],
+  revisePlaceholder: [
+    'Make the second section shorter and add an example to each page.',
+    'Ikkinchi bo‘limni qisqartiring va har sahifaga misol qo‘shing.',
+    'Сократите второй раздел и добавьте пример на каждую страницу.',
+  ],
   reviseAction: ['Review the change', 'O‘zgarishni ko‘rib chiqish', 'Проверить изменение'],
-  reviseExamples: ['Make it shorter · Use a friendlier tone · Add an example to each page · The same in 8 pages', 'Qisqartiring · Do‘stona uslubda · Har sahifaga misol · Xuddi shu 8 sahifada', 'Сократите · Дружелюбнее · Пример на каждую страницу · То же на 8 страницах'],
+  reviseExamples: [
+    'Make it shorter · Use a friendlier tone · Add an example to each page · The same in 8 pages',
+    'Qisqartiring · Do‘stona uslubda · Har sahifaga misol · Xuddi shu 8 sahifada',
+    'Сократите · Дружелюбнее · Пример на каждую страницу · То же на 8 страницах',
+  ],
   studioSlidesReading: ['{count} slides', '{count} slayd', '{count} слайд'],
-  reviseBanner: ['You are changing an existing document. Everything you did not mention stays as it is.', 'Siz mavjud hujjatni o‘zgartiryapsiz. Aytmagan narsalaringiz o‘z holicha qoladi.', 'Вы изменяете существующий документ. Всё, о чём вы не упомянули, останется как есть.'],
+  reviseBanner: [
+    'You are changing an existing document. Everything you did not mention stays as it is.',
+    'Siz mavjud hujjatni o‘zgartiryapsiz. Aytmagan narsalaringiz o‘z holicha qoladi.',
+    'Вы изменяете существующий документ. Всё, о чём вы не упомянули, останется как есть.',
+  ],
   // The slide editor. Layout names mirror `apps/studio/layouts.py`; the hint
   // under each says what that layout reads from the slide's fields.
   slideLayout: ['Layout', 'Ko‘rinish', 'Макет'],
@@ -2008,27 +2176,111 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   'layout.image_split': ['Photo and text', 'Rasm va matn', 'Фото и текст'],
   'layout.image_full': ['Full photo', 'To‘liq rasm', 'Фото во весь слайд'],
   'layout.closing': ['Closing slide', 'Yakunlovchi slayd', 'Завершающий слайд'],
-  'layoutHint.cover': ['The heading is the deck title and the body one subtitle line.', 'Sarlavha — taqdimot nomi, matn — bitta qo‘shimcha satr.', 'Заголовок — название презентации, текст — одна строка подзаголовка.'],
-  'layoutHint.agenda': ['3 to 6 items; each label is a topic.', '3–6 ta band; har bir nom — mavzu.', 'От 3 до 6 пунктов; название — тема.'],
-  'layoutHint.section': ['Only the heading, with an optional one-line body.', 'Faqat sarlavha, xohlasangiz bir qatorli matn.', 'Только заголовок и, по желанию, одна строка текста.'],
-  'layoutHint.bullets': ['Each line of the body is one bullet.', 'Matnning har bir qatori — bitta band.', 'Каждая строка текста — отдельный пункт.'],
-  'layoutHint.two_column': ['Two items: the label titles each column and the text fills it.', 'Ikki band: nom — ustun sarlavhasi, matn — mazmuni.', 'Два пункта: название — заголовок колонки, текст — её содержание.'],
-  'layoutHint.statement': ['One sentence in the body, set large.', 'Matnda bitta gap, katta harflarda.', 'Одно предложение в тексте, крупно.'],
-  'layoutHint.quote': ['The body is the quotation; the first item’s label is who said it.', 'Matn — iqtibos; birinchi bandning nomi — kim aytgani.', 'Текст — цитата; название первого пункта — её автор.'],
-  'layoutHint.big_number': ['One item: the value is the figure, the label says what it measures.', 'Bitta band: qiymat — raqam, nom — nimani o‘lchashi.', 'Один пункт: значение — цифра, название — что она измеряет.'],
-  'layoutHint.stats': ['2 to 4 items, each with a figure as its value.', '2–4 ta band, har birining qiymati raqam.', 'От 2 до 4 пунктов, у каждого значение — цифра.'],
-  'layoutHint.timeline': ['3 to 6 items; the value is the date, the label the event.', '3–6 ta band; qiymat — sana, nom — voqea.', 'От 3 до 6 пунктов; значение — дата, название — событие.'],
-  'layoutHint.process': ['3 to 5 items in order; the label is the step.', 'Tartib bilan 3–5 ta band; nom — bosqich.', 'От 3 до 5 пунктов по порядку; название — шаг.'],
-  'layoutHint.comparison': ['Name the two sides as columns; each item’s label is a criterion, its text the first side and its value the second.', 'Ikki tomonni ustun sifatida nomlang; band nomi — mezon, matn — birinchi tomon, qiymat — ikkinchi.', 'Назовите две стороны в колонках; название пункта — критерий, текст — первая сторона, значение — вторая.'],
-  'layoutHint.pros_cons': ['Each item’s value is “pro” or “con”. Columns rename the two panels.', 'Har bir band qiymati — «pro» yoki «con». Ustunlar panellarni qayta nomlaydi.', 'Значение каждого пункта — «pro» или «con». Колонки переименовывают две панели.'],
-  'layoutHint.cards': ['3 to 6 items; the label names each card and the value adds an optional tag.', '3–6 ta band; nom — karta nomi, qiymat — ixtiyoriy belgi.', 'От 3 до 6 пунктов; название — имя карточки, значение — необязательная метка.'],
-  'layoutHint.matrix': ['Exactly 4 items, filled row by row. Columns can name the two axes.', 'Aynan 4 ta band, qatorma-qator. Ustunlar ikki o‘qni nomlashi mumkin.', 'Ровно 4 пункта, по строкам. Колонки могут назвать две оси.'],
-  'layoutHint.chart': ['2 to 8 items; the value is a number. The first column can name the unit.', '2–8 ta band; qiymat — son. Birinchi ustun o‘lchov birligini ko‘rsatishi mumkin.', 'От 2 до 8 пунктов; значение — число. Первая колонка может задать единицу.'],
-  'layoutHint.table': ['2 or 3 columns, 2 to 6 rows; label, text and value are the cells of a row.', '2 yoki 3 ustun, 2–6 qator; nom, matn va qiymat — qator kataklari.', '2 или 3 колонки, 2–6 строк; название, текст и значение — ячейки строки.'],
-  'layoutHint.image_split': ['A photo beside the body’s lines.', 'Matn qatorlari yonida rasm.', 'Фото рядом со строками текста.'],
-  'layoutHint.image_full': ['A wide photo with the body as its caption.', 'Keng rasm, matn — uning izohi.', 'Широкое фото, текст — подпись к нему.'],
-  'layoutHint.closing': ['The heading and one line: thanks, next step or questions.', 'Sarlavha va bitta qator: rahmat, keyingi qadam yoki savollar.', 'Заголовок и одна строка: благодарность, следующий шаг или вопросы.'],
-  slideCoverFirst: ['The first slide of a deck is always its title slide.', 'Taqdimotning birinchi slaydi doim sarlavha slaydi bo‘ladi.', 'Первый слайд презентации всегда титульный.'],
+  'layoutHint.cover': [
+    'The heading is the deck title and the body one subtitle line.',
+    'Sarlavha — taqdimot nomi, matn — bitta qo‘shimcha satr.',
+    'Заголовок — название презентации, текст — одна строка подзаголовка.',
+  ],
+  'layoutHint.agenda': [
+    '3 to 6 items; each label is a topic.',
+    '3–6 ta band; har bir nom — mavzu.',
+    'От 3 до 6 пунктов; название — тема.',
+  ],
+  'layoutHint.section': [
+    'Only the heading, with an optional one-line body.',
+    'Faqat sarlavha, xohlasangiz bir qatorli matn.',
+    'Только заголовок и, по желанию, одна строка текста.',
+  ],
+  'layoutHint.bullets': [
+    'Each line of the body is one bullet.',
+    'Matnning har bir qatori — bitta band.',
+    'Каждая строка текста — отдельный пункт.',
+  ],
+  'layoutHint.two_column': [
+    'Two items: the label titles each column and the text fills it.',
+    'Ikki band: nom — ustun sarlavhasi, matn — mazmuni.',
+    'Два пункта: название — заголовок колонки, текст — её содержание.',
+  ],
+  'layoutHint.statement': [
+    'One sentence in the body, set large.',
+    'Matnda bitta gap, katta harflarda.',
+    'Одно предложение в тексте, крупно.',
+  ],
+  'layoutHint.quote': [
+    'The body is the quotation; the first item’s label is who said it.',
+    'Matn — iqtibos; birinchi bandning nomi — kim aytgani.',
+    'Текст — цитата; название первого пункта — её автор.',
+  ],
+  'layoutHint.big_number': [
+    'One item: the value is the figure, the label says what it measures.',
+    'Bitta band: qiymat — raqam, nom — nimani o‘lchashi.',
+    'Один пункт: значение — цифра, название — что она измеряет.',
+  ],
+  'layoutHint.stats': [
+    '2 to 4 items, each with a figure as its value.',
+    '2–4 ta band, har birining qiymati raqam.',
+    'От 2 до 4 пунктов, у каждого значение — цифра.',
+  ],
+  'layoutHint.timeline': [
+    '3 to 6 items; the value is the date, the label the event.',
+    '3–6 ta band; qiymat — sana, nom — voqea.',
+    'От 3 до 6 пунктов; значение — дата, название — событие.',
+  ],
+  'layoutHint.process': [
+    '3 to 5 items in order; the label is the step.',
+    'Tartib bilan 3–5 ta band; nom — bosqich.',
+    'От 3 до 5 пунктов по порядку; название — шаг.',
+  ],
+  'layoutHint.comparison': [
+    'Name the two sides as columns; each item’s label is a criterion, its text the first side and its value the second.',
+    'Ikki tomonni ustun sifatida nomlang; band nomi — mezon, matn — birinchi tomon, qiymat — ikkinchi.',
+    'Назовите две стороны в колонках; название пункта — критерий, текст — первая сторона, значение — вторая.',
+  ],
+  'layoutHint.pros_cons': [
+    'Each item’s value is “pro” or “con”. Columns rename the two panels.',
+    'Har bir band qiymati — «pro» yoki «con». Ustunlar panellarni qayta nomlaydi.',
+    'Значение каждого пункта — «pro» или «con». Колонки переименовывают две панели.',
+  ],
+  'layoutHint.cards': [
+    '3 to 6 items; the label names each card and the value adds an optional tag.',
+    '3–6 ta band; nom — karta nomi, qiymat — ixtiyoriy belgi.',
+    'От 3 до 6 пунктов; название — имя карточки, значение — необязательная метка.',
+  ],
+  'layoutHint.matrix': [
+    'Exactly 4 items, filled row by row. Columns can name the two axes.',
+    'Aynan 4 ta band, qatorma-qator. Ustunlar ikki o‘qni nomlashi mumkin.',
+    'Ровно 4 пункта, по строкам. Колонки могут назвать две оси.',
+  ],
+  'layoutHint.chart': [
+    '2 to 8 items; the value is a number. The first column can name the unit.',
+    '2–8 ta band; qiymat — son. Birinchi ustun o‘lchov birligini ko‘rsatishi mumkin.',
+    'От 2 до 8 пунктов; значение — число. Первая колонка может задать единицу.',
+  ],
+  'layoutHint.table': [
+    '2 or 3 columns, 2 to 6 rows; label, text and value are the cells of a row.',
+    '2 yoki 3 ustun, 2–6 qator; nom, matn va qiymat — qator kataklari.',
+    '2 или 3 колонки, 2–6 строк; название, текст и значение — ячейки строки.',
+  ],
+  'layoutHint.image_split': [
+    'A photo beside the body’s lines.',
+    'Matn qatorlari yonida rasm.',
+    'Фото рядом со строками текста.',
+  ],
+  'layoutHint.image_full': [
+    'A wide photo with the body as its caption.',
+    'Keng rasm, matn — uning izohi.',
+    'Широкое фото, текст — подпись к нему.',
+  ],
+  'layoutHint.closing': [
+    'The heading and one line: thanks, next step or questions.',
+    'Sarlavha va bitta qator: rahmat, keyingi qadam yoki savollar.',
+    'Заголовок и одна строка: благодарность, следующий шаг или вопросы.',
+  ],
+  slideCoverFirst: [
+    'The first slide of a deck is always its title slide.',
+    'Taqdimotning birinchi slaydi doim sarlavha slaydi bo‘ladi.',
+    'Первый слайд презентации всегда титульный.',
+  ],
   slideColumns: ['Column names', 'Ustun nomlari', 'Названия колонок'],
   slideItems: ['Items', 'Bandlar', 'Пункты'],
   itemLabel: ['Label', 'Nom', 'Название'],
@@ -2038,12 +2290,28 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   removeItem: ['Remove item', 'Bandni olib tashlash', 'Удалить пункт'],
   photoSubject: ['Photo subject, in English', 'Rasm mavzusi, ingliz tilida', 'Тема фото, на английском'],
   photoSubjectExample: ['city skyline at night', 'city skyline at night', 'city skyline at night'],
-  photoSubjectHint: ['A few plain words, no names of people or brands. The photo is a free stock image from Pixabay.', 'Bir necha oddiy so‘z, odam yoki brend nomisiz. Rasm Pixabay’dan olingan bepul stok surat.', 'Несколько простых слов, без имён людей и брендов. Фото — бесплатный стоковый снимок с Pixabay.'],
-  photosOff: ['Photos are not available right now, so this slide will be set as text.', 'Hozir rasmlar mavjud emas, shuning uchun bu slayd matn sifatida tayyorlanadi.', 'Фото сейчас недоступны, поэтому этот слайд будет оформлен текстом.'],
+  photoSubjectHint: [
+    'A few plain words, no names of people or brands. The photo is a free stock image from Pixabay.',
+    'Bir necha oddiy so‘z, odam yoki brend nomisiz. Rasm Pixabay’dan olingan bepul stok surat.',
+    'Несколько простых слов, без имён людей и брендов. Фото — бесплатный стоковый снимок с Pixabay.',
+  ],
+  photosOff: [
+    'Photos are not available right now, so this slide will be set as text.',
+    'Hozir rasmlar mavjud emas, shuning uchun bu slayd matn sifatida tayyorlanadi.',
+    'Фото сейчас недоступны, поэтому этот слайд будет оформлен текстом.',
+  ],
   guideRowLayouts: ['Slide layouts', 'Slayd ko‘rinishlari', 'Макеты слайдов'],
-  guideRowLayoutsBody: ['Each slide gets the layout that fits it — key figures, a timeline, steps, a comparison, a chart, a table, cards. Ask for one if you want it: “show the sales as a chart”. For charts and figures, give the numbers in the description or your files. You can change any slide’s layout before it is made.', 'Har bir slaydga mos ko‘rinish tanlanadi — asosiy raqamlar, vaqt chizig‘i, bosqichlar, taqqoslash, diagramma, jadval, kartalar. Xohlasangiz so‘rang: «sotuvni diagramma qilib ko‘rsat». Diagramma va raqamlar uchun sonlarni tavsifda yoki fayllaringizda bering. Tayyorlashdan oldin istalgan slayd ko‘rinishini o‘zgartirish mumkin.', 'Каждый слайд получает подходящий макет — ключевые цифры, хронологию, шаги, сравнение, диаграмму, таблицу, карточки. Можно попросить: «покажи продажи диаграммой». Для диаграмм и цифр укажите числа в описании или в файлах. Макет любого слайда можно изменить до создания.'],
+  guideRowLayoutsBody: [
+    'Each slide gets the layout that fits it — key figures, a timeline, steps, a comparison, a chart, a table, cards. Ask for one if you want it: “show the sales as a chart”. For charts and figures, give the numbers in the description or your files. You can change any slide’s layout before it is made.',
+    'Har bir slaydga mos ko‘rinish tanlanadi — asosiy raqamlar, vaqt chizig‘i, bosqichlar, taqqoslash, diagramma, jadval, kartalar. Xohlasangiz so‘rang: «sotuvni diagramma qilib ko‘rsat». Diagramma va raqamlar uchun sonlarni tavsifda yoki fayllaringizda bering. Tayyorlashdan oldin istalgan slayd ko‘rinishini o‘zgartirish mumkin.',
+    'Каждый слайд получает подходящий макет — ключевые цифры, хронологию, шаги, сравнение, диаграмму, таблицу, карточки. Можно попросить: «покажи продажи диаграммой». Для диаграмм и цифр укажите числа в описании или в файлах. Макет любого слайда можно изменить до создания.',
+  ],
   guideRowPhotos: ['Photos in slides', 'Slayddagi rasmlar', 'Фото в слайдах'],
-  guideRowPhotosBody: ['Where a photo helps, a slide gets a stock photo at no extra cost. Say “no photos” if you would rather have none. Photos come from Pixabay.', 'Rasm foydali bo‘lgan joyda slaydga qo‘shimcha to‘lovsiz stok rasm qo‘shiladi. Rasm kerak bo‘lmasa, «rasmsiz» deb yozing. Rasmlar Pixabay’dan olinadi.', 'Там, где фото уместно, слайд получает стоковое фото без доплаты. Напишите «без фото», если они не нужны. Фото берутся с Pixabay.'],
+  guideRowPhotosBody: [
+    'Where a photo helps, a slide gets a stock photo at no extra cost. Say “no photos” if you would rather have none. Photos come from Pixabay.',
+    'Rasm foydali bo‘lgan joyda slaydga qo‘shimcha to‘lovsiz stok rasm qo‘shiladi. Rasm kerak bo‘lmasa, «rasmsiz» deb yozing. Rasmlar Pixabay’dan olinadi.',
+    'Там, где фото уместно, слайд получает стоковое фото без доплаты. Напишите «без фото», если они не нужны. Фото берутся с Pixabay.',
+  ],
   // Paying by card transfer: the customer sends the price to the owner's card,
   // uploads the receipt, and the owner switches the plan on after checking.
   payByCard: ['Card transfer', 'Karta orqali to‘lov', 'Перевод на карту'],
@@ -2051,28 +2319,82 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   extendPlan: ['Add 30 days · {price}', '30 kun qo‘shish · {price}', 'Добавить 30 дней · {price}'],
   signInToPay: ['Sign in to pay', 'To‘lash uchun kiring', 'Войдите, чтобы оплатить'],
   perThirtyDays: ['per 30 days', '30 kun uchun', 'за 30 дней'],
+  // A plan bought for a year at once (365 days), beside the month: the server's yearly price.
+  termMonthly: ['Monthly', 'Oylik', 'Помесячно'],
+  termYearly: ['Yearly', 'Yillik', 'На год'],
+  termChoice: ['How long to pay for', 'Qancha muddatga to‘lash', 'Срок оплаты'],
+  perMonthShort: ['a month', 'oyiga', 'в месяц'],
+  billedYearly: ['billed {price} once a year', 'yiliga bir yo‘la {price}', 'оплата {price} сразу за год'],
+  yearSaving: ['Save {percent}%', '{percent}% tejang', 'Экономия {percent}%'],
+  planOneYear: ['{plan} · 1 year', '{plan} · 1 yil', '{plan} · 1 год'],
+  yearPaidOnce: [
+    'Paid once for 365 days. Nothing renews by itself.',
+    '365 kun uchun bir marta to‘lanadi. Hech narsa o‘zi uzaytirilmaydi.',
+    'Оплата один раз за 365 дней. Автоматического продления нет.',
+  ],
+  extendYear: ['Add a year · {price}', '1 yil qo‘shish · {price}', 'Добавить год · {price}'],
   paymentMethod: ['How would you like to pay?', 'Qanday to‘laysiz?', 'Как хотите оплатить?'],
   methodCard: ['Card transfer', 'Karta orqali o‘tkazma', 'Перевод на карту'],
-  methodCardBody: ['Send the price from your bank app (Click, Payme, Uzum or any bank) and upload the receipt. We switch your plan on after checking it, usually within a few hours.', 'Narxni bank ilovangizdan (Click, Payme, Uzum yoki istalgan bank) o‘tkazing va kvitansiyani yuklang. Tekshirgach, odatda bir necha soat ichida tarifingizni yoqamiz.', 'Переведите сумму из банковского приложения (Click, Payme, Uzum или любой банк) и загрузите квитанцию. После проверки, обычно в течение нескольких часов, мы включим тариф.'],
+  methodCardBody: [
+    'Send the price from your bank app (Click, Payme, Uzum or any bank) and upload the receipt. We switch your plan on after checking it, usually within a few hours.',
+    'Narxni bank ilovangizdan (Click, Payme, Uzum yoki istalgan bank) o‘tkazing va kvitansiyani yuklang. Tekshirgach, odatda bir necha soat ichida tarifingizni yoqamiz.',
+    'Переведите сумму из банковского приложения (Click, Payme, Uzum или любой банк) и загрузите квитанцию. После проверки, обычно в течение нескольких часов, мы включим тариф.',
+  ],
   methodAutomatic: ['Automatic payment', 'Avtomatik to‘lov', 'Автоматическая оплата'],
   paymentContinue: ['Continue', 'Davom etish', 'Продолжить'],
-  cardStepSend: ['Send exactly {amount} to this card:', 'Shu kartaga aynan {amount} o‘tkazing:', 'Переведите ровно {amount} на эту карту:'],
-  cardStepReceipt: ['Upload the receipt from your bank app.', 'Bank ilovangizdagi kvitansiyani yuklang.', 'Загрузите квитанцию из банковского приложения.'],
+  cardStepSend: [
+    'Send exactly {amount} to this card:',
+    'Shu kartaga aynan {amount} o‘tkazing:',
+    'Переведите ровно {amount} на эту карту:',
+  ],
+  cardStepReceipt: [
+    'Upload the receipt from your bank app.',
+    'Bank ilovangizdagi kvitansiyani yuklang.',
+    'Загрузите квитанцию из банковского приложения.',
+  ],
   copyAction: ['Copy', 'Nusxalash', 'Копировать'],
   closePanel: ['Close', 'Yopish', 'Закрыть'],
-  receiptFile: ['Receipt (photo, screenshot or PDF)', 'Kvitansiya (rasm, skrinshot yoki PDF)', 'Квитанция (фото, скриншот или PDF)'],
+  receiptFile: [
+    'Receipt (photo, screenshot or PDF)',
+    'Kvitansiya (rasm, skrinshot yoki PDF)',
+    'Квитанция (фото, скриншот или PDF)',
+  ],
   receiptNote: ['Note (optional)', 'Izoh (ixtiyoriy)', 'Комментарий (необязательно)'],
-  receiptNoteHint: ['e.g. the last 4 digits of your card', 'masalan, kartangizning oxirgi 4 raqami', 'например, последние 4 цифры вашей карты'],
+  receiptNoteHint: [
+    'e.g. the last 4 digits of your card',
+    'masalan, kartangizning oxirgi 4 raqami',
+    'например, последние 4 цифры вашей карты',
+  ],
   sendReceipt: ['Send receipt', 'Kvitansiyani yuborish', 'Отправить квитанцию'],
   sendAnotherReceipt: ['Send another receipt', 'Boshqa kvitansiya yuborish', 'Отправить другую квитанцию'],
   cancelPayment: ['Cancel this payment', 'Bu to‘lovni bekor qilish', 'Отменить этот платёж'],
   paymentCode: ['Payment code', 'To‘lov kodi', 'Код платежа'],
-  manualReviewNote: ['We check every payment by hand and message you in Telegram.', 'Har bir to‘lovni qo‘lda tekshiramiz va Telegram’da xabar beramiz.', 'Мы проверяем каждый платёж вручную и сообщаем в Telegram.'],
+  manualReviewNote: [
+    'We check every payment by hand and message you in Telegram.',
+    'Har bir to‘lovni qo‘lda tekshiramiz va Telegram’da xabar beramiz.',
+    'Мы проверяем каждый платёж вручную и сообщаем в Telegram.',
+  ],
   paymentWaiting: ['Waiting for review', 'Tekshiruv kutilmoqda', 'Ждёт проверки'],
-  paymentWaitingBody: ['We have your receipt and are checking the transfer, usually within a few hours. This page updates by itself.', 'Kvitansiyangiz qabul qilindi, o‘tkazmani tekshiryapmiz — odatda bir necha soat. Sahifa o‘zi yangilanadi.', 'Квитанция получена, проверяем перевод — обычно несколько часов. Страница обновится сама.'],
-  paymentApproved: ['Payment confirmed. {plan} is active until {date}.', 'To‘lov tasdiqlandi. {plan} tarifi {date} gacha faol.', 'Оплата подтверждена. Тариф {plan} действует до {date}.'],
-  paymentRejected: ['We couldn’t confirm payment {reference}:', '{reference} to‘lovini tasdiqlay olmadik:', 'Не удалось подтвердить платёж {reference}:'],
-  cardPaymentsUnavailable: ['Payments aren’t available right now. Please try again later.', 'To‘lov hozircha mavjud emas. Keyinroq urinib ko‘ring.', 'Оплата сейчас недоступна. Попробуйте позже.'],
+  paymentWaitingBody: [
+    'We have your receipt and are checking the transfer, usually within a few hours. This page updates by itself.',
+    'Kvitansiyangiz qabul qilindi, o‘tkazmani tekshiryapmiz — odatda bir necha soat. Sahifa o‘zi yangilanadi.',
+    'Квитанция получена, проверяем перевод — обычно несколько часов. Страница обновится сама.',
+  ],
+  paymentApproved: [
+    'Payment confirmed. {plan} is active until {date}.',
+    'To‘lov tasdiqlandi. {plan} tarifi {date} gacha faol.',
+    'Оплата подтверждена. Тариф {plan} действует до {date}.',
+  ],
+  paymentRejected: [
+    'We couldn’t confirm payment {reference}:',
+    '{reference} to‘lovini tasdiqlay olmadik:',
+    'Не удалось подтвердить платёж {reference}:',
+  ],
+  cardPaymentsUnavailable: [
+    'Payments aren’t available right now. Please try again later.',
+    'To‘lov hozircha mavjud emas. Keyinroq urinib ko‘ring.',
+    'Оплата сейчас недоступна. Попробуйте позже.',
+  ],
   // Paying automatically through inPAY: the customer pays on inPAY's page with
   // Click, Payme, Uzcard or Humo and the plan switches on by itself. Said
   // plainly: what happens, how long it takes, and that nothing renews.
@@ -2117,9 +2439,17 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Oxirgi uzaytirish to‘lovi o‘tmadi. Keyingi urinish: {date}.',
     'Последнее списание за продление не прошло. Следующая попытка: {date}.',
   ],
-  renewalCard: ['Saved card: •••• {last4}', 'Saqlangan karta: •••• {last4}', 'Сохранённая карта: •••• {last4}'],
+  renewalCard: [
+    'Saved card: •••• {last4}',
+    'Saqlangan karta: •••• {last4}',
+    'Сохранённая карта: •••• {last4}',
+  ],
   renewalTurnOff: ['Turn off auto-renewal', 'Avtomatik uzaytirishni o‘chirish', 'Отключить автопродление'],
-  renewalRemoveCard: ['Remove card •••• {last4}', '•••• {last4} kartani uzish', 'Отвязать карту •••• {last4}'],
+  renewalRemoveCard: [
+    'Remove card •••• {last4}',
+    '•••• {last4} kartani uzish',
+    'Отвязать карту •••• {last4}',
+  ],
   renewalRemoveConfirm: [
     'Remove the card? Auto-renewal stops, and nothing is charged to it again.',
     'Kartani uzasizmi? Avtomatik uzaytirish to‘xtaydi va undan boshqa hech narsa yechilmaydi.',
@@ -2144,15 +2474,31 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   ],
   // Paying with a saved card, or saving one, on the billing page (PaymentPanel, CardReturnView).
   payWayOnce: ['Pay once', 'Bir marta to‘lash', 'Оплатить один раз'],
-  payWayOnceOther: ['Pay once with another card', 'Boshqa karta bilan bir marta to‘lash', 'Оплатить один раз другой картой'],
-  payWayRenew: ['Pay and renew every month', 'To‘lash va har oy uzaytirish', 'Оплатить и продлевать каждый месяц'],
+  payWayOnceOther: [
+    'Pay once with another card',
+    'Boshqa karta bilan bir marta to‘lash',
+    'Оплатить один раз другой картой',
+  ],
+  payWayRenew: [
+    'Pay and renew every month',
+    'To‘lash va har oy uzaytirish',
+    'Оплатить и продлевать каждый месяц',
+  ],
   payWayRenewBody: [
     'Save your card on inPAY’s page: {price} now and every 30 days, with no SMS code. Turn it off any time.',
     'Kartangizni inPAY sahifasida saqlang: hozir va har 30 kunda {price}, SMS kodsiz. Istalgan vaqtda o‘chirasiz.',
     'Сохраните карту на странице inPAY: {price} сейчас и каждые 30 дней, без SMS-кода. Отключить можно в любой момент.',
   ],
-  payWayCard: ['Pay with card •••• {last4}', '•••• {last4} karta bilan to‘lash', 'Оплатить картой •••• {last4}'],
-  payWayCardBody: ['Charged at once, no SMS code.', 'Darhol yechiladi, SMS kodsiz.', 'Списывается сразу, без SMS-кода.'],
+  payWayCard: [
+    'Pay with card •••• {last4}',
+    '•••• {last4} karta bilan to‘lash',
+    'Оплатить картой •••• {last4}',
+  ],
+  payWayCardBody: [
+    'Charged at once, no SMS code.',
+    'Darhol yechiladi, SMS kodsiz.',
+    'Списывается сразу, без SMS-кода.',
+  ],
   payWayCardRenew: [
     'Pay with •••• {last4} and renew every month',
     '•••• {last4} bilan to‘lash va har oy uzaytirish',
@@ -2163,7 +2509,11 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Hozir va har 30 kunda {price}. Istalgan vaqtda o‘chirasiz.',
     '{price} сейчас и каждые 30 дней. Отключить можно в любой момент.',
   ],
-  saveCardPay: ['Save card and pay {price}', 'Kartani saqlab, {price} to‘lash', 'Сохранить карту и оплатить {price}'],
+  saveCardPay: [
+    'Save card and pay {price}',
+    'Kartani saqlab, {price} to‘lash',
+    'Сохранить карту и оплатить {price}',
+  ],
   cardConfirm: [
     'Charge {price} to card •••• {last4} now?',
     '•••• {last4} kartadan hozir {price} yechilsinmi?',
@@ -2218,7 +2568,11 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   ],
   cardBackToInpay: ['Back to inPAY’s page', 'inPAY sahifasiga qaytish', 'Вернуться на страницу inPAY'],
   cardSavedTitle: ['Card saved', 'Karta saqlandi', 'Карта сохранена'],
-  cardSavedBody: ['Card •••• {last4} is saved.', '•••• {last4} karta saqlandi.', 'Карта •••• {last4} сохранена.'],
+  cardSavedBody: [
+    'Card •••• {last4} is saved.',
+    '•••• {last4} karta saqlandi.',
+    'Карта •••• {last4} сохранена.',
+  ],
   cardClosedTitle: ['The card wasn’t saved', 'Karta saqlanmadi', 'Карта не сохранена'],
   cardClosedBody: [
     'inPAY’s page was closed or expired, so nothing was charged. You can try again from Plan & billing.',
@@ -2245,14 +2599,22 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   checkoutContinue: ['Continue to payment', 'To‘lovga o‘tish', 'Перейти к оплате'],
   checkoutCheck: ['I’ve paid — check', 'To‘ladim — tekshirish', 'Оплачено — проверить'],
   checkoutChecking: ['Checking…', 'Tekshirilmoqda…', 'Проверяем…'],
-  checkoutNotYet: ['inPAY has not confirmed the payment yet.', 'inPAY to‘lovni hali tasdiqlamadi.', 'inPAY пока не подтвердил оплату.'],
+  checkoutNotYet: [
+    'inPAY has not confirmed the payment yet.',
+    'inPAY to‘lovni hali tasdiqlamadi.',
+    'inPAY пока не подтвердил оплату.',
+  ],
   checkoutCheckFailed: [
     'We couldn’t check the payment just now. Try again in a moment.',
     'To‘lovni hozir tekshirib bo‘lmadi. Birozdan keyin qayta urinib ko‘ring.',
     'Не удалось проверить оплату. Попробуйте ещё раз чуть позже.',
   ],
   checkoutReceipt: ['Receipt', 'Chek', 'Чек'],
-  checkoutPaidPlain: ['Payment confirmed. {plan} is on.', 'To‘lov tasdiqlandi. {plan} tarifi yoqildi.', 'Оплата подтверждена. Тариф {plan} включён.'],
+  checkoutPaidPlain: [
+    'Payment confirmed. {plan} is on.',
+    'To‘lov tasdiqlandi. {plan} tarifi yoqildi.',
+    'Оплата подтверждена. Тариф {plan} включён.',
+  ],
   checkoutTestPaid: [
     'The test payment went through. No money moved and the plan was not changed.',
     'Sinov to‘lovi o‘tdi. Pul yechilmadi va tarif o‘zgarmadi.',
@@ -2296,7 +2658,11 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   ],
   checkoutCheckAgain: ['Check again', 'Qayta tekshirish', 'Проверить ещё раз'],
   checkoutPaidTitle: ['Payment received', 'To‘lov qabul qilindi', 'Оплата получена'],
-  checkoutPlanActive: ['{plan} is active until {date}.', '{plan} tarifi {date} gacha faol.', 'Тариф {plan} действует до {date}.'],
+  checkoutPlanActive: [
+    '{plan} is active until {date}.',
+    '{plan} tarifi {date} gacha faol.',
+    'Тариф {plan} действует до {date}.',
+  ],
   checkoutPlanOn: ['{plan} is on.', '{plan} tarifi yoqildi.', 'Тариф {plan} включён.'],
   checkoutTestPaidTitle: ['Test payment complete', 'Sinov to‘lovi yakunlandi', 'Тестовый платёж завершён'],
   checkoutNotDoneTitle: ['Payment not completed', 'To‘lov yakunlanmadi', 'Оплата не завершена'],
@@ -2310,16 +2676,28 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   checkoutOpenApp: ['Open {brand}', '{brand}’ni ochish', 'Открыть {brand}'],
   checkoutBackToTelegram: ['Back to Telegram', 'Telegram’ga qaytish', 'Вернуться в Telegram'],
   // Free and Plus accounts join the owner's Telegram channels; Premium is never asked.
-  channelsTitle: ['Join our Telegram community', 'Telegram hamjamiyatimizga qo‘shiling', 'Вступите в наше Telegram-сообщество'],
+  channelsTitle: [
+    'Join our Telegram community',
+    'Telegram hamjamiyatimizga qo‘shiling',
+    'Вступите в наше Telegram-сообщество',
+  ],
   channelsBody: [
     'The Free and Plus plans are for members of our Telegram community. Join the channels below in Telegram, then tap “I’ve joined”.',
     'Free va Plus tariflari Telegram hamjamiyatimiz a’zolari uchun. Quyidagi kanallarga Telegram’da qo‘shiling, so‘ng «Qo‘shildim» tugmasini bosing.',
     'Тарифы Free и Plus — для участников нашего Telegram-сообщества. Подпишитесь на каналы ниже в Telegram и нажмите «Я подписался».',
   ],
   channelsJoined: ['I’ve joined', 'Qo‘shildim', 'Я подписался'],
-  channelsNotYet: ['You haven’t joined {titles} yet. Join, then tap “I’ve joined” again.', 'Siz hali {titles} ga qo‘shilmagansiz. Qo‘shiling va «Qo‘shildim»ni yana bosing.', 'Вы ещё не подписались на {titles}. Подпишитесь и снова нажмите «Я подписался».'],
+  channelsNotYet: [
+    'You haven’t joined {titles} yet. Join, then tap “I’ve joined” again.',
+    'Siz hali {titles} ga qo‘shilmagansiz. Qo‘shiling va «Qo‘shildim»ni yana bosing.',
+    'Вы ещё не подписались на {titles}. Подпишитесь и снова нажмите «Я подписался».',
+  ],
   channelsWelcomeTitle: ['Thanks for joining!', 'Qo‘shilganingiz uchun rahmat!', 'Спасибо за подписку!'],
-  channelsWelcome: ['Every service is open to you now. Try your task again.', 'Endi barcha xizmatlar siz uchun ochiq. Vazifani qayta bajaring.', 'Все сервисы теперь доступны. Повторите задачу.'],
+  channelsWelcome: [
+    'Every service is open to you now. Try your task again.',
+    'Endi barcha xizmatlar siz uchun ochiq. Vazifani qayta bajaring.',
+    'Все сервисы теперь доступны. Повторите задачу.',
+  ],
   channelsContinue: ['Continue', 'Davom etish', 'Продолжить'],
   // The same ending as the server's channels_required message, so the dialog and
   // the banner beside it never disagree about what Premium needs.
@@ -2343,9 +2721,21 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'So‘ramagan savollar qo‘shilmadi.',
     'Вопросы, которые вы не запрашивали, не добавлены.',
   ],
-  sections_trimmed: ['The document was trimmed to the number of pages you asked for.', 'Hujjat siz so‘ragan sahifa soniga qisqartirildi.', 'Документ сокращён до запрошенного количества страниц.'],
-  citations_dropped: ['A source reference that did not match any file you sent was left out.', 'Siz yuborgan fayllarga mos kelmagan manba havolasi qo‘shilmadi.', 'Ссылка на источник, не совпавшая с вашими файлами, не добавлена.'],
-  shortened_to_fit: ['A section was longer than its page, so its end was trimmed to keep the page count you asked for.', 'Bir bo‘lim sahifasiga sig‘madi, shuning uchun siz so‘ragan sahifa soni saqlanib, oxiri qisqartirildi.', 'Один раздел не помещался на страницу, поэтому его конец сокращён, чтобы сохранить запрошенное число страниц.'],
+  sections_trimmed: [
+    'The document was trimmed to the number of pages you asked for.',
+    'Hujjat siz so‘ragan sahifa soniga qisqartirildi.',
+    'Документ сокращён до запрошенного количества страниц.',
+  ],
+  citations_dropped: [
+    'A source reference that did not match any file you sent was left out.',
+    'Siz yuborgan fayllarga mos kelmagan manba havolasi qo‘shilmadi.',
+    'Ссылка на источник, не совпавшая с вашими файлами, не добавлена.',
+  ],
+  shortened_to_fit: [
+    'A section was longer than its page, so its end was trimmed to keep the page count you asked for.',
+    'Bir bo‘lim sahifasiga sig‘madi, shuning uchun siz so‘ragan sahifa soni saqlanib, oxiri qisqartirildi.',
+    'Один раздел не помещался на страницу, поэтому его конец сокращён, чтобы сохранить запрошенное число страниц.',
+  ],
   longer_than_quoted: [
     'This came out a little longer than you asked for.',
     'Hujjat so‘ralganidan biroz uzunroq chiqdi.',
@@ -2356,8 +2746,16 @@ export const extendedEntries: Record<string, [string, string, string]> = {
     'Rasm qo‘shib bo‘lmadi, shuning uchun o‘sha slayd matn sifatida tayyorlandi.',
     'Фото добавить не удалось, поэтому слайд оформлен текстом.',
   ],
-  images_limited: ['A deck holds a set number of photos; the other photo slides were set as text.', 'Bitta taqdimotdagi rasmlar soni cheklangan; qolgan rasmli slaydlar matn sifatida tayyorlandi.', 'Число фото в одной презентации ограничено; остальные слайды с фото оформлены текстом.'],
-  local_fixture_not_ai_generated: ['Written locally for testing, without the AI model.', 'Sinov uchun AI modelidan foydalanmasdan mahalliy tarzda yozildi.', 'Создано локально для теста, без модели ИИ.'],
+  images_limited: [
+    'A deck holds a set number of photos; the other photo slides were set as text.',
+    'Bitta taqdimotdagi rasmlar soni cheklangan; qolgan rasmli slaydlar matn sifatida tayyorlandi.',
+    'Число фото в одной презентации ограничено; остальные слайды с фото оформлены текстом.',
+  ],
+  local_fixture_not_ai_generated: [
+    'Written locally for testing, without the AI model.',
+    'Sinov uchun AI modelidan foydalanmasdan mahalliy tarzda yozildi.',
+    'Создано локально для теста, без модели ИИ.',
+  ],
   // What a CV job can say it adjusted. The CV never goes past two pages and
   // never shows a contact the customer did not write.
   cv_trimmed: [
@@ -2870,8 +3268,16 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   deckTabPictures: ['Pictures', 'Rasmlar', 'Картинки'],
   deckTabDesign: ['Design', 'Bezak', 'Оформление'],
   deckTabAskAi: ['Ask AI', 'AI', 'ИИ'],
-  deckPicturesAll: ['Add pictures to all slides', 'Barcha slaydlarga rasm qo‘shish', 'Добавить картинки на все слайды'],
-  deckPicturesCount: ['Pictures in this deck: {pinned} of {max}', 'Taqdimotdagi rasmlar: {max} tadan {pinned} ta', 'Картинок в презентации: {pinned} из {max}'],
+  deckPicturesAll: [
+    'Add pictures to all slides',
+    'Barcha slaydlarga rasm qo‘shish',
+    'Добавить картинки на все слайды',
+  ],
+  deckPicturesCount: [
+    'Pictures in this deck: {pinned} of {max}',
+    'Taqdimotdagi rasmlar: {max} tadan {pinned} ta',
+    'Картинок в презентации: {pinned} из {max}',
+  ],
   deckPicturesLeftToday: ['Left today: {count}', 'Bugun qoldi: {count}', 'Осталось сегодня: {count}'],
   deckPicturesKind: ['Kind of picture', 'Rasm turi', 'Вид картинок'],
   deckPicturesPhoto: ['Photo', 'Foto', 'Фото'],
@@ -2879,16 +3285,28 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   deckPicturesSlide: ['Slide {n}', '{n}-slayd', 'Слайд {n}'],
   deckPicturesNone: ['No picture on this slide.', 'Bu slaydda rasm yo‘q.', 'На этом слайде нет картинки.'],
   deckPicturesCurrent: ['The slide’s picture', 'Slayddagi rasm', 'Картинка на слайде'],
-  deckPicturesOnOffer: ['Tap a picture to put it on the slide.', 'Slaydga qo‘yish uchun rasmni bosing.', 'Нажмите на картинку, чтобы поставить её на слайд.'],
+  deckPicturesOnOffer: [
+    'Tap a picture to put it on the slide.',
+    'Slaydga qo‘yish uchun rasmni bosing.',
+    'Нажмите на картинку, чтобы поставить её на слайд.',
+  ],
   deckPictureOffered: ['Picture {n} on offer', 'Taklif etilgan {n}-rasm', 'Предложенная картинка {n}'],
   deckPictureAnother: ['Another picture', 'Boshqa rasm', 'Другая картинка'],
   deckPictureRemove: ['Remove', 'Olib tashlash', 'Убрать'],
   deckPictureFromPhone: ['From my phone', 'Telefonimdan', 'С телефона'],
   deckPictureFindMore: ['Find more', 'Yana topish', 'Найти ещё'],
-  deckPictureFindLabel: ['Words to search for, in English', 'Qidiruv so‘zlari, ingliz tilida', 'Слова для поиска, на английском'],
+  deckPictureFindLabel: [
+    'Words to search for, in English',
+    'Qidiruv so‘zlari, ingliz tilida',
+    'Слова для поиска, на английском',
+  ],
   deckPictureFindHint: ['For example: harbour cranes', 'Masalan: harbour cranes', 'Например: harbour cranes'],
   deckPictureFind: ['Search', 'Qidirish', 'Найти'],
-  deckPicturesQuestions: ['Question slides take no pictures.', 'Savol slaydlariga rasm qo‘yilmaydi.', 'На слайды с вопросами картинки не ставятся.'],
+  deckPicturesQuestions: [
+    'Question slides take no pictures.',
+    'Savol slaydlariga rasm qo‘yilmaydi.',
+    'На слайды с вопросами картинки не ставятся.',
+  ],
   deckPicturesWorking: [
     'Adding pictures… This can take a minute.',
     'Rasmlar qo‘shilmoqda… Bir daqiqacha vaqt olishi mumkin.',
@@ -2897,7 +3315,11 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   deckPictureWorking: ['Changing the picture…', 'Rasm almashtirilmoqda…', 'Меняем картинку…'],
   deckPicturesSearching: ['Looking for pictures…', 'Rasmlar qidirilmoqda…', 'Ищем картинки…'],
   deckPictureUploading: ['Adding your picture…', 'Rasmingiz qo‘shilmoqda…', 'Добавляем вашу картинку…'],
-  deckPicturesAdded: ['Slides with a new picture: {count}', 'Yangi rasmli slaydlar: {count}', 'Слайдов с новой картинкой: {count}'],
+  deckPicturesAdded: [
+    'Slides with a new picture: {count}',
+    'Yangi rasmli slaydlar: {count}',
+    'Слайдов с новой картинкой: {count}',
+  ],
   deckPicturesFound: [
     'Pictures found: {count}. Tap one to put it on the slide.',
     'Topilgan rasmlar: {count}. Slaydga qo‘yish uchun birini bosing.',
@@ -2997,7 +3419,11 @@ export const extendedEntries: Record<string, [string, string, string]> = {
   deckAskExample: ['Add an example', 'Misol qo‘shing', 'Добавьте пример'],
   deckAskEnglish: ['Translate into English', 'Ingliz tiliga tarjima qiling', 'Переведите на английский'],
   deckAskRussian: ['Translate into Russian', 'Rus tiliga tarjima qiling', 'Переведите на русский'],
-  deckAskUzbek: ['Translate into Uzbek (Latin)', 'O‘zbek tiliga (lotin) tarjima qiling', 'Переведите на узбекский (латиница)'],
+  deckAskUzbek: [
+    'Translate into Uzbek (Latin)',
+    'O‘zbek tiliga (lotin) tarjima qiling',
+    'Переведите на узбекский (латиница)',
+  ],
   deckAskCost: [
     '✨ Uses 1 AI edit. You’ll see the price before it starts.',
     '✨ 1 ta AI tahriri sarflanadi. Narxi boshlanishidan oldin ko‘rsatiladi.',

@@ -436,7 +436,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description Open an automatic payment for a plan at inPAY and return its payment page; 200 with the one already open for the same plan and price. */
+        /** @description Open an automatic payment for a plan at inPAY and return its payment page; 200 with the one already open for the same plan, term and price. */
         post: operations["createCheckout"];
         delete?: never;
         options?: never;
@@ -1767,6 +1767,8 @@ export interface components {
             starts_at: string | null;
             /** @enum {unknown} */
             status: "pending" | "paid" | "failed" | "cancelled" | "expired" | "refunded";
+            /** @enum {unknown} */
+            term?: "month" | "year";
             test: boolean;
         };
         CoverLines: {
@@ -2341,6 +2343,8 @@ export interface components {
             status: "awaiting" | "submitted" | "approved" | "rejected" | "cancelled" | "expired" | "refunded";
             /** Format: date-time */
             submitted_at?: string | null;
+            /** @enum {unknown} */
+            term?: "month" | "year";
         };
         ManualPaymentOptions: {
             automatic: {
@@ -2363,6 +2367,7 @@ export interface components {
                 plan: "plus" | "premium";
                 price: number;
                 regular_price: number;
+                yearly?: components["schemas"]["PlanYearly"] | null;
             }[];
         };
         Payment: {
@@ -2382,6 +2387,8 @@ export interface components {
             refunded: number;
             sandbox: boolean;
             status: string;
+            /** @enum {unknown} */
+            term?: "month" | "year";
         };
         Plan: {
             discount: components["schemas"]["PlanDiscount"] | null;
@@ -2390,6 +2397,7 @@ export interface components {
             limits: Record<string, never>;
             name: string;
             price_uzs: number | null;
+            yearly?: components["schemas"]["PlanYearly"] | null;
         };
         PlanDiscount: {
             percent: number;
@@ -2397,6 +2405,17 @@ export interface components {
             regular: number;
             /** Format: date */
             until: string;
+        };
+        PlanYearly: {
+            days: number;
+            /** @description The price spread over twelve months, to the nearest so'm. */
+            per_month: number;
+            /** @description Whole per cent saved against `regular`, rounded down; at least 1. */
+            percent: number;
+            /** @description So'm paid at once for 365 days. No discount lowers it. */
+            price: number;
+            /** @description Twelve months at the regular monthly price. */
+            regular: number;
         };
         PracticeResult: {
             grading: string;
@@ -4509,6 +4528,11 @@ export interface operations {
                 "application/json": {
                     /** @enum {unknown} */
                     plan: "plus" | "premium";
+                    /**
+                     * @description month: 30 days at today's price; year: 365 days at the yearly price, paid once.
+                     * @enum {unknown}
+                     */
+                    term?: "month" | "year";
                 };
             };
         };
@@ -4676,6 +4700,11 @@ export interface operations {
                 "application/json": {
                     /** @enum {unknown} */
                     plan: "plus" | "premium";
+                    /**
+                     * @description month: 30 days at today's price; year: 365 days at the yearly price, paid once.
+                     * @enum {unknown}
+                     */
+                    term?: "month" | "year";
                 };
             };
         };

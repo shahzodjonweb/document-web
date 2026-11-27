@@ -9,6 +9,15 @@ export interface PlanDiscount {
   /** The last day it applies, YYYY-MM-DD in Tashkent. */
   until: string
 }
+/** A plan's price for a year paid at once, as the server works it out. */
+export interface PlanYear {
+  /** So'm paid once for 365 days. */
+  price: number
+  /** That price spread over twelve months, to the nearest so'm. */
+  perMonth: number
+  /** Whole per cent saved against twelve months at the regular price. */
+  percent: number
+}
 export interface DiscountedPlan {
   plan: any
   discount: PlanDiscount
@@ -22,7 +31,20 @@ export interface DiscountedPlan {
  */
 const MONTHS: Record<'en' | 'uz' | 'ru', string[]> = {
   en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-  uz: ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'],
+  uz: [
+    'yanvar',
+    'fevral',
+    'mart',
+    'aprel',
+    'may',
+    'iyun',
+    'iyul',
+    'avgust',
+    'sentabr',
+    'oktabr',
+    'noyabr',
+    'dekabr',
+  ],
   ru: [
     'января',
     'февраля',
@@ -45,7 +67,8 @@ const MONTHS: Record<'en' | 'uz' | 'ru', string[]> = {
  */
 export const tashkentYear = (now: number = Date.now()) => new Date(now + 5 * 3600_000).getUTCFullYear()
 /** Today in Tashkent as YYYY-MM-DD, the form a discount's last day comes in. */
-export const tashkentToday = (now: number = Date.now()) => new Date(now + 5 * 3600_000).toISOString().slice(0, 10)
+export const tashkentToday = (now: number = Date.now()) =>
+  new Date(now + 5 * 3600_000).toISOString().slice(0, 10)
 /**
  * A YYYY-MM-DD day as the language writes it: "31 Oct", "31-oktabr",
  * "31 октября". The year is added only when it is not the current Tashkent
@@ -98,6 +121,23 @@ export function usePricing() {
   }
   /** What a plan costs today. */
   const price = (plan: any): number => discount(plan)?.price ?? regular(plan)
+  /**
+   * The plan's year paid at once, or null: none from an older platform, none
+   * for a plan sold by the month only, and none from a half-filled answer, so a
+   * year that saves nothing is never shown as a deal.
+   */
+  const yearly = (plan: any): PlanYear | null => {
+    const raw = plan?.yearly
+    if (!raw || typeof raw !== 'object') return null
+    const price = Number(raw.price)
+    const perMonth = Number(raw.per_month)
+    const percent = Math.floor(Number(raw.percent))
+    if (!(price > 0) || !(perMonth > 0) || !(percent >= 1)) return null
+    return { price, perMonth, percent }
+  }
+  /** What one payment for `term` costs: today's monthly price, or the year's. */
+  const termPrice = (plan: any, term: string): number =>
+    term === 'year' ? (yearly(plan)?.price ?? 0) : price(plan)
   /** "31 Oct", "31-oktabr", "31 октября" in the page's language. */
   const day = (iso: string) => dayLabel(iso, locale.value)
   /** "until 31 Oct", "31-oktabrgacha", "до 31 октября", in the page's language. */
@@ -108,5 +148,5 @@ export function usePricing() {
       .map((plan: any) => ({ plan, discount: discount(plan) }))
       .filter((row): row is DiscountedPlan => !!row.discount),
   )
-  return { figure, money, regular, discount, price, dayLabel: day, untilLabel, active }
+  return { figure, money, regular, discount, price, yearly, termPrice, dayLabel: day, untilLabel, active }
 }
