@@ -1,10 +1,15 @@
 # The app inside Telegram (Mini App)
 
-The bot opens this web app inside Telegram: from the chat's menu button and the bot's
-**📱 Open app** buttons once the owner ticks **Open the app inside Telegram (Mini App)** on
-Admin → Integrations → Telegram bot, and, as before, from the editor's and deck/CV setup's own
-buttons. It is the same `/{locale}/app` as the website, signed in from Telegram's launch data
-(`POST /auth/telegram/miniapp`), with a frame of its own. Nothing changes in a plain browser.
+The bot opens this web app inside Telegram, always (there is no switch; the bot keeps working
+beside it): from the chat's menu button **DOC Master mini-app**, the one button Telegram keeps
+beside the message field, from the bot's **📱 Open app** buttons, and, as before, from the
+editor's and deck/CV setup's own buttons. It needs the HTTPS address on Admin → Integrations →
+Telegram bot. It is the same `/{locale}/app` as the website, signed in from Telegram's launch
+data (`POST /auth/telegram/miniapp`), with a frame of its own. Nothing changes in a plain browser.
+
+A reply-keyboard button (under the message field) cannot be the way in: Telegram opens an app
+from a keyboard button without launch data, only able to send data back to the bot, so the
+customer would not be signed in. The menu button opens it as an inline button does, signed in.
 
 Sources: core.telegram.org/bots/webapps (the Web App API) and the TelegramUI kit's tokens,
 researched 2026-11-27.
