@@ -4491,7 +4491,7 @@ await group('41 Slides list actions in reach', async () => {
 })
 
 await group('42 Typing over the budget at 320', async () => {
-  const TOO_LONG = { en: /Too long for this slide/, ru: /Слишком длинно для слайда/, uz: /Slayd uchun uzun/ }
+  const TOO_LONG = { en: /Too long for this slide/, ru: /Слишком длинно для слайда/, uz: /Matn sig‘madi/ }
   for (const locale of ['en', 'ru', 'uz']) {
     const o = await openDeck({ width: 320, height: 426, locale })
     const { page } = o
@@ -4528,7 +4528,7 @@ await group('43 One line', async () => {
   const want = {
     en: ['1 of 1 line', '3 of 21 lines'],
     ru: ['1 из 1 строки', '3 из 21 строки'],
-    uz: ['1 qatordan 1 ta', '21 qatordan 3 ta'],
+    uz: ['1 / 1 qator', '3 / 21 qator'],
   }
   for (const locale of ['en', 'ru', 'uz']) {
     // The closing slide holds one line, slide 2 twenty-one, as the platform can count them.

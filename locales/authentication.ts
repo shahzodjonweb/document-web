@@ -34,24 +34,24 @@ export const authenticationEntries: Record<string, [string, string, string]> = {
   ],
   antibotBusy: [
     'Please finish the open security check first.',
-    'Avval ochiq xavfsizlik tekshiruvini yakunlang.',
+    'Avval ochiq turgan tekshiruvni tugating.',
     'Сначала завершите открытую проверку безопасности.',
   ],
   authTelegramRequired: [
     'Connect Telegram in Settings to have files sent to you in Telegram.',
-    'Fayllarni Telegram’da olish uchun Sozlamalarda Telegramni ulang.',
+    'Fayllarni Telegramda olish uchun «Sozlamalar» bo‘limida Telegramni ulang.',
     'Подключите Telegram в настройках, чтобы получать файлы в Telegram.',
   ],
-  authContinueGoogle: ['Continue with Google', 'Google orqali davom etish', 'Продолжить через Google'],
+  authContinueGoogle: ['Continue with Google', 'Google orqali kirish', 'Продолжить через Google'],
   authOrEmail: ['or use email', 'yoki email orqali', 'или по электронной почте'],
   authEmailOptions: ['Email sign-in options', 'Email orqali kirish usullari', 'Варианты входа по почте'],
   authEmailSignIn: ['Sign in with email', 'Email orqali kirish', 'Войти по почте'],
-  authCreateAccount: ['Create account', 'Hisob yaratish', 'Создать аккаунт'],
+  authCreateAccount: ['Create account', 'Ro‘yxatdan o‘tish', 'Создать аккаунт'],
   authEmailAddress: ['Email address', 'Email manzili', 'Электронная почта'],
   authDisplayName: ['Your name', 'Ismingiz', 'Ваше имя'],
   authPassword: ['Password', 'Parol', 'Пароль'],
   authNewPassword: ['New password', 'Yangi parol', 'Новый пароль'],
-  authCurrentPassword: ['Current password', 'Joriy parol', 'Текущий пароль'],
+  authCurrentPassword: ['Current password', 'Hozirgi parol', 'Текущий пароль'],
   authPasswordHint: [
     'Use 12–128 characters. Choose a unique password.',
     '12–128 ta belgidan iborat, boshqa joyda ishlatilmagan parol tanlang.',
@@ -78,7 +78,7 @@ export const authenticationEntries: Record<string, [string, string, string]> = {
   ],
   authCodeHelp: [
     'Check your inbox and spam folder. Codes expire after 15 minutes. Already have an account? Sign in first, then add another sign-in method in Settings.',
-    'Kiruvchi xatlar va spam jildini tekshiring. Kod 15 daqiqa amal qiladi. Hisobingiz bormi? Avval kiring, so‘ng Sozlamalarda boshqa kirish usulini qo‘shing.',
+    'Pochtangizdagi «Kiruvchi» va «Spam» jildlarini tekshiring. Kod 15 daqiqa amal qiladi. Hisobingiz bormi? Avval kiring, keyin «Sozlamalar» bo‘limida yangi kirish usulini qo‘shing.',
     'Проверьте входящие и спам. Код действует 15 минут. Уже есть аккаунт? Войдите в него и добавьте другой способ входа в настройках.',
   ],
   authStartAgain: ['Start again', 'Qayta boshlash', 'Начать заново'],
@@ -90,7 +90,7 @@ export const authenticationEntries: Record<string, [string, string, string]> = {
   ],
   authPasswordChanged: [
     'Password updated. Other sessions have been signed out.',
-    'Parol yangilandi. Boshqa seanslardan chiqildi.',
+    'Parol yangilandi. Boshqa qurilmalardagi seanslar yopildi.',
     'Пароль обновлён. Другие сеансы завершены.',
   ],
   authSavePassword: ['Save password', 'Parolni saqlash', 'Сохранить пароль'],
@@ -98,7 +98,7 @@ export const authenticationEntries: Record<string, [string, string, string]> = {
   authSignInMethods: ['Sign-in methods', 'Kirish usullari', 'Способы входа'],
   authOneAccount: [
     'Connect your sign-in methods to this account. Your files, tasks, plan and allowance stay together whichever method you use.',
-    'Kirish usullarini shu hisobga ulang. Qaysi usuldan foydalansangiz ham fayllar, vazifalar, tarif va limit bitta hisobda qoladi.',
+    'Kirish usullarini shu hisobga ulang. Qaysi usul bilan kirsangiz ham fayllar, amallar, tarif va limit bitta hisobda qoladi.',
     'Подключите способы входа к этому аккаунту. Файлы, задачи, тариф и лимиты будут общими при любом способе входа.',
   ],
   authEmailPassword: ['Email and password', 'Email va parol', 'Почта и пароль'],
@@ -108,7 +108,7 @@ export const authenticationEntries: Record<string, [string, string, string]> = {
   authOpenTelegram: ['Open Telegram', 'Telegramni ochish', 'Открыть Telegram'],
   authAwaitingTelegramLink: [
     'Open Telegram and approve connecting it to this account, then return here to check confirmation.',
-    'Telegramni ochib, shu hisobga ulashni tasdiqlang. So‘ng bu yerga qaytib tasdiqni tekshiring.',
+    'Telegramni oching va uni shu hisobga ulashni tasdiqlang. Keyin shu yerga qaytib, tasdiqni tekshiring.',
     'Откройте Telegram и подтвердите привязку к этому аккаунту, затем вернитесь сюда и проверьте подтверждение.',
   ],
   authLinked: ['Connected', 'Ulangan', 'Подключён'],
@@ -120,27 +120,27 @@ export const authenticationEntries: Record<string, [string, string, string]> = {
   ],
   authGoogleComplete: [
     'Google sign-in completed. You are using your shared workspace.',
-    'Google orqali kirish bajarildi. Barcha usullar uchun bitta ish maydonidan foydalanasiz.',
+    'Google orqali kirdingiz. Barcha kirish usullari uchun kabinet bitta.',
     'Вход через Google выполнен. Вы в своём общем рабочем пространстве.',
   ],
   authProvidersFailed: [
     'Sign-in options could not be loaded. Please retry.',
-    'Kirish usullarini yuklab bo‘lmadi. Qayta urinib ko‘ring.',
+    'Kirish usullari yuklanmadi. Qayta urinib ko‘ring.',
     'Не удалось загрузить способы входа. Повторите попытку.',
   ],
   authGoogleUnavailable: [
     'Google sign-in is not available yet.',
-    'Google orqali kirish hali mavjud emas.',
+    'Google orqali kirish hozircha yo‘q.',
     'Вход через Google пока недоступен.',
   ],
   authEmailUnavailable: [
     'Email sign-in is currently unavailable. Please try another sign-in method or contact support.',
-    'Email orqali kirish hozir mavjud emas. Boshqa kirish usulidan foydalaning yoki yordam xizmatiga murojaat qiling.',
+    'Email orqali kirish hozir ishlamayapti. Boshqa usul bilan kiring yoki yordam xizmatiga yozing.',
     'Вход по почте сейчас недоступен. Выберите другой способ входа или обратитесь в поддержку.',
   ],
   authProviderUnavailable: [
     'This sign-in method is currently unavailable. Please try another method.',
-    'Bu kirish usuli hozir mavjud emas. Boshqa usuldan foydalaning.',
+    'Bu kirish usuli hozir ishlamayapti. Boshqa usul bilan kiring.',
     'Этот способ входа сейчас недоступен. Выберите другой способ.',
   ],
   authInvalidCredentials: [
@@ -170,32 +170,32 @@ export const authenticationEntries: Record<string, [string, string, string]> = {
   ],
   authIdentityConflict: [
     'This sign-in method belongs to an account already. Sign in to that account, then connect your other methods in Settings. Existing accounts cannot be merged here.',
-    'Bu kirish usuli allaqachon boshqa hisobga tegishli. O‘sha hisobga kiring va Sozlamalarda boshqa usullarni ulang. Mavjud hisoblarni bu yerda birlashtirib bo‘lmaydi.',
+    'Bu kirish usuli allaqachon boshqa hisobga ulangan. O‘sha hisobga kiring va «Sozlamalar» bo‘limida boshqa usullarni ulang. Mavjud hisoblarni bu yerda birlashtirib bo‘lmaydi.',
     'Этот способ входа уже принадлежит аккаунту. Войдите в тот аккаунт и подключите другие способы в настройках. Объединение существующих аккаунтов здесь недоступно.',
   ],
   authRateLimited: [
     'Too many attempts. Wait a few minutes before trying again.',
-    'Urinishlar juda ko‘p. Bir necha daqiqadan so‘ng qayta urinib ko‘ring.',
+    'Urinishlar juda ko‘p bo‘ldi. Bir necha daqiqa kutib, qayta urinib ko‘ring.',
     'Слишком много попыток. Подождите несколько минут.',
   ],
   authPasswordInvalid: [
     'Choose a unique password with 12–128 characters.',
-    '12–128 ta belgidan iborat noyob parol tanlang.',
+    '12–128 ta belgidan iborat, boshqa joyda ishlatilmagan parol tanlang.',
     'Выберите уникальный пароль длиной от 12 до 128 символов.',
   ],
   authCurrentPasswordInvalid: [
     'Your current password is incorrect.',
-    'Joriy parolingiz noto‘g‘ri.',
+    'Hozirgi parol noto‘g‘ri.',
     'Текущий пароль неверен.',
   ],
   authGoogleCancelled: [
     'Google sign-in was cancelled. You can try again or choose another method.',
-    'Google orqali kirish bekor qilindi. Qayta urining yoki boshqa usulni tanlang.',
+    'Google orqali kirish bekor qilindi. Qayta urinib ko‘ring yoki boshqa usulni tanlang.',
     'Вход через Google отменён. Повторите попытку или выберите другой способ.',
   ],
   authGoogleFailed: [
     'Google could not confirm this sign-in. Please start again.',
-    'Google kirishni tasdiqlay olmadi. Qayta boshlang.',
+    'Google bu kirishni tasdiqlay olmadi. Qaytadan boshlang.',
     'Google не смог подтвердить вход. Начните заново.',
   ],
   authSessionExpired: [
@@ -205,7 +205,7 @@ export const authenticationEntries: Record<string, [string, string, string]> = {
   ],
   authTelegramExpired: [
     'This Telegram request expired or was declined. Start a new request.',
-    'Bu Telegram so‘rovining muddati tugagan yoki rad etilgan. Yangi so‘rov yuboring.',
+    'Telegramdagi so‘rov muddati tugagan yoki rad etilgan. Yangi so‘rov yuboring.',
     'Запрос Telegram истёк или отклонён. Создайте новый запрос.',
   ],
   authFailed: [
