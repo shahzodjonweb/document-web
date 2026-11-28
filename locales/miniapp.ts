@@ -15,7 +15,7 @@ export const miniAppEntries: Record<string, [string, string, string]> = {
   ],
   profileSettingsHint: [
     'Output language, paper size and sign-in methods',
-    'Natija tili, qog‘oz o‘lchami va kirish usullari',
+    'Hujjat tili, qog‘oz o‘lchami va kirish usullari',
     'Язык результата, формат бумаги и способы входа',
   ],
   profileEditorHint: [
@@ -25,22 +25,22 @@ export const miniAppEntries: Record<string, [string, string, string]> = {
   ],
   profileGuideHint: [
     'How to describe a document so it comes out right',
-    'Hujjat to‘g‘ri chiqishi uchun uni qanday tasvirlash kerak',
+    'Hujjat ko‘ngildagidek chiqishi uchun nima deb yozish kerak',
     'Как описать документ, чтобы он получился правильно',
   ],
   profileSupport: ['Contacts and support', 'Aloqa va yordam', 'Контакты и поддержка'],
   profileSupportHint: [
     'Write to a person, read the answers to common questions',
-    'Odamga yozing, ko‘p beriladigan savollar javoblarini o‘qing',
+    'Xodimga yozing yoki ko‘p so‘raladigan savollarni o‘qing',
     'Напишите человеку, прочитайте ответы на частые вопросы',
   ],
-  tgChooseFiles: ['Choose your files', 'Fayllaringizni tanlang', 'Выберите файлы'],
+  tgChooseFiles: ['Choose your files', 'Fayllarni tanlang', 'Выберите файлы'],
   tgFreeGift: ['Free gift', 'Bepul sovg‘a', 'Бесплатный подарок'],
   saveToPhone: ['Save to phone', 'Telefonga saqlash', 'Сохранить на телефон'],
   savedToPhone: ['Saved', 'Saqlandi', 'Сохранено'],
   resultInChat: [
     'The file is also in your chat with the bot.',
-    'Fayl bot bilan chatingizda ham bor.',
+    'Fayl bot chatida ham bor.',
     'Файл также есть в вашем чате с ботом.',
   ],
 }

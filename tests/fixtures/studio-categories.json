@@ -22,7 +22,7 @@
     "id": "pdf.kurs_ishi",
     "kind": "category",
     "label": "Kurs ishi",
-    "hint": "Kafedra talabidagi titul, kirish, boblar va xulosa",
+    "hint": "Kafedra talabiga mos titul, kirish, boblar va xulosa",
     "prompt": [
      "Kurs ishining mavzusi va fanini yozing. Sahifalar sonini ham ayting (aytmasangiz, 25; 12 dan 35 gacha). Titul varag‘i va mundarija ham shu songa kiradi.",
      "Kafedra rejasi, raqamlaringiz yoki manbalaringiz bo‘lsa, PDF, Word yoki TXT fayl qo‘shing. Ilova kerak bo‘lsa, shuni ham yozing.",
@@ -57,7 +57,7 @@
     "id": "pdf.dars_ishlanmasi",
     "kind": "category",
     "label": "Dars ishlanmasi / tarqatma",
-    "hint": "Bir darslik reja va o‘quvchilarga tarqatma",
+    "hint": "Bitta dars rejasi va o‘quvchilar uchun tarqatma",
     "prompt": [
      "Dars ishlanmasi yoki o‘quvchilar uchun tarqatma tayyorlayman.",
      "Bitta xabarda yozing: sinf, fan, mavzu (ixtiyoriy: o‘qituvchi, maktab, sana, dars metodlari).",
@@ -75,7 +75,7 @@
     "id": "pdf.test",
     "kind": "category",
     "label": "Test savollari",
-    "hint": "Variantli savollar, kalitlar oxirgi sahifada",
+    "hint": "Javob variantli savollar, kalitlar oxirgi sahifada",
     "prompt": [
      "Bitta xabarda yozing: fan, sinf, mavzu va savollar soni (40 tagacha, aytilmasa 20).",
      "Ixtiyoriy: turi (test, nazorat ishi, BSB, CHSB), vaqt, maktab nomi, yozma savollar.",
@@ -517,7 +517,7 @@
     "id": "slides.hisobot",
     "kind": "category",
     "label": "Hisobot",
-    "hint": "Oy, chorak yoki yil hisoboti",
+    "hint": "Oylik, choraklik yoki yillik hisobot",
     "prompt": [
      "Hisobot: kompaniya, bo‘lim yoki loyihaning oy, chorak yoki yil natijalari (raqamlar, reja, nima bajarildi, keyingi reja). Hammasini bitta xabarda yozing, kimga ko‘rsatilishini ham; slayd soni aytilmasa, 10 ta.",
      "Hisobot yoki jadvalingiz bo‘lsa, PDF, Word yoki TXT qilib yuboring. Maktab, ota-onalar yig‘ilishi yoki himoya hisoboti uchun boshqa tugmani tanlang."

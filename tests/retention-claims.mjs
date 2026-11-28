@@ -63,10 +63,10 @@ export const EXCEPTION = new RegExp(
 export const SCOPED = new RegExp(
   [
     // A file tool's files.
-    String.raw`\btool\s+files\b|vosita\s+fayllari|файлы\s+инструментов`,
+    String.raw`\btool\s+files\b|vosita\s+fayllari|vositalardagi\s+fayllar|файлы\s+инструментов`,
     // A result file, or our copies of the files sent to Telegram (results).
-    String.raw`\bresult\s+file\b|natija\s+fayli|файл\s+результата`,
-    String.raw`\bour\s+copies\b|o[‘'’ʻ]z\s+nusxalarimiz|свои\s+копии`,
+    String.raw`\bresult\s+file\b|natija\s+fayli|tayyor\s+fayl\b|файл\s+результата`,
+    String.raw`\bour\s+copies\b|o[‘'’ʻ]z\s+nusxalarimiz|o[‘'’ʻ]zimizdagi\s+nusxa|свои\s+копии`,
     // The team's quality-review copy of AI requests and results (30 days).
     String.raw`\bcop(?:y|ies)\b[^.;]{0,90}\bquality\s+review\b`,
     String.raw`nusxa\S*\s[^.;]{0,90}sifatni\s+tekshirish|sifatni\s+tekshirish\s[^.;]{0,40}nusxa`,

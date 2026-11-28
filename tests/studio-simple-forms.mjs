@@ -2807,7 +2807,7 @@ try {
   // The same in Uzbek and Russian, numbers and all, on a phone.
   for (const [locale, chips, waiting] of [
     ['ru', ['В очереди · перед вами 3 файла', 'В очереди · перед вами 5 файлов'], 'Читаем файлы · перед вами 5'],
-    ['uz', ['Navbatda · oldingizda 3 ta fayl', 'Navbatda · oldingizda 5 ta fayl'], 'Fayllar o‘qilmoqda · oldingizda 5 ta'],
+    ['uz', ['Navbatda · oldingizda 3 ta fayl', 'Navbatda · oldingizda 5 ta fayl'], 'Fayllar o‘qilmoqda · oldingizda 5 ta fayl'],
   ]) {
     await page.setViewportSize({ width: 390, height: 844 })
     await open('ai.cv', locale)

@@ -10,7 +10,14 @@ for(const locale of ['uz','ru']){
  assert.deepEqual(Object.keys(dictionaries[locale]).sort(),keys,`${locale} translation parity`)
  assert.ok(Object.values(dictionaries[locale]).every(value=>typeof value==='string'&&value.trim()))
 }
-assert.match(dictionaries.uz['pdf.merge.description'],/[‘’]/)
+// Uzbek is Latin: o‘ and g‘ with U+2018, the tutuq belgisi with U+02BC, never ’ ' ` or ʻ.
+// Only the Russian language name and a Russian sample heading are Cyrillic on purpose.
+const cyrillicOnPurpose=new Set(['siteLangRu','siteHomeHeroLangLine','siteAiSampleHeadingRu'])
+for(const [key,value] of Object.entries(dictionaries.uz)){
+ assert.doesNotMatch(value,/[’'`ʻ]/,`uz ${key} uses ‘ and ʼ`)
+ if(!cyrillicOnPurpose.has(key))assert.doesNotMatch(value,/[А-Яа-яЁё]/,`uz ${key} is Latin`)
+}
+assert.match(dictionaries.uz['pdf.merge.name'],/birlashtirish/)
 assert.match(dictionaries.ru['pdf.merge.name'],/[А-Яа-я]/)
 // Russian says ИИ, never the Latin AI (the landing headline once did).
 for(const [key,value] of Object.entries(dictionaries.ru))assert.doesNotMatch(value,/\bAI\b/,`ru ${key} says ИИ, not AI`)

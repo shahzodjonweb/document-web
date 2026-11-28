@@ -21,9 +21,9 @@ const labels = {
     'Start processing',
   ],
   uz: [
-    'Hujjatlar o‘ziga mos sahifa o‘lchamini oladi (A4, Letter yoki Legal). Boshqa rasmlar o‘z shaklini saqlaydi.',
-    'Vazifani tekshirish',
-    'Qayta ishlashni boshlash',
+    'Hujjat rasmlari o‘ziga mos o‘lchamdagi sahifaga (A4, Letter yoki Legal) joylanadi. Boshqa rasmlar shaklini saqlaydi.',
+    'Tekshirish',
+    'Boshlash',
   ],
   ru: [
     'Документы получат подходящий размер страницы (A4, Letter или Legal). Остальные фото сохранят свои пропорции.',

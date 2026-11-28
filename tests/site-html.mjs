@@ -211,9 +211,9 @@ try {
       en: { home: 'AI: kept for changes', help: 'the files an AI document needs to be changed stay until the account is deleted',
             kept: 'except those an AI document needs for a change', cv: 'what was read from your files', meta: 'unless an AI document needs them',
             later: 'For an AI document, ask for a change instead.' },
-      uz: { home: 'AI: o‘zgartirish uchun saqlanadi', help: 'AI hujjatni o‘zgartirish uchun kerakli fayllar esa hisob o‘chirilguncha',
-            kept: 'AI hujjatni o‘zgartirish uchun kerakli fayllar bundan mustasno', cv: 'fayllaringizdan o‘qilgan ma’lumotlar', meta: 'AI hujjatga kerakli fayllardan tashqari',
-            later: 'AI hujjat uchun buning o‘rniga o‘zgartirish so‘rang.' },
+      uz: { home: 'AI: o‘zgartirish uchun saqlanadi', help: 'AI hujjatni o‘zgartirish uchun kerak bo‘ladigan fayllar esa hisobingiz o‘chirilguncha',
+            kept: 'faqat AI hujjatni o‘zgartirish uchun kerakli fayllar qoladi', cv: 'fayllaringizdan o‘qilgan maʼlumotlar', meta: 'AI hujjatga kerakli fayllardan tashqari',
+            later: 'AI hujjatni esa qaytadan yaratish o‘rniga unga o‘zgartirish so‘rang.' },
       ru: { home: 'ИИ: хранится для правок', help: 'файлы, нужные для изменения ИИ-документа, хранятся, пока аккаунт не удалён',
             kept: 'кроме нужных для изменения ИИ-документа', cv: 'то, что прочитано из ваших файлов', meta: 'кроме нужных ИИ-документу',
             later: 'Для ИИ-документа вместо этого попросите его изменить.' },
@@ -245,9 +245,9 @@ try {
   // ('Temporary files & privacy' on /app/support and a tool's page) is drawn in the browser, so its catalog string
   // is read; the note, the answer and the fact are read on the pages too.
   await check('what an AI document keeps names what was read from the files it was made from, wherever it is said', async () => {
-    const read = ['what was read from the files it was made from', 'u yaratilgan fayllardan o‘qilgan ma’lumotlar', 'то, что прочитано из файлов, по которым']
+    const read = ['what was read from the files it was made from', 'fayllardan o‘qilgan maʼlumotlar', 'то, что прочитано из файлов, по которым']
     // The AI fact is a short tile: in English and Russian it says “its files”.
-    const fact = ['what was read from its files', 'u yaratilgan fayllardan o‘qilgan ma’lumotlar', 'то, что прочитано из его файлов']
+    const fact = ['what was read from its files', 'fayllaridan o‘qilgan maʼlumotlar', 'то, что прочитано из его файлов']
     const { default: dictionaries } = await import('../locales/catalog.ts')
     const { site: copy } = await import('../locales/site.ts')
     const { faq: questions } = await import('../content/site/faq.ts')
@@ -293,6 +293,8 @@ try {
     for (const piece of caught) assert.notDeepEqual(untrue(piece), [], `the check lets “${piece.text}” through`)
     const allowed = [
       'Tool files deleted after 24 hours', 'Vosita fayllari 24 soatda o‘chiriladi', 'Файлы инструментов удаляются через 24 часа',
+      'Vositalardagi fayllar 24 soatdan keyin o‘chiriladi', 'Tayyor fayl 24 soatdan keyin o‘chiriladi.',
+      'Biz o‘zimizdagi nusxalarni 24 soatdan keyin o‘chiramiz.',
       'Save it to your device or get it in Telegram. The result file is deleted after 24 hours.',
       'Uploaded files and results are removed, except those an AI document needs for a change.',
       'A document’s request and text, and what was read from its files, stay in your account so you can ask for changes; a copy kept for quality review is deleted after 30 days.',

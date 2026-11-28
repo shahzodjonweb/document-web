@@ -192,7 +192,7 @@ try {
     assert.deepEqual(posted.find(([endpoint]) => endpoint === '/auth/telegram/miniapp')?.[1]?.init_data, 'auth_date=1&hash=fixture&user=%7B%22id%22%3A7700123%7D')
     assert.equal(await page.evaluate(() => document.documentElement.classList.contains('tg-app')), true)
     assert.equal(await page.locator('.sidebar, .app-topbar, .public-topbar').count(), 0, 'Telegram draws the top bar')
-    assert.deepEqual(await page.locator('.tg-tabbar a span').allInnerTexts(), ['Bosh sahifa', 'Vazifalar', 'Profil'])
+    assert.deepEqual(await page.locator('.tg-tabbar a span').allInnerTexts(), ['Bosh sahifa', 'Tarix', 'Profil'])
     checks.push('Signed in from the launch data, sent to the account’s language, three places and no website frame')
 
     const tokens = await page.evaluate(() => ['--paper', '--surface', '--ink', '--action', '--link'].map((name) => document.documentElement.style.getPropertyValue(name)))
@@ -294,7 +294,7 @@ try {
     await page.goto(`${origin}/uz/app/tools/pdf.rotate`)
     await page.locator('.tool-page').waitFor()
     await settle(page)
-    assert.deepEqual(await telegramButton(page, 'MainButton'), { text: 'Vazifani tekshirish', isVisible: true, isActive: false })
+    assert.deepEqual(await telegramButton(page, 'MainButton'), { text: 'Tekshirish', isVisible: true, isActive: false })
     assert.equal(await page.locator('.tool-action > .button').isVisible(), false, 'the page’s button gives way to Telegram’s')
     checks.push('A tool’s main button waits, off, for a file; the page’s own button gives way to it')
     await context.close()
