@@ -242,9 +242,11 @@ for (const [width, theme] of [[390, 'light'], [1440, 'dark']]) {
   await context.close()
 }
 
-// Uzbek on a phone inside Telegram: the longest copy, checked the same way.
+// Uzbek on a phone inside Telegram: the longest copy, checked the same way. Inside Telegram the
+// account's language wins over the address (layouts/default.vue), so this customer's account is Uzbek.
 {
   draft = { ...structuredClone(baseDraft), output_locale: 'uz', options: { length: 8, portrait_asset_id: '00000000-0000-4000-8000-000000000077' } }
+  account.locale = 'uz'
   const { context, page } = await open(390, 'dark', true, 'uz')
   await page.getByTestId('cv-setup-templates').waitFor()
   assert.equal(await page.locator('html').getAttribute('lang'), 'uz')
@@ -254,6 +256,7 @@ for (const [width, theme] of [[390, 'light'], [1440, 'dark']]) {
   await audit(page, 'uz/390/dark')
   await page.screenshot({ path: path.join(output, 'cv-setup-390-dark-uz.png') })
   await context.close()
+  account.locale = 'en'
 }
 
 // Only a CV has a template here, and a CV that has gone says so.
