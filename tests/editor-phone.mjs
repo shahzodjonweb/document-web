@@ -80,6 +80,10 @@ function telegramStub({ inside, scheme, version, platform, stable, safeBottom, k
       text: '',
       isActive: true,
       progress: false,
+      // Telegram's own name for it, which the app reads before it calls hideProgress.
+      get isProgressVisible() {
+        return self.progress
+      },
       setParams(params) {
         log.push([`${prefix}.setParams`, params])
         if (params.text !== undefined) self.text = params.text
@@ -739,8 +743,10 @@ for (const [label, options] of [
   await goToDocument(opened)
   await page.locator('.editor-shell').waitFor()
   assert.equal(await page.getByTestId('editor-frame').count(), 0, `${label}: no new frame`)
-  assert.ok(await page.locator('.mobile-nav').isVisible(), `${label}: the app's phone bar stays`)
-  assert.ok(await page.locator('.app-topbar').isVisible(), `${label}: the app's top bar stays`)
+  // Inside Telegram a screen opened from the bot is the Mini App's (layouts/default.vue STANDALONE):
+  // Telegram draws its header and Close, so the app adds no tab bar and no top bar of its own.
+  assert.equal(await page.locator('.mobile-nav').count(), 0, `${label}: no tab bar on a screen opened from the bot`)
+  assert.equal(await page.locator('.app-topbar').count(), 0, `${label}: Telegram draws the header`)
   assert.equal(await page.evaluate(() => document.documentElement.classList.contains('editor-bare')), false)
   assert.equal(
     await page.evaluate(() => document.documentElement.style.getPropertyValue('--tg-stable-h')),
@@ -801,8 +807,9 @@ passed('Off, absent or failed: today’s editor, with nothing of Telegram’s to
   passed('Leaving the frame loads the plans the menus read')
 }
 {
-  // The list of documents is not a document: it keeps the app's menus to leave by.
-  const opened = await openContext({ width: 390, height: 844 })
+  // The list of documents is not a document: it keeps the app's menus to leave by. In a phone's
+  // browser: inside Telegram the Mini App draws no menus on a screen opened from the bot.
+  const opened = await openContext({ width: 390, height: 844, inside: false })
   await opened.page.goto(`${origin}/en/app/editor`, { waitUntil: 'domcontentloaded' })
   await opened.page.locator('.mobile-nav').waitFor()
   assert.equal(await opened.page.getByTestId('editor-frame').count(), 0)
@@ -812,7 +819,8 @@ passed('Off, absent or failed: today’s editor, with nothing of Telegram’s to
 
 {
   // Until the switch answers, the last answer on this device decides, and a stranger gets today's frame.
-  const fresh = await openContext({ width: 390, height: 656, configDelay: 800 })
+  // In a phone's browser, where today's editor comes with the app's menus (inside Telegram it has none).
+  const fresh = await openContext({ width: 390, height: 656, configDelay: 800, inside: false })
   await fresh.page.goto(`${origin}/en/app/editor/${DOC}`, { waitUntil: 'domcontentloaded' })
   await fresh.page.locator('.mobile-nav').waitFor()
   await fresh.page.locator('.editor-shell').waitFor()
@@ -825,7 +833,7 @@ passed('Off, absent or failed: today’s editor, with nothing of Telegram’s to
     'and it is kept',
   )
   await fresh.context.close()
-  const back = await openContext({ width: 390, height: 656, configDelay: 800, remembered: true })
+  const back = await openContext({ width: 390, height: 656, configDelay: 800, remembered: true, inside: false })
   await back.page.goto(`${origin}/en/app/editor/${DOC}`, { waitUntil: 'domcontentloaded' })
   await back.page.getByTestId('editor-opening').waitFor()
   assert.equal(await back.page.locator('.mobile-nav, .app-topbar').count(), 0, 'no old menus flash')
@@ -836,6 +844,7 @@ passed('Off, absent or failed: today’s editor, with nothing of Telegram’s to
     height: 656,
     remembered: true,
     editor: { editor_v2: false },
+    inside: false,
   })
   await goToDocument(offNow)
   await offNow.page.locator('.mobile-nav').waitFor()
@@ -852,6 +861,8 @@ passed('Off, absent or failed: today’s editor, with nothing of Telegram’s to
     height: 844,
     configDelay: 1500,
     editor: { editor_v2: false },
+    // In a phone's browser, where the app's menus come back once the plans are read.
+    inside: false,
   })
   const { page, server } = opened
   await page.goto(`${origin}/en/app/editor/${DOC}`, { waitUntil: 'domcontentloaded' })
@@ -2985,12 +2996,13 @@ const lastQuote = (server) => server.quotes.filter((quote) => quote.id).at(-1)
   await off.page.goto(`${origin}/en/app/jobs/${sentJob}`, { waitUntil: 'domcontentloaded' })
   await off.page.locator('.artifact-row').waitFor()
   assert.equal(await off.page.getByTestId('artifact-edit').count(), 0, 'off: no Edit')
-  assert.ok(await off.page.getByText('Send to my bot').isVisible())
+  // Inside Telegram the Mini App says Send to chat (ArtifactActions inChat); a browser says Send to my bot.
+  assert.ok(await off.page.getByText('Send to chat').isVisible())
   await off.page.goto(`${origin}/en/app/jobs/${pastJob}`, { waitUntil: 'domcontentloaded' })
   await off.page.locator('.artifact-row').waitFor()
   await off.page.locator('.artifact-secondary').waitFor({ state: 'attached' })
-  assert.equal(await off.page.getByTestId('artifact-send').count(), 0, 'off, past its day: no Send to my bot')
-  assert.equal(await off.page.getByText('Send to my bot').count(), 0)
+  assert.equal(await off.page.getByTestId('artifact-send').count(), 0, 'off, past its day: no Send to chat')
+  assert.equal(await off.page.getByText('Send to chat').count(), 0)
   await off.context.close()
   passed(
     'Edit under a PDF reopens the draft a send came from, or opens the file; off, nothing changes; a result past its day offers no send',
@@ -5351,12 +5363,12 @@ const outcomesSay = (page) => page.getByTestId('editor-blackout-pages').evaluate
   await page.getByTestId('editor-tab-blackout').click()
   const search = page.getByTestId('editor-blackout-search')
   await search.fill("o'g'li")
-  await foundSays(page, '3 ta topildi · sahifalar: 1, 2')
+  await foundSays(page, '3 ta topildi · 1, 2-sahifalar')
   assert.equal(await page.getByTestId('editor-primary').textContent(), 'Hammasini bo‘yab yopish (3)', 'drawn by the sheet outside Telegram')
   await search.fill('oʻgʻli')
-  await foundSays(page, '3 ta topildi · sahifalar: 1, 2')
+  await foundSays(page, '3 ta topildi · 1, 2-sahifalar')
   await search.fill('OTA')
-  await foundSays(page, '2 ta topildi · sahifalar: 1, 2')
+  await foundSays(page, '2 ta topildi · 1, 2-sahifalar')
   await search.fill('+998901234567')
   await foundSays(page, '1 ta topildi · 1-sahifa')
   for (const [preset, says, text] of [
@@ -5372,7 +5384,7 @@ const outcomesSay = (page) => page.getByTestId('editor-blackout-pages').evaluate
     void text
   }
   await page.getByTestId('editor-blackout-preset-phone').click()
-  await foundSays(page, '3 ta topildi · sahifalar: 1, 2')
+  await foundSays(page, '3 ta topildi · 1, 2-sahifalar')
   // A tap on the first page's number covers it alone.
   const match = await page.getByTestId('editor-match').first().boundingBox()
   const paper = await page.getByTestId('editor-page-1').boundingBox()
@@ -5383,7 +5395,7 @@ const outcomesSay = (page) => page.getByTestId('editor-blackout-pages').evaluate
   assert.equal(await page.getByTestId('editor-primary').textContent(), 'Hammasini bo‘yab yopish (2)')
   // Undo takes the box away and the match is outlined again.
   await page.getByTestId('editor-undo').click()
-  await foundSays(page, '3 ta topildi · sahifalar: 1, 2')
+  await foundSays(page, '3 ta topildi · 1, 2-sahifalar')
   assert.deepEqual(opened.errors, [])
   assert.deepEqual(server.unexpected, [])
   await opened.context.close()
